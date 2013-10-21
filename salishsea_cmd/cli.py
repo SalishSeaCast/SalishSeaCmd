@@ -24,7 +24,10 @@ from __future__ import (
 import argparse
 import logging
 import sys
-import __version__
+from . import (
+    __version__,
+    utils,
+)
 
 
 __all__ = ['main']
@@ -32,11 +35,7 @@ __all__ = ['main']
 
 log = logging.getLogger('cli')
 log.setLevel(logging.DEBUG)
-stderr = logging.StreamHandler()
-log.setLevel(logging.ERROR)
-formatter = logging.Formatter('%(message)s')
-stderr.setFormatter(formatter)
-log.addHandler(stderr)
+log.addHandler(utils.make_stderr_logger())
 
 
 def main():
