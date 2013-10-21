@@ -22,11 +22,21 @@ from __future__ import (
     print_function,
 )
 import argparse
+import logging
 import sys
 import __version__
 
 
 __all__ = ['main']
+
+
+log = logging.getLogger('cli')
+log.setLevel(logging.DEBUG)
+stderr = logging.StreamHandler()
+log.setLevel(logging.ERROR)
+formatter = logging.Formatter('%(message)s')
+stderr.setFormatter(formatter)
+log.addHandler(stderr)
 
 
 def main():
@@ -39,7 +49,7 @@ def main():
         try:
             args = cmd_processor.parse_args()
         except IOError as e:
-            print(
+            log.error(
                 'IOError: Run description file not found: {.filename}'
                 .format(e))
             sys.exit(2)
