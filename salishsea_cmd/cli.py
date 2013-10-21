@@ -24,8 +24,10 @@ from __future__ import (
 import argparse
 import logging
 import sys
+import yaml
 from . import (
     __version__,
+    rebuild_processor,
     utils,
 )
 
@@ -63,6 +65,7 @@ def _build_parser():
     _add_version_arg(parser)
     subparsers = parser.add_subparsers(title='sub-commands')
     _add_run_subparser(subparsers)
+    _add_rebuild_subparser(subparsers)
     return parser
 
 
@@ -107,3 +110,37 @@ def _do_run(args):
     """Execute the `ss run` command with the specified arguments and options.
     """
     print(args)
+
+
+def _add_rebuild_subparser(subparsers):
+    """Add a sub-parser for the `ss rebuild` command.
+    """
+    parser = subparsers.add_parser(
+        'rebuild', help='Rebuild results from an MPI Salish Sea NEMO run.',
+        description='''
+            Combine the per-processor results files from an MPI
+            Salish Sea NEMO run described in DESC_FILE
+            into files in RESULTS_DIR.
+
+            If RESULTS_DIR does not exist it will be created.
+            ''')
+    parser.add_argument(
+        'desc_file', metavar='DESC_FILE', type=open,
+        help='run description YAML file')
+    parser.add_argument(
+        'results_dir', metavar='RESULTS_DIR',
+        help='directory to store results in')
+    _add_version_arg(parser)
+    parser.set_defaults(func=_do_rebuild)
+
+
+def _do_rebuild(args):
+    """Execute the `ss rebuild` command with the specified arguments
+    and options.
+    """
+    run_desc = _load_run_desc(args.desc_file)
+    rebuild_processor.main(run_desc)
+
+
+def _load_run_desc(desc_file):
+    return yaml.load(desc_file)
