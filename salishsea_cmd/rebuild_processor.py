@@ -1,11 +1,10 @@
-"""Salish Sea NEMO command processor
+"""Salish Sea NEMO results rebuild sub-command processor
 
-NEMO results rebuild sub-command processor.
 Combines per-processor files from an MPI Salish Sea NEMO run into single files
 with the same name-root.
 
 
-Copyright 2010-2013 Doug Latornell and The University of British Columbia
+Copyright 2013 Doug Latornell and The University of British Columbia
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

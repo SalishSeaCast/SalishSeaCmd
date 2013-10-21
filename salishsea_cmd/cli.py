@@ -1,9 +1,7 @@
-"""Salish Sea NEMO command processor
-
-Command line interface
+"""Salish Sea NEMO command processor command line interface
 
 
-Copyright 2010-2013 Doug Latornell and The University of British Columbia
+Copyright 2013 Doug Latornell and The University of British Columbia
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
