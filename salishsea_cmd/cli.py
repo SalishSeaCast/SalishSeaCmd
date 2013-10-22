@@ -62,7 +62,6 @@ def _build_parser():
             help about a sub-command.''')
     _add_version_arg(parser)
     subparsers = parser.add_subparsers(title='sub-commands')
-    _add_run_subparser(subparsers)
     _add_rebuild_subparser(subparsers)
     return parser
 
@@ -71,44 +70,6 @@ def _add_version_arg(parser):
     parser.add_argument(
         '--version', action='version',
         version=__version__.number + __version__.release)
-
-
-def _add_run_subparser(subparsers):
-    """Add a sub-parser for the `ss run` command.
-    """
-    parser = subparsers.add_parser(
-        'run', help='Run Salish Sea NEMO.',
-        description='''
-            Run Salish Sea NEMO on NUM_CORES cores/processors
-            using the run description from DESC_FILE
-            and storing the results in RESULTS_DIR.
-
-            If RESULTS_DIR does not exist it will be created.
-            ''')
-    parser.add_argument(
-        'num_cores', metavar='NUM_CORES', type=int,
-        help='number of cores/processors to use')
-    parser.add_argument(
-        'desc_file', metavar='DESC_FILE', type=open,
-        help='run description YAML file')
-    parser.add_argument(
-        'results_dir', metavar='RESULTS_DIR',
-        help='directory to store results in')
-    parser.add_argument(
-        '-n', '--namelist', metavar='NAMELIST', default='namelist',
-        help='''
-            name of the namelist file to use;
-            defaults to %(default)s
-        ''')
-    _add_version_arg(parser)
-    parser.set_defaults(func=_do_run)
-
-
-def _do_run(args):
-    """Execute the `salishsea run` command with the specified arguments
-    and options.
-    """
-    print(args)
 
 
 def _add_rebuild_subparser(subparsers):
