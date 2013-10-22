@@ -17,14 +17,23 @@ limitations under the License.
 """
 from __future__ import absolute_import
 import logging
+import sys
 
 
-__all__ = ['make_stderr_logger']
+__all__ = ['make_stderr_logger', 'make_stdout_logger']
 
 
 def make_stderr_logger():
-    stderr = logging.StreamHandler()
+    stderr = logging.StreamHandler(sys.stderr)
     stderr.setLevel(logging.ERROR)
     formatter = logging.Formatter('%(message)s')
     stderr.setFormatter(formatter)
     return stderr
+
+
+def make_stdout_logger():
+    stdout = logging.StreamHandler(sys.stdout)
+    stdout.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(message)s')
+    stdout.setFormatter(formatter)
+    return stdout
