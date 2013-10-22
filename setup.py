@@ -42,6 +42,7 @@ with open('CHANGELOG.rst', 'rt') as f:
     long_description += '\n\n' + f.read()
 install_requires = [
     # see requirements.txt for versions most recently used in development
+    'PyYAML',
 ]
 
 setup(
