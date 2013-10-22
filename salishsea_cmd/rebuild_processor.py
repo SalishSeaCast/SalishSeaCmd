@@ -37,17 +37,18 @@ log.addHandler(utils.make_stderr_logger())
 
 
 def main(run_desc):
-    rebuild_nemo_exec = _find_rebuild_nemo_exec(run_desc['paths']['NEMO-code'])
+    rebuild_nemo_script = _find_rebuild_nemo_script(
+        run_desc['paths']['NEMO-code'])
     name_roots, ncores = _get_results_files()
     for fn in name_roots:
         result = subprocess.check_output(
-            [rebuild_nemo_exec, fn, str(ncores)],
+            [rebuild_nemo_script, fn, str(ncores)],
             stderr=subprocess.STDOUT,
             universal_newlines=True)
         log.info(result)
 
 
-def _find_rebuild_nemo_exec(nemo_code_path):
+def _find_rebuild_nemo_script(nemo_code_path):
     rebuild_nemo_exec = os.path.join(
         nemo_code_path,
         'NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo.exe')
