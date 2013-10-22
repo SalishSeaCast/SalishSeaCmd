@@ -59,6 +59,6 @@ setup(
     install_requires=install_requires,
     packages=['salishsea_cmd'],
     entry_points={
-        'console_scripts': ['ss = salishsea_cmd.cli:main'],
+        'console_scripts': ['salishsea = salishsea_cmd.cli:main'],
     },
 )

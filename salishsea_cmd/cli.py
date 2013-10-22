@@ -105,13 +105,14 @@ def _add_run_subparser(subparsers):
 
 
 def _do_run(args):
-    """Execute the `ss run` command with the specified arguments and options.
+    """Execute the `salishsea run` command with the specified arguments
+    and options.
     """
     print(args)
 
 
 def _add_rebuild_subparser(subparsers):
-    """Add a sub-parser for the `ss rebuild` command.
+    """Add a sub-parser for the `salishsea rebuild` command.
     """
     parser = subparsers.add_parser(
         'rebuild', help='Rebuild results from an MPI Salish Sea NEMO run.',
@@ -133,7 +134,7 @@ def _add_rebuild_subparser(subparsers):
 
 
 def _do_rebuild(args):
-    """Execute the `ss rebuild` command with the specified arguments
+    """Execute the `salishsea rebuild` command with the specified arguments
     and options.
     """
     run_desc = _load_run_desc(args.desc_file)
