@@ -32,7 +32,7 @@ __all__ = ['main']
 
 log = logging.getLogger('combine')
 log.setLevel(logging.DEBUG)
-log.addHandler(utils.make_stdout_logger)
+log.addHandler(utils.make_stdout_logger())
 log.addHandler(utils.make_stderr_logger())
 
 
