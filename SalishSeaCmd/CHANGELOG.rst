@@ -4,10 +4,10 @@ Changelog
 Next Release
 ------------
 
-* :command:`salishsea rebuild` command to combine per-processor files from an
+* :command:`salishsea combine` command to combine per-processor files from an
   MPI Salish Sea NEMO run into single files with the same name-root
   and store the results in a specified directory.
-  See :command:`salishsea rebuild --help` for details.
+  See :command:`salishsea combine --help` for details.
 
 * Salish Sea NEMO command processor framework based on the Python argparse
   module for command line argument and option handling.

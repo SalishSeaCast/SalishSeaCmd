@@ -25,7 +25,7 @@ import sys
 import yaml
 from . import (
     __version__,
-    rebuild_processor,
+    combine_processor,
     utils,
 )
 
@@ -62,7 +62,7 @@ def _build_parser():
             help about a sub-command.''')
     _add_version_arg(parser)
     subparsers = parser.add_subparsers(title='sub-commands')
-    _add_rebuild_subparser(subparsers)
+    _add_combine_subparser(subparsers)
     return parser
 
 
@@ -72,11 +72,11 @@ def _add_version_arg(parser):
         version=__version__.number + __version__.release)
 
 
-def _add_rebuild_subparser(subparsers):
-    """Add a sub-parser for the `salishsea rebuild` command.
+def _add_combine_subparser(subparsers):
+    """Add a sub-parser for the `salishsea combine` command.
     """
     parser = subparsers.add_parser(
-        'rebuild', help='Rebuild results from an MPI Salish Sea NEMO run.',
+        'combine', help='Combine results from an MPI Salish Sea NEMO run.',
         description='''
             Combine the per-processor results files from an MPI
             Salish Sea NEMO run described in DESC_FILE
@@ -91,15 +91,15 @@ def _add_rebuild_subparser(subparsers):
         'results_dir', metavar='RESULTS_DIR',
         help='directory to store results in')
     _add_version_arg(parser)
-    parser.set_defaults(func=_do_rebuild)
+    parser.set_defaults(func=_do_combine)
 
 
-def _do_rebuild(args):
-    """Execute the `salishsea rebuild` command with the specified arguments
+def _do_combine(args):
+    """Execute the `salishsea combine` command with the specified arguments
     and options.
     """
     run_desc = _load_run_desc(args.desc_file)
-    rebuild_processor.main(run_desc)
+    combine_processor.main(run_desc)
 
 
 def _load_run_desc(desc_file):

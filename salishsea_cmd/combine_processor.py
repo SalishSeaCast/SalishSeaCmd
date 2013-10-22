@@ -1,4 +1,4 @@
-"""Salish Sea NEMO results rebuild sub-command processor
+"""Salish Sea NEMO results combine sub-command processor
 
 Combines per-processor files from an MPI Salish Sea NEMO run into single files
 with the same name-root.
@@ -30,13 +30,22 @@ from . import utils
 __all__ = ['main']
 
 
-log = logging.getLogger('rebuild')
+log = logging.getLogger('combine')
 log.setLevel(logging.DEBUG)
 log.addHandler(utils.make_stdout_logger)
 log.addHandler(utils.make_stderr_logger())
 
 
 def main(run_desc):
+    """Run the NEMO `rebuild_nemo` tool for each set of per-processor
+    results files.
+
+    The output of `rebuild_nemo` for each file set is logged
+    at the INFO level.
+
+    :arg run_desc: Run description data structure.
+    :type run_desc: dict
+    """
     rebuild_nemo_script = _find_rebuild_nemo_script(
         run_desc['paths']['NEMO-code'])
     name_roots, ncores = _get_results_files()
