@@ -61,3 +61,19 @@ def test_get_results_files_none_found(mock_log):
     with pytest.raises(SystemExit):
         combine_processor._get_results_files()
     assert mock_log.called
+
+
+@patch('salishsea_cmd.combine_processor.os.renames')
+def test_move_results_pwd(mock_renames):
+    """_move_results does nothing if results_dir is pwd
+    """
+    combine_processor._move_results(['foo'], './')
+    assert not mock_renames.called
+
+
+@patch('salishsea_cmd.combine_processor.os.renames')
+def test_move_results_renames(mock_renames):
+    """_move_results calls os.renames for each results file
+    """
+    combine_processor._move_results(['foo', 'bar'], 'baz')
+    assert mock_renames.call_count == 2

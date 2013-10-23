@@ -80,11 +80,16 @@ def _add_combine_subparser(subparsers):
         description='''
             Combine the per-processor results files from an MPI
             Salish Sea NEMO run described in DESC_FILE
-            into the current directory.
+            into files in RESULTS_DIR.
+
+            If RESULTS_DIR does not exist it will be created.
             ''')
     parser.add_argument(
         'desc_file', metavar='DESC_FILE', type=open,
         help='run description YAML file')
+    parser.add_argument(
+        'results_dir', metavar='RESULTS_DIR',
+        help='directory to store results into')
     _add_version_arg(parser)
     parser.set_defaults(func=_do_combine)
 
@@ -94,7 +99,7 @@ def _do_combine(args):
     and options.
     """
     run_desc = _load_run_desc(args.desc_file)
-    combine_processor.main(run_desc)
+    combine_processor.main(run_desc, args)
 
 
 def _load_run_desc(desc_file):

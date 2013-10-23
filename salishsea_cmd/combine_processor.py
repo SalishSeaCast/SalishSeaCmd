@@ -36,15 +36,20 @@ log.addHandler(utils.make_stdout_logger())
 log.addHandler(utils.make_stderr_logger())
 
 
-def main(run_desc):
+def main(run_desc, args):
     """Run the NEMO `rebuild_nemo` tool for each set of per-processor
     results files.
 
     The output of `rebuild_nemo` for each file set is logged
     at the INFO level.
+    The combined results files that `rebuild_nemo` produces are moved
+    to the directory given by `args.results_dir`.
 
     :arg run_desc: Run description data structure.
     :type run_desc: dict
+
+    :arg args: Command line arguments and option values
+    :type args: :class:`argparse.Namespace`
     """
     rebuild_nemo_script = _find_rebuild_nemo_script(
         run_desc['paths']['NEMO-code'])
@@ -55,6 +60,7 @@ def main(run_desc):
             stderr=subprocess.STDOUT,
             universal_newlines=True)
         log.info(result)
+    _move_results(name_roots, args.results_dir)
 
 
 def _find_rebuild_nemo_script(nemo_code_path):
@@ -80,3 +86,14 @@ def _get_results_files():
         sys.exit(2)
     ncores = len(glob.glob(name_roots[0] + '_[0-9][0-9][0-9][0-9].nc'))
     return name_roots, ncores
+
+
+def _move_results(name_roots, results_dir):
+    abs_results_dir = os.path.abspath(results_dir)
+    if os.path.exists(abs_results_dir):
+        if os.path.samefile(os.getcwd(), abs_results_dir):
+            return
+    postfix = '' if results_dir.endswith('/') else '/'
+    for fn in ['.'.join((n, 'nc')) for n in name_roots]:
+        log.info('moving {} to {}{}'.format(fn, results_dir, postfix))
+        os.renames(os.path.join('.', fn), os.path.join(abs_results_dir, fn))
