@@ -16,7 +16,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from __future__ import absolute_import
-from mock import patch
+from mock import (
+    Mock,
+    patch,
+)
 import pytest
 from salishsea_cmd import combine_processor
 
@@ -63,6 +66,15 @@ def test_get_results_files_none_found(mock_log):
     assert mock_log.called
 
 
+@patch('salishsea_cmd.combine_processor.subprocess.check_output')
+def test_combine_results_files(mock_chk_out):
+    """_combine_results_files calls subprocess.check_output for each name-root
+    """
+    combine_processor._combine_results_files(
+        'rebuild_nemo', ['foo', 'bar'], 16)
+    assert mock_chk_out.call_count == 2
+
+
 @patch('salishsea_cmd.combine_processor.os.renames')
 def test_move_results_pwd(mock_renames):
     """_move_results does nothing if results_dir is pwd
@@ -77,3 +89,19 @@ def test_move_results_renames(mock_renames):
     """
     combine_processor._move_results(['foo', 'bar'], 'baz')
     assert mock_renames.call_count == 2
+
+
+def test_result_files():
+    """_results_files generator yields name-root with .nc appended
+    """
+    fn = next(combine_processor._results_files(['foo', 'bar']))
+    assert fn == 'foo.nc'
+
+
+@patch('salishsea_cmd.combine_processor._results_files')
+def test_compress_results_no_compress(mock_res_files):
+    """_compress_results does nothing when args.no_compress is False
+    """
+    args = Mock(no_compress=True)
+    combine_processor._compress_results(['foo', 'bar'], args)
+    assert not mock_res_files.called
