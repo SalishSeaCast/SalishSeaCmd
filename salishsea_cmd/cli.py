@@ -80,7 +80,8 @@ def _add_combine_subparser(subparsers):
         description='''
             Combine the per-processor results files from an MPI
             Salish Sea NEMO run described in DESC_FILE
-            into files in RESULTS_DIR.
+            into files in RESULTS_DIR
+            and compress them using gzip.
 
             If RESULTS_DIR does not exist it will be created.
             ''')
@@ -90,6 +91,9 @@ def _add_combine_subparser(subparsers):
     parser.add_argument(
         'results_dir', metavar='RESULTS_DIR',
         help='directory to store results into')
+    parser.add_argument(
+        '--no-compress', action='store_true',
+        help="don't compress results files")
     _add_version_arg(parser)
     parser.set_defaults(func=_do_combine)
 

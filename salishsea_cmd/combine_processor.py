@@ -20,6 +20,7 @@ limitations under the License.
 """
 from __future__ import absolute_import
 import glob
+import gzip
 import logging
 import os
 import subprocess
@@ -57,6 +58,7 @@ def main(run_desc, args):
     _combine_results_files(rebuild_nemo_script, name_roots, ncores)
     os.remove('nam_rebuild')
     _move_results(name_roots, args.results_dir)
+    _compress_results(name_roots, args)
 
 
 def _find_rebuild_nemo_script(nemo_code_path):
@@ -99,6 +101,24 @@ def _move_results(name_roots, results_dir):
         if os.path.samefile(os.getcwd(), abs_results_dir):
             return
     postfix = '' if results_dir.endswith('/') else '/'
-    for fn in ['.'.join((n, 'nc')) for n in name_roots]:
+    for fn in _results_files(name_roots):
         log.info('moving {} to {}{}'.format(fn, results_dir, postfix))
         os.renames(os.path.join('.', fn), os.path.join(abs_results_dir, fn))
+
+
+def _results_files(name_roots):
+    for fn in ('.'.join((n, 'nc')) for n in name_roots):
+        yield fn
+
+
+def _compress_results(name_roots, args):
+    if args.no_compress:
+        return
+    for fn in _results_files(name_roots):
+        fp = os.path.join(args.results_dir, fn)
+        with open(fp, 'rb') as f_in:
+            fpgz = '.'.join((fp, 'gz'))
+            with gzip.open(fpgz, 'wb') as f_out:
+                f_out.writelines(f_in)
+        os.remove(fp)
+        log.info('compressed {}'.format(fp))
