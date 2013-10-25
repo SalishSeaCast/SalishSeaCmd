@@ -54,14 +54,9 @@ def main(run_desc, args):
     rebuild_nemo_script = _find_rebuild_nemo_script(
         run_desc['paths']['NEMO-code'])
     name_roots, ncores = _get_results_files()
-    for fn in name_roots:
-        result = subprocess.check_output(
-            [rebuild_nemo_script, fn, str(ncores)],
-            stderr=subprocess.STDOUT,
-            universal_newlines=True)
-        log.info(result)
-    _move_results(name_roots, args.results_dir)
+    _combine_results_files(rebuild_nemo_script, name_roots, ncores)
     os.remove('nam_rebuild')
+    _move_results(name_roots, args.results_dir)
 
 
 def _find_rebuild_nemo_script(nemo_code_path):
@@ -87,6 +82,15 @@ def _get_results_files():
         sys.exit(2)
     ncores = len(glob.glob(name_roots[0] + '_[0-9][0-9][0-9][0-9].nc'))
     return name_roots, ncores
+
+
+def _combine_results_files(rebuild_nemo_script, name_roots, ncores):
+    for fn in name_roots:
+        result = subprocess.check_output(
+            [rebuild_nemo_script, fn, str(ncores)],
+            stderr=subprocess.STDOUT,
+            universal_newlines=True)
+        log.info(result)
 
 
 def _move_results(name_roots, results_dir):
