@@ -61,6 +61,7 @@ def main(run_desc, args):
             universal_newlines=True)
         log.info(result)
     _move_results(name_roots, args.results_dir)
+    os.remove('nam_rebuild')
 
 
 def _find_rebuild_nemo_script(nemo_code_path):
