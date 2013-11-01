@@ -87,6 +87,7 @@ def _get_results_files():
 
 
 def _combine_results_files(rebuild_nemo_script, name_roots, ncores):
+    log.info('Starting compression...')
     for fn in name_roots:
         result = subprocess.check_output(
             [rebuild_nemo_script, fn, str(ncores)],
