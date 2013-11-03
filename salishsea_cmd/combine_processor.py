@@ -54,7 +54,7 @@ def main(run_desc, args):
     """
     rebuild_nemo_script = _find_rebuild_nemo_script(
         run_desc['paths']['NEMO-code'])
-    name_roots, ncores = _get_results_files()
+    name_roots, ncores = _get_results_files(args)
     _combine_results_files(rebuild_nemo_script, name_roots, ncores)
     os.remove('nam_rebuild')
     _move_results(name_roots, args.results_dir)
@@ -74,7 +74,11 @@ def _find_rebuild_nemo_script(nemo_code_path):
     return rebuild_nemo_script
 
 
-def _get_results_files():
+def _get_results_files(args):
+    if args.delete_restart:
+        restart_pattern = '*_restart_[0-9][0-9][0-9][0-9].nc'
+        for fn in glob.glob(restart_pattern):
+            os.remove(fn)
     result_pattern = '*_0000.nc'
     name_roots = [fn[:-8] for fn in glob.glob(result_pattern)]
     if not name_roots:
@@ -116,6 +120,8 @@ def _compress_results(name_roots, args):
         return
     log.info('Starting compression...')
     for fn in _results_files(name_roots):
+        if 'restart' in fn and not args.compress_restart:
+            continue
         fp = os.path.join(args.results_dir, fn)
         with open(fp, 'rb') as f_in:
             fpgz = '.'.join((fp, 'gz'))
