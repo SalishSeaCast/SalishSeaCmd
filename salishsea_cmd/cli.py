@@ -94,6 +94,12 @@ def _add_combine_subparser(subparsers):
     parser.add_argument(
         '--no-compress', action='store_true',
         help="don't compress results files")
+    parser.add_argument(
+        '--compress-restart', action='store_true',
+        help="compress restart file(s)")
+    parser.add_argument(
+        '--delete-restart', action='store_true',
+        help="delete restart file(s)")
     _add_version_arg(parser)
     parser.set_defaults(func=_do_combine)
 
