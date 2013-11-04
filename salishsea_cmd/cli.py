@@ -82,6 +82,7 @@ def _add_combine_subparser(subparsers):
             Salish Sea NEMO run described in DESC_FILE
             into files in RESULTS_DIR
             and compress them using gzip.
+            Delete the per-processor files.
 
             If RESULTS_DIR does not exist it will be created.
             ''')
@@ -91,6 +92,9 @@ def _add_combine_subparser(subparsers):
     parser.add_argument(
         'results_dir', metavar='RESULTS_DIR',
         help='directory to store results into')
+    parser.add_argument(
+        '--keep', action='store_true',
+        help="don't delete per-processor results files")
     parser.add_argument(
         '--no-compress', action='store_true',
         help="don't compress results files")
