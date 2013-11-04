@@ -59,6 +59,7 @@ def main(run_desc, args):
     os.remove('nam_rebuild')
     _move_results(name_roots, args.results_dir)
     _compress_results(name_roots, args)
+    _delete_results_files(name_roots, args)
 
 
 def _find_rebuild_nemo_script(nemo_code_path):
@@ -129,3 +130,12 @@ def _compress_results(name_roots, args):
                 f_out.writelines(f_in)
         os.remove(fp)
         log.info('compressed {}'.format(fp))
+
+
+def _delete_results_files(name_roots, args):
+    if args.keep:
+        return
+    log.info('Deleting per-processor files...')
+    for name_root in name_roots:
+        for fn in glob.glob(name_root + '_[0-9][0-9][0-9][0-9].nc'):
+            os.remove(fn)
