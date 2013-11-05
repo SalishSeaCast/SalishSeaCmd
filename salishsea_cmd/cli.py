@@ -72,20 +72,9 @@ def _add_version_arg(parser):
         version=__version__.number + __version__.release)
 
 
-def _add_combine_subparser(subparsers):
-    """Add a sub-parser for the `salishsea combine` command.
+def _add_common_options(parser):
+    """Add options that are common to all sub-commands.
     """
-    parser = subparsers.add_parser(
-        'combine', help='Combine results from an MPI Salish Sea NEMO run.',
-        description='''
-            Combine the per-processor results files from an MPI
-            Salish Sea NEMO run described in DESC_FILE
-            into files in RESULTS_DIR
-            and compress them using gzip.
-            Delete the per-processor files.
-
-            If RESULTS_DIR does not exist it will be created.
-            ''')
     parser.add_argument(
         'desc_file', metavar='DESC_FILE', type=open,
         help='run description YAML file')
@@ -104,6 +93,24 @@ def _add_combine_subparser(subparsers):
     parser.add_argument(
         '--delete-restart', action='store_true',
         help="delete restart file(s)")
+
+
+
+def _add_combine_subparser(subparsers):
+    """Add a sub-parser for the `salishsea combine` command.
+    """
+    parser = subparsers.add_parser(
+        'combine', help='Combine results from an MPI Salish Sea NEMO run.',
+        description='''
+            Combine the per-processor results files from an MPI
+            Salish Sea NEMO run described in DESC_FILE
+            into files in RESULTS_DIR
+            and compress them using gzip.
+            Delete the per-processor files.
+
+            If RESULTS_DIR does not exist it will be created.
+            ''')
+    _add_common_options(parser)
     _add_version_arg(parser)
     parser.set_defaults(func=_do_combine)
 
