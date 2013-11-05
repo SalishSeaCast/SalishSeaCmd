@@ -52,7 +52,8 @@ def test_get_results_files(mock_glob):
         ['foo_0000.nc', 'bar_0000.nc'],
         ['foo_0000.nc', 'foo_0001.nc', 'foo_0002.nc'],
     )
-    name_roots, ncores = combine_processor._get_results_files()
+    args = Mock(delete_restart=False)
+    name_roots, ncores = combine_processor._get_results_files(args)
     assert name_roots == ['foo', 'bar']
     assert ncores == 3
 
@@ -61,9 +62,25 @@ def test_get_results_files(mock_glob):
 def test_get_results_files_none_found(mock_log):
     """_get_results_files logs error if no results files exists
     """
+    args = Mock(delete_restart=False)
     with pytest.raises(SystemExit):
-        combine_processor._get_results_files()
+        combine_processor._get_results_files(args)
     assert mock_log.called
+
+
+@patch('salishsea_cmd.combine_processor.glob.glob')
+@patch('salishsea_cmd.combine_processor.os.remove')
+def test_get_results_files_delete_restart(mock_rm, mock_glob):
+    """_get_results_files deletes restart files
+    """
+    mock_glob.side_effect = (
+        ['baz_restart_0000.nc', 'baz_restart_0001.nc'],
+        ['foo_0000.nc', 'bar_0000.nc'],
+        ['foo_0000.nc', 'foo_0001.nc', 'foo_0002.nc'],
+    )
+    args = Mock(delete_restart=True)
+    combine_processor._get_results_files(args)
+    assert mock_rm.call_count == 2
 
 
 @patch('salishsea_cmd.combine_processor.subprocess.check_output')
