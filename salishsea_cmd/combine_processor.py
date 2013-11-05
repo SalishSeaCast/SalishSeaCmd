@@ -133,7 +133,7 @@ def _compress_results(name_roots, args):
 
 
 def _delete_results_files(name_roots, args):
-    if args.keep:
+    if args.keep_proc_results:
         return
     log.info('Deleting per-processor files...')
     for name_root in name_roots:
