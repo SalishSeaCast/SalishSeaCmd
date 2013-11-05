@@ -93,7 +93,7 @@ def _add_combine_subparser(subparsers):
         'results_dir', metavar='RESULTS_DIR',
         help='directory to store results into')
     parser.add_argument(
-        '--keep', action='store_true',
+        '--keep-proc-results', action='store_true',
         help="don't delete per-processor results files")
     parser.add_argument(
         '--no-compress', action='store_true',
