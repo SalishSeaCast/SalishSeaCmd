@@ -125,7 +125,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
         ic_source = os.path.abspath(init_conditions)
         ic_link_name = 'restart.nc'
     else:
-        ic_source = os.path.join(nemo_forcing_dir, init_conditions) + '/'
+        ic_source = os.path.join(nemo_forcing_dir, init_conditions)
         ic_link_name = 'initial_strat'
     forcing_dirs = (
         (run_desc['forcing']['open boundaries'], 'open_boundaries'),
@@ -134,7 +134,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
     os.chdir(run_dir)
     os.symlink(ic_source, ic_link_name)
     for source, link_name in forcing_dirs:
-        os.symlink(os.path.join(nemo_forcing_dir, source) + '/', link_name)
+        os.symlink(os.path.join(nemo_forcing_dir, source), link_name)
     with open('NEMO-forcing_tip.txt', 'wt') as f:
         f.writelines(hg_heads(nemo_forcing_dir))
     os.chdir(starting_dir)
