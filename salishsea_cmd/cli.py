@@ -130,8 +130,7 @@ def _add_prepare_subparser(subparsers):
     parser = subparsers.add_parser(
         'prepare', help='Prepare a Salish Sea NEMO run',
         description='''
-            Set up the Salish Sea NEMO run described in DESC_FILE
-            and change to the run directory.
+            Set up the Salish Sea NEMO run described in DESC_FILE.
         ''')
     parser.add_argument(
         'desc_file', metavar='DESC_FILE', type=open,
@@ -143,8 +142,8 @@ def _add_prepare_subparser(subparsers):
         'iodefs', metavar='IO_DEFS',
         help='NEMO IOM server defs file for run')
     parser.add_argument(
-        '--no-cd', action='store_true',
-        help="don't cd to the run directory")
+        '-q', '--quiet', action='store_true',
+        help="don't show the run directory path on completion")
     _add_version_arg(parser)
     parser.set_defaults(func=_do_prepare)
 

@@ -39,18 +39,19 @@ log.addHandler(utils.make_stderr_logger())
 def main(run_desc, args):
     """
     """
-    nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc)
+    nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, args)
     starting_dir = os.getcwd()
     run_dir = _make_run_dir(run_desc)
     _make_run_set_links(args, run_dir, starting_dir)
     _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir)
     _make_grid_links(run_desc, run_dir, starting_dir)
     _make_forcing_links(run_desc, run_dir, starting_dir)
-    if not args.no_cd:
-        os.chdir(run_dir)
+    if not args.quiet:
+        log.info('Created run directory {}'.format(run_dir))
+    return run_dir
 
 
-def _check_nemo_exec(run_desc):
+def _check_nemo_exec(run_desc, args):
     nemo_code_repo = os.path.abspath(run_desc['paths']['NEMO-code'])
     config_dir = os.path.join(
         nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config_name'])
@@ -62,7 +63,7 @@ def _check_nemo_exec(run_desc):
             .format(nemo_exec))
         sys.exit(2)
     iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
-    if not os.path.exists(iom_server_exec):
+    if not os.path.exists(iom_server_exec) and not args.quiet:
         log.warn(
             'Warning: {} not found - are you running without key_iomput?'
             .format(iom_server_exec)
