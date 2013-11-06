@@ -26,6 +26,7 @@ import yaml
 from . import (
     __version__,
     combine_processor,
+    prepare_processor,
     utils,
 )
 
@@ -63,6 +64,7 @@ def _build_parser():
     _add_version_arg(parser)
     subparsers = parser.add_subparsers(title='sub-commands')
     _add_combine_subparser(subparsers)
+    _add_prepare_subparser(subparsers)
     return parser
 
 
@@ -95,7 +97,6 @@ def _add_common_options(parser):
         help="delete restart file(s)")
 
 
-
 def _add_combine_subparser(subparsers):
     """Add a sub-parser for the `salishsea combine` command.
     """
@@ -121,6 +122,39 @@ def _do_combine(args):
     """
     run_desc = _load_run_desc(args.desc_file)
     combine_processor.main(run_desc, args)
+
+
+def _add_prepare_subparser(subparsers):
+    """Add a sub-parser for the `salishsea prepare` command.
+    """
+    parser = subparsers.add_parser(
+        'prepare', help='Prepare a Salish Sea NEMO run',
+        description='''
+            Set up the Salish Sea NEMO run described in DESC_FILE
+            and change to the run directory.
+        ''')
+    parser.add_argument(
+        'desc_file', metavar='DESC_FILE', type=open,
+        help='run description YAML file')
+    parser.add_argument(
+        'namelist', metavar='NAMELIST',
+        help='NEMO namelist file for run')
+    parser.add_argument(
+        'iodefs', metavar='IO_DEFS',
+        help='NEMO IOM server defs file for run')
+    parser.add_argument(
+        '--no-cd', action='store_true',
+        help="don't cd to the run directory")
+    _add_version_arg(parser)
+    parser.set_defaults(func=_do_prepare)
+
+
+def _do_prepare(args):
+    """Execute the `salishsea prepare` command with the specified arguments
+    and options.
+    """
+    run_desc = _load_run_desc(args.desc_file)
+    prepare_processor.main(run_desc, args)
 
 
 def _load_run_desc(desc_file):
