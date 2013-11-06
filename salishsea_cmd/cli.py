@@ -130,7 +130,8 @@ def _add_prepare_subparser(subparsers):
     parser = subparsers.add_parser(
         'prepare', help='Prepare a Salish Sea NEMO run',
         description='''
-            Set up the Salish Sea NEMO run described in DESC_FILE.
+            Set up the Salish Sea NEMO run described in DESC_FILE
+            and print the path to the run directory.
         ''')
     parser.add_argument(
         'desc_file', metavar='DESC_FILE', type=open,
