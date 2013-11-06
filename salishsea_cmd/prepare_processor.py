@@ -37,7 +37,20 @@ log.addHandler(utils.make_stderr_logger())
 
 
 def main(run_desc, args):
-    """
+    """Set up for the Salish Sea NEMO run described in run_desc.
+
+    A UUID named directory is created and symbolic links are created
+    in the directory to the files and directories specifed to run NEMO.
+    The output of :command:`hg heads .` is recorded in the directory
+    for the NEMO-code and NEMO-forcing repos that the symlinks point to.
+    The path to the run directory is logged to the console on completion
+    of the set-up.
+
+    :arg run_desc: Run description data structure.
+    :type run_desc: dict
+
+    :arg args: Command line arguments and option values
+    :type args: :class:`argparse.Namespace`
     """
     nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, args)
     starting_dir = os.getcwd()
