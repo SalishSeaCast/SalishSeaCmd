@@ -53,7 +53,7 @@ def main(run_desc, args):
 def _check_nemo_exec(run_desc):
     nemo_code_repo = os.path.abspath(run_desc['paths']['NEMO-code'])
     config_dir = os.path.join(
-        nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config'])
+        nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config_name'])
     nemo_bin_dir = os.path.join(nemo_code_repo, config_dir, 'BLD', 'bin')
     nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
     if not os.path.exists(nemo_exec):
