@@ -94,10 +94,10 @@ def _make_run_dir(run_desc):
 def _make_run_set_links(args, run_dir, starting_dir):
     run_set_dir = os.path.dirname(os.path.abspath(args.desc_file.name))
     run_set_files = (
-        (args.iodefs, 'iodefs.xml'),
+        (args.iodefs, 'iodef.xml'),
         (args.namelist, 'namelist'),
         (args.desc_file.name, os.path.basename(args.desc_file.name)),
-        ('xml_server.def', 'xml_server.def'),
+        ('xmlio_server.def', 'xmlio_server.def'),
     )
     os.chdir(run_dir)
     for source, link_name in run_set_files:
