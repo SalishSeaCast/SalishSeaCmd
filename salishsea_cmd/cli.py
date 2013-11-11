@@ -46,15 +46,15 @@ def main():
     cmd_processor = _build_parser()
     if len(sys.argv) == 1:
         cmd_processor.print_help()
-    else:
-        try:
-            args = cmd_processor.parse_args()
-        except IOError as e:
-            log.error(
-                'IOError: Run description file not found: {.filename}'
-                .format(e))
-            sys.exit(2)
-        args.func(args)
+        sys.exit(2)
+    try:
+        args = cmd_processor.parse_args()
+    except IOError as e:
+        log.error(
+            'IOError: Run description file not found: {.filename}'
+            .format(e))
+        sys.exit(2)
+    args.func(args)
 
 
 def _build_parser():
@@ -125,6 +125,10 @@ def _do_combine(args):
     combine_processor.main(run_desc, args)
 
 
+def _load_run_desc(desc_file):
+    return yaml.load(desc_file)
+
+
 def _add_prepare_subparser(subparsers):
     """Add a sub-parser for the `salishsea prepare` command.
     """
@@ -156,7 +160,3 @@ def _do_prepare(args):
     """
     run_desc = _load_run_desc(args.desc_file)
     prepare_processor.main(run_desc, args)
-
-
-def _load_run_desc(desc_file):
-    return yaml.load(desc_file)
