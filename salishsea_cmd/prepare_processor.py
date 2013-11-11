@@ -142,6 +142,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
         ic_source = os.path.join(nemo_forcing_dir, init_conditions)
         ic_link_name = 'initial_strat'
     forcing_dirs = (
+        (run_desc['forcing']['atmospheric'], 'NEMO-atmos'),
         (run_desc['forcing']['open boundaries'], 'open_boundaries'),
         (run_desc['forcing']['rivers'], 'rivers')
     )
