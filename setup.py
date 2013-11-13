@@ -43,6 +43,7 @@ with open('CHANGELOG.rst', 'rt') as f:
     long_description += '\n\n' + f.read()
 install_requires = [
     # see requirements.txt for versions most recently used in development
+    'arrow',
     'PyYAML',
 ]
 
@@ -53,7 +54,9 @@ setup(
     long_description=long_description,
     author='Doug Latornell',
     author_email='djl@douglatornell.ca',
-    url='',
+    url=(
+        'http://salishsea-meopar-tools.readthedocs.org/en/latest/SalishSeaCmd/'
+        'salishsea-cmd.html'),
     license='Apache License, Version 2.0',
     classifiers=python_classifiers + other_classifiers,
     platforms=['MacOS X', 'Linux'],
