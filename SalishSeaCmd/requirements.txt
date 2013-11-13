@@ -1,0 +1,10 @@
+# Python packages and versions used for development
+
+PyYAML==3.10
+arrow==0.4.2
+ipdb==0.8
+mock==1.0.1
+py==1.4.17
+pytest==2.4.2
+python-dateutil==2.2
+six==1.4.1
