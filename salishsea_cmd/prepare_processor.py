@@ -24,6 +24,7 @@ import logging
 import os
 import sys
 import uuid
+import salishsea_tools.hg_commands as hg
 from . import utils
 
 
@@ -115,7 +116,7 @@ def _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir):
     if os.path.exists(iom_server_exec):
         os.symlink(iom_server_exec, 'server.exe')
     with open('NEMO-code_tip.txt', 'wt') as f:
-        f.writelines(hg_heads(nemo_code_repo))
+        f.writelines(hg.heads(nemo_code_repo))
     os.chdir(starting_dir)
 
 
@@ -151,5 +152,5 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
     for source, link_name in forcing_dirs:
         os.symlink(os.path.join(nemo_forcing_dir, source), link_name)
     with open('NEMO-forcing_tip.txt', 'wt') as f:
-        f.writelines(hg_heads(nemo_forcing_dir))
+        f.writelines(hg.heads(nemo_forcing_dir))
     os.chdir(starting_dir)
