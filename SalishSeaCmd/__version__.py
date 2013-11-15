@@ -18,4 +18,4 @@ limitations under the License.
 """
 number = '0.9.0'
 release = '.dev'
-dev_status = '1 - Planning'
+dev_status = '4 - Beta'
