@@ -22,7 +22,6 @@ limitations under the License.
 from __future__ import absolute_import
 import logging
 import os
-import subprocess
 import sys
 import uuid
 from . import utils
@@ -154,21 +153,3 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
     with open('NEMO-forcing_tip.txt', 'wt') as f:
         f.writelines(hg_heads(nemo_forcing_dir))
     os.chdir(starting_dir)
-
-
-def hg_heads(repo, revs=['.']):
-    """Return the result of the :command:`hg -R repo heads revs` command.
-
-    :arg repo: Repository root directory.
-    :type repo: str
-
-    :arg revs: Revisions for which to show branch heads.
-               The default :kbd:`.` causes the head(s) of the currently
-               checked out branch to be returned.
-    :type revs: list
-
-    :returns: Output of the command.
-    :rtype: str
-    """
-    cmd = ['hg', '-R', repo, 'heads'] + revs
-    return subprocess.check_output(cmd)
