@@ -2,14 +2,14 @@
 Salish Sea NEMO Command Processor
 *********************************
 
-The Salish Sea NEMO command processor, :command:`ss`, is a command line tool for doing various operations associated with the Salish Sea NEMO model.
+The Salish Sea NEMO command processor, ``salishsea``, is a command line tool for doing various operations associated with the Salish Sea NEMO model.
 
-Use :command:`ss --help` to get a list of the commands available for doing things with and related to Salish Sea NEMO.
-Use :command:`ss <command> --help` to get a synopsis of what a command does,
+Use ``salishsea --help`` to get a list of the sub-commands available for doing things with and related to Salish Sea NEMO.
+Use ``salishsea <sub-command> --help`` to get a synopsis of what a sub-command does,
 what its required arguments are,
-and what options are available to control the command.
+and what options are available to control it.
 
-Documentation for the command processor is the :file:`docs/` directory and is rendered at http://salishsea-meopar-tools.readthedocs.org/SalishSeaCmd/.
+Documentation for the command processor is in the ``docs/`` directory and is rendered at http://salishsea-meopar-tools.readthedocs.org/en/latest/SalishSeaCmd/salishsea-cmd.html.
 
 
 License
