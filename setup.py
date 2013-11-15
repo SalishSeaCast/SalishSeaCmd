@@ -45,7 +45,7 @@ install_requires = [
     # see requirements.txt for versions most recently used in development
     'arrow',
     'PyYAML',
-    'SalishSeaTools',
+    # 'SalishSeaTools',
 ]
 
 setup(
