@@ -1,7 +1,12 @@
 Changelog
 =========
 
-* The ``SalishSeaCmd`` package now depend on the ``SalishSeaTools``
+* Removed the ``namelist`` required argument from the ``salishsea prepare``
+  sub-command.
+  Namelists are now specified via a list of namelist segments in the
+  run description YAML file.
+
+* The ``SalishSeaCmd`` package now depends on the ``SalishSeaTools``
   package for its Mercurial commands interface.
 
 * ``salishsea get_cgrf`` sub-command to download CGRF products

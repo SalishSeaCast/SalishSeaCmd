@@ -56,6 +56,7 @@ def main(run_desc, args):
     nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, args)
     starting_dir = os.getcwd()
     run_dir = _make_run_dir(run_desc)
+    _make_namelist(args, run_desc, run_dir)
     _make_run_set_links(args, run_dir, starting_dir)
     _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir)
     _make_grid_links(run_desc, run_dir, starting_dir)
@@ -92,11 +93,21 @@ def _make_run_dir(run_desc):
     return run_dir
 
 
+def _make_namelist(args, run_desc, run_dir):
+    run_set_dir = os.path.dirname(os.path.abspath(args.desc_file.name))
+    namelists = run_desc['namelists']
+    with open(os.path.join(run_dir, 'namelist'), 'wt') as namelist:
+        for nl in namelists:
+            with open(os.path.join(run_set_dir, nl), 'rt') as f:
+                namelist.writelines(f.readlines())
+                namelist.write('\n\n')
+        namelist.writelines(EMPTY_NAMELISTS)
+
+
 def _make_run_set_links(args, run_dir, starting_dir):
     run_set_dir = os.path.dirname(os.path.abspath(args.desc_file.name))
     run_set_files = (
         (args.iodefs, 'iodef.xml'),
-        (args.namelist, 'namelist'),
         (args.desc_file.name, os.path.basename(args.desc_file.name)),
         ('xmlio_server.def', 'xmlio_server.def'),
     )
@@ -154,3 +165,102 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
     with open('NEMO-forcing_tip.txt', 'wt') as f:
         f.writelines(hg.heads(nemo_forcing_dir))
     os.chdir(starting_dir)
+
+# All of the namelists that NEMO requires, but empty so that they result
+# in the defaults defined in the NEMO code being used.
+EMPTY_NAMELISTS = """
+&namrun        !  Parameters of the run
+&end
+&nam_diaharm   !  Harmonic analysis of tidal constituents ('key_diaharm')
+&end
+&namzgr        !  Vertical coordinate
+&end
+&namzgr_sco    !  s-Coordinate or hybrid z-s-coordinate
+&end
+&namdom        !  Space and time domain (bathymetry, mesh, timestep)
+&end
+&namtsd        !  Data : Temperature  & Salinity
+&end
+&namsbc        !  Surface Boundary Condition (surface module)
+&end
+&namsbc_ana    !  Analytical surface boundary condition
+&end
+&namsbc_flx    !  Surface boundary condition : flux formulation
+&end
+&namsbc_clio   !  CLIO bulk formulae
+&end
+&namsbc_core   !  CORE bulk formulae
+&end
+&namsbc_mfs    !  MFS bulk formulae
+&end
+&namtra_qsr    !  Penetrative solar radiation
+&end
+&namsbc_rnf    !  Runoffs namelist surface boundary condition
+&end
+&namsbc_apr    !  Atmospheric pressure used as ocean forcing or in bulk
+&end
+&namsbc_ssr    !  Surface boundary condition : sea surface restoring
+&end
+&namsbc_alb    !  Albedo parameters
+&end
+&namlbc        !  Lateral momentum boundary condition
+&end
+&namcla        !  Cross land advection
+&end
+&nam_tide      !  Tide parameters (#ifdef key_tide)
+&end
+&nambdy        !  Unstructured open boundaries ("key_bdy")
+&end
+&nambdy_index  !  Open boundaries - definition ("key_bdy")
+&end
+&nambdy_dta    !  Open boundaries - external data ("key_bdy")
+&end
+&nambdy_tide   !  Tidal forcing at open boundaries
+&end
+&nambfr        !  Bottom friction
+&end
+&nambbc        !  Bottom temperature boundary condition
+&end
+&nambbl        !  Bottom boundary layer scheme
+&end
+&nameos        !  Ocean physical parameters
+&end
+&namtra_adv    !  Advection scheme for tracer
+&end
+&namtra_ldf    !  Lateral diffusion scheme for tracers
+&end
+&namtra_dmp    !  Tracer: T & S newtonian damping
+&end
+&namdyn_adv    !  Formulation of the momentum advection
+&end
+&namdyn_vor    !  Option of physics/algorithm (not control by CPP keys)
+&end
+&namdyn_hpg    !  Hydrostatic pressure gradient option
+&end
+&namdyn_ldf    !  Lateral diffusion on momentum
+&end
+&namzdf        !  Vertical physics
+&end
+&namzdf_gls    !  GLS vertical diffusion ("key_zdfgls")
+&end
+&namsol        !  Elliptic solver / island / free surface
+&end
+&nammpp        !  Massively Parallel Processing ("key_mpp_mpi)
+&end
+&namctl        !  Control prints & Benchmark
+&end
+&namnc4        !  netCDF4 chunking and compression settings ("key_netcdf4")
+&end
+&namptr        !  Poleward Transport Diagnostic
+&end
+&namhsb        !  Heat and salt budgets
+&end
+&namdct        !  Transports through sections
+&end
+&namsbc_wave   !  External fields from wave model
+&end
+&namdyn_nept   !  Neptune effect
+&end           !  (simplified: lateral & vertical diffusions removed)
+&namtrj        !  Handling non-linear trajectory for TAM
+&end           !  (output for direct model, input for TAM)
+"""
