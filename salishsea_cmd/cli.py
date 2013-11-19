@@ -187,9 +187,6 @@ def _add_prepare_subparser(subparsers):
         'desc_file', metavar='DESC_FILE', type=open,
         help='run description YAML file')
     parser.add_argument(
-        'namelist', metavar='NAMELIST',
-        help='NEMO namelist file for run')
-    parser.add_argument(
         'iodefs', metavar='IO_DEFS',
         help='NEMO IOM server defs file for run')
     parser.add_argument(
