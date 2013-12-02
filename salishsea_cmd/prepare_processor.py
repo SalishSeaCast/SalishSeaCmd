@@ -113,9 +113,8 @@ def _make_run_set_links(args, run_dir, starting_dir):
     )
     os.chdir(run_dir)
     for source, link_name in run_set_files:
-        os.symlink(
-            os.path.join(run_set_dir, os.path.basename(source)),
-            link_name)
+        source_path = os.path.normpath(os.path.join(run_set_dir, source))
+        os.symlink(source_path, link_name)
     os.chdir(starting_dir)
 
 
