@@ -25,12 +25,15 @@ import pytest
 from salishsea_cmd import combine_processor
 
 
+@patch('salishsea_cmd.combine_processor.os.path.realpath')
 @patch('salishsea_cmd.combine_processor.os.path.lexists')
-def test_find_rebuild_nemo_script_found(mock_lexists):
+def test_find_rebuild_nemo_script_found(mock_lexists, mock_realpath):
     """_find_rebuild_nemo_exec returns script name if executable exists
     """
+    mock_realpath.return_value = (
+        'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin/nemo.exe')
     mock_lexists.return_value = True
-    script = combine_processor._find_rebuild_nemo_script('NEMO-code')
+    script = combine_processor._find_rebuild_nemo_script()
     assert script == 'NEMO-code/NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo'
 
 
@@ -41,7 +44,7 @@ def test_find_rebuild_nemo_script_not_found(mock_lexists, mock_log):
     """
     mock_lexists.return_value = False
     with pytest.raises(SystemExit):
-        combine_processor._find_rebuild_nemo_script('NEMO-code')
+        combine_processor._find_rebuild_nemo_script()
     assert mock_log.called
 
 

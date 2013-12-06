@@ -53,8 +53,7 @@ def main(run_desc, args):
     :arg args: Command line arguments and option values
     :type args: :class:`argparse.Namespace`
     """
-    rebuild_nemo_script = _find_rebuild_nemo_script(
-        run_desc['paths']['NEMO-code'])
+    rebuild_nemo_script = _find_rebuild_nemo_script()
     name_roots, ncores = _get_results_files(args)
     _combine_results_files(rebuild_nemo_script, name_roots, ncores)
     os.remove('nam_rebuild')
@@ -63,7 +62,9 @@ def main(run_desc, args):
     _delete_results_files(name_roots, args)
 
 
-def _find_rebuild_nemo_script(nemo_code_path):
+def _find_rebuild_nemo_script():
+    nemo_exec_path = os.path.realpath('nemo.exe')
+    nemo_code_path = nemo_exec_path.split('NEMOGCM')[0]
     rebuild_nemo_exec = os.path.join(
         nemo_code_path,
         'NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo.exe')
