@@ -23,7 +23,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from __future__ import absolute_import
-from . import combine_processor
+from salishsea_cmd import combine_processor
 
 
 __all__ = ['combine']
