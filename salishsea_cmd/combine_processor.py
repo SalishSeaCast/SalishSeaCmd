@@ -1,7 +1,7 @@
 """Salish Sea NEMO results combine sub-command processor
 
 Combines per-processor files from an MPI Salish Sea NEMO run into single files
-with the same name-root.
+with the same name-root and move them to a specified directory.
 
 
 Copyright 2013 The Salish Sea MEOPAR Contributors
