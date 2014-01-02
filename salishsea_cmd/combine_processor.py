@@ -4,7 +4,7 @@ Combines per-processor files from an MPI Salish Sea NEMO run into single files
 with the same name-root and move them to a specified directory.
 
 
-Copyright 2013 The Salish Sea MEOPAR Contributors
+Copyright 2013-2014 The Salish Sea MEOPAR Contributors
 and The University of British Columbia
 
 Licensed under the Apache License, Version 2.0 (the "License");

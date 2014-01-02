@@ -1,7 +1,7 @@
 """Salish Sea NEMO results combine sub-command processor unit tests
 
 
-Copyright 2013 The Salish Sea MEOPAR Contributors
+Copyright 2013-2014 The Salish Sea MEOPAR Contributors
 and The University of British Columbia
 
 Licensed under the Apache License, Version 2.0 (the "License");

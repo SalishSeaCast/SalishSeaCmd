@@ -3,7 +3,7 @@
 Download CGRF products atmospheric forcing files from Dalhousie rsync
 repository and symlink with the file names that NEMO expects.
 
-Copyright 2013 The Salish Sea MEOPAR Contributors
+Copyright 2013-2014 The Salish Sea MEOPAR Contributors
 and The University of British Columbia
 
 Licensed under the Apache License, Version 2.0 (the "License");
