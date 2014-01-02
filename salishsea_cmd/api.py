@@ -7,7 +7,7 @@ for use in other sub-command processor modules,
 and by other software.
 
 
-Copyright 2013 The Salish Sea MEOPAR Contributors
+Copyright 2013-2014 The Salish Sea MEOPAR Contributors
 and The University of British Columbia
 
 Licensed under the Apache License, Version 2.0 (the "License");
