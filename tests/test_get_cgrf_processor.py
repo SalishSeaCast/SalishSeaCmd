@@ -52,7 +52,17 @@ def test_main_calls_get_cgrf(
 
 
 @patch('salishsea_cmd.get_cgrf_processor.log.info')
-@patch('salishsea_cmd.get_cgrf_processor.subprocess.call')
+@patch('salishsea_cmd.get_cgrf_processor.os.path.exists', return_value=True)
+@patch('salishsea_cmd.get_cgrf_processor.os.listdir', return_value=range(8))
+def test_get_cgrf_dst_dir_exists(mock_listdir, mock_exists, mock_log):
+    """_get_cgrf logs msg and returns if CGRF day dir exists & contains 8 files
+    """
+    get_cgrf_processor._get_cgrf(arrow.get(2014, 1, 6), 'foo', 'bar')
+    mock_log.assert_called_once_with('2014-01-06 dataset already downloaded')
+
+
+@patch('salishsea_cmd.get_cgrf_processor.log.info')
+@patch('salishsea_cmd.get_cgrf_processor.subprocess.check_call')
 @patch('salishsea_cmd.get_cgrf_processor.os.chmod')
 @patch('salishsea_cmd.get_cgrf_processor.os.listdir', return_value=[])
 def test_get_cgrf_dst_dir(mock_listdir, mock_chmod, mock_call, mock_log):
@@ -62,7 +72,7 @@ def test_get_cgrf_dst_dir(mock_listdir, mock_chmod, mock_call, mock_log):
     mock_log.assert_called_once_with('Downloading 2014-01-02')
 
 
-@patch('salishsea_cmd.get_cgrf_processor.subprocess.call')
+@patch('salishsea_cmd.get_cgrf_processor.subprocess.check_call')
 @patch('salishsea_cmd.get_cgrf_processor.os.chmod')
 @patch('salishsea_cmd.get_cgrf_processor.os.listdir', return_value=[])
 def test_get_cgrf_rsync(mock_listdir, mock_chmod, mock_call):
@@ -77,7 +87,7 @@ def test_get_cgrf_rsync(mock_listdir, mock_chmod, mock_call):
     mock_call.assert_called_once_with(expected)
 
 
-@patch('salishsea_cmd.get_cgrf_processor.subprocess.call')
+@patch('salishsea_cmd.get_cgrf_processor.subprocess.check_call')
 @patch('salishsea_cmd.get_cgrf_processor.os.chmod')
 @patch('salishsea_cmd.get_cgrf_processor.os.listdir', return_value=['baz.gz'])
 def test_get_cgrf_unzip(mock_listdir, mock_chmod, mock_call):
