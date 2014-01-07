@@ -46,6 +46,10 @@ log.addHandler(utils.make_stdout_logger())
 log.addHandler(utils.make_stderr_logger())
 
 
+RSYNC_MIRROR_DIR = os.path.abspath('rsync-mirror-new')
+NEMO_ATMOS_DIR = os.path.abspath('NEMO-atmos-new')
+
+
 def main(args):
     """Download CGRF products atmospheric forcing files from Dalhousie rsync
     repository and symlink with the file names that NEMO expects.
@@ -53,26 +57,27 @@ def main(args):
     :arg args: Command line arguments and option values
     :type args: :class:`argparse.Namespace`
     """
-    start_date = args.start_date.replace(days=-1)
-    end_date = args.start_date.replace(days=args.days - 1)
     userid = args.userid if args.userid is not None else raw_input('User id: ')
     passwd = args.passwd if args.passwd is not None else getpass.getpass()
     with tempfile.NamedTemporaryFile(mode='wt', delete=False) as f:
         f.write('{}\n'.format(passwd))
         passwd_file = f.name
-    rsync_mirror_dir = os.path.abspath('rsync-mirror')
-    nemo_atmos_dir = os.path.abspath('NEMO-atmos')
+    start_date = args.start_date.replace(days=-1)
+    end_date = args.start_date.replace(days=args.days - 1)
     for day in arrow.Arrow.range('day', start_date, end_date):
-        os.chdir(rsync_mirror_dir)
+        os.chdir(RSYNC_MIRROR_DIR)
         _get_cgrf(day, userid, passwd_file)
-        os.chdir(nemo_atmos_dir)
+        os.chdir(NEMO_ATMOS_DIR)
         _link_cgrf(day)
     os.remove(passwd_file)
 
 
 def _get_cgrf(day, userid, passwd_file):
-    src_dir = day.strftime('%Y%m%d00')
     dst_dir = day.format('YYYY-MM-DD')
+    if os.path.exists(dst_dir) and len(os.listdir(dst_dir)) == 8:
+        log.info('{} dataset already downloaded'.format(dst_dir))
+        return
+    src_dir = day.strftime('%Y%m%d00')
     src_path = os.path.join(SERVER, str(day.year), src_dir)
     cmd = [
         'rsync',
@@ -82,13 +87,13 @@ def _get_cgrf(day, userid, passwd_file):
         '{}/'.format(dst_dir),
     ]
     log.info('Downloading {}'.format(dst_dir))
-    subprocess.call(cmd)
+    subprocess.check_call(cmd)
     os.chmod(dst_dir, PERM775)
     for f in os.listdir(dst_dir):
         fp = os.path.join(dst_dir, f)
         log.info('Uncompressing {}'.format(fp))
         os.chmod(fp, PERM664)
-        subprocess.call(['gunzip', fp])
+        subprocess.check_call(['gunzip', fp])
 
 
 def _link_cgrf(day):
