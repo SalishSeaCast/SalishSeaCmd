@@ -37,15 +37,16 @@ def test_main_calls_get_cgrf(
     """
     mock_NTF().__enter__().name = 'tmp'
     args = Mock(
-        start_date=arrow.get(2014, 1, 2),
+        start_date=arrow.get(2014, 1, 1),
         days=2,
         userid='foo',
         passwd='bar',
     )
     get_cgrf_processor.main(args)
     expected = [
+        call(arrow.get(2013, 12, 31), 'foo', 'tmp'),
+        call(arrow.get(2014, 1, 1), 'foo', 'tmp'),
         call(arrow.get(2014, 1, 2), 'foo', 'tmp'),
-        call(arrow.get(2014, 1, 3), 'foo', 'tmp'),
     ]
     assert mock_get_cgrf.mock_calls == expected
 

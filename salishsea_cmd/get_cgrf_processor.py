@@ -53,6 +53,7 @@ def main(args):
     :arg args: Command line arguments and option values
     :type args: :class:`argparse.Namespace`
     """
+    start_date = args.start_date.replace(days=-1)
     end_date = args.start_date.replace(days=args.days - 1)
     userid = args.userid if args.userid is not None else raw_input('User id: ')
     passwd = args.passwd if args.passwd is not None else getpass.getpass()
@@ -61,7 +62,7 @@ def main(args):
         passwd_file = f.name
     rsync_mirror_dir = os.path.abspath('rsync-mirror')
     nemo_atmos_dir = os.path.abspath('NEMO-atmos')
-    for day in arrow.Arrow.range('day', args.start_date, end_date):
+    for day in arrow.Arrow.range('day', start_date, end_date):
         os.chdir(rsync_mirror_dir)
         _get_cgrf(day, userid, passwd_file)
         os.chdir(nemo_atmos_dir)
