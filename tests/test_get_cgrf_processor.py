@@ -26,12 +26,12 @@ from salishsea_cmd import get_cgrf_processor
 
 
 @patch('salishsea_cmd.get_cgrf_processor._get_cgrf')
-@patch('salishsea_cmd.get_cgrf_processor._link_cgrf')
+@patch('salishsea_cmd.get_cgrf_processor._rebase_cgrf_time')
 @patch('salishsea_cmd.get_cgrf_processor.os.chdir')
 @patch('salishsea_cmd.get_cgrf_processor.os.remove')
 @patch('salishsea_cmd.get_cgrf_processor.tempfile.NamedTemporaryFile')
 def test_main_calls_get_cgrf(
-    mock_NTF, mock_rm, mock_chdir, mock_link_cgrf, mock_get_cgrf,
+    mock_NTF, mock_rm, mock_chdir, mock_rebase, mock_get_cgrf,
 ):
     """main calls _get_cgrf for expected dates
     """
@@ -49,6 +49,31 @@ def test_main_calls_get_cgrf(
         call(arrow.get(2014, 1, 2), 'foo', 'tmp'),
     ]
     assert mock_get_cgrf.mock_calls == expected
+
+
+@patch('salishsea_cmd.get_cgrf_processor._rebase_cgrf_time')
+@patch('salishsea_cmd.get_cgrf_processor._get_cgrf')
+@patch('salishsea_cmd.get_cgrf_processor.os.chdir')
+@patch('salishsea_cmd.get_cgrf_processor.os.remove')
+@patch('salishsea_cmd.get_cgrf_processor.tempfile.NamedTemporaryFile')
+def test_main_calls_rebase_cgrf_time(
+    mock_NTF, mock_rm, mock_chdir, mock_get_cgrf, mock_rebase,
+):
+    """main calls _rebase_cgrf_time for expected dates
+    """
+    mock_NTF().__enter__().name = 'tmp'
+    args = Mock(
+        start_date=arrow.get(2014, 1, 7),
+        days=2,
+        userid='foo',
+        passwd='bar',
+    )
+    get_cgrf_processor.main(args)
+    expected = [
+        call(arrow.get(2014, 1, 7)),
+        call(arrow.get(2014, 1, 8)),
+    ]
+    assert mock_rebase.mock_calls == expected
 
 
 @patch('salishsea_cmd.get_cgrf_processor.log.info')
@@ -95,3 +120,35 @@ def test_get_cgrf_unzip(mock_listdir, mock_chmod, mock_call):
     """
     get_cgrf_processor._get_cgrf(arrow.get(2014, 1, 2), 'foo', 'bar')
     assert mock_call.mock_calls[1] == call(['gunzip', '2014-01-02/baz.gz'])
+
+
+@patch('salishsea_cmd.get_cgrf_processor.subprocess.check_call')
+def test_get_cgrf_hyperslab(mock_call):
+    """_get_cgrf_hyperslab invokes expected ncks command
+    """
+    day = arrow.get(2014, 1, 7)
+    with patch('salishsea_cmd.get_cgrf_processor.RSYNC_MIRROR_DIR',
+               '/foo/rsync-mirror'):
+        get_cgrf_processor._get_cgrf_hyperslab(day, 'u10', 18, 23, 'tmp1.nc')
+    expected = (
+        'ncks -4 -L1 -O -d time_counter,18,23 '
+        '/foo/rsync-mirror/2014-01-07/2014010700_u10.nc tmp1.nc'
+    ).split()
+    mock_call.assert_called_once_with(expected)
+
+
+@patch('salishsea_cmd.get_cgrf_processor.subprocess.check_call')
+def test_merge_cgrf_hyperslabs(mock_call):
+    """_merge_cgrf_hyperslabs invokes expected ncrcat command
+    """
+    day = arrow.get(2014, 1, 7)
+    with patch('salishsea_cmd.get_cgrf_processor.NEMO_ATMOS_DIR',
+               '/foo/NEMO-atmos'):
+        get_cgrf_processor._merge_cgrf_hyperslabs(
+            day, 'u10', 'tmp1.nc', 'tmp2.nc')
+    expected = (
+        'ncrcat -O '
+        'tmp1.nc tmp2.nc '
+        '/foo/NEMO-atmos/u10_y2014m01d07.nc'
+    ).split()
+    mock_call.assert_called_once_with(expected)

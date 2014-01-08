@@ -19,6 +19,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from __future__ import absolute_import
+import datetime
 import getpass
 import logging
 import os
@@ -26,7 +27,10 @@ import stat
 import subprocess
 import tempfile
 import arrow
+import netCDF4 as nc
+import numpy as np
 from . import utils
+from salishsea_tools import nc_tools
 
 
 __all__ = ['main']
@@ -46,8 +50,8 @@ log.addHandler(utils.make_stdout_logger())
 log.addHandler(utils.make_stderr_logger())
 
 
-RSYNC_MIRROR_DIR = os.path.abspath('rsync-mirror-new')
-NEMO_ATMOS_DIR = os.path.abspath('NEMO-atmos-new')
+RSYNC_MIRROR_DIR = os.path.abspath('rsync-mirror')
+NEMO_ATMOS_DIR = os.path.abspath('NEMO-atmos')
 
 
 def main(args):
@@ -62,14 +66,16 @@ def main(args):
     with tempfile.NamedTemporaryFile(mode='wt', delete=False) as f:
         f.write('{}\n'.format(passwd))
         passwd_file = f.name
+    cgrf_dir = os.getcwd()
     start_date = args.start_date.replace(days=-1)
     end_date = args.start_date.replace(days=args.days - 1)
     for day in arrow.Arrow.range('day', start_date, end_date):
         os.chdir(RSYNC_MIRROR_DIR)
         _get_cgrf(day, userid, passwd_file)
-        os.chdir(NEMO_ATMOS_DIR)
-        _link_cgrf(day)
+        os.chdir(cgrf_dir)
     os.remove(passwd_file)
+    for day in arrow.Arrow.range('day', args.start_date, end_date):
+        _rebase_cgrf_time(day)
 
 
 def _get_cgrf(day, userid, passwd_file):
@@ -94,6 +100,88 @@ def _get_cgrf(day, userid, passwd_file):
         log.info('Uncompressing {}'.format(fp))
         os.chmod(fp, PERM664)
         subprocess.check_call(['gunzip', fp])
+
+
+def _rebase_cgrf_time(day):
+    log.info('Rebasing {} dataset'.format(day.format('YYYY-MM-DD')))
+    vars = (
+        ('precip', 'liquid precipitation'),
+        ('q2', '2m specific humidity'),
+        ('qlw', 'long-wave radiation'),
+        ('qsw', 'short-wave radiation'),
+        ('slp', 'sea-level atmospheric pressure'),
+        ('t2', '2m temperature'),
+        ('u10', 'u-component 10m wind'),
+        ('v10', 'v-component 10m wind'),
+    )
+    prev_day = day.replace(days=-1)
+    for var, description in vars:
+        log.info('Gathering {} values'.format(var))
+        _get_cgrf_hyperslab(prev_day, var, 18, 23, 'tmp1.nc')
+        _get_cgrf_hyperslab(day, var, 0, 17, 'tmp2.nc')
+        _merge_cgrf_hyperslabs(day, var, 'tmp1.nc', 'tmp2.nc')
+        tmp2 = nc.Dataset('tmp2.nc')
+        _improve_cgrf_file(var, description, day, tmp2.history)
+
+
+def _merge_cgrf_hyperslabs(day, var, part1_filename, part2_filename):
+        nemo_filename = '{}_{}.nc'.format(var, day.strftime('y%Ym%md%d'))
+        cmd = [
+            'ncrcat',
+            '-O',
+            part1_filename,
+            part2_filename,
+            os.path.join(NEMO_ATMOS_DIR, nemo_filename),
+        ]
+        subprocess.check_call(cmd)
+
+
+def _get_cgrf_hyperslab(day, var, start_hr, end_hr, result_filename):
+    src_dir = os.path.join(RSYNC_MIRROR_DIR, day.format('YYYY-MM-DD'))
+    cgrf_filename = '{}_{}.nc'.format(day.format('YYYYMMDD00'), var)
+    cmd = [
+        'ncks',
+        '-4', '-L1', '-O',
+        '-d', 'time_counter,{},{}'.format(start_hr, end_hr),
+        os.path.join(src_dir, cgrf_filename),
+        result_filename,
+    ]
+    subprocess.check_call(cmd)
+
+
+def _improve_cgrf_file(var, description, day, tmp2_history):
+    nemo_filename = '{}_{}.nc'.format(var, day.strftime('y%Ym%md%d'))
+    dataset = nc.Dataset(os.path.join(NEMO_ATMOS_DIR, nemo_filename), 'r+')
+    nc_tools.init_dataset_attrs(
+        dataset,
+        title=(
+            'CGRF {} forcing dataset for {}'
+            .format(description, day.format('YYYY-MM-DD'))),
+        notebook_name='',
+        nc_filepath='',
+        comment=(
+            'Processed from '
+            'goapp.ocean.dal.ca::canadian_GDPS_reforecasts_v1 files.'),
+        quiet=True,
+    )
+    dataset.source = (
+        'https://bitbucket.org/salishsea/tools/raw/tip/SalishSeaCmd/'
+        'salishsea_cmd/get_cgrf_processor.py')
+    dataset.references = os.path.join(NEMO_ATMOS_DIR, nemo_filename)
+    time_counter = dataset.variables['time_counter']
+    time_counter.units = (
+        'hours since {} 00:00:00'.format(day.format('YYYY-MM-DD')))
+    time_counter.time_origin = '{} 00:00:00'.format(day.format('YYYY-MMM-DD'))
+    time_counter[:] = np.arange(24)
+    time_counter.valid_range = np.array((0, 23))
+    history = dataset.history.split('\n')
+    history.reverse()
+    dataset.history = (
+        '{}\n'
+        '{:%c}: Adjust time_counter values and clean up metadata.'
+        .format('\n'.join(history), datetime.datetime.now())
+    )
+    dataset.close()
 
 
 def _link_cgrf(day):
