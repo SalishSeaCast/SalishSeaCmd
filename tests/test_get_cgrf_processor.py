@@ -29,9 +29,12 @@ from salishsea_cmd import get_cgrf_processor
 @patch('salishsea_cmd.get_cgrf_processor._rebase_cgrf_time')
 @patch('salishsea_cmd.get_cgrf_processor.os.chdir')
 @patch('salishsea_cmd.get_cgrf_processor.os.remove')
+@patch('salishsea_cmd.get_cgrf_processor.os.removedirs')
 @patch('salishsea_cmd.get_cgrf_processor.tempfile.NamedTemporaryFile')
+@patch('salishsea_cmd.get_cgrf_processor.os.listdir')
 def test_main_calls_get_cgrf(
-    mock_NTF, mock_rm, mock_chdir, mock_rebase, mock_get_cgrf,
+    mock_listdir, mock_NTF, mock_rmdir, mock_rm, mock_chdir, mock_rebase,
+    mock_get_cgrf,
 ):
     """main calls _get_cgrf for expected dates
     """
@@ -55,9 +58,12 @@ def test_main_calls_get_cgrf(
 @patch('salishsea_cmd.get_cgrf_processor._get_cgrf')
 @patch('salishsea_cmd.get_cgrf_processor.os.chdir')
 @patch('salishsea_cmd.get_cgrf_processor.os.remove')
+@patch('salishsea_cmd.get_cgrf_processor.os.removedirs')
 @patch('salishsea_cmd.get_cgrf_processor.tempfile.NamedTemporaryFile')
+@patch('salishsea_cmd.get_cgrf_processor.os.listdir')
 def test_main_calls_rebase_cgrf_time(
-    mock_NTF, mock_rm, mock_chdir, mock_get_cgrf, mock_rebase,
+    mock_listdir, mock_NTF, mock_rmdirs, mock_rm, mock_chdir, mock_get_cgrf,
+    mock_rebase,
 ):
     """main calls _rebase_cgrf_time for expected dates
     """
@@ -74,6 +80,37 @@ def test_main_calls_rebase_cgrf_time(
         call(arrow.get(2014, 1, 8)),
     ]
     assert mock_rebase.mock_calls == expected
+
+
+@patch('salishsea_cmd.get_cgrf_processor.os.removedirs')
+@patch('salishsea_cmd.get_cgrf_processor._rebase_cgrf_time')
+@patch('salishsea_cmd.get_cgrf_processor._get_cgrf')
+@patch('salishsea_cmd.get_cgrf_processor.os.chdir')
+@patch('salishsea_cmd.get_cgrf_processor.os.remove')
+@patch('salishsea_cmd.get_cgrf_processor.tempfile.NamedTemporaryFile')
+@patch('salishsea_cmd.get_cgrf_processor.os.listdir', return_value=['bar'])
+def test_main_removes_rsync_dirs(
+    mock_listdir, mock_NTF, mock_rm, mock_chdir, mock_get_cgrf, mock_rebase,
+    mock_rmdir,
+):
+    """main removes rsync-ed CGRF diretories
+    """
+    mock_NTF().__enter__().name = 'tmp'
+    args = Mock(
+        start_date=arrow.get(2014, 1, 8),
+        days=2,
+        userid='foo',
+        passwd='bar',
+    )
+    with patch('salishsea_cmd.get_cgrf_processor.RSYNC_MIRROR_DIR',
+               '/foo/rsync-mirror'):
+        get_cgrf_processor.main(args)
+    expected = [
+        call('/foo/rsync-mirror/2014-01-07'),
+        call('/foo/rsync-mirror/2014-01-08'),
+        call('/foo/rsync-mirror/2014-01-09'),
+    ]
+    assert mock_rmdir.mock_calls == expected
 
 
 @patch('salishsea_cmd.get_cgrf_processor.log.info')

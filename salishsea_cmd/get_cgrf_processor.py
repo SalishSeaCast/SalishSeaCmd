@@ -76,6 +76,14 @@ def main(args):
     os.remove(passwd_file)
     for day in arrow.Arrow.range('day', args.start_date, end_date):
         _rebase_cgrf_time(day)
+    os.remove('tmp1.nc')
+    os.remove('tmp2.nc')
+    for day in arrow.Arrow.range('day', start_date, end_date):
+        rsync_dir = os.path.join(RSYNC_MIRROR_DIR, day.format('YYYY-MM-DD'))
+        log.info('Deleting {} directory'.format(rsync_dir))
+        for f in os.listdir(rsync_dir):
+            os.remove(os.path.join(rsync_dir, f))
+        os.removedirs(rsync_dir)
 
 
 def _get_cgrf(day, userid, passwd_file):
@@ -124,18 +132,6 @@ def _rebase_cgrf_time(day):
         _improve_cgrf_file(var, description, day, tmp2.history)
 
 
-def _merge_cgrf_hyperslabs(day, var, part1_filename, part2_filename):
-        nemo_filename = '{}_{}.nc'.format(var, day.strftime('y%Ym%md%d'))
-        cmd = [
-            'ncrcat',
-            '-O',
-            part1_filename,
-            part2_filename,
-            os.path.join(NEMO_ATMOS_DIR, nemo_filename),
-        ]
-        subprocess.check_call(cmd)
-
-
 def _get_cgrf_hyperslab(day, var, start_hr, end_hr, result_filename):
     src_dir = os.path.join(RSYNC_MIRROR_DIR, day.format('YYYY-MM-DD'))
     cgrf_filename = '{}_{}.nc'.format(day.format('YYYYMMDD00'), var)
@@ -147,6 +143,18 @@ def _get_cgrf_hyperslab(day, var, start_hr, end_hr, result_filename):
         result_filename,
     ]
     subprocess.check_call(cmd)
+
+
+def _merge_cgrf_hyperslabs(day, var, part1_filename, part2_filename):
+        nemo_filename = '{}_{}.nc'.format(var, day.strftime('y%Ym%md%d'))
+        cmd = [
+            'ncrcat',
+            '-O',
+            part1_filename,
+            part2_filename,
+            os.path.join(NEMO_ATMOS_DIR, nemo_filename),
+        ]
+        subprocess.check_call(cmd)
 
 
 def _improve_cgrf_file(var, description, day, tmp2_history):
@@ -182,13 +190,3 @@ def _improve_cgrf_file(var, description, day, tmp2_history):
         .format('\n'.join(history), datetime.datetime.now())
     )
     dataset.close()
-
-
-def _link_cgrf(day):
-    link_src_dir = os.path.join('..', 'rsync-mirror', day.format('YYYY-MM-DD'))
-    for f in os.listdir(link_src_dir):
-        root, ext = os.path.splitext(f)
-        var = root.rsplit('_', 1)[1]
-        link_name = '{}_{}.nc'.format(var, day.strftime('y%Ym%md%d'))
-        log.info('Symlinking {}'.format(link_name))
-        os.symlink(os.path.join(link_src_dir, f), link_name)
