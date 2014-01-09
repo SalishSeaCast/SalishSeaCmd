@@ -67,6 +67,10 @@ def main(args):
         f.write('{}\n'.format(passwd))
         passwd_file = f.name
     cgrf_dir = os.getcwd()
+    try:
+        os.mkdir(RSYNC_MIRROR_DIR)
+    except OSError:
+        pass
     start_date = args.start_date.replace(days=-1)
     end_date = args.start_date.replace(days=args.days - 1)
     for day in arrow.Arrow.range('day', start_date, end_date):
@@ -80,9 +84,10 @@ def main(args):
     os.remove('tmp2.nc')
     for day in arrow.Arrow.range('day', start_date, end_date):
         rsync_dir = os.path.join(RSYNC_MIRROR_DIR, day.format('YYYY-MM-DD'))
-        log.info('Deleting {} directory'.format(rsync_dir))
+        log.info('Deleting {} files'.format(rsync_dir))
         for f in os.listdir(rsync_dir):
             os.remove(os.path.join(rsync_dir, f))
+        log.info('Deleting {} directory'.format(RSYNC_MIRROR_DIR))
         os.removedirs(rsync_dir)
 
 
