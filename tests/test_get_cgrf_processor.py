@@ -239,8 +239,8 @@ def test_get_cgrf_hyperslab(mock_call):
     mock_call.assert_called_once_with(expected)
 
 
-@patch('salishsea_cmd.get_cgrf_processor.subprocess.check_call')
-def test_merge_cgrf_hyperslabs(mock_call):
+@patch('salishsea_cmd.get_cgrf_processor.subprocess.check_output')
+def test_merge_cgrf_hyperslabs(mock_chk_out):
     """_merge_cgrf_hyperslabs invokes expected ncrcat command
     """
     day = arrow.get(2014, 1, 7)
@@ -253,4 +253,4 @@ def test_merge_cgrf_hyperslabs(mock_call):
         'tmp1.nc tmp2.nc '
         '/foo/NEMO-atmos/u10_y2014m01d07.nc'
     ).split()
-    mock_call.assert_called_once_with(expected)
+    mock_chk_out.assert_called_once_with(expected, stderr=-2)

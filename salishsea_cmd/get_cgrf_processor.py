@@ -159,7 +159,9 @@ def _merge_cgrf_hyperslabs(day, var, part1_filename, part2_filename):
             part2_filename,
             os.path.join(NEMO_ATMOS_DIR, nemo_filename),
         ]
-        subprocess.check_call(cmd)
+        output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+        if output.strip() and not output.startswith('ncrcat: INFO/WARNING'):
+            log.info(output)
 
 
 def _improve_cgrf_file(var, description, day, tmp2_history):
