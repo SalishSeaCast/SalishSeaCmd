@@ -122,6 +122,68 @@ def test_get_cgrf_unzip(mock_listdir, mock_chmod, mock_call):
     assert mock_call.mock_calls[1] == call(['gunzip', '2014-01-02/baz.gz'])
 
 
+@patch('salishsea_cmd.get_cgrf_processor._get_cgrf_hyperslab')
+@patch('salishsea_cmd.get_cgrf_processor._merge_cgrf_hyperslabs')
+@patch('salishsea_cmd.get_cgrf_processor.nc')
+@patch('salishsea_cmd.get_cgrf_processor._improve_cgrf_file')
+def test_rebase_cgrf_time_calls_get_cgrf_hyperslab(
+    mock_improve, mock_nc, mock_merge, mock_get_slab,
+):
+    """_rebase_cgrf_time calls _get_cgrf_hyperslab with expected args
+    """
+    day = arrow.get(2014, 1, 8)
+    prev_day = day.replace(days=-1)
+    vars = 'precip q2 qlw qsw slp t2 u10 v10'.split()
+    expected = []
+    for var in vars:
+        expected.append(call(prev_day, var, 18, 23, 'tmp1.nc'))
+        expected.append(call(day, var, 0, 17, 'tmp2.nc'))
+    get_cgrf_processor._rebase_cgrf_time(day)
+    assert mock_get_slab.mock_calls == expected
+
+
+@patch('salishsea_cmd.get_cgrf_processor._merge_cgrf_hyperslabs')
+@patch('salishsea_cmd.get_cgrf_processor._get_cgrf_hyperslab')
+@patch('salishsea_cmd.get_cgrf_processor.nc')
+@patch('salishsea_cmd.get_cgrf_processor._improve_cgrf_file')
+def test_rebase_cgrf_time_calls_merge_cgrf_hyperslabs(
+    mock_improve, mock_nc, mock_get_slab, mock_merge
+):
+    """_rebase_cgrf_time calls _merge_cgrf_hyperslabs with expected args
+    """
+    day = arrow.get(2014, 1, 8)
+    vars = 'precip q2 qlw qsw slp t2 u10 v10'.split()
+    expected = [call(day, var, 'tmp1.nc', 'tmp2.nc') for var in vars]
+    get_cgrf_processor._rebase_cgrf_time(day)
+    assert mock_merge.mock_calls == expected
+
+
+@patch('salishsea_cmd.get_cgrf_processor._improve_cgrf_file')
+@patch('salishsea_cmd.get_cgrf_processor._get_cgrf_hyperslab')
+@patch('salishsea_cmd.get_cgrf_processor._merge_cgrf_hyperslabs')
+@patch('salishsea_cmd.get_cgrf_processor.nc')
+def test_rebase_cgrf_time_calls_improve_cgrf_file(
+    mock_nc, mock_merge, mock_get_slab, mock_improve,
+):
+    """_rebase_cgrf_time calls _improve_cgrf_file with expected args
+    """
+    day = arrow.get(2014, 1, 8)
+    vars = (
+        ('precip', 'liquid precipitation'),
+        ('q2', '2m specific humidity'),
+        ('qlw', 'long-wave radiation'),
+        ('qsw', 'short-wave radiation'),
+        ('slp', 'sea-level atmospheric pressure'),
+        ('t2', '2m temperature'),
+        ('u10', 'u-component 10m wind'),
+        ('v10', 'v-component 10m wind'),
+    )
+    expected = [call(var, descr, day, mock_nc.Dataset('tmp2.nc').history)
+                for var, descr in vars]
+    get_cgrf_processor._rebase_cgrf_time(day)
+    assert mock_improve.mock_calls == expected
+
+
 @patch('salishsea_cmd.get_cgrf_processor.subprocess.check_call')
 def test_get_cgrf_hyperslab(mock_call):
     """_get_cgrf_hyperslab invokes expected ncks command
