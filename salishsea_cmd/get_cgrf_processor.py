@@ -142,7 +142,7 @@ def _get_cgrf_hyperslab(day, var, start_hr, end_hr, result_filename):
     cgrf_filename = '{}_{}.nc'.format(day.format('YYYYMMDD00'), var)
     cmd = [
         'ncks',
-        '-4', '-L1', '-O',
+        '-4', '-L4', '-O',
         '-d', 'time_counter,{},{}'.format(start_hr, end_hr),
         os.path.join(src_dir, cgrf_filename),
         result_filename,
