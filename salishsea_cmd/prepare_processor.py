@@ -125,8 +125,8 @@ def _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir):
     iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
     if os.path.exists(iom_server_exec):
         os.symlink(iom_server_exec, 'server.exe')
-    with open('NEMO-code_tip.txt', 'wt') as f:
-        f.writelines(hg.heads(nemo_code_repo))
+    with open('NEMO-code_rev.txt', 'wt') as f:
+        f.writelines(hg.parents(nemo_code_repo, verbose=True))
     os.chdir(starting_dir)
 
 
@@ -161,8 +161,8 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
     os.symlink(ic_source, ic_link_name)
     for source, link_name in forcing_dirs:
         os.symlink(os.path.join(nemo_forcing_dir, source), link_name)
-    with open('NEMO-forcing_tip.txt', 'wt') as f:
-        f.writelines(hg.heads(nemo_forcing_dir))
+    with open('NEMO-forcing_rev.txt', 'wt') as f:
+        f.writelines(hg.parents(nemo_forcing_dir, verbose=True))
     os.chdir(starting_dir)
 
 # All of the namelists that NEMO requires, but empty so that they result
