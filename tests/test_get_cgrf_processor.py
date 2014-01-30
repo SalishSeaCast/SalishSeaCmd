@@ -233,7 +233,7 @@ def test_get_cgrf_hyperslab(mock_call):
                '/foo/rsync-mirror'):
         get_cgrf_processor._get_cgrf_hyperslab(day, 'u10', 18, 23, 'tmp1.nc')
     expected = (
-        'ncks -4 -L1 -O -d time_counter,18,23 '
+        'ncks -4 -L4 -O -d time_counter,18,23 '
         '/foo/rsync-mirror/2014-01-07/2014010700_u10.nc tmp1.nc'
     ).split()
     mock_call.assert_called_once_with(expected)
