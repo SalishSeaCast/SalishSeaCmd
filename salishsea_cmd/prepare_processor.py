@@ -22,8 +22,10 @@ limitations under the License.
 from __future__ import absolute_import
 import logging
 import os
+import shutil
 import sys
 import uuid
+
 import salishsea_tools.hg_commands as hg
 from . import utils
 
@@ -57,7 +59,7 @@ def main(run_desc, args):
     starting_dir = os.getcwd()
     run_dir = _make_run_dir(run_desc)
     _make_namelist(args, run_desc, run_dir)
-    _make_run_set_links(args, run_dir, starting_dir)
+    _copy_run_set_files(args, run_dir, starting_dir)
     _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir)
     _make_grid_links(run_desc, run_dir, starting_dir)
     _make_forcing_links(run_desc, run_dir, starting_dir)
@@ -104,7 +106,7 @@ def _make_namelist(args, run_desc, run_dir):
         namelist.writelines(EMPTY_NAMELISTS)
 
 
-def _make_run_set_links(args, run_dir, starting_dir):
+def _copy_run_set_files(args, run_dir, starting_dir):
     run_set_dir = os.path.dirname(os.path.abspath(args.desc_file.name))
     run_set_files = (
         (args.iodefs, 'iodef.xml'),
@@ -112,9 +114,9 @@ def _make_run_set_links(args, run_dir, starting_dir):
         ('xmlio_server.def', 'xmlio_server.def'),
     )
     os.chdir(run_dir)
-    for source, link_name in run_set_files:
+    for source, dest_name in run_set_files:
         source_path = os.path.normpath(os.path.join(run_set_dir, source))
-        os.symlink(source_path, link_name)
+        shutil.copy2(source_path, dest_name)
     os.chdir(starting_dir)
 
 
