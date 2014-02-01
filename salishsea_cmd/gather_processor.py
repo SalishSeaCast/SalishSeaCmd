@@ -21,8 +21,6 @@ limitations under the License.
 from __future__ import absolute_import
 import logging
 import os
-import shutil
-import tempfile
 from . import (
     api,
     utils,
@@ -58,24 +56,8 @@ def main(run_desc, args):
     api.combine(
         run_desc, args.results_dir, args.keep_proc_results, args.no_compress,
         args.compress_restart, args.delete_restart)
-    _copy_run_description(args)
     _delete_symlinks()
     _move_results(args.results_dir)
-
-
-def _copy_run_description(args):
-    log.info('Copying run description file...')
-    abs_results_dir = os.path.abspath(args.results_dir)
-    if os.path.samefile(os.getcwd(), abs_results_dir):
-        # Results are being gathered in-place so replace run description
-        # file symlink with a copy of the file
-        tmpfile_obj, tmpfile = tempfile.mkstemp(dir='.')
-        shutil.copy2(args.desc_file.name, tmpfile)
-        os.remove(args.desc_file.name)
-        shutil.copy2(tmpfile, args.desc_file.name)
-        os.remove(tmpfile)
-        return
-    shutil.copy2(args.desc_file.name, abs_results_dir)
 
 
 def _delete_symlinks():
