@@ -134,6 +134,13 @@ def _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir):
 
 def _make_grid_links(run_desc, run_dir, starting_dir):
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
+    if not os.path.exists(nemo_forcing_dir):
+        log.error(
+            'Error: {} not found; cannot create symlinks - '
+            'please check the forcing path in your run description file'
+            .format(nemo_forcing_dir)
+        )
+        sys.exit(2)
     grid_dir = os.path.join(nemo_forcing_dir, 'grid')
     grid_files = (
         (run_desc['grid']['coordinates'], 'coordinates.nc'),
@@ -141,12 +148,27 @@ def _make_grid_links(run_desc, run_dir, starting_dir):
     )
     os.chdir(run_dir)
     for source, link_name in grid_files:
-        os.symlink(os.path.join(grid_dir, source), link_name)
+        link_path = os.path.join(grid_dir, source)
+        if not os.path.exists(link_path):
+            log.error(
+                'Error: {} not found; cannot create symlink - '
+                'please check the forcing path and grid file names '
+                'in your run description file'
+                .format(link_path))
+            sys.exit(2)
+        os.symlink(link_path, link_name)
     os.chdir(starting_dir)
 
 
 def _make_forcing_links(run_desc, run_dir, starting_dir):
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
+    if not os.path.exists(nemo_forcing_dir):
+        log.error(
+            'Error: {} not found; cannot create symlinks - '
+            'please check the forcing path in your run description file'
+            .format(nemo_forcing_dir)
+        )
+        sys.exit(2)
     init_conditions = run_desc['forcing']['initial conditions']
     if 'restart' in init_conditions:
         ic_source = os.path.abspath(init_conditions)
@@ -160,9 +182,24 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
         (run_desc['forcing']['rivers'], 'rivers')
     )
     os.chdir(run_dir)
+    if not os.path.exists(ic_source):
+        log.error(
+            'Error: {} not found; cannot create symlink - '
+            'please check the forcing path and initial conditions file names '
+            'in your run description file'
+            .format(ic_source))
+        sys.exit(2)
     os.symlink(ic_source, ic_link_name)
     for source, link_name in forcing_dirs:
-        os.symlink(os.path.join(nemo_forcing_dir, source), link_name)
+        link_path = os.path.join(nemo_forcing_dir, source)
+        if not os.path.exists(link_path):
+            log.error(
+                'Error: {} not found; cannot create symlink - '
+                'please check the forcing paths and file names '
+                'in your run description file'
+                .format(link_path))
+            sys.exit(2)
+        os.symlink(link_path, link_name)
     with open('NEMO-forcing_rev.txt', 'wt') as f:
         f.writelines(hg.parents(nemo_forcing_dir, verbose=True))
     os.chdir(starting_dir)
