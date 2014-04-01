@@ -31,21 +31,20 @@ from . import (
     gather_processor,
     get_cgrf_processor,
     prepare_processor,
-    utils,
 )
 
 
 __all__ = ['main']
 
 
-log = logging.getLogger('cli')
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
-log.addHandler(utils.make_stderr_logger())
 
 
 def main():
     """Entry point to start the command processor.
     """
+    _config_logging()
     cmd_processor = _build_parser()
     if len(sys.argv) == 1:
         cmd_processor.print_help()
@@ -58,6 +57,27 @@ def main():
             .format(e))
         sys.exit(2)
     args.func(args)
+
+
+def _config_logging():
+    root_logger = logging.getLogger()
+    # Error log
+    stderr = logging.StreamHandler(sys.stderr)
+    formatter = logging.Formatter('[%(name)s] %(levelname)s: %(message)s')
+    stderr.setLevel(logging.WARNING)
+    stderr.setFormatter(formatter)
+    root_logger.addHandler(stderr)
+
+    # Console log
+    class InfoFilter(object):
+        def filter(self, record):
+            return 1 if record.levelno <= logging.INFO else 0
+    console = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(message)s')
+    console.setLevel(logging.INFO)
+    console.setFormatter(formatter)
+    console.addFilter(InfoFilter())
+    root_logger.addHandler(console)
 
 
 def _build_parser():

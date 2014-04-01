@@ -27,16 +27,13 @@ import sys
 import uuid
 
 import salishsea_tools.hg_commands as hg
-from . import utils
 
 
 __all__ = ['main']
 
 
-log = logging.getLogger('prepare')
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
-log.addHandler(utils.make_stdout_logger())
-log.addHandler(utils.make_stderr_logger())
 
 
 def main(run_desc, args):
@@ -76,13 +73,13 @@ def _check_nemo_exec(run_desc, args):
     nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
     if not os.path.exists(nemo_exec):
         log.error(
-            'Error: {} not found - did you forget to build it?'
+            '{} not found - did you forget to build it?'
             .format(nemo_exec))
         sys.exit(2)
     iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
     if not os.path.exists(iom_server_exec) and not args.quiet:
         log.warn(
-            'Warning: {} not found - are you running without key_iomput?'
+            '{} not found - are you running without key_iomput?'
             .format(iom_server_exec)
         )
     return nemo_code_repo, nemo_bin_dir
@@ -136,7 +133,7 @@ def _make_grid_links(run_desc, run_dir, starting_dir):
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     if not os.path.exists(nemo_forcing_dir):
         log.error(
-            'Error: {} not found; cannot create symlinks - '
+            '{} not found; cannot create symlinks - '
             'please check the forcing path in your run description file'
             .format(nemo_forcing_dir)
         )
@@ -151,7 +148,7 @@ def _make_grid_links(run_desc, run_dir, starting_dir):
         link_path = os.path.join(grid_dir, source)
         if not os.path.exists(link_path):
             log.error(
-                'Error: {} not found; cannot create symlink - '
+                '{} not found; cannot create symlink - '
                 'please check the forcing path and grid file names '
                 'in your run description file'
                 .format(link_path))
@@ -164,7 +161,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     if not os.path.exists(nemo_forcing_dir):
         log.error(
-            'Error: {} not found; cannot create symlinks - '
+            '{} not found; cannot create symlinks - '
             'please check the forcing path in your run description file'
             .format(nemo_forcing_dir)
         )
@@ -184,7 +181,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
     os.chdir(run_dir)
     if not os.path.exists(ic_source):
         log.error(
-            'Error: {} not found; cannot create symlink - '
+            '{} not found; cannot create symlink - '
             'please check the forcing path and initial conditions file names '
             'in your run description file'
             .format(ic_source))
@@ -194,7 +191,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
         link_path = os.path.join(nemo_forcing_dir, source)
         if not os.path.exists(link_path):
             log.error(
-                'Error: {} not found; cannot create symlink - '
+                '{} not found; cannot create symlink - '
                 'please check the forcing paths and file names '
                 'in your run description file'
                 .format(link_path))

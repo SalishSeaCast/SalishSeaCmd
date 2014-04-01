@@ -23,17 +23,14 @@ import logging
 import os
 from . import (
     api,
-    utils,
 )
 
 
 __all__ = ['main']
 
 
-log = logging.getLogger('gather')
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
-log.addHandler(utils.make_stdout_logger())
-log.addHandler(utils.make_stderr_logger())
 
 
 def main(run_desc, args):
