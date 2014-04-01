@@ -78,7 +78,7 @@ def test_make_grid_links_no_forcing_dir(m_log):
     with pytest.raises(SystemExit), p_exists, p_abspath:
         prepare_processor._make_grid_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
-        'Error: foo not found; cannot create symlinks - '
+        'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
 
 
@@ -103,7 +103,7 @@ def test_make_grid_links_no_link_path(m_log):
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
         prepare_processor._make_grid_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
-        'Error: foo/grid/coordinates.nc not found; cannot create symlink - '
+        'foo/grid/coordinates.nc not found; cannot create symlink - '
         'please check the forcing path and grid file names '
         'in your run description file')
 
@@ -123,7 +123,7 @@ def test_make_forcing_links_no_forcing_dir(m_log):
     with pytest.raises(SystemExit), p_exists, p_abspath:
         prepare_processor._make_forcing_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
-        'Error: foo not found; cannot create symlinks - '
+        'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
 
 
@@ -157,7 +157,7 @@ def test_make_forcing_links_no_restart_path(m_log, link_path, expected):
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
         prepare_processor._make_forcing_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
-        'Error: {} not found; cannot create symlink - '
+        '{} not found; cannot create symlink - '
         'please check the forcing path and initial conditions file names '
         'in your run description file'.format(expected))
 
@@ -186,6 +186,6 @@ def test_make_forcing_links_no_forcing_path(m_log):
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir, p_symlink:
         prepare_processor._make_forcing_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
-        'Error: foo/bar not found; cannot create symlink - '
+        'foo/bar not found; cannot create symlink - '
         'please check the forcing paths and file names '
         'in your run description file')

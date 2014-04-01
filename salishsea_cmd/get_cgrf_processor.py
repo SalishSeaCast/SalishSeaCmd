@@ -29,7 +29,6 @@ import tempfile
 import arrow
 import netCDF4 as nc
 import numpy as np
-from . import utils
 from salishsea_tools import nc_tools
 
 
@@ -44,10 +43,8 @@ PERM664 = (
 PERM775 = PERM664 | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
 
 
-log = logging.getLogger('get_cgrf')
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
-log.addHandler(utils.make_stdout_logger())
-log.addHandler(utils.make_stderr_logger())
 
 
 RSYNC_MIRROR_DIR = os.path.abspath('rsync-mirror')

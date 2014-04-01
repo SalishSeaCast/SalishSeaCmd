@@ -26,16 +26,13 @@ import logging
 import os
 import subprocess
 import sys
-from . import utils
 
 
 __all__ = ['main']
 
 
-log = logging.getLogger('combine')
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
-log.addHandler(utils.make_stdout_logger())
-log.addHandler(utils.make_stderr_logger())
 
 
 def main(run_desc, args):
@@ -70,7 +67,7 @@ def _find_rebuild_nemo_script():
         'NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo.exe')
     if not os.path.lexists(rebuild_nemo_exec):
         log.error(
-            'Error: {} not found - did you forget to build it?'
+            '{} not found - did you forget to build it?'
             .format(rebuild_nemo_exec))
         sys.exit(2)
     rebuild_nemo_script = os.path.splitext(rebuild_nemo_exec)[0]
@@ -86,7 +83,7 @@ def _get_results_files(args):
     name_roots = [fn[:-8] for fn in glob.glob(result_pattern)]
     if not name_roots:
         log.error(
-            'Error: no files found that match the {} pattern'
+            'no files found that match the {} pattern'
             .format(result_pattern))
         sys.exit(2)
     ncores = len(glob.glob(name_roots[0] + '_[0-9][0-9][0-9][0-9].nc'))
