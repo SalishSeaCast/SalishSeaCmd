@@ -41,7 +41,7 @@ def main(run_desc, args):
 
     A UUID named directory is created and symbolic links are created
     in the directory to the files and directories specifed to run NEMO.
-    The output of :command:`hg heads .` is recorded in the directory
+    The output of :command:`hg parents` is recorded in the directory
     for the NEMO-code and NEMO-forcing repos that the symlinks point to.
     The path to the run directory is logged to the console on completion
     of the set-up.
@@ -92,14 +92,25 @@ def _make_run_dir(run_desc):
     return run_dir
 
 
+def _remove_run_dir(run_dir):
+    for fn in os.listdir(run_dir):
+        os.remove(os.path.join(run_dir, fn))
+    os.rmdir(run_dir)
+
+
 def _make_namelist(args, run_desc, run_dir):
     run_set_dir = os.path.dirname(os.path.abspath(args.desc_file.name))
     namelists = run_desc['namelists']
     with open(os.path.join(run_dir, 'namelist'), 'wt') as namelist:
         for nl in namelists:
-            with open(os.path.join(run_set_dir, nl), 'rt') as f:
-                namelist.writelines(f.readlines())
-                namelist.write('\n\n')
+            try:
+                with open(os.path.join(run_set_dir, nl), 'rt') as f:
+                    namelist.writelines(f.readlines())
+                    namelist.write('\n\n')
+            except IOError as e:
+                log.error(e)
+                _remove_run_dir(run_dir)
+                sys.exit(2)
         namelist.writelines(EMPTY_NAMELISTS)
 
 
@@ -137,6 +148,7 @@ def _make_grid_links(run_desc, run_dir, starting_dir):
             'please check the forcing path in your run description file'
             .format(nemo_forcing_dir)
         )
+        _remove_run_dir(run_dir)
         sys.exit(2)
     grid_dir = os.path.join(nemo_forcing_dir, 'grid')
     grid_files = (
@@ -152,6 +164,7 @@ def _make_grid_links(run_desc, run_dir, starting_dir):
                 'please check the forcing path and grid file names '
                 'in your run description file'
                 .format(link_path))
+            _remove_run_dir(run_dir)
             sys.exit(2)
         os.symlink(link_path, link_name)
     os.chdir(starting_dir)
@@ -165,6 +178,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
             'please check the forcing path in your run description file'
             .format(nemo_forcing_dir)
         )
+        _remove_run_dir(run_dir)
         sys.exit(2)
     init_conditions = run_desc['forcing']['initial conditions']
     if 'restart' in init_conditions:
@@ -185,6 +199,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
             'please check the forcing path and initial conditions file names '
             'in your run description file'
             .format(ic_source))
+        _remove_run_dir(run_dir)
         sys.exit(2)
     os.symlink(ic_source, ic_link_name)
     for source, link_name in forcing_dirs:
@@ -195,6 +210,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
                 'please check the forcing paths and file names '
                 'in your run description file'
                 .format(link_path))
+            _remove_run_dir(run_dir)
             sys.exit(2)
         os.symlink(link_path, link_name)
     with open('NEMO-forcing_rev.txt', 'wt') as f:

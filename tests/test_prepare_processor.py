@@ -70,6 +70,7 @@ def test_make_grid_links_no_forcing_dir(m_log):
             'forcing': 'foo',
         },
     }
+    prepare_processor._remove_run_dir = Mock()
     p_exists = patch(
         'salishsea_cmd.prepare_processor.os.path.exists', return_value=False)
     p_abspath = patch(
@@ -80,6 +81,7 @@ def test_make_grid_links_no_forcing_dir(m_log):
     m_log.error.assert_called_once_with(
         'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
+    prepare_processor._remove_run_dir.assert_called_once()
 
 
 @patch('salishsea_cmd.prepare_processor.log')
@@ -93,6 +95,7 @@ def test_make_grid_links_no_link_path(m_log):
             'bathymetry': 'bathy.nc',
         },
     }
+    prepare_processor._remove_run_dir = Mock()
     p_exists = patch(
         'salishsea_cmd.prepare_processor.os.path.exists',
         side_effect=[True, False])
@@ -106,6 +109,7 @@ def test_make_grid_links_no_link_path(m_log):
         'foo/grid/coordinates.nc not found; cannot create symlink - '
         'please check the forcing path and grid file names '
         'in your run description file')
+    prepare_processor._remove_run_dir.assert_called_once()
 
 
 @patch('salishsea_cmd.prepare_processor.log')
@@ -115,6 +119,7 @@ def test_make_forcing_links_no_forcing_dir(m_log):
             'forcing': 'foo',
         },
     }
+    prepare_processor._remove_run_dir = Mock()
     p_exists = patch(
         'salishsea_cmd.prepare_processor.os.path.exists', return_value=False)
     p_abspath = patch(
@@ -125,6 +130,7 @@ def test_make_forcing_links_no_forcing_dir(m_log):
     m_log.error.assert_called_once_with(
         'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
+    prepare_processor._remove_run_dir.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -147,6 +153,7 @@ def test_make_forcing_links_no_restart_path(m_log, link_path, expected):
             'rivers': 'rivers/',
         },
     }
+    prepare_processor._remove_run_dir = Mock()
     p_exists = patch(
         'salishsea_cmd.prepare_processor.os.path.exists',
         side_effect=[True, False])
@@ -160,6 +167,7 @@ def test_make_forcing_links_no_restart_path(m_log, link_path, expected):
         '{} not found; cannot create symlink - '
         'please check the forcing path and initial conditions file names '
         'in your run description file'.format(expected))
+    prepare_processor._remove_run_dir.assert_called_once()
 
 
 @patch('salishsea_cmd.prepare_processor.log')
@@ -175,6 +183,7 @@ def test_make_forcing_links_no_forcing_path(m_log):
             'rivers': 'rivers/',
         },
     }
+    prepare_processor._remove_run_dir = Mock()
     p_exists = patch(
         'salishsea_cmd.prepare_processor.os.path.exists',
         side_effect=[True, True, False])
@@ -189,3 +198,4 @@ def test_make_forcing_links_no_forcing_path(m_log):
         'foo/bar not found; cannot create symlink - '
         'please check the forcing paths and file names '
         'in your run description file')
+    prepare_processor._remove_run_dir.assert_called_once()
