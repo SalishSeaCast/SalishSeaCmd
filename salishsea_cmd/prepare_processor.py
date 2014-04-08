@@ -20,13 +20,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from __future__ import absolute_import
+
 import logging
 import os
 import shutil
 import sys
 import uuid
 
+import arrow
+
 import salishsea_tools.hg_commands as hg
+from salishsea_tools.namelist import namelist2dict
 
 
 __all__ = ['main']
@@ -60,6 +64,7 @@ def main(run_desc, args):
     _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir)
     _make_grid_links(run_desc, run_dir, starting_dir)
     _make_forcing_links(run_desc, run_dir, starting_dir)
+    _check_atmos_files(run_desc, run_dir)
     if not args.quiet:
         log.info('Created run directory {}'.format(run_dir))
     return run_dir
@@ -216,6 +221,73 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
     with open('NEMO-forcing_rev.txt', 'wt') as f:
         f.writelines(hg.parents(nemo_forcing_dir, verbose=True))
     os.chdir(starting_dir)
+
+
+def _check_atmos_files(run_desc, run_dir):
+    namelist = namelist2dict(os.path.join(run_dir, 'namelist'))
+    if not namelist['namsbc'][0]['ln_blk_core']:
+        return
+    date0 = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
+    it000 = namelist['namrun'][0]['nn_it000']
+    itend = namelist['namrun'][0]['nn_itend']
+    dt = namelist['namdom'][0]['rn_rdt']
+    start_date = date0.replace(seconds=it000 * dt - 1)
+    end_date = date0.replace(seconds=itend * dt - 1)
+    qtys = (
+        'sn_wndi sn_wndj sn_qsr sn_qlw sn_tair sn_humi sn_prec sn_snow'
+        .split())
+    core_dir = namelist['namsbc_core'][0]['cn_dir']
+    file_info = {
+        'core': {
+            'dir': core_dir,
+            'params': [],
+        },
+    }
+    for qty in qtys:
+        flread_params = namelist['namsbc_core'][0][qty]
+        file_info['core']['params'].append(
+            (flread_params[0], flread_params[5]))
+    if namelist['namsbc'][0]['ln_apr_dyn']:
+        apr_dir = namelist['namsbc_apr'][0]['cn_dir']
+        file_info['apr'] = {
+            'dir': apr_dir,
+            'params': [],
+        }
+        flread_params = namelist['namsbc_apr'][0]['sn_apr']
+        file_info['apr']['params'].append((flread_params[0], flread_params[5]))
+    startm1 = start_date.replace(days=-1)
+    for r in arrow.Arrow.range('day', startm1, end_date):
+        for v in file_info.values():
+            for basename, period in v['params']:
+                if period == 'daily':
+                    file_path = os.path.join(
+                        v['dir'],
+                        '{basename}_y{date.year}m{date.month}d{date.day}.nc'
+                        .format(basename=basename, date=r))
+                elif period == 'yearly':
+                    file_path = os.path.join(
+                        v['dir'], '{basename}.nc'.format(basename=basename))
+                if not os.path.exists(os.path.join(run_dir, file_path)):
+                    nemo_forcing_dir = os.path.abspath(
+                        run_desc['paths']['forcing'])
+                    atmos_dir = run_desc['forcing']['atmospheric']
+                    log.error(
+                        '{file_path} not found; '
+                        'please confirm that CGRF files for {startm1} through '
+                        '{end} are in the {dir} collection, '
+                        'and that atmospheric forcing paths in your '
+                        'run description and surface boundary conditions '
+                        'namelist are in agreement.'
+                        .format(
+                            file_path=file_path,
+                            startm1=startm1.format('YYYY-MM-DD'),
+                            end=end_date.format('YYYY-MM-DD'),
+                            dir=os.path.join(nemo_forcing_dir, atmos_dir),
+                        )
+                    )
+                    _remove_run_dir(run_dir)
+                    sys.exit(2)
+
 
 # All of the namelists that NEMO requires, but empty so that they result
 # in the defaults defined in the NEMO code being used.
