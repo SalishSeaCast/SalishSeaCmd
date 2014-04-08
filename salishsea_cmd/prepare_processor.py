@@ -262,7 +262,7 @@ def _check_atmos_files(run_desc, run_dir):
                 if period == 'daily':
                     file_path = os.path.join(
                         v['dir'],
-                        '{basename}_y{date.year}m{date.month}d{date.day}.nc'
+                        '{basename}_y{date.year}m{date.month:02d}d{date.day:02d}.nc'
                         .format(basename=basename, date=r))
                 elif period == 'yearly':
                     file_path = os.path.join(
