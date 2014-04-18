@@ -1,5 +1,4 @@
-"""Salish Sea NEMO command processor
-
+"""SalishSeaCmd -- Salish Sea NEMO command processor
 
 Copyright 2013-2014 The Salish Sea MEOPAR Contributors
 and The University of British Columbia
@@ -16,6 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-number = '0.9.0'
-release = '.dev'
-dev_status = '4 - Beta'
+PROJECT = 'SalishSeaCmd'
+DESCRIPTION = 'Salish Sea NEMO Command Processor'
+VERSION = '0.9.0'
+DEV_STATUS = '5 - Production'
