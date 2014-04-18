@@ -44,6 +44,7 @@ with open('CHANGELOG.rst', 'rt') as f:
 install_requires = [
     # see requirements.txt for versions most recently used in development
     'arrow',
+    'cliff',
     'PyYAML',
     # 'SalishSeaTools',
 ]
