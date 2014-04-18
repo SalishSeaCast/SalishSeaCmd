@@ -98,6 +98,8 @@ def _make_run_dir(run_desc):
 
 
 def _remove_run_dir(run_dir):
+    if not os.path.exists(run_dir):
+        return
     for fn in os.listdir(run_dir):
         os.remove(os.path.join(run_dir, fn))
     os.rmdir(run_dir)
