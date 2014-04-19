@@ -73,6 +73,7 @@ setup(
         ],
         # Sub-command plug-ins:
         'salishsea.app': [
+            'prepare = salishsea_cmd.prepare:Prepare',
         ],
     },
 )

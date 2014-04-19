@@ -32,6 +32,8 @@ __all__ = ['main', 'SalishSeaApp']
 
 
 class SalishSeaApp(cliff.app.App):
+    CONSOLE_MESSAGE_FORMAT = '%(levelname)s: %(message)s'
+
     def __init__(self):
         super(SalishSeaApp, self).__init__(
             description=__pkg_metadata__.DESCRIPTION,

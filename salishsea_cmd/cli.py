@@ -30,7 +30,6 @@ from . import (
     combine_processor,
     gather_processor,
     get_cgrf_processor,
-    prepare_processor,
 )
 
 
@@ -90,7 +89,6 @@ def _build_parser():
     _add_combine_subparser(subparsers)
     _add_gather_subparser(subparsers)
     _add_get_cgrf_subparser(subparsers)
-    _add_prepare_subparser(subparsers)
     return parser
 
 
@@ -224,33 +222,3 @@ def _date_string(string):
 
 def _do_get_cgrf(args):
     get_cgrf_processor.main(args)
-
-
-def _add_prepare_subparser(subparsers):
-    """Add a sub-parser for the `salishsea prepare` command.
-    """
-    parser = subparsers.add_parser(
-        'prepare', help='Prepare a Salish Sea NEMO run',
-        description='''
-            Set up the Salish Sea NEMO run described in DESC_FILE
-            and print the path to the run directory.
-        ''')
-    parser.add_argument(
-        'desc_file', metavar='DESC_FILE', type=open,
-        help='run description YAML file')
-    parser.add_argument(
-        'iodefs', metavar='IO_DEFS',
-        help='NEMO IOM server defs file for run')
-    parser.add_argument(
-        '-q', '--quiet', action='store_true',
-        help="don't show the run directory path on completion")
-    _add_version_arg(parser)
-    parser.set_defaults(func=_do_prepare)
-
-
-def _do_prepare(args):
-    """Execute the `salishsea prepare` command with the specified arguments
-    and options.
-    """
-    run_desc = _load_run_desc(args.desc_file)
-    prepare_processor.main(run_desc, args)

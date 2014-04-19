@@ -1,20 +1,19 @@
-"""Salish Sea NEMO results prepare sub-command processor unit tests
+# Copyright 2013-2014 The Salish Sea MEOPAR Contributors
+# and The University of British Columbia
 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 
-Copyright 2013-2014 The Salish Sea MEOPAR Contributors
-and The University of British Columbia
+#    http://www.apache.org/licenses/LICENSE-2.0
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+"""SalishSeaCmd prepare sub-command plug-in unit tests
 """
 from __future__ import absolute_import
 import os
@@ -26,65 +25,65 @@ from mock import (
 )
 import pytest
 
-from salishsea_cmd import prepare_processor
+from salishsea_cmd import prepare
 
 
-@patch('salishsea_cmd.prepare_processor.shutil.copy2')
-def test_copy_run_set_files_no_path(mock_copy):
+@patch('salishsea_cmd.prepare.shutil.copy2')
+def test_copy_run_set_files_no_path(m_copy):
     """_copy_run_set_files creates correct symlink for source w/o path
     """
     args = Mock(iodefs='iodef.xml')
     args.desc_file.name = 'foo'
-    with patch('salishsea_cmd.prepare_processor.os.chdir'):
-        prepare_processor._copy_run_set_files(args, 'bar', 'baz')
+    with patch('salishsea_cmd.prepare.os.chdir'):
+        prepare._copy_run_set_files(args, 'bar', 'baz')
     pwd = os.getcwd()
     expected = [
         call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
         call(os.path.join(pwd, 'foo'), 'foo'),
         call(os.path.join(pwd, 'xmlio_server.def'), 'xmlio_server.def'),
     ]
-    assert mock_copy.call_args_list == expected
+    assert m_copy.call_args_list == expected
 
 
-@patch('salishsea_cmd.prepare_processor.shutil.copy2')
-def test_copy_run_set_files_relative_path(mock_copy):
+@patch('salishsea_cmd.prepare.shutil.copy2')
+def test_copy_run_set_files_relative_path(m_copy):
     """_copy_run_set_files creates correct symlink for relative path source
     """
     args = Mock(iodefs='../iodef.xml')
     args.desc_file.name = 'foo'
-    with patch('salishsea_cmd.prepare_processor.os.chdir'):
-        prepare_processor._copy_run_set_files(args, 'bar', 'baz')
+    with patch('salishsea_cmd.prepare.os.chdir'):
+        prepare._copy_run_set_files(args, 'bar', 'baz')
     pwd = os.getcwd()
     expected = [
         call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
         call(os.path.join(pwd, 'foo'), 'foo'),
         call(os.path.join(pwd, 'xmlio_server.def'), 'xmlio_server.def'),
     ]
-    assert mock_copy.call_args_list == expected
+    assert m_copy.call_args_list == expected
 
 
-@patch('salishsea_cmd.prepare_processor.log')
+@patch('salishsea_cmd.prepare.log')
 def test_make_grid_links_no_forcing_dir(m_log):
     run_desc = {
         'paths': {
             'forcing': 'foo',
         },
     }
-    prepare_processor._remove_run_dir = Mock()
+    prepare._remove_run_dir = Mock()
     p_exists = patch(
-        'salishsea_cmd.prepare_processor.os.path.exists', return_value=False)
+        'salishsea_cmd.prepare.os.path.exists', return_value=False)
     p_abspath = patch(
-        'salishsea_cmd.prepare_processor.os.path.abspath',
+        'salishsea_cmd.prepare.os.path.abspath',
         side_effect=lambda path: path)
     with pytest.raises(SystemExit), p_exists, p_abspath:
-        prepare_processor._make_grid_links(run_desc, '', '')
+        prepare._make_grid_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
         'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
-    prepare_processor._remove_run_dir.assert_called_once()
+    prepare._remove_run_dir.assert_called_once()
 
 
-@patch('salishsea_cmd.prepare_processor.log')
+@patch('salishsea_cmd.prepare.log')
 def test_make_grid_links_no_link_path(m_log):
     run_desc = {
         'paths': {
@@ -95,42 +94,42 @@ def test_make_grid_links_no_link_path(m_log):
             'bathymetry': 'bathy.nc',
         },
     }
-    prepare_processor._remove_run_dir = Mock()
+    prepare._remove_run_dir = Mock()
     p_exists = patch(
-        'salishsea_cmd.prepare_processor.os.path.exists',
+        'salishsea_cmd.prepare.os.path.exists',
         side_effect=[True, False])
     p_abspath = patch(
-        'salishsea_cmd.prepare_processor.os.path.abspath',
+        'salishsea_cmd.prepare.os.path.abspath',
         side_effect=lambda path: path)
-    p_chdir = patch('salishsea_cmd.prepare_processor.os.chdir')
+    p_chdir = patch('salishsea_cmd.prepare.os.chdir')
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-        prepare_processor._make_grid_links(run_desc, '', '')
+        prepare._make_grid_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
         'foo/grid/coordinates.nc not found; cannot create symlink - '
         'please check the forcing path and grid file names '
         'in your run description file')
-    prepare_processor._remove_run_dir.assert_called_once()
+    prepare._remove_run_dir.assert_called_once()
 
 
-@patch('salishsea_cmd.prepare_processor.log')
+@patch('salishsea_cmd.prepare.log')
 def test_make_forcing_links_no_forcing_dir(m_log):
     run_desc = {
         'paths': {
             'forcing': 'foo',
         },
     }
-    prepare_processor._remove_run_dir = Mock()
+    prepare._remove_run_dir = Mock()
     p_exists = patch(
-        'salishsea_cmd.prepare_processor.os.path.exists', return_value=False)
+        'salishsea_cmd.prepare.os.path.exists', return_value=False)
     p_abspath = patch(
-        'salishsea_cmd.prepare_processor.os.path.abspath',
+        'salishsea_cmd.prepare.os.path.abspath',
         side_effect=lambda path: path)
     with pytest.raises(SystemExit), p_exists, p_abspath:
-        prepare_processor._make_forcing_links(run_desc, '', '')
+        prepare._make_forcing_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
         'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
-    prepare_processor._remove_run_dir.assert_called_once()
+    prepare._remove_run_dir.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -140,7 +139,7 @@ def test_make_forcing_links_no_forcing_dir(m_log):
         ('initial_strat/', 'foo/initial_strat/'),
     ],
 )
-@patch('salishsea_cmd.prepare_processor.log')
+@patch('salishsea_cmd.prepare.log')
 def test_make_forcing_links_no_restart_path(m_log, link_path, expected):
     run_desc = {
         'paths': {
@@ -153,24 +152,24 @@ def test_make_forcing_links_no_restart_path(m_log, link_path, expected):
             'rivers': 'rivers/',
         },
     }
-    prepare_processor._remove_run_dir = Mock()
+    prepare._remove_run_dir = Mock()
     p_exists = patch(
-        'salishsea_cmd.prepare_processor.os.path.exists',
+        'salishsea_cmd.prepare.os.path.exists',
         side_effect=[True, False])
     p_abspath = patch(
-        'salishsea_cmd.prepare_processor.os.path.abspath',
+        'salishsea_cmd.prepare.os.path.abspath',
         side_effect=lambda path: path)
-    p_chdir = patch('salishsea_cmd.prepare_processor.os.chdir')
+    p_chdir = patch('salishsea_cmd.prepare.os.chdir')
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-        prepare_processor._make_forcing_links(run_desc, '', '')
+        prepare._make_forcing_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
         '{} not found; cannot create symlink - '
         'please check the forcing path and initial conditions file names '
         'in your run description file'.format(expected))
-    prepare_processor._remove_run_dir.assert_called_once()
+    prepare._remove_run_dir.assert_called_once()
 
 
-@patch('salishsea_cmd.prepare_processor.log')
+@patch('salishsea_cmd.prepare.log')
 def test_make_forcing_links_no_forcing_path(m_log):
     run_desc = {
         'paths': {
@@ -183,19 +182,19 @@ def test_make_forcing_links_no_forcing_path(m_log):
             'rivers': 'rivers/',
         },
     }
-    prepare_processor._remove_run_dir = Mock()
+    prepare._remove_run_dir = Mock()
     p_exists = patch(
-        'salishsea_cmd.prepare_processor.os.path.exists',
+        'salishsea_cmd.prepare.os.path.exists',
         side_effect=[True, True, False])
     p_abspath = patch(
-        'salishsea_cmd.prepare_processor.os.path.abspath',
+        'salishsea_cmd.prepare.os.path.abspath',
         side_effect=lambda path: path)
-    p_chdir = patch('salishsea_cmd.prepare_processor.os.chdir')
-    p_symlink = patch('salishsea_cmd.prepare_processor.os.symlink')
+    p_chdir = patch('salishsea_cmd.prepare.os.chdir')
+    p_symlink = patch('salishsea_cmd.prepare.os.symlink')
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir, p_symlink:
-        prepare_processor._make_forcing_links(run_desc, '', '')
+        prepare._make_forcing_links(run_desc, '', '')
     m_log.error.assert_called_once_with(
         'foo/bar not found; cannot create symlink - '
         'please check the forcing paths and file names '
         'in your run description file')
-    prepare_processor._remove_run_dir.assert_called_once()
+    prepare._remove_run_dir.assert_called_once()
