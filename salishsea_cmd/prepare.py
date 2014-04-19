@@ -1,23 +1,22 @@
-"""Salish Sea NEMO run prepare sub-command processor
+# Copyright 2013-2014 The Salish Sea MEOPAR Contributors
+# and The University of British Columbia
 
-Sets up the necesaary symbolic links for a Salish Sea NEMO run in a specified
-directory and changes the pwd to that directory.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 
+#    http://www.apache.org/licenses/LICENSE-2.0
 
-Copyright 2013-2014 The Salish Sea MEOPAR Contributors
-and The University of British Columbia
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""SalishSeaCmd command plug-in for prepare sub-command.
 
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Sets up the necesaary symbolic links for a Salish Sea NEMO run
+in a specified directory and changes the pwd to that directory.
 """
 from __future__ import absolute_import
 
@@ -28,46 +27,64 @@ import sys
 import uuid
 
 import arrow
+import cliff.command
 
+from . import lib
 import salishsea_tools.hg_commands as hg
 from salishsea_tools.namelist import namelist2dict
 
 
-__all__ = ['main']
+__all__ = ['Prepare']
 
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
 
 
-def main(run_desc, args):
-    """Set up for the Salish Sea NEMO run described in run_desc.
-
-    A UUID named directory is created and symbolic links are created
-    in the directory to the files and directories specifed to run NEMO.
-    The output of :command:`hg parents` is recorded in the directory
-    for the NEMO-code and NEMO-forcing repos that the symlinks point to.
-    The path to the run directory is logged to the console on completion
-    of the set-up.
-
-    :arg run_desc: Run description data structure.
-    :type run_desc: dict
-
-    :arg args: Command line arguments and option values
-    :type args: :class:`argparse.Namespace`
+class Prepare(cliff.command.Command):
+    """Prepare a Salish Sea NEMO run
     """
-    nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, args)
-    starting_dir = os.getcwd()
-    run_dir = _make_run_dir(run_desc)
-    _make_namelist(args, run_desc, run_dir)
-    _copy_run_set_files(args, run_dir, starting_dir)
-    _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir)
-    _make_grid_links(run_desc, run_dir, starting_dir)
-    _make_forcing_links(run_desc, run_dir, starting_dir)
-    _check_atmos_files(run_desc, run_dir)
-    if not args.quiet:
-        log.info('Created run directory {}'.format(run_dir))
-    return run_dir
+
+    def get_parser(self, prog_name):
+        parser = super(Prepare, self).get_parser(prog_name)
+        parser.description = '''
+            Set up the Salish Sea NEMO run described in DESC_FILE
+            and print the path to the run directory.
+        '''
+        parser.add_argument(
+            'desc_file', metavar='DESC_FILE', type=open,
+            help='run description YAML file')
+        parser.add_argument(
+            'iodefs', metavar='IO_DEFS',
+            help='NEMO IOM server defs file for run')
+        parser.add_argument(
+            '-q', '--quiet', action='store_true',
+            help="don't show the run directory path on completion")
+        return parser
+
+    def take_action(self, parsed_args):
+        """Execute the `salishsea prepare` sub-command.
+
+        A UUID named directory is created and symbolic links are created
+        in the directory to the files and directories specifed to run NEMO.
+        The output of :command:`hg parents` is recorded in the directory
+        for the NEMO-code and NEMO-forcing repos that the symlinks point to.
+        The path to the run directory is logged to the console on completion
+        of the set-up.
+        """
+        run_desc = lib.load_run_desc(parsed_args.desc_file)
+        nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, parsed_args)
+        starting_dir = os.getcwd()
+        run_dir = _make_run_dir(run_desc)
+        _make_namelist(parsed_args, run_desc, run_dir)
+        _copy_run_set_files(parsed_args, run_dir, starting_dir)
+        _make_nemo_code_links(
+            nemo_code_repo, nemo_bin_dir, run_dir, starting_dir)
+        _make_grid_links(run_desc, run_dir, starting_dir)
+        _make_forcing_links(run_desc, run_dir, starting_dir)
+        _check_atmos_files(run_desc, run_dir)
+        if not parsed_args.quiet:
+            log.info('Created run directory {}'.format(run_dir))
+        return run_dir
 
 
 def _check_nemo_exec(run_desc, args):
@@ -264,7 +281,8 @@ def _check_atmos_files(run_desc, run_dir):
                 if period == 'daily':
                     file_path = os.path.join(
                         v['dir'],
-                        '{basename}_y{date.year}m{date.month:02d}d{date.day:02d}.nc'
+                        '{basename}_'
+                        'y{date.year}m{date.month:02d}d{date.day:02d}.nc'
                         .format(basename=basename, date=r))
                 elif period == 'yearly':
                     file_path = os.path.join(
