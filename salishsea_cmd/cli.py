@@ -28,7 +28,6 @@ import yaml
 from . import (
     __version__,
     combine_processor,
-    gather_processor,
     get_cgrf_processor,
 )
 
@@ -87,7 +86,6 @@ def _build_parser():
     _add_version_arg(parser)
     subparsers = parser.add_subparsers(title='sub-commands')
     _add_combine_subparser(subparsers)
-    _add_gather_subparser(subparsers)
     _add_get_cgrf_subparser(subparsers)
     return parser
 
@@ -150,36 +148,6 @@ def _do_combine(args):
 
 def _load_run_desc(desc_file):
     return yaml.load(desc_file)
-
-
-def _add_gather_subparser(subparsers):
-    """Add a sub-parser for the `salishsea gather` command.
-    """
-    parser = subparsers.add_parser(
-        'gather',
-        help='Gather results from a Salish Sea NEMO run; '
-        'includes combining MPI results files',
-        description='''
-            Gather the results files from a Salish Sea NEMO run
-            described in DESC_FILE into files in RESULTS_DIR.
-            The gathering process includes combining
-            the per-processor results files,
-            compressing them using gzip
-            and deleting the per-processor files.
-
-            If RESULTS_DIR does not exist it will be created.
-        ''')
-    _add_common_options(parser)
-    _add_version_arg(parser)
-    parser.set_defaults(func=_do_gather)
-
-
-def _do_gather(args):
-    """Execute the `salishsea gather` command with the specified arguments
-    and options.
-    """
-    run_desc = _load_run_desc(args.desc_file)
-    gather_processor.main(run_desc, args)
 
 
 def _add_get_cgrf_subparser(subparsers):
