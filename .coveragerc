@@ -1,5 +1,8 @@
 [run]
 branch = True
+source =
+    salishsea_cmd
+    tests
 
 [report]
 show_missing = True
