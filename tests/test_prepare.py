@@ -18,6 +18,7 @@
 from __future__ import absolute_import
 import os
 
+import cliff.app
 from mock import (
     call,
     patch,
@@ -26,6 +27,17 @@ from mock import (
 import pytest
 
 from salishsea_cmd import prepare
+
+
+@pytest.fixture
+def prepare_app():
+    import salishsea_cmd.prepare
+    return salishsea_cmd.prepare.Prepare(Mock(spec=cliff.app.App), [])
+
+
+def test_get_parser(prepare_app):
+    parser = prepare_app.get_parser('salishsea prepare')
+    assert parser.prog == 'salishsea prepare'
 
 
 @patch('salishsea_cmd.prepare.shutil.copy2')
