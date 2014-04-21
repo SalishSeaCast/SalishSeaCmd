@@ -67,9 +67,8 @@ class Gather(cliff.command.Command):
         and other files that define the run are also gathered into the
         directory given by `parsed_args.results_dir`.
         """
-        run_desc = lib.load_run_desc(parsed_args.desc_file)
         api.combine(
-            run_desc, parsed_args.results_dir, parsed_args.keep_proc_results,
+            parsed_args.results_dir, parsed_args.keep_proc_results,
             parsed_args.no_compress, parsed_args.compress_restart,
             parsed_args.delete_restart)
         _delete_symlinks()

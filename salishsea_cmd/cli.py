@@ -24,10 +24,8 @@ import argparse
 import logging
 import sys
 import arrow
-import yaml
 from . import (
     __version__,
-    combine_processor,
     get_cgrf_processor,
 )
 
@@ -85,7 +83,6 @@ def _build_parser():
             help about a sub-command.''')
     _add_version_arg(parser)
     subparsers = parser.add_subparsers(title='sub-commands')
-    _add_combine_subparser(subparsers)
     _add_get_cgrf_subparser(subparsers)
     return parser
 
@@ -94,60 +91,6 @@ def _add_version_arg(parser):
     parser.add_argument(
         '--version', action='version',
         version=__version__.number + __version__.release)
-
-
-def _add_common_options(parser):
-    """Add options that are common to all sub-commands.
-    """
-    parser.add_argument(
-        'desc_file', metavar='DESC_FILE', type=open,
-        help='run description YAML file')
-    parser.add_argument(
-        'results_dir', metavar='RESULTS_DIR',
-        help='directory to store results into')
-    parser.add_argument(
-        '--keep-proc-results', action='store_true',
-        help="don't delete per-processor results files")
-    parser.add_argument(
-        '--no-compress', action='store_true',
-        help="don't compress results files")
-    parser.add_argument(
-        '--compress-restart', action='store_true',
-        help="compress restart file(s)")
-    parser.add_argument(
-        '--delete-restart', action='store_true',
-        help="delete restart file(s)")
-
-
-def _add_combine_subparser(subparsers):
-    """Add a sub-parser for the `salishsea combine` command.
-    """
-    parser = subparsers.add_parser(
-        'combine', help='Combine results from an MPI Salish Sea NEMO run',
-        description='''
-            Combine the per-processor results files from an MPI
-            Salish Sea NEMO run described in DESC_FILE
-            into files in RESULTS_DIR
-            and compress them using gzip.
-            Delete the per-processor files.
-
-            If RESULTS_DIR does not exist it will be created.
-            ''')
-    _add_common_options(parser)
-    _add_version_arg(parser)
-    parser.set_defaults(func=_do_combine)
-
-
-def _do_combine(args):
-    """Execute the `salishsea combine` command with the specified arguments
-    and options.
-    """
-    run_desc = _load_run_desc(args.desc_file)
-    combine_processor.main(run_desc, args)
-
-
-def _load_run_desc(desc_file):
-    return yaml.load(desc_file)
 
 
 def _add_get_cgrf_subparser(subparsers):

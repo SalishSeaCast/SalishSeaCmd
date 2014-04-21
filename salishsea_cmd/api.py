@@ -22,32 +22,14 @@ for use in other sub-command processor modules,
 and by other software.
 """
 from __future__ import absolute_import
-from salishsea_cmd import combine_processor
+
+import salishsea_cmd
 
 
 __all__ = ['combine']
 
 
-class Args(object):
-    """Container for sub-command arguments.
-    """
-    def __init__(
-        self,
-        results_dir,
-        keep_proc_results=False,
-        no_compress=False,
-        compress_restart=False,
-        delete_restart=False,
-    ):
-        self.results_dir = results_dir
-        self.keep_proc_results = keep_proc_results
-        self.no_compress = no_compress
-        self.compress_restart = compress_restart
-        self.delete_restart = delete_restart
-
-
 def combine(
-    run_desc,
     results_dir,
     keep_proc_results=False,
     no_compress=False,
@@ -61,9 +43,6 @@ def combine(
     at the INFO level.
     The combined results files that :program:`rebuild_nemo` produces
     are moved to the directory given by :py:obj:`results_dir`.
-
-    :arg run_desc: Run description data structure.
-    :type run_desc: dict
 
     :arg results_dir: Directory to store results into.
     :type results_dir: str
@@ -84,7 +63,14 @@ def combine(
                          defaults to :py:obj:`False`.
     :type delete_restart: Boolean
     """
-    args = Args(
-        results_dir, keep_proc_results, no_compress, compress_restart,
-        delete_restart)
-    combine_processor.main(run_desc, args)
+    app = salishsea_cmd.main.SalishSeaApp()
+    args = ['combine', results_dir]
+    args_map = {
+        'keep_proc_results': {True: '--keep-proc-results', False: ''},
+        'no_compress': {True: '--no-compress', False: ''},
+        'compress_restart': {True: '--compress-restart', False: ''},
+        'delete_restart': {True: '--delete-restart', False: ''},
+    }
+    for arg in args_map:
+        args.append(args_map[arg])
+    app.run(args)

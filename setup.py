@@ -73,8 +73,9 @@ setup(
         ],
         # Sub-command plug-ins:
         'salishsea.app': [
-            'prepare = salishsea_cmd.prepare:Prepare',
+            'combine = salishsea_cmd.combine:Combine',
             'gather = salishsea_cmd.gather:Gather',
+            'prepare = salishsea_cmd.prepare:Prepare',
         ],
     },
 )
