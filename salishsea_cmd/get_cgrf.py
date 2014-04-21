@@ -1,24 +1,26 @@
-"""Salish Sea NEMO get_cgrf sub-command processor
+# Copyright 2013-2014 The Salish Sea MEOPAR Contributors
+# and The University of British Columbia
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""SalishSeaCmd command plug-in for get_cgrf sub-command.
 
 Download CGRF products atmospheric forcing files from Dalhousie rsync
 repository and symlink with the file names that NEMO expects.
-
-Copyright 2013-2014 The Salish Sea MEOPAR Contributors
-and The University of British Columbia
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
 """
 from __future__ import absolute_import
+
+import argparse
 import datetime
 import getpass
 import logging
@@ -26,13 +28,19 @@ import os
 import stat
 import subprocess
 import tempfile
+
 import arrow
+import cliff.command
 import netCDF4 as nc
 import numpy as np
+
 from salishsea_tools import nc_tools
 
 
-__all__ = ['main']
+__all__ = ['GetCGRF']
+
+
+log = logging.getLogger(__name__)
 
 
 SERVER = 'goapp.ocean.dal.ca::canadian_GDPS_reforecasts_v1'
@@ -42,50 +50,84 @@ PERM664 = (
     stat.S_IROTH)
 PERM775 = PERM664 | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
 
-
-log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
-
-
 RSYNC_MIRROR_DIR = os.path.abspath('rsync-mirror')
 NEMO_ATMOS_DIR = os.path.abspath('NEMO-atmos')
 
 
-def main(args):
-    """Download CGRF products atmospheric forcing files from Dalhousie rsync
-    repository and symlink with the file names that NEMO expects.
-
-    :arg args: Command line arguments and option values
-    :type args: :class:`argparse.Namespace`
+class GetCGRF(cliff.command.Command):
+    """Download and symlink CGRF atmospheric forcing files
     """
-    userid = args.userid if args.userid is not None else raw_input('User id: ')
-    passwd = args.passwd if args.passwd is not None else getpass.getpass()
-    with tempfile.NamedTemporaryFile(mode='wt', delete=False) as f:
-        f.write('{}\n'.format(passwd))
-        passwd_file = f.name
-    cgrf_dir = os.getcwd()
-    try:
-        os.mkdir(RSYNC_MIRROR_DIR)
-    except OSError:
-        pass
-    start_date = args.start_date.replace(days=-1)
-    end_date = args.start_date.replace(days=args.days - 1)
-    for day in arrow.Arrow.range('day', start_date, end_date):
-        os.chdir(RSYNC_MIRROR_DIR)
-        _get_cgrf(day, userid, passwd_file)
-        os.chdir(cgrf_dir)
-    os.remove(passwd_file)
-    for day in arrow.Arrow.range('day', args.start_date, end_date):
-        _rebase_cgrf_time(day)
-    os.remove('tmp1.nc')
-    os.remove('tmp2.nc')
-    for day in arrow.Arrow.range('day', start_date, end_date):
-        rsync_dir = os.path.join(RSYNC_MIRROR_DIR, day.format('YYYY-MM-DD'))
-        log.info('Deleting {} files'.format(rsync_dir))
-        for f in os.listdir(rsync_dir):
-            os.remove(os.path.join(rsync_dir, f))
-        log.info('Deleting {} directory'.format(RSYNC_MIRROR_DIR))
-        os.removedirs(rsync_dir)
+    def get_parser(self, prog_name):
+        parser = super(GetCGRF, self).get_parser(prog_name)
+        parser.description = '''
+            Download CGRF products atmospheric forcing files from
+            Dalhousie rsync repository and symlink with the file names
+            that NEMO expects.
+        '''
+        parser.add_argument(
+            'start_date', metavar='START_DATE', type=self._date_string,
+            help='1st date to download files for')
+        parser.add_argument(
+            '-d', '--days', type=int, default=1,
+            help='Number of days to download; defaults to 1')
+        parser.add_argument(
+            '--user', dest='userid', metavar='USERID',
+            help='User id for Dalhousie CGRF rsync repository')
+        parser.add_argument(
+            '--password', dest='passwd', metavar='PASSWD',
+            help='Passowrd for Dalhousie CGRF rsync repository')
+        return parser
+
+    def take_action(self, parsed_args):
+        """Download CGRF products atmospheric forcing files from
+        Dalhousie rsync repository and symlink with the file names that
+        NEMO expects.
+        """
+        userid = (
+            parsed_args.userid if parsed_args.userid is not None
+            else raw_input('User id: '))
+        passwd = (
+            parsed_args.passwd if parsed_args.passwd is not None
+            else getpass.getpass())
+        with tempfile.NamedTemporaryFile(mode='wt', delete=False) as f:
+            f.write('{}\n'.format(passwd))
+            passwd_file = f.name
+        cgrf_dir = os.getcwd()
+        try:
+            os.mkdir(RSYNC_MIRROR_DIR)
+        except OSError:
+            pass
+        start_date = parsed_args.start_date.replace(days=-1)
+        end_date = parsed_args.start_date.replace(days=parsed_args.days - 1)
+        for day in arrow.Arrow.range('day', start_date, end_date):
+            os.chdir(RSYNC_MIRROR_DIR)
+            _get_cgrf(day, userid, passwd_file)
+            os.chdir(cgrf_dir)
+        os.remove(passwd_file)
+        for day in arrow.Arrow.range('day', parsed_args.start_date, end_date):
+            _rebase_cgrf_time(day)
+        os.remove('tmp1.nc')
+        os.remove('tmp2.nc')
+        for day in arrow.Arrow.range('day', start_date, end_date):
+            rsync_dir = os.path.join(
+                RSYNC_MIRROR_DIR, day.format('YYYY-MM-DD'))
+            log.info('Deleting {} files'.format(rsync_dir))
+            for f in os.listdir(rsync_dir):
+                os.remove(os.path.join(rsync_dir, f))
+            log.info('Deleting {} directory'.format(RSYNC_MIRROR_DIR))
+            os.removedirs(rsync_dir)
+
+    def _date_string(self, string):
+        try:
+            value = arrow.get(string)
+        except arrow.parser.ParserError:
+            raise argparse.ArgumentTypeError(
+                'Invalid start date: {}'.format(string))
+        if value < arrow.get(2002, 1, 1) or value > arrow.get(2010, 12, 31):
+            raise argparse.ArgumentTypeError(
+                'Start date out of CGRF range 2002-01-01 to 2010-12-31: {}'
+                .format(string))
+        return value
 
 
 def _get_cgrf(day, userid, passwd_file):
