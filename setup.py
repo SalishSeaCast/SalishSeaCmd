@@ -75,6 +75,7 @@ setup(
         'salishsea.app': [
             'combine = salishsea_cmd.combine:Combine',
             'gather = salishsea_cmd.gather:Gather',
+            'get_cgrf = salishsea_cmd.get_cgrf:GetCGRF',
             'prepare = salishsea_cmd.prepare:Prepare',
         ],
     },
