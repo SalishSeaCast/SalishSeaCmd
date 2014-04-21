@@ -28,13 +28,13 @@ from salishsea_cmd import combine
 
 
 @pytest.fixture
-def combine_app():
+def combine_cmd():
     import salishsea_cmd.combine
     return salishsea_cmd.combine.Combine(Mock(spec=cliff.app.App), [])
 
 
-def test_get_parser(combine_app):
-    parser = combine_app.get_parser('salishsea combine')
+def test_get_parser(combine_cmd):
+    parser = combine_cmd.get_parser('salishsea combine')
     assert parser.prog == 'salishsea combine'
 
 
