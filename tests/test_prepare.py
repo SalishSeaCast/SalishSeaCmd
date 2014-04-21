@@ -30,13 +30,13 @@ from salishsea_cmd import prepare
 
 
 @pytest.fixture
-def prepare_app():
+def prepare_cmd():
     import salishsea_cmd.prepare
     return salishsea_cmd.prepare.Prepare(Mock(spec=cliff.app.App), [])
 
 
-def test_get_parser(prepare_app):
-    parser = prepare_app.get_parser('salishsea prepare')
+def test_get_parser(prepare_cmd):
+    parser = prepare_cmd.get_parser('salishsea prepare')
     assert parser.prog == 'salishsea prepare'
 
 

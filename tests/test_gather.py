@@ -23,11 +23,11 @@ import pytest
 
 
 @pytest.fixture
-def gather_app():
+def gather_cmd():
     import salishsea_cmd.gather
     return salishsea_cmd.gather.Gather(Mock(spec=cliff.app.App), [])
 
 
-def test_get_parser(gather_app):
-    parser = gather_app.get_parser('salishsea gather')
+def test_get_parser(gather_cmd):
+    parser = gather_cmd.get_parser('salishsea gather')
     assert parser.prog == 'salishsea gather'
