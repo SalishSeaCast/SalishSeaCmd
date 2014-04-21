@@ -1,25 +1,25 @@
-"""Salish Sea NEMO results combine sub-command processor
+# Copyright 2013-2014 The Salish Sea MEOPAR Contributors
+# and The University of British Columbia
 
-Combines per-processor files from an MPI Salish Sea NEMO run into single files
-with the same name-root and move them to a specified directory.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 
+#    http://www.apache.org/licenses/LICENSE-2.0
 
-Copyright 2013-2014 The Salish Sea MEOPAR Contributors
-and The University of British Columbia
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+"""SalishSeaCmd command plug-in for combine sub-command.
 
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Combine per-processor files from an MPI Salish Sea NEMO run into single
+files with the same name-root and move them to a specified directory.
 """
 from __future__ import absolute_import
+
 import glob
 import gzip
 import logging
@@ -27,36 +27,52 @@ import os
 import subprocess
 import sys
 
+import cliff.command
 
-__all__ = ['main']
+from . import lib
+
+
+__all__ = ['Combine']
 
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
 
 
-def main(run_desc, args):
-    """Run the NEMO `rebuild_nemo` tool for each set of per-processor
-    results files.
-
-    The output of `rebuild_nemo` for each file set is logged
-    at the INFO level.
-    The combined results files that `rebuild_nemo` produces are moved
-    to the directory given by `args.results_dir`.
-
-    :arg run_desc: Run description data structure.
-    :type run_desc: dict
-
-    :arg args: Command line arguments and option values
-    :type args: :class:`argparse.Namespace`
+class Combine(cliff.command.Command):
+    """Combine per-processor files from an MPI NEMO run into single files
     """
-    rebuild_nemo_script = _find_rebuild_nemo_script()
-    name_roots, ncores = _get_results_files(args)
-    _combine_results_files(rebuild_nemo_script, name_roots, ncores)
-    os.remove('nam_rebuild')
-    _move_results(name_roots, args.results_dir)
-    _compress_results(name_roots, args)
-    _delete_results_files(name_roots, args)
+    def get_parser(self, prog_name):
+        parser = super(Combine, self).get_parser(prog_name)
+        parser.description = '''
+            Combine the per-processor results files from an MPI
+            Salish Sea NEMO run described in DESC_FILE
+            into files in RESULTS_DIR
+            and compress them using gzip.
+            Delete the per-processor files.
+
+            If RESULTS_DIR does not exist it will be created.
+        '''
+        lib.add_combine_gather_options(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        """Execute the `salishsea combine` sub-command
+
+        Run the NEMO `rebuild_nemo` tool for each set of per-processor
+        results files.
+
+        The output of `rebuild_nemo` for each file set is logged
+        at the INFO level.
+        The combined results files that `rebuild_nemo` produces are moved
+        to the directory given by `parsed_args.results_dir`.
+        """
+        rebuild_nemo_script = _find_rebuild_nemo_script()
+        name_roots, ncores = _get_results_files(parsed_args)
+        _combine_results_files(rebuild_nemo_script, name_roots, ncores)
+        os.remove('nam_rebuild')
+        _move_results(name_roots, parsed_args.results_dir)
+        _compress_results(name_roots, parsed_args)
+        _delete_results_files(name_roots, parsed_args)
 
 
 def _find_rebuild_nemo_script():
