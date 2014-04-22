@@ -30,6 +30,7 @@ __all__ = ['combine']
 
 
 def combine(
+    run_desc_file,
     results_dir,
     keep_proc_results=False,
     no_compress=False,
@@ -64,13 +65,13 @@ def combine(
     :type delete_restart: Boolean
     """
     app = salishsea_cmd.main.SalishSeaApp()
-    args = ['combine', results_dir]
-    args_map = {
-        'keep_proc_results': {True: '--keep-proc-results', False: ''},
-        'no_compress': {True: '--no-compress', False: ''},
-        'compress_restart': {True: '--compress-restart', False: ''},
-        'delete_restart': {True: '--delete-restart', False: ''},
-    }
-    for arg in args_map:
-        args.append(args_map[arg])
+    args = ['combine', run_desc_file, results_dir]
+    if keep_proc_results:
+        args.append('--keep-proc-results')
+    if no_compress:
+        args.append('--no-compress')
+    if compress_restart:
+        args.append('--compress-restart')
+    if delete_restart:
+        args.append('--delete-restart')
     app.run(args)
