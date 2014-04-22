@@ -272,4 +272,5 @@ def test_merge_cgrf_hyperslabs(m_chk_out, get_cgrf_module):
         'tmp1.nc tmp2.nc '
         '/foo/NEMO-atmos/u10_y2014m01d07.nc'
     ).split()
-    m_chk_out.assert_called_once_with(expected, stderr=-2)
+    m_chk_out.assert_called_once_with(
+        expected, stderr=-2, universal_newlines=True)
