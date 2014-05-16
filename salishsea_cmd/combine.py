@@ -24,6 +24,7 @@ import glob
 import gzip
 import logging
 import os
+import shutil
 import subprocess
 import sys
 
@@ -123,7 +124,7 @@ def _move_results(name_roots, results_dir):
     postfix = '' if results_dir.endswith('/') else '/'
     for fn in _results_files(name_roots):
         log.info('moving {} to {}{}'.format(fn, results_dir, postfix))
-        os.renames(os.path.join('.', fn), os.path.join(abs_results_dir, fn))
+        shutil.move(os.path.join('.', fn), os.path.join(abs_results_dir, fn))
 
 
 def _results_files(name_roots):
