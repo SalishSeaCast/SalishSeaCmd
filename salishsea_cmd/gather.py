@@ -21,6 +21,7 @@ from __future__ import absolute_import
 
 import logging
 import os
+import shutil
 
 import cliff.command
 
@@ -93,11 +94,10 @@ def _delete_symlinks(symlinks):
 
 
 def _move_results(results_dir, symlinks):
-    import ipdb; ipdb.set_trace()
     abs_results_dir = os.path.abspath(results_dir)
     if os.path.samefile(os.getcwd(), abs_results_dir):
         return
     log.info('Moving run definition and non-netCDF results files...')
     for fn in os.listdir('.'):
         if fn not in symlinks:
-            os.rename(os.path.join('.', fn), os.path.join(abs_results_dir, fn))
+            shutil.move(os.path.join('.', fn), os.path.join(abs_results_dir, fn))
