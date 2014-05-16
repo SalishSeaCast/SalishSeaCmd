@@ -67,25 +67,37 @@ class Gather(cliff.command.Command):
         and other files that define the run are also gathered into the
         directory given by `parsed_args.results_dir`.
         """
-        api.combine(
-            parsed_args.desc_file.name, parsed_args.results_dir,
-            parsed_args.keep_proc_results, parsed_args.no_compress,
-            parsed_args.compress_restart, parsed_args.delete_restart)
-        _delete_symlinks()
-        _move_results(parsed_args.results_dir)
+        try:
+            api.combine(
+                parsed_args.desc_file.name, parsed_args.results_dir,
+                parsed_args.keep_proc_results, parsed_args.no_compress,
+                parsed_args.compress_restart, parsed_args.delete_restart)
+        except Exception:
+            raise
+        symlinks = _find_symlinks()
+        try:
+            _move_results(parsed_args.results_dir, symlinks)
+        except Exception:
+            raise
+        _delete_symlinks(symlinks)
 
 
-def _delete_symlinks():
+def _find_symlinks():
+    return {fn for fn in os.listdir('.') if os.path.islink(fn)}
+
+
+def _delete_symlinks(symlinks):
     log.info('Deleting symbolic links...')
-    for fn in os.listdir('.'):
-        if os.path.islink(fn):
-            os.remove(fn)
+    for fn in symlinks:
+        os.remove(fn)
 
 
-def _move_results(results_dir):
+def _move_results(results_dir, symlinks):
+    import ipdb; ipdb.set_trace()
     abs_results_dir = os.path.abspath(results_dir)
     if os.path.samefile(os.getcwd(), abs_results_dir):
         return
     log.info('Moving run definition and non-netCDF results files...')
     for fn in os.listdir('.'):
-        os.rename(os.path.join('.', fn), os.path.join(abs_results_dir, fn))
+        if fn not in symlinks:
+            os.rename(os.path.join('.', fn), os.path.join(abs_results_dir, fn))
