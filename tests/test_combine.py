@@ -109,20 +109,20 @@ def test_combine_results_files(mock_chk_out):
     assert mock_chk_out.call_count == 2
 
 
-@patch('salishsea_cmd.combine.os.renames')
-def test_move_results_pwd(mock_renames):
+@patch('salishsea_cmd.combine.shutil.move')
+def test_move_results_pwd(mock_move):
     """_move_results does nothing if results_dir is pwd
     """
     combine._move_results(['foo'], './')
-    assert not mock_renames.called
+    assert not mock_move.called
 
 
-@patch('salishsea_cmd.combine.os.renames')
-def test_move_results_renames(mock_renames):
+@patch('salishsea_cmd.combine.shutil.move')
+def test_move_results_renames(mock_move):
     """_move_results calls os.renames for each results file
     """
     combine._move_results(['foo', 'bar'], 'baz')
-    assert mock_renames.call_count == 2
+    assert mock_move.call_count == 2
 
 
 def test_result_files():
