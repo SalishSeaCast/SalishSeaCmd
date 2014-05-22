@@ -77,6 +77,7 @@ setup(
             'gather = salishsea_cmd.gather:Gather',
             'get_cgrf = salishsea_cmd.get_cgrf:GetCGRF',
             'prepare = salishsea_cmd.prepare:Prepare',
+            'run = salishsea_cmd.run:Run',
         ],
     },
 )
