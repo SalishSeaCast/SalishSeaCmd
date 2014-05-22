@@ -51,9 +51,6 @@ def add_combine_gather_options(parser):
         '--keep-proc-results', action='store_true',
         help="don't delete per-processor results files")
     parser.add_argument(
-        '--no-compress', action='store_true',
-        help="don't compress results files")
-    parser.add_argument(
         '--compress-restart', action='store_true',
         help="compress restart file(s)")
     parser.add_argument(
