@@ -20,6 +20,7 @@ Salish Sea NEMO model.
 """
 from __future__ import absolute_import
 
+import datetime
 import logging
 import os
 import subprocess
@@ -34,7 +35,7 @@ from . import (
 from salishsea_tools.namelist import namelist2dict
 
 
-__all__ = ['Run']
+__all__ = ['Run', 'td2hms']
 
 
 log = logging.getLogger(__name__)
@@ -143,6 +144,7 @@ def _build_batch_script(
 
 
 def _pbs_common(run_desc, procs, email, results_dir, pmem='2gb'):
+    walltime = td2hms(datetime.timedelta(seconds=run_desc['walltime']))
     pbs_directives = (
         u'#PBS -N {run_id}\n'
         u'#PBS -S /bin/bash\n'
@@ -160,11 +162,35 @@ def _pbs_common(run_desc, procs, email, results_dir, pmem='2gb'):
         run_id=run_desc['run_id'],
         procs=procs,
         pmem=pmem,
-        walltime=run_desc['walltime'],
+        walltime=walltime,
         email=email,
         results_dir=results_dir,
     )
     return pbs_directives
+
+
+def td2hms(timedelta):
+    """Return a string that is the timedelta value formated as H:M:S
+    with leading zeros on the minutes and seconds values.
+
+    :arg timedelta: Time interval to format.
+    :type timedelta: :py:obj:datetime.timedelta
+
+    :returns: H:M:S string with leading zeros on the minutes and seconds
+              values.
+    :rtype: unicode
+    """
+    seconds = int(timedelta.total_seconds())
+    periods = (
+        ('hour', 60*60),
+        ('minute', 60),
+        ('second', 1),
+    )
+    hms = []
+    for period_name, period_seconds in periods:
+        period_value, seconds = divmod(seconds, period_seconds)
+        hms.append(period_value)
+    return u'{0[0]}:{0[1]:02d}:{0[2]:02d}'.format(hms)
 
 
 def _pbs_features(system):
