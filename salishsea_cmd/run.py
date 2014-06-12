@@ -37,7 +37,7 @@ from salishsea_tools.namelist import namelist2dict
 __all__ = ['Run']
 
 
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 
 class Run(cliff.command.Command):
