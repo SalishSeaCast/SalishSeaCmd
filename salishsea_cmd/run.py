@@ -100,12 +100,12 @@ class Run(cliff.command.Command):
             ' '.join((gather_opts, '--delete-restart'))
         batch_script = _build_batch_script(
             parsed_args.desc_file, procs, email, results_dir, system,
-            run_dir_name, gather_opts)
+            run_dir.as_posix(), gather_opts)
         batch_file = run_dir/'SalishSeaNEMO.sh'
         with batch_file.open('wt') as f:
             f.write(batch_script)
         starting_dir = os.getcwd()
-        os.chdir(run_dir_name)
+        os.chdir(run_dir.as_posix())
         qsub_msg = subprocess.check_output(
             'qsub SalishSeaNEMO.sh'.split(), universal_newlines=True)
         os.chdir(starting_dir)
@@ -114,7 +114,7 @@ class Run(cliff.command.Command):
 
 
 def _build_batch_script(
-    desc_file, procs, email, results_dir, system, run_dir_name, gather_opts,
+    desc_file, procs, email, results_dir, system, run_dir, gather_opts,
 ):
     run_desc = lib.load_run_desc(desc_file)
     script = (
@@ -131,7 +131,7 @@ def _build_batch_script(
             pbs_common=_pbs_common(run_desc, procs, email, results_dir),
             pbs_features=_pbs_features(system),
             defns=_definitions(
-                run_desc['run_id'], desc_file.name, run_dir_name, results_dir,
+                run_desc['run_id'], desc_file.name, run_dir, results_dir,
                 gather_opts),
             modules=_modules(system),
             execute=_execute(),
@@ -180,16 +180,14 @@ def _pbs_features(system):
     return pbs_features
 
 
-def _definitions(
-    run_id, run_desc_file, run_dir_name, results_dir, gather_opts,
-):
+def _definitions(run_id, run_desc_file, run_dir, results_dir, gather_opts):
     mpirun = 'mpirun'
     run_suffix = ''
     salishsea_cmd = '$HOME/.local/bin/salishsea'
     defns = (
         u'RUN_ID={run_id}\n'
         u'RUN_DESC={run_desc_file}\n'
-        u'WORK_DIR={run_dir_name}\n'
+        u'WORK_DIR={run_dir}\n'
         u'RESULTS_DIR={results_dir}\n'
         u'MPIRUN={mpirun}\n'
         u'RUN_SUFFIX="{run_suffix}"\n'
@@ -198,7 +196,7 @@ def _definitions(
     ).format(
         run_id=run_id,
         run_desc_file=run_desc_file,
-        run_dir_name=run_dir_name,
+        run_dir=run_dir,
         results_dir=results_dir,
         mpirun=mpirun,
         run_suffix=run_suffix,
