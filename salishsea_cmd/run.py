@@ -104,11 +104,11 @@ class Run(cliff.command.Command):
         batch_file = run_dir/'SalishSeaNEMO.sh'
         with batch_file.open('wt') as f:
             f.write(batch_script)
-        starting_dir = os.getcwd()
+        starting_dir = pathlib.Path.cwd()
         os.chdir(run_dir.as_posix())
         qsub_msg = subprocess.check_output(
             'qsub SalishSeaNEMO.sh'.split(), universal_newlines=True)
-        os.chdir(starting_dir)
+        os.chdir(starting_dir.as_posix())
         if not parsed_args.quiet:
             log.info(qsub_msg)
 
