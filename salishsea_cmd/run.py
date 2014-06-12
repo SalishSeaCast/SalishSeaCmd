@@ -83,7 +83,7 @@ class Run(cliff.command.Command):
             self.app, self.app_args,
             parsed_args.desc_file.name, parsed_args.iodefs,
             parsed_args.quiet)
-        run_dir = pathlib.Path(run_dir_name)
+        run_dir = pathlib.Path(run_dir_name).resolve()
         namelist = namelist2dict((run_dir/'namelist').as_posix())
         procs = namelist['nammpp'][0]['jpnij']
         email = '{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
