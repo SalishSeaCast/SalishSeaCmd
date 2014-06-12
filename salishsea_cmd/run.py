@@ -87,6 +87,7 @@ class Run(cliff.command.Command):
         namelist = namelist2dict((run_dir/'namelist').as_posix())
         procs = namelist['nammpp'][0]['jpnij']
         email = '{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
+        results_dir = pathlib.Path(parsed_args.results_dir).resolve()
         system = os.getenv('WGSYSTEM')
         gather_opts = ''
         if parsed_args.keep_proc_results:
@@ -98,7 +99,7 @@ class Run(cliff.command.Command):
         if parsed_args.delete_restart:
             ' '.join((gather_opts, '--delete-restart'))
         batch_script = _build_batch_script(
-            parsed_args.desc_file, procs, email, parsed_args.results_dir,
+            parsed_args.desc_file, procs, email, results_dir.as_posix(),
             system, run_dir_name, gather_opts)
         batch_file = run_dir/'SalishSeaNEMO.sh'
         with batch_file.open('wt') as f:
