@@ -13,9 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""SalishSeaCmd -- Salish Sea NEMO command processor
+"""SalishSeaCmd run sub-command plug-in unit tests
 """
-PROJECT = 'SalishSeaCmd'
-DESCRIPTION = 'Salish Sea NEMO Command Processor'
-VERSION = '1.0.0'
-DEV_STATUS = '5 - Production'
+from __future__ import absolute_import
+
+import cliff.app
+from mock import Mock
+import pytest
+
+# from salishsea_cmd import run
+
+
+@pytest.fixture
+def run_cmd():
+    import salishsea_cmd.run
+    return salishsea_cmd.run.Run(Mock(spec=cliff.app.App), [])
+
+
+def test_get_parser(run_cmd):
+    parser = run_cmd.get_parser('salishsea run')
+    assert parser.prog == 'salishsea run'

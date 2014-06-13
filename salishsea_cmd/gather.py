@@ -52,6 +52,9 @@ class Gather(cliff.command.Command):
 
             If RESULTS_DIR does not exist it will be created.
         '''
+        parser.add_argument(
+            '--no-compress', action='store_true',
+            help="don't compress results files")
         lib.add_combine_gather_options(parser)
         return parser
 
@@ -70,6 +73,7 @@ class Gather(cliff.command.Command):
         """
         try:
             api.combine(
+                self.app, self.app_args,
                 parsed_args.desc_file.name, parsed_args.results_dir,
                 parsed_args.keep_proc_results, parsed_args.no_compress,
                 parsed_args.compress_restart, parsed_args.delete_restart)
