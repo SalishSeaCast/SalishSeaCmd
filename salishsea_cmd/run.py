@@ -209,7 +209,7 @@ def _pbs_features(system):
 def _definitions(run_id, run_desc_file, run_dir, results_dir, gather_opts):
     mpirun = 'mpirun'
     run_suffix = ''
-    salishsea_cmd = '$HOME/.local/bin/salishsea'
+    salishsea_cmd = pathlib.Path('$HOME/.local/bin/salishsea').resolve()
     defns = (
         u'RUN_ID={run_id}\n'
         u'RUN_DESC={run_desc_file}\n'
@@ -226,7 +226,7 @@ def _definitions(run_id, run_desc_file, run_dir, results_dir, gather_opts):
         results_dir=results_dir,
         mpirun=mpirun,
         run_suffix=run_suffix,
-        salishsea_cmd=salishsea_cmd,
+        salishsea_cmd=salishsea_cmd.as_posix(),
         gather_opts=gather_opts,
     )
     return defns
