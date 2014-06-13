@@ -23,13 +23,20 @@ and by other software.
 """
 from __future__ import absolute_import
 
-import salishsea_cmd
+import logging
+
+import cliff.commandmanager
 
 
-__all__ = ['combine']
+__all__ = ['combine', 'prepare']
+
+
+log = logging.getLogger(__name__)
 
 
 def combine(
+    app,
+    app_args,
     run_desc_file,
     results_dir,
     keep_proc_results=False,
@@ -44,6 +51,15 @@ def combine(
     at the INFO level.
     The combined results files that :program:`rebuild_nemo` produces
     are moved to the directory given by :py:obj:`results_dir`.
+
+    :arg app: Application instance invoking the command.
+    :type app: :py:class:`cliff.app.App`
+
+    :arg app_args: Application arguments.
+    :type app_args: :py:class:`argparse.Namespace`
+
+    :arg run_desc_file: File path/name of the run description YAML file.
+    :type run_desc_file: str
 
     :arg results_dir: Directory to store results into.
     :type results_dir: str
@@ -64,14 +80,88 @@ def combine(
                          defaults to :py:obj:`False`.
     :type delete_restart: Boolean
     """
-    app = salishsea_cmd.main.SalishSeaApp()
-    args = ['combine', run_desc_file, results_dir]
+    argv = ['combine', run_desc_file, results_dir]
     if keep_proc_results:
-        args.append('--keep-proc-results')
+        argv.append('--keep-proc-results')
     if no_compress:
-        args.append('--no-compress')
+        argv.append('--no-compress')
     if compress_restart:
-        args.append('--compress-restart')
+        argv.append('--compress-restart')
     if delete_restart:
-        args.append('--delete-restart')
-    app.run(args)
+        argv.append('--delete-restart')
+    result = _run_subcommand(app, app_args, argv)
+    return result
+
+
+def prepare(app, app_args, run_desc_file, iodefs_file, quiet=False):
+    """Prepare a Salish Sea NEMO run.
+
+    A UUID named directory is created and symbolic links are created
+    in the directory to the files and directories specifed to run NEMO.
+    The output of :command:`hg parents` is recorded in the directory
+    for the NEMO-code and NEMO-forcing repos that the symlinks point to.
+    The path to the run directory is logged to the console on completion
+    of the set-up.
+
+    :arg app: Application instance invoking the command.
+    :type app: :py:class:`cliff.app.App`
+
+    :arg app_args: Application arguments.
+    :type app_args: :py:class:`argparse.Namespace`
+
+    :arg run_desc_file: File path/name of the run description YAML file.
+    :type run_desc_file: str
+
+    :arg iodefs_file:  File path/name of the NEMO IOM server defs file
+                       for the run.
+    :type iodefs_file: str
+
+    :arg quite: Don't show the run directory path on completion;
+                defaults to :py:obj:`False`.
+    :type Boolean:
+    """
+    argv = ['prepare', run_desc_file, iodefs_file]
+    if quiet:
+        argv.append('--quiet')
+    result = _run_subcommand(app, app_args, argv)
+    return result
+
+
+def _run_subcommand(app, app_args, argv):
+    """Run a sub-command with argv as arguments via its plug-in
+    interface.
+
+    Based on :py:meth:`cliff.app.run_subcommand`.
+
+    :arg app: Application instance invoking the command.
+    :type app: :py:class:`cliff.app.App`
+
+    :arg app_args: Application arguments.
+    :type app_args: :py:class:`argparse.Namespace`
+
+    :arg argv: Sub-command arguments.
+    :type argv: list
+    """
+    command_manager = cliff.commandmanager.CommandManager(
+        'salishsea.app', convert_underscores=False)
+    try:
+        subcommand = command_manager.find_command(argv)
+    except ValueError as err:
+        if app_args.debug:
+            raise
+        else:
+            log.error(err)
+        return 2
+    cmd_factory, cmd_name, sub_argv = subcommand
+    cmd = cmd_factory(app, app_args)
+    try:
+        cmd_parser = cmd.get_parser(cmd_name)
+        parsed_args = cmd_parser.parse_args(sub_argv)
+        result = cmd.take_action(parsed_args)
+    except Exception as err:
+        result = 1
+        if app_args.debug:
+            log.exception(err)
+        else:
+            log.error(err)
+    return result
