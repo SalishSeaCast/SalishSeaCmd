@@ -209,7 +209,7 @@ def _pbs_features(system):
 def _definitions(run_id, run_desc_file, run_dir, results_dir, gather_opts):
     mpirun = 'mpirun'
     run_suffix = ''
-    salishsea_cmd = '$PBS_O_HOME/.local/bin/salishsea'
+    salishsea_cmd = '${PBS_O_HOME}/.local/bin/salishsea'
     defns = (
         u'RUN_ID={run_id}\n'
         u'RUN_DESC={run_desc_file}\n'
@@ -217,7 +217,7 @@ def _definitions(run_id, run_desc_file, run_dir, results_dir, gather_opts):
         u'RESULTS_DIR={results_dir}\n'
         u'MPIRUN={mpirun}\n'
         u'RUN_SUFFIX="{run_suffix}"\n'
-        u'GATHER={salishsea_cmd} gather\n'
+        u'GATHER="{salishsea_cmd} gather"\n'
         u'GATHER_OPTS="{gather_opts}"\n'
     ).format(
         run_id=run_id,
@@ -249,16 +249,16 @@ def _modules(system):
 
 def _execute():
     script = (
-        u'cd $WORK_DIR\n'
+        u'cd ${WORK_DIR}\n'
         u'echo "working dir: $(pwd)"\n'
         u'\n'
         u'echo "Starting run at $(date)"\n'
-        u'mkdir -p $RESULTS_DIR\n'
-        u'$MPIRUN ./nemo.exe $RUN_SUFFIX\n'
+        u'mkdir -p ${RESULTS_DIR}\n'
+        u'${MPIRUN} ./nemo.exe ${RUN_SUFFIX}\n'
         u'echo "Ended run at $(date)"\n'
         u'\n'
         u'echo "Results gathering started at $(date)"\n'
-        u'$GATHER $GATHER_OPTS $RUN_DESC $RESULTS_DIR\n'
+        u'${GATHER} ${GATHER_OPTS} ${RUN_DESC} ${RESULTS_DIR}\n'
         u'echo "Results gathering ended at $(date)"\n'
     )
     return script
@@ -266,9 +266,9 @@ def _execute():
 
 def _fix_permissions():
     script = (
-        u'chmod go+rx $RESULTS_DIR\n'
-        u'chmod g+rw $RESULTS_DIR/*\n'
-        u'chmod o+r $RESULTS_DIR/*\n'
+        u'chmod go+rx ${RESULTS_DIR}\n'
+        u'chmod g+rw ${RESULTS_DIR}/*\n'
+        u'chmod o+r ${RESULTS_DIR}/*\n'
     )
     return script
 
