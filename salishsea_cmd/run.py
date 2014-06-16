@@ -92,13 +92,13 @@ class Run(cliff.command.Command):
         system = os.getenv('WGSYSTEM')
         gather_opts = ''
         if parsed_args.keep_proc_results:
-            ' '.join((gather_opts, '--keep-proc-results'))
+            gather_opts = ' '.join((gather_opts, '--keep-proc-results'))
         if not parsed_args.compress:
-            ' '.join((gather_opts, '--no-compress'))
+            gather_opts = ' '.join((gather_opts, '--no-compress'))
         if parsed_args.compress_restart:
-            ' '.join((gather_opts, '--compress-restart'))
+            gather_opts = ' '.join((gather_opts, '--compress-restart'))
         if parsed_args.delete_restart:
-            ' '.join((gather_opts, '--delete-restart'))
+            gather_opts = ' '.join((gather_opts, '--delete-restart'))
         batch_script = _build_batch_script(
             parsed_args.desc_file, procs, email, results_dir, system,
             run_dir.as_posix(), gather_opts)
