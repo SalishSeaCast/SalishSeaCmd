@@ -243,7 +243,7 @@ def _modules(system):
     elif system == 'orcinus':
         modules = (
             u'module load intel\n'
-            u'module load intel\14.0\netcdf_hdf5\n'
+            u'module load intel/14.0/netcdf_hdf5\n'
             u'module load python\n'
         )
     return modules
