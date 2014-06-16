@@ -277,8 +277,7 @@ def _fix_permissions():
 
 def _cleanup():
     script = (
-        u'echo "Scheduling cleanup of run directory"\n'
-        u'echo rmdir $(pwd) > /tmp/${RUN_ID}_cleanup\n'
-        u'at now + 1 minutes -f /tmp/${RUN_ID}_cleanup 2>&1\n'
+        u'echo "Deleting run directory"\n'
+        u'rmdir $(pwd)\n'
     )
     return script
