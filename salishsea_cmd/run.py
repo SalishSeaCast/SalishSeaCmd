@@ -89,7 +89,7 @@ class Run(cliff.command.Command):
         procs = namelist['nammpp'][0]['jpnij']
         email = '{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
         results_dir = os.path.abspath(parsed_args.results_dir)
-        system = os.getenv('WGSYSTEM')
+        system = os.getenv('WGSYSTEM', default='salish')
         gather_opts = ''
         if parsed_args.keep_proc_results:
             gather_opts = ' '.join((gather_opts, '--keep-proc-results'))
@@ -133,7 +133,7 @@ def _build_batch_script(
             pbs_features=_pbs_features(system),
             defns=_definitions(
                 run_desc['run_id'], desc_file.name, run_dir, results_dir,
-                gather_opts),
+                gather_opts, system, procs),
             modules=_modules(system),
             execute=_execute(),
             fix_permissions=_fix_permissions(),
@@ -206,17 +206,18 @@ def _pbs_features(system):
     return pbs_features
 
 
-def _definitions(run_id, run_desc_file, run_dir, results_dir, gather_opts):
-    mpirun = 'mpirun'
-    run_suffix = ''
+def _definitions(
+    run_id, run_desc_file, run_dir, results_dir, gather_opts, system, procs,
+):
+    mpirun = ('mpirun -n {procs}'.format(procs=procs) if system == 'salish'
+              else 'mpirun')
     salishsea_cmd = '${PBS_O_HOME}/.local/bin/salishsea'
     defns = (
-        u'RUN_ID={run_id}\n'
-        u'RUN_DESC={run_desc_file}\n'
-        u'WORK_DIR={run_dir}\n'
-        u'RESULTS_DIR={results_dir}\n'
-        u'MPIRUN={mpirun}\n'
-        u'RUN_SUFFIX="{run_suffix}"\n'
+        u'RUN_ID="{run_id}"\n'
+        u'RUN_DESC="{run_desc_file}"\n'
+        u'WORK_DIR="{run_dir}"\n'
+        u'RESULTS_DIR="{results_dir}"\n'
+        u'MPIRUN="{mpirun}"\n'
         u'GATHER="{salishsea_cmd} gather"\n'
         u'GATHER_OPTS="{gather_opts}"\n'
     ).format(
@@ -225,7 +226,6 @@ def _definitions(run_id, run_desc_file, run_dir, results_dir, gather_opts):
         run_dir=run_dir,
         results_dir=results_dir,
         mpirun=mpirun,
-        run_suffix=run_suffix,
         salishsea_cmd=salishsea_cmd,
         gather_opts=gather_opts,
     )
@@ -256,7 +256,7 @@ def _execute():
         u'\n'
         u'echo "Starting run at $(date)"\n'
         u'mkdir -p ${RESULTS_DIR}\n'
-        u'${MPIRUN} ./nemo.exe ${RUN_SUFFIX}\n'
+        u'${MPIRUN} ./nemo.exe\n'
         u'echo "Ended run at $(date)"\n'
         u'\n'
         u'echo "Results gathering started at $(date)"\n'
