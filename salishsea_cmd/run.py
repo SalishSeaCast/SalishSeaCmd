@@ -87,7 +87,6 @@ class Run(cliff.command.Command):
         run_dir = pathlib.Path(run_dir_name).resolve()
         namelist = namelist2dict((run_dir/'namelist').as_posix())
         procs = namelist['nammpp'][0]['jpnij']
-        email = '{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
         results_dir = os.path.abspath(parsed_args.results_dir)
         system = os.getenv('WGSYSTEM', default='salish')
         gather_opts = ''
@@ -100,7 +99,7 @@ class Run(cliff.command.Command):
         if parsed_args.delete_restart:
             gather_opts = ' '.join((gather_opts, '--delete-restart'))
         batch_script = _build_batch_script(
-            parsed_args.desc_file, procs, email, results_dir, system,
+            parsed_args.desc_file, procs, results_dir, system,
             run_dir.as_posix(), gather_opts)
         batch_file = run_dir/'SalishSeaNEMO.sh'
         with batch_file.open('wt') as f:
@@ -115,9 +114,13 @@ class Run(cliff.command.Command):
 
 
 def _build_batch_script(
-    desc_file, procs, email, results_dir, system, run_dir, gather_opts,
+    desc_file, procs, results_dir, system, run_dir, gather_opts,
 ):
     run_desc = lib.load_run_desc(desc_file)
+    try:
+        email = run_desc['email']
+    except KeyError:
+        email = '{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
     script = (
         u'#!/bin/bash\n'
         u'\n'
