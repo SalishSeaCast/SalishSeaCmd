@@ -221,7 +221,7 @@ def _improve_cgrf_file(var, description, day, tmp2_history):
     )
     dataset.source = (
         'https://bitbucket.org/salishsea/tools/raw/tip/SalishSeaCmd/'
-        'salishsea_cmd/get_cgrf_processor.py')
+        'salishsea_cmd/get_cgrf.py')
     dataset.references = os.path.join(NEMO_ATMOS_DIR, nemo_filename)
     time_counter = dataset.variables['time_counter']
     time_counter.units = (
