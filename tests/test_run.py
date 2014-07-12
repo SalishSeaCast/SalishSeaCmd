@@ -17,11 +17,18 @@
 """
 from __future__ import absolute_import
 
+from cStringIO import StringIO
+
 import cliff.app
 from mock import Mock
 import pytest
+import yaml
 
-# from salishsea_cmd import run
+
+@pytest.fixture
+def run_module():
+    import salishsea_cmd.run
+    return salishsea_cmd.run
 
 
 @pytest.fixture
@@ -33,3 +40,31 @@ def run_cmd():
 def test_get_parser(run_cmd):
     parser = run_cmd.get_parser('salishsea run')
     assert parser.prog == 'salishsea run'
+
+
+def test_walltime_leading_zero(run_module):
+    """Ensure correct handling of walltime w/ leading zero in YAML desc file
+
+    re: issue#16
+    """
+    desc_file = StringIO(
+        'run_id: foo\n'
+        'walltime: 01:02:03\n')
+    run_desc = yaml.load(desc_file)
+    pbs_directives = run_module._pbs_common(
+        run_desc, 42, 'me@example.com', 'foo/')
+    assert u'walltime=1:02:03' in pbs_directives
+
+
+def test_walltime_no_leading_zero(run_module):
+    """Ensure correct handling of walltime w/o leading zero in YAML desc file
+
+    re: issue#16
+    """
+    desc_file = StringIO(
+        'run_id: foo\n'
+        'walltime: 1:02:03\n')
+    run_desc = yaml.load(desc_file)
+    pbs_directives = run_module._pbs_common(
+        run_desc, 42, 'me@example.com', 'foo/')
+    assert u'walltime=1:02:03' in pbs_directives
