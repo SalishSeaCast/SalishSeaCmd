@@ -145,7 +145,13 @@ def _build_batch_script(desc_file, procs, results_dir, run_dir, gather_opts):
 
 
 def _pbs_common(run_desc, procs, email, results_dir, pmem='2gb'):
-    walltime = td2hms(datetime.timedelta(seconds=run_desc['walltime']))
+    try:
+        td = datetime.timedelta(seconds=run_desc['walltime'])
+    except TypeError:
+        t = datetime.datetime.strptime(run_desc['walltime'], '%H:%M:%S').time()
+        td = datetime.timedelta(
+            hours=t.hour, minutes=t.minute, seconds=t.second)
+    walltime = td2hms(td)
     pbs_directives = (
         u'#PBS -N {run_id}\n'
         u'#PBS -S /bin/bash\n'
