@@ -28,7 +28,7 @@ import logging
 import cliff.commandmanager
 
 
-__all__ = ['combine', 'prepare', 'run']
+__all__ = ['combine', 'prepare', 'run', 'run_description']
 
 
 log = logging.getLogger(__name__)
@@ -190,6 +190,95 @@ def run(
         argv.append('--quiet')
     result = _run_subcommand(app, app_args, argv)
     return result
+
+
+def run_description(
+    run_id=None,
+    walltime=None,
+    NEMO_code=None,
+    forcing=None,
+    runs_dir=None,
+    init_conditions=None,
+):
+    """Return a Salish Sea NEMO run description dict template.
+
+    Value may be passed for the keyword arguments to set the value of the
+    corresponding items.
+    Otherwise,
+    the returned run description dict
+    that must be updated by assigment statements to provide those values.
+
+    .. note::
+
+        The value of the :kbd:`['forcing']['atmospheric']` item is set to
+        :file:`/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/` which is appropriate
+        for runs on Westgrid, but needs to be changed for runs on
+        :kbd:`salish`.
+
+    :arg run_id: job identifier that appears in the :command:`qstat` listing.
+    'type run_id': str
+
+    :arg walltime: Wall-clock time requested for the run.
+    :type walltime: str
+
+    :arg NEMO_code: Path to the :file:`NEMO-code/` directory where the
+                    NEMO executable, etc. for the run are to be found.
+                    If a relative path is used it will start from the
+                    current directory.
+    :type NEMO_code: str
+
+    :arg forcing: Path to the :file:`NEMO-forcing/` directory where the
+                  netCDF files for the grid coordinates, bathymetry,
+                  initial conditions, open boundary conditions, etc.
+                  are found.
+                  If a relative path is used it will start from the
+                  current directory.
+    :type forcing: str
+
+    :arg runs_dir: Path to the directory where run directories will be
+                  created.
+                  If a relative path is used it will start from the
+                  current directory.
+    :type runs_dir: str
+
+    :arg init_conditions: Name of sub-directory in :file:`NEMO-forcing/`
+                          where initial conditions files are to be found,
+                          or the path to and name of a restart file.
+                          If a relative path is used for a restart file
+                          it will start from the  current directory.
+    :type init_conditions: str
+    """
+    run_description = {
+        'config_name': 'SalishSea',
+        'run_id': run_id,
+        'walltime': walltime,
+        'paths': {
+            'NEMO-code': NEMO_code,
+            'forcing': forcing,
+            'runs directory': runs_dir,
+        },
+        'grid': {
+            'coordinates': 'coordinates_seagrid_SalishSea.nc',
+            'bathymetry': 'bathy_meter_SalishSea2.nc',
+        },
+        'forcing': {
+            'atmospheric': '/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/',
+            'initial conditions': init_conditions,
+            'open boundaries': 'open_boundaries/',
+            'rivers': 'rivers/',
+        },
+        'namelists': [
+            'namelist.time',
+            'namelist.domain',
+            'namelist.surface',
+            'namelist.lateral',
+            'namelist.bottom',
+            'namelist.tracers',
+            'namelist.dynamics',
+            'namelist.compute.12x27',
+        ],
+    }
+    return run_description
 
 
 def _run_subcommand(app, app_args, argv):
