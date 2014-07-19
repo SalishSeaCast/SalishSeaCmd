@@ -195,6 +195,85 @@ class TestRun(object):
 
 
 @pytest.mark.usefixture('api_module')
+class TestRunDescription(object):
+    def test_no_arguments(self, api_module):
+        run_desc = api_module.run_description()
+        expected = {
+            'config_name': 'SalishSea',
+            'run_id': None,
+            'walltime': None,
+            'paths': {
+                'NEMO-code': None,
+                'forcing': None,
+                'runs directory': None,
+            },
+            'grid': {
+                'coordinates': 'coordinates_seagrid_SalishSea.nc',
+                'bathymetry': 'bathy_meter_SalishSea2.nc',
+            },
+            'forcing': {
+                'atmospheric': '/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/',
+                'initial conditions': None,
+                'open boundaries': 'open_boundaries/',
+                'rivers': 'rivers/',
+            },
+            'namelists': [
+                'namelist.time',
+                'namelist.domain',
+                'namelist.surface',
+                'namelist.lateral',
+                'namelist.bottom',
+                'namelist.tracers',
+                'namelist.dynamics',
+                'namelist.compute.12x27',
+            ],
+        }
+        assert run_desc == expected
+
+    def test_all_arguments(self, api_module):
+        run_desc = api_module.run_description(
+            run_id='foo',
+            walltime='1:00:00',
+            NEMO_code='../../NEMO-code/',
+            forcing='../../NEMO-forcing/',
+            runs_dir='../../SalishSea/',
+            init_conditions='../../22-25Sep/SalishSea_00019008_restart.nc',
+        )
+        expected = {
+            'config_name': 'SalishSea',
+            'run_id': 'foo',
+            'walltime': '1:00:00',
+            'paths': {
+                'NEMO-code': '../../NEMO-code/',
+                'forcing': '../../NEMO-forcing/',
+                'runs directory': '../../SalishSea/',
+            },
+            'grid': {
+                'coordinates': 'coordinates_seagrid_SalishSea.nc',
+                'bathymetry': 'bathy_meter_SalishSea2.nc',
+            },
+            'forcing': {
+                'atmospheric': '/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/',
+                'initial conditions': '../../22-25Sep/SalishSea_00019008_restart.nc',
+                'open boundaries': 'open_boundaries/',
+                'rivers': 'rivers/',
+            },
+            'namelists': [
+                'namelist.time',
+                'namelist.domain',
+                'namelist.surface',
+                'namelist.lateral',
+                'namelist.bottom',
+                'namelist.tracers',
+                'namelist.dynamics',
+                'namelist.compute.12x27',
+            ],
+        }
+        assert run_desc == expected
+
+
+
+@pytest.mark.usefixture('api_module')
 class TestRunSubcommand(object):
     def test_command_not_found_raised(self, api_module):
         app = Mock(spec=cliff.app.App)
