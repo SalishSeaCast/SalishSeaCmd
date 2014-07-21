@@ -39,7 +39,8 @@ class SalishSeaApp(cliff.app.App):
             description=__pkg_metadata__.DESCRIPTION,
             version=__pkg_metadata__.VERSION,
             command_manager=cliff.commandmanager.CommandManager(
-                'salishsea.app', convert_underscores=False)
+                'salishsea.app', convert_underscores=False),
+            stderr=sys.stdout,
         )
 
 
