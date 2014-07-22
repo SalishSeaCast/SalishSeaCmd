@@ -24,11 +24,14 @@ and by other software.
 from __future__ import absolute_import
 
 import logging
+import os
+import subprocess
 
 import cliff.commandmanager
+import yaml
 
 
-__all__ = ['combine', 'prepare', 'run', 'run_description']
+__all__ = ['combine', 'prepare', 'run', 'run_description', 'run_in_subprocess']
 
 
 log = logging.getLogger(__name__)
@@ -139,7 +142,7 @@ def run(
     delete_restart=False,
     quiet=False,
 ):
-    """
+    """Execute a Salish Sea NEMO run in the context of the SalishSeaCmd app.
 
     :arg app: Application instance invoking the command.
     :type app: :py:class:`cliff.app.App`
@@ -279,6 +282,39 @@ def run_description(
         ],
     }
     return run_description
+
+
+def run_in_subprocess(run_id, run_desc, iodefs_file, results_dir):
+    """Execute `salishsea run` in a subprocess.
+
+    :arg run_id: Job identifier that appears in the :command:`qstat` listing.
+                 A temporary run description YAML file is created with
+                 the name :file:`{run_id}_subprocess_run.yaml`.
+    :type run_id: str
+
+    :arg run_desc: Run description data structure that will be written to
+                   the temporary YAML file.
+    :type run_desc: dict
+
+    :arg iodefs_file:  File path/name of the NEMO IOM server defs file
+                       for the run.
+    type iodefs_file: str
+
+    :arg results_dir: Directory to store results into.
+    :type results_dir: str
+    """
+    yaml_file = '{}_subprocess_run.yaml'.format(run_id)
+    with open(yaml_file, 'wt') as f:
+        yaml.dump(run_desc, f, default_flow_style=False)
+    cmd = ['salishsea', 'run', yaml_file, iodefs_file, results_dir]
+    try:
+        output = subprocess.check_output(
+            cmd, stderr=subprocess.STDOUT, universal_newlines=True)
+    except subprocess.CalledProcessError as e:
+        print(e.output)
+    finally:
+        print(output)
+    os.unlink(yaml_file)
 
 
 def _run_subcommand(app, app_args, argv):
