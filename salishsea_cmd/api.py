@@ -31,7 +31,7 @@ import cliff.commandmanager
 import yaml
 
 
-__all__ = ['combine', 'prepare', 'run', 'run_description', 'run_in_subprocess']
+__all__ = ['combine', 'prepare', 'run_description', 'run_in_subprocess']
 
 
 log = logging.getLogger(__name__)
@@ -124,71 +124,6 @@ def prepare(app, app_args, run_desc_file, iodefs_file, quiet=False):
     :type Boolean:
     """
     argv = ['prepare', run_desc_file, iodefs_file]
-    if quiet:
-        argv.append('--quiet')
-    result = _run_subcommand(app, app_args, argv)
-    return result
-
-
-def run(
-    app,
-    app_args,
-    run_desc_file,
-    iodefs_file,
-    results_dir,
-    keep_proc_results=False,
-    compress=False,
-    compress_restart=False,
-    delete_restart=False,
-    quiet=False,
-):
-    """Execute a Salish Sea NEMO run in the context of the SalishSeaCmd app.
-
-    :arg app: Application instance invoking the command.
-    :type app: :py:class:`cliff.app.App`
-
-    :arg app_args: Application arguments.
-    :type app_args: :py:class:`argparse.Namespace`
-
-    :arg run_desc_file: File path/name of the run description YAML file.
-    :type run_desc_file: str
-
-    :arg iodefs_file:  File path/name of the NEMO IOM server defs file
-                       for the run.
-    :type iodefs_file: str
-
-    :arg results_dir: Directory to store results into.
-    :type results_dir: str
-
-    :arg keep_proc_results: Don't delete per-processor results files;
-                            defaults to :py:obj:`False`.
-    :type keep_proc_results: Boolean
-
-    :arg compress: Compress results files;
-                   defaults to :py:obj:`False`.
-    :type compress: Boolean
-
-    :arg compress_restart: Compress restart file(s);
-                           defaults to :py:obj:`False`.
-    :type compress_restart: Boolean
-
-    :arg delete_restart: Delete restart file(s);
-                         defaults to :py:obj:`False`.
-    :type delete_restart: Boolean
-
-    :arg quite: Don't show the run directory path on completion;
-                defaults to :py:obj:`False`.
-    :type Boolean:
-    """
-    argv = ['run', run_desc_file, iodefs_file, results_dir]
-    if keep_proc_results:
-        argv.append('--keep-proc-results')
-    if compress:
-        argv.append('--compress')
-    if compress_restart:
-        argv.append('--compress-restart')
-    if delete_restart:
-        argv.append('--delete-restart')
     if quiet:
         argv.append('--quiet')
     result = _run_subcommand(app, app_args, argv)
