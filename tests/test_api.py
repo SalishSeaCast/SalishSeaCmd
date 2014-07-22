@@ -272,7 +272,6 @@ class TestRunDescription(object):
         assert run_desc == expected
 
 
-
 @pytest.mark.usefixture('api_module')
 class TestRunSubcommand(object):
     def test_command_not_found_raised(self, api_module):
