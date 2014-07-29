@@ -154,7 +154,7 @@ def run_description(
         :kbd:`salish`.
 
     :arg run_id: job identifier that appears in the :command:`qstat` listing.
-    'type run_id': str
+    :type run_id': str
 
     :arg walltime: Wall-clock time requested for the run.
     :type walltime: str
@@ -233,7 +233,7 @@ def run_in_subprocess(run_id, run_desc, iodefs_file, results_dir):
 
     :arg iodefs_file:  File path/name of the NEMO IOM server defs file
                        for the run.
-    type iodefs_file: str
+    :type iodefs_file: str
 
     :arg results_dir: Directory to store results into.
     :type results_dir: str
