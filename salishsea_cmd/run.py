@@ -131,7 +131,7 @@ def _build_batch_script(desc_file, procs, results_dir, run_dir, gather_opts):
         u'{cleanup}'
         .format(
             pbs_common=_pbs_common(run_desc, procs, email, results_dir),
-            pbs_features=_pbs_features(system),
+            pbs_features=_pbs_features(run_desc, system),
             defns=_definitions(
                 run_desc['run_id'], desc_file.name, run_dir, results_dir,
                 gather_opts, system, procs),
@@ -200,11 +200,24 @@ def td2hms(timedelta):
     return u'{0[0]}:{0[1]:02d}:{0[2]:02d}'.format(hms)
 
 
-def _pbs_features(system):
+def _pbs_features(run_desc, system):
     pbs_features = u''
     if system == 'jasper':
+        try:
+            nodes = run_desc['nodes']
+        except KeyError:
+            log.error('nodes key not found in run description YAML file')
+            raise
+        try:
+            ppn = run_desc['processors_per_node']
+        except KeyError:
+            log.error(
+                'processors_per_node key not found '
+                'in run description YAML file')
+            raise
         pbs_features = (
             u'#PBS -l feature=X5675\n'
+            u'#PBS -l nodes={}:ppn={}\n'.format(nodes, ppn)
         )
     elif system == 'orcinus':
         pbs_features = (

@@ -68,3 +68,39 @@ def test_walltime_no_leading_zero(run_module):
     pbs_directives = run_module._pbs_common(
         run_desc, 42, 'me@example.com', 'foo/')
     assert u'walltime=1:02:03' in pbs_directives
+
+
+def test_number_of_nodes_missing(run_module):
+    """KeyError raised & msg logged when nodes key missing from YAML desc file
+    """
+    desc_file = StringIO(
+        'run_id: foo\n'
+        'walltime: 1:02:03\n')
+    run_desc = yaml.load(desc_file)
+    with pytest.raises(KeyError):
+        pbs_features = run_module._pbs_features(run_desc, 'jasper')
+
+
+def test_processors_per_node_missing(run_module):
+    """KeyError raised & msg logged when ppn key missing from YAML desc file
+    """
+    desc_file = StringIO(
+        'run_id: foo\n'
+        'walltime: 1:02:03\n'
+        'nodes: 27\n')
+    run_desc = yaml.load(desc_file)
+    with pytest.raises(KeyError):
+        pbs_features = run_module._pbs_features(run_desc, 'jasper')
+
+
+def test_nodes_ppn(run_module):
+    """KeyError raised & msg logged when ppn key missing from YAML desc file
+    """
+    desc_file = StringIO(
+        'run_id: foo\n'
+        'walltime: 1:02:03\n'
+        'nodes: 27\n'
+        'processors_per_node: 12\n')
+    run_desc = yaml.load(desc_file)
+    pbs_features = run_module._pbs_features(run_desc, 'jasper')
+    assert u'#PBS -l nodes=27:ppn=12' in pbs_features
