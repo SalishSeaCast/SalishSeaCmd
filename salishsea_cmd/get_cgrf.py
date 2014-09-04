@@ -245,77 +245,13 @@ def _correct_pressure(day):
     tmp_filename = '{}_{}.nc'.format('t2',day.strftime('y%Ym%md%d'))
     alt_filename = '{}.nc'.format('altitude_y2003')
     #load pressure, temperature, lat,lon, altitude
-    f = nc.Dataset(os.path.join(NEMO_ATMOS_DIR,pres_filename)); press=f.variables['atmpres']
-    f = nc.Dataset(os.path.join(NEMO_ATMOS_DIR,tmp_filename)); temp=f.variables['tair']
-    lon=f.variables['nav_lon']; lat=f.variables['nav_lat']
-    time =f.variables['time_counter']
-    f=nc.Dataset(os.path.join(ALTITUDE_DIR,alt_filename)); alt=f.variables['alt']
-    #correct pressure
-    press_corr=np.zeros(press.shape)
-    for k in range(press.shape[0]):
-        press_corr[k,:,:] = _slp(alt,press[k,:,:],temp[k,:,:])
+    f_pres = os.path.join(NEMO_ATMOS_DIR,pres_filename);
+    f_temp = os.path.join(NEMO_ATMOS_DIR,tmp_filename);
+    f_alt= os.path.join(ALTITUDE_DIR,alt_filename);
 
     #build corrected pressure file
     slpcorr_filename = '{}_{}.nc'.format('slp_corr',day.strftime('y%Ym%md%d'))
-    slp_file = nc.Dataset(os.path.join(NEMO_ATMOS_DIR,slpcorr_filename), 'w', zlib=True)
-    #attributes
-    nc_tools.init_dataset_attrs(
-        slp_file,
-        title=(
-            'CGRF {} forcing dataset for {}'
-            .format('corrected sea level pressure', day.format('YYYY-MM-DD'))),
-        notebook_name='',
-        nc_filepath='',
-        comment=(
-            'Processed from '
-            'goapp.ocean.dal.ca::canadian_GDPS_reforecasts_v1 files.'),
-        quiet=True,
-    )
-    #dimensions
-    slp_file.createDimension('time_counter', 0)
-    slp_file.createDimension('y', press_corr.shape[1])
-    slp_file.createDimension('x', press_corr.shape[2])
-    #time
-    time_counter=slp_file.createVariable('time_counter','double', ('time_counter',))
-    time_counter.calendar=time.calendar
-    time_counter.long_name=time.long_name
-    time_counter.title=time.title
-    time_counter.units=time.units
-    time_counter[:] = time[:]
-    time_counter.valid_range = time.valid_range
-    #lat/lon variables
-    nav_lat = slp_file.createVariable('nav_lat','float32',('y','x'))
-    nav_lat.long_name = lat.long_name
-    nav_lat.units = lat.units
-    nav_lat.valid_max=lat.valid_max
-    nav_lat.valid_min=lat.valid_min
-    nav_lat.nav_model=lat.nav_model
-    nav_lat[:]=lat
-    nav_lon = slp_file.createVariable('nav_lon','float32',('y','x'))
-    nav_lon.long_name = lon.long_name
-    nav_lon.units = lon.units
-    nav_lon.valid_max=lon.valid_max
-    nav_lon.valid_min=lon.valid_min
-    nav_lon.nav_model=lon.nav_model
-    nav_lon[:]=lon
-    #Pressure
-    atmpres = slp_file.createVariable('atmpres','float32',('time_counter','y','x'))
-    atmpres.long_name = 'Sea Level Pressure'
-    atmpres.units = press.units
-    atmpres.valid_min=press.valid_min
-    atmpres.valid_max=press.valid_max
-    atmpres.missing_value=press.missing_value
-    atmpres.axis=press.axis
-    atmpres[:]=press_corr[:]
-
-    slp_file.close()
+    f_slp = os.path.join(NEMO_ATMOS_DIR,slpcorr_filename);
+    nc_tools.generate_pressure_file(f_slp,f_pres,f_temp,f_alt,day)
     
-def _slp(Z,P,T):
-    R = 287 #ideal gas constant
-    g = 9.81 #gravity
-    gam = 0.0098 #lapse rate(deg/m)
-    p0=101000 #average sea surface heigh in Pa
-    
-    ps = P*(gam*(Z/T) +1)**(g/gam/R)
-    return ps
 
