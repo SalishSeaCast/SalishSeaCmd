@@ -52,7 +52,7 @@ PERM775 = PERM664 | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
 
 RSYNC_MIRROR_DIR = os.path.abspath('rsync-mirror')
 NEMO_ATMOS_DIR = os.path.abspath('NEMO-atmos')
-ALTITUDE_DIR= os.path.abspath('NEMO-atmos') #assumes altitude_y2003.nc is in NEMO-atmos
+ALTITUDE_DIR= os.path.abspath('NEMO-atmos') #assumes altitude_CGRF.nc is in NEMO-atmos
 
 class GetCGRF(cliff.command.Command):
     """Download and symlink CGRF atmospheric forcing files
@@ -243,7 +243,7 @@ def _correct_pressure(day):
     log.info('Correcting pressure for {} '.format(day.format('YYYY-MM-DD')))
     pres_filename = '{}_{}.nc'.format('slp', day.strftime('y%Ym%md%d'))
     tmp_filename = '{}_{}.nc'.format('t2',day.strftime('y%Ym%md%d'))
-    alt_filename = '{}.nc'.format('altitude_y2003')
+    alt_filename = '{}.nc'.format('altitude_CGRF')
     #load pressure, temperature, lat,lon, altitude
     f_pres = os.path.join(NEMO_ATMOS_DIR,pres_filename);
     f_temp = os.path.join(NEMO_ATMOS_DIR,tmp_filename);
