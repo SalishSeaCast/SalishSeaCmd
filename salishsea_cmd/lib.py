@@ -13,10 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""SalishSeaCmd command plug-in for prepare sub-command.
-
-Sets up the necesaary symbolic links for a Salish Sea NEMO run
-in a specified directory and changes the pwd to that directory.
+"""Utility functions for use by SalishSeaCmd command plug-ins.
 """
 from __future__ import absolute_import
 
