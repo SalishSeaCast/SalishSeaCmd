@@ -46,6 +46,7 @@ def test_get_parser(get_cgrf_cmd):
 
 @patch('salishsea_cmd.get_cgrf._get_cgrf')
 @patch('salishsea_cmd.get_cgrf._rebase_cgrf_time')
+@patch('salishsea_cmd.get_cgrf._correct_pressure')
 @patch('salishsea_cmd.get_cgrf.os.chdir')
 @patch('salishsea_cmd.get_cgrf.os.mkdir')
 @patch('salishsea_cmd.get_cgrf.os.remove')
@@ -53,8 +54,8 @@ def test_get_parser(get_cgrf_cmd):
 @patch('salishsea_cmd.get_cgrf.tempfile.NamedTemporaryFile')
 @patch('salishsea_cmd.get_cgrf.os.listdir')
 def test_take_action_calls_get_cgrf(
-    m_listdir, m_NTF, m_rmdir, m_rm, m_mkdir, m_chdir, m_rebase, m_get_cgrf,
-    get_cgrf_cmd,
+    m_listdir, m_NTF, m_rmdir, m_rm, m_mkdir, m_chdir, m_rebase, m_corr_press,
+    m_get_cgrf, get_cgrf_cmd,
 ):
     """take_action calls _get_cgrf for expected dates
     """
@@ -75,6 +76,7 @@ def test_take_action_calls_get_cgrf(
 
 
 @patch('salishsea_cmd.get_cgrf._rebase_cgrf_time')
+@patch('salishsea_cmd.get_cgrf._correct_pressure')
 @patch('salishsea_cmd.get_cgrf._get_cgrf')
 @patch('salishsea_cmd.get_cgrf.os.chdir')
 @patch('salishsea_cmd.get_cgrf.os.mkdir')
@@ -84,7 +86,7 @@ def test_take_action_calls_get_cgrf(
 @patch('salishsea_cmd.get_cgrf.os.listdir')
 def test_take_action_calls_rebase_cgrf_time(
     m_listdir, m_NTF, m_rmdirs, m_rm, m_mkdir, m_chdir, m_get_cgrf, m_rebase,
-    get_cgrf_cmd,
+    m_corr_press, get_cgrf_cmd,
 ):
     """take_action calls _rebase_cgrf_time for expected dates
     """
@@ -105,6 +107,7 @@ def test_take_action_calls_rebase_cgrf_time(
 
 @patch('salishsea_cmd.get_cgrf.os.removedirs')
 @patch('salishsea_cmd.get_cgrf._rebase_cgrf_time')
+@patch('salishsea_cmd.get_cgrf._correct_pressure')
 @patch('salishsea_cmd.get_cgrf._get_cgrf')
 @patch('salishsea_cmd.get_cgrf.os.chdir')
 @patch('salishsea_cmd.get_cgrf.os.mkdir')
@@ -112,8 +115,8 @@ def test_take_action_calls_rebase_cgrf_time(
 @patch('salishsea_cmd.get_cgrf.tempfile.NamedTemporaryFile')
 @patch('salishsea_cmd.get_cgrf.os.listdir', return_value=['bar'])
 def test_take_action_removes_rsync_dirs(
-    m_listdir, m_NTF, m_rm, m_chdir, m_mkdir, m_get_cgrf, m_rebase, m_rmdir,
-    get_cgrf_cmd,
+    m_listdir, m_NTF, m_rm, m_chdir, m_mkdir, m_get_cgrf, m_rebase,
+    m_corr_press, m_rmdir, get_cgrf_cmd,
 ):
     """take_action removes rsync-ed CGRF diretories
     """
