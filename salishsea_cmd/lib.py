@@ -17,10 +17,16 @@
 """
 from __future__ import absolute_import
 
+import subprocess
+
 import yaml
 
 
-__all__ = ['add_combine_gather_options', 'load_run_desc']
+__all__ = [
+    'add_combine_gather_options',
+    'load_run_desc',
+    'netcdf4_deflate',
+]
 
 
 def load_run_desc(desc_file):
@@ -53,3 +59,26 @@ def add_combine_gather_options(parser):
     parser.add_argument(
         '--delete-restart', action='store_true',
         help="delete restart file(s)")
+
+
+def netcdf4_deflate(filename, dfl_lvl=4):
+    """Run `ncks -4 -L dfl_lvl` on filename *in place*.
+
+    The result is a netCDF4 file with its variables compressed
+    with Lempel-Ziv deflation.
+
+    :arg filename: Path/filename of the netCDF file to process.
+    :type filename: string
+
+    :arg dfl_lvl: Lempel-Ziv deflation level to use.
+    :type dfl_lvl: int
+
+    :returns: Output of the ncks command.
+    :rtype: string
+    """
+    result = subprocess.check_output(
+        ['ncks', '-4', '-L{}'.format(dfl_lvl), '-O', filename, filename],
+        stderr=subprocess.STDOUT,
+        universal_newlines=True,
+    )
+    return result

@@ -104,4 +104,5 @@ def _move_results(results_dir, symlinks):
     log.info('Moving run definition and non-netCDF results files...')
     for fn in os.listdir('.'):
         if fn not in symlinks:
-            shutil.move(os.path.join('.', fn), os.path.join(abs_results_dir, fn))
+            shutil.move(
+                os.path.join('.', fn), os.path.join(abs_results_dir, fn))
