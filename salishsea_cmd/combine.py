@@ -76,6 +76,7 @@ class Combine(cliff.command.Command):
         os.remove('nam_rebuild')
         _move_results(name_roots, parsed_args.results_dir)
         _compress_results(name_roots, parsed_args)
+        _netcdf4_deflate_results(name_roots)
         _delete_results_files(name_roots, parsed_args)
 
 
@@ -117,6 +118,16 @@ def _combine_results_files(rebuild_nemo_script, name_roots, ncores):
             stderr=subprocess.STDOUT,
             universal_newlines=True)
         log.info(result)
+
+
+def _netcdf4_deflate_results(name_roots):
+    log.info('Starting netCDF4 deflation...')
+    for fn in _results_files(name_roots):
+        result = lib.netcdf4_deflate(fn)
+        if result:
+            log.info(result)
+        else:
+            log.info('netCDF4 deflated {}'.format(fn))
 
 
 def _move_results(name_roots, results_dir):

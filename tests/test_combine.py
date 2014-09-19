@@ -109,6 +109,14 @@ def test_combine_results_files(mock_chk_out):
     assert mock_chk_out.call_count == 2
 
 
+@patch('salishsea_cmd.lib.netcdf4_deflate')
+def test_netcdf4_deflate_results(mock_nc4_dfl):
+    """_netcdf4_deflate_results calls subprocess.check_output per name-root
+    """
+    combine._netcdf4_deflate_results(['foo', 'bar'])
+    assert mock_nc4_dfl.call_count == 2
+
+
 @patch('salishsea_cmd.combine.shutil.move')
 def test_move_results_pwd(mock_move):
     """_move_results does nothing if results_dir is pwd
