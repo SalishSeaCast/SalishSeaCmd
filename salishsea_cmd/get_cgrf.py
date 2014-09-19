@@ -52,7 +52,9 @@ PERM775 = PERM664 | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
 
 RSYNC_MIRROR_DIR = os.path.abspath('rsync-mirror')
 NEMO_ATMOS_DIR = os.path.abspath('NEMO-atmos')
-ALTITUDE_DIR= os.path.abspath('NEMO-atmos') #assumes altitude_CGRF.nc is in NEMO-atmos
+# Assume altitude_CGRF.nc is in NEMO-atmos
+ALTITUDE_DIR = os.path.abspath('NEMO-atmos')
+
 
 class GetCGRF(cliff.command.Command):
     """Download and symlink CGRF atmospheric forcing files
@@ -118,7 +120,6 @@ class GetCGRF(cliff.command.Command):
             log.info('Deleting {} directory'.format(RSYNC_MIRROR_DIR))
             os.removedirs(rsync_dir)
 
-
     def _date_string(self, string):
         try:
             value = arrow.get(string)
@@ -176,6 +177,7 @@ def _rebase_cgrf_time(day):
         _merge_cgrf_hyperslabs(day, var, 'tmp1.nc', 'tmp2.nc')
         tmp2 = nc.Dataset('tmp2.nc')
         _improve_cgrf_file(var, description, day, tmp2.history)
+
 
 def _get_cgrf_hyperslab(day, var, start_hr, end_hr, result_filename):
     src_dir = os.path.join(RSYNC_MIRROR_DIR, day.format('YYYY-MM-DD'))
@@ -239,19 +241,17 @@ def _improve_cgrf_file(var, description, day, tmp2_history):
     )
     dataset.close()
 
+
 def _correct_pressure(day):
     log.info('Correcting pressure for {} '.format(day.format('YYYY-MM-DD')))
     pres_filename = '{}_{}.nc'.format('slp', day.strftime('y%Ym%md%d'))
-    tmp_filename = '{}_{}.nc'.format('t2',day.strftime('y%Ym%md%d'))
+    tmp_filename = '{}_{}.nc'.format('t2', day.strftime('y%Ym%md%d'))
     alt_filename = '{}.nc'.format('altitude_CGRF')
-    #load pressure, temperature, lat,lon, altitude
-    f_pres = os.path.join(NEMO_ATMOS_DIR,pres_filename);
-    f_temp = os.path.join(NEMO_ATMOS_DIR,tmp_filename);
-    f_alt= os.path.join(ALTITUDE_DIR,alt_filename);
-
-    #build corrected pressure file
-    slpcorr_filename = '{}_{}.nc'.format('slp_corr',day.strftime('y%Ym%md%d'))
-    f_slp = os.path.join(NEMO_ATMOS_DIR,slpcorr_filename);
-    nc_tools.generate_pressure_file(f_slp,f_pres,f_temp,f_alt,day)
-    
-
+    # Load pressure, temperature, lat,lon, altitude
+    f_pres = os.path.join(NEMO_ATMOS_DIR, pres_filename)
+    f_temp = os.path.join(NEMO_ATMOS_DIR, tmp_filename)
+    f_alt = os.path.join(ALTITUDE_DIR, alt_filename)
+    # Build corrected pressure file
+    slpcorr_filename = '{}_{}.nc'.format('slp_corr', day.strftime('y%Ym%md%d'))
+    f_slp = os.path.join(NEMO_ATMOS_DIR, slpcorr_filename)
+    nc_tools.generate_pressure_file(f_slp, f_pres, f_temp, f_alt, day)
