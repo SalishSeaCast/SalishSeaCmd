@@ -74,9 +74,9 @@ class Combine(cliff.command.Command):
         name_roots, ncores = _get_results_files(parsed_args)
         _combine_results_files(rebuild_nemo_script, name_roots, ncores)
         os.remove('nam_rebuild')
+        _netcdf4_deflate_results(name_roots)
         _move_results(name_roots, parsed_args.results_dir)
         _compress_results(name_roots, parsed_args)
-        _netcdf4_deflate_results(name_roots)
         _delete_results_files(name_roots, parsed_args)
 
 
