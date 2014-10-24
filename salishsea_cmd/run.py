@@ -144,7 +144,7 @@ def _build_batch_script(desc_file, procs, results_dir, run_dir, gather_opts):
     return script
 
 
-def _pbs_common(run_desc, procs, email, results_dir, pmem='2gb'):
+def _pbs_common(run_desc, procs, email, results_dir, pmem='2000mb'):
     try:
         td = datetime.timedelta(seconds=run_desc['walltime'])
     except TypeError:
