@@ -259,6 +259,7 @@ def _modules(system):
             u'module load application/python/2.7.3\n'
             u'module load library/netcdf/4.1.3\n'
             u'module load library/szip/2.1\n'
+            u'module load application/nco/4.3.9\n'
         )
     elif system == 'orcinus':
         modules = (
