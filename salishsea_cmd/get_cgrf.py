@@ -126,9 +126,9 @@ class GetCGRF(cliff.command.Command):
         except arrow.parser.ParserError:
             raise argparse.ArgumentTypeError(
                 'Invalid start date: {}'.format(string))
-        if value < arrow.get(2002, 1, 1) or value > arrow.get(2010, 12, 31):
+        if value < arrow.get(2002, 1, 1) or value > arrow.get(2012, 12, 31):
             raise argparse.ArgumentTypeError(
-                'Start date out of CGRF range 2002-01-01 to 2010-12-31: {}'
+                'Start date out of CGRF range 2002-01-01 to 2012-12-31: {}'
                 .format(string))
         return value
 
