@@ -232,7 +232,7 @@ def _improve_cgrf_file(var, description, day, tmp2_history):
     time_counter.time_origin = '{} 00:00:00'.format(day.format('YYYY-MMM-DD'))
     time_counter[:] = np.arange(24)
     time_counter.valid_range = np.array((0, 23))
-    history = dataset.history.split('\n')
+    history = dataset.history.splitlines()
     history.reverse()
     dataset.history = (
         '{}\n'
