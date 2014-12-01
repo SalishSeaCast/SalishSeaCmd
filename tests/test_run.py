@@ -78,7 +78,7 @@ def test_number_of_nodes_missing(run_module):
         'walltime: 1:02:03\n')
     run_desc = yaml.load(desc_file)
     with pytest.raises(KeyError):
-        pbs_features = run_module._pbs_features(run_desc, 'jasper')
+        run_module._pbs_features(run_desc, 'jasper')
 
 
 def test_processors_per_node_missing(run_module):
@@ -90,7 +90,7 @@ def test_processors_per_node_missing(run_module):
         'nodes: 27\n')
     run_desc = yaml.load(desc_file)
     with pytest.raises(KeyError):
-        pbs_features = run_module._pbs_features(run_desc, 'jasper')
+        run_module._pbs_features(run_desc, 'jasper')
 
 
 def test_nodes_ppn(run_module):
