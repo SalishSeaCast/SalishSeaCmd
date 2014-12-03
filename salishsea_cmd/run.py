@@ -23,6 +23,7 @@ from __future__ import absolute_import
 import datetime
 import logging
 import os
+import socket
 import subprocess
 
 import cliff.command
@@ -97,50 +98,59 @@ class Run(cliff.command.Command):
             gather_opts = ' '.join((gather_opts, '--compress-restart'))
         if parsed_args.delete_restart:
             gather_opts = ' '.join((gather_opts, '--delete-restart'))
+        system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
         batch_script = _build_batch_script(
             parsed_args.desc_file, procs, results_dir, run_dir.as_posix(),
-            gather_opts)
+            gather_opts, system)
         batch_file = run_dir/'SalishSeaNEMO.sh'
         with batch_file.open('wt') as f:
             f.write(batch_script)
         starting_dir = pathlib.Path.cwd()
         os.chdir(run_dir.as_posix())
-        qsub_msg = subprocess.check_output(
-            'qsub SalishSeaNEMO.sh'.split(), universal_newlines=True)
+        if system != 'nowcast0':
+            qsub_msg = subprocess.check_output(
+                'qsub SalishSeaNEMO.sh'.split(), universal_newlines=True)
+            if not parsed_args.quiet:
+                log.info(qsub_msg)
         os.chdir(starting_dir.as_posix())
-        if not parsed_args.quiet:
-            log.info(qsub_msg)
 
 
-def _build_batch_script(desc_file, procs, results_dir, run_dir, gather_opts):
+def _build_batch_script(
+    desc_file, procs, results_dir, run_dir, gather_opts, system,
+):
     run_desc = lib.load_run_desc(desc_file)
-    try:
-        email = run_desc['email']
-    except KeyError:
-        email = '{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
-    system = os.getenv('WGSYSTEM', default='salish')
-    script = (
-        u'#!/bin/bash\n'
-        u'\n'
-        u'{pbs_common}'
-        u'{pbs_features}\n'
+    script = u'#!/bin/bash\n'
+    if system != 'nowcast0':
+        try:
+            email = run_desc['email']
+        except KeyError:
+            email = '{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
+        script = '\n'.join((
+            script,
+            u'{pbs_common}'
+            u'{pbs_features}\n'
+            .format(
+                pbs_common=_pbs_common(run_desc, procs, email, results_dir),
+                pbs_features=_pbs_features(run_desc, system)
+                )
+        ))
+    script = '\n'.join((
+        script,
         u'{defns}\n'
         u'{modules}\n'
         u'{execute}\n'
         u'{fix_permissions}\n'
         u'{cleanup}'
         .format(
-            pbs_common=_pbs_common(run_desc, procs, email, results_dir),
-            pbs_features=_pbs_features(run_desc, system),
             defns=_definitions(
                 run_desc['run_id'], desc_file.name, run_dir, results_dir,
                 gather_opts, system, procs),
             modules=_modules(system),
-            execute=_execute(),
+            execute=_execute(system),
             fix_permissions=_fix_permissions(),
             cleanup=_cleanup(),
         )
-    )
+    ))
     return script
 
 
@@ -229,9 +239,14 @@ def _pbs_features(run_desc, system):
 def _definitions(
     run_id, run_desc_file, run_dir, results_dir, gather_opts, system, procs,
 ):
-    mpirun = ('mpirun -n {procs}'.format(procs=procs) if system == 'salish'
-              else 'mpirun')
-    salishsea_cmd = '${PBS_O_HOME}/.local/bin/salishsea'
+    if system in 'salish nowcast0'.split():
+        home = '${HOME}'
+        mpirun = 'mpirun -n {procs}'.format(procs=procs)
+        if system == 'nowcast0':
+            mpirun = ' '.join((mpirun, '--hostfile', '${HOME}/mpi_hosts'))
+    else:
+        home = '${PBS_O_HOME}'
+        mpirun = 'mpirun'
     defns = (
         u'RUN_ID="{run_id}"\n'
         u'RUN_DESC="{run_desc_file}"\n'
@@ -246,7 +261,7 @@ def _definitions(
         run_dir=run_dir,
         results_dir=results_dir,
         mpirun=mpirun,
-        salishsea_cmd=salishsea_cmd,
+        salishsea_cmd=os.path.join(home, '.local/bin/salishsea'),
         gather_opts=gather_opts,
     )
     return defns
@@ -270,14 +285,16 @@ def _modules(system):
     return modules
 
 
-def _execute():
+def _execute(system):
+    mpirun_suffix = ' >>stdout 2>>stderr' if system == 'nowcast0' else ''
     script = (
         u'cd ${WORK_DIR}\n'
         u'echo "working dir: $(pwd)"\n'
         u'\n'
         u'echo "Starting run at $(date)"\n'
-        u'mkdir -p ${RESULTS_DIR}\n'
-        u'${MPIRUN} ./nemo.exe\n'
+        u'mkdir -p ${RESULTS_DIR}\n')
+    script += u'${{MPIRUN}} ./nemo.exe{}\n'.format(mpirun_suffix)
+    script += (
         u'echo "Ended run at $(date)"\n'
         u'\n'
         u'echo "Results gathering started at $(date)"\n'
