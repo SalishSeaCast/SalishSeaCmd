@@ -48,8 +48,7 @@ def test_copy_run_set_files_no_path(m_copy):
     desc_file.name = 'foo.yaml'
     pwd = os.getcwd()
     with patch('salishsea_cmd.prepare.os.chdir'):
-        prepare._copy_run_set_files(
-            desc_file, pwd, 'iodef.xml', 'run_dir', 'starting_dir')
+        prepare._copy_run_set_files(desc_file, pwd, 'iodef.xml', 'run_dir')
     expected = [
         call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
         call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
@@ -66,8 +65,7 @@ def test_copy_run_set_files_relative_path(m_copy):
     desc_file.name = 'foo.yaml'
     pwd = os.getcwd()
     with patch('salishsea_cmd.prepare.os.chdir'):
-        prepare._copy_run_set_files(
-            desc_file, pwd, '../iodef.xml', 'run_dir', 'starting_dir')
+        prepare._copy_run_set_files(desc_file, pwd, '../iodef.xml', 'run_dir')
     expected = [
         call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
         call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
@@ -90,7 +88,7 @@ def test_make_grid_links_no_forcing_dir(m_log):
         'salishsea_cmd.prepare.os.path.abspath',
         side_effect=lambda path: path)
     with pytest.raises(SystemExit), p_exists, p_abspath:
-        prepare._make_grid_links(run_desc, '', '')
+        prepare._make_grid_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
@@ -117,7 +115,7 @@ def test_make_grid_links_no_link_path(m_log):
         side_effect=lambda path: path)
     p_chdir = patch('salishsea_cmd.prepare.os.chdir')
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-        prepare._make_grid_links(run_desc, '', '')
+        prepare._make_grid_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         'foo/grid/coordinates.nc not found; cannot create symlink - '
         'please check the forcing path and grid file names '
@@ -139,7 +137,7 @@ def test_make_forcing_links_no_forcing_dir(m_log):
         'salishsea_cmd.prepare.os.path.abspath',
         side_effect=lambda path: path)
     with pytest.raises(SystemExit), p_exists, p_abspath:
-        prepare._make_forcing_links(run_desc, '', '')
+        prepare._make_forcing_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
@@ -175,7 +173,7 @@ def test_make_forcing_links_no_restart_path(m_log, link_path, expected):
         side_effect=lambda path: path)
     p_chdir = patch('salishsea_cmd.prepare.os.chdir')
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-        prepare._make_forcing_links(run_desc, '', '')
+        prepare._make_forcing_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         '{} not found; cannot create symlink - '
         'please check the forcing path and initial conditions file names '
@@ -206,7 +204,7 @@ def test_make_forcing_links_no_forcing_path(m_log):
     p_chdir = patch('salishsea_cmd.prepare.os.chdir')
     p_symlink = patch('salishsea_cmd.prepare.os.symlink')
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir, p_symlink:
-        prepare._make_forcing_links(run_desc, '', '')
+        prepare._make_forcing_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         'foo/bar not found; cannot create symlink - '
         'please check the forcing paths and file names '
