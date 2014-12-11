@@ -98,21 +98,14 @@ def prepare(desc_file, iodefs):
     """
     run_desc = lib.load_run_desc(desc_file)
     nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc)
-    starting_dir = os.getcwd()
     run_set_dir = os.path.dirname(os.path.abspath(desc_file.name))
     run_dir = _make_run_dir(run_desc)
-    _make_namelist(
-        run_set_dir, run_desc, run_dir)
-    _copy_run_set_files(
-        desc_file, run_set_dir, iodefs, run_dir, starting_dir)
-    _make_nemo_code_links(
-        nemo_code_repo, nemo_bin_dir, run_dir, starting_dir)
-    _make_grid_links(
-        run_desc, run_dir, starting_dir)
-    _make_forcing_links(
-        run_desc, run_dir, starting_dir)
-    _check_atmos_files(
-        run_desc, run_dir)
+    _make_namelist(run_set_dir, run_desc, run_dir)
+    _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir)
+    _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir)
+    _make_grid_links(run_desc, run_dir)
+    _make_forcing_links(run_desc, run_dir)
+    _check_atmos_files(run_desc, run_dir)
     return run_dir
 
 
@@ -166,21 +159,23 @@ def _make_namelist(run_set_dir, run_desc, run_dir):
         namelist.writelines(EMPTY_NAMELISTS)
 
 
-def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, starting_dir):
+def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir):
     run_set_files = (
         (iodefs, 'iodef.xml'),
         (desc_file.name, os.path.basename(desc_file.name)),
         ('xmlio_server.def', 'xmlio_server.def'),
     )
+    saved_cwd = os.getcwd()
     os.chdir(run_dir)
     for source, dest_name in run_set_files:
         source_path = os.path.normpath(os.path.join(run_set_dir, source))
         shutil.copy2(source_path, dest_name)
-    os.chdir(starting_dir)
+    os.chdir(saved_cwd)
 
 
-def _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir):
+def _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir):
     nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
+    saved_cwd = os.getcwd()
     os.chdir(run_dir)
     os.symlink(nemo_exec, 'nemo.exe')
     iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
@@ -188,10 +183,10 @@ def _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir, starting_dir):
         os.symlink(iom_server_exec, 'server.exe')
     with open('NEMO-code_rev.txt', 'wt') as f:
         f.writelines(hg.parents(nemo_code_repo, verbose=True))
-    os.chdir(starting_dir)
+    os.chdir(saved_cwd)
 
 
-def _make_grid_links(run_desc, run_dir, starting_dir):
+def _make_grid_links(run_desc, run_dir):
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     if not os.path.exists(nemo_forcing_dir):
         log.error(
@@ -206,6 +201,7 @@ def _make_grid_links(run_desc, run_dir, starting_dir):
         (run_desc['grid']['coordinates'], 'coordinates.nc'),
         (run_desc['grid']['bathymetry'], 'bathy_meter.nc'),
     )
+    saved_cwd = os.getcwd()
     os.chdir(run_dir)
     for source, link_name in grid_files:
         link_path = os.path.join(grid_dir, source)
@@ -218,10 +214,10 @@ def _make_grid_links(run_desc, run_dir, starting_dir):
             _remove_run_dir(run_dir)
             sys.exit(2)
         os.symlink(link_path, link_name)
-    os.chdir(starting_dir)
+    os.chdir(saved_cwd)
 
 
-def _make_forcing_links(run_desc, run_dir, starting_dir):
+def _make_forcing_links(run_desc, run_dir):
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     if not os.path.exists(nemo_forcing_dir):
         log.error(
@@ -243,6 +239,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
         (run_desc['forcing']['open boundaries'], 'open_boundaries'),
         (run_desc['forcing']['rivers'], 'rivers')
     )
+    saved_cwd = os.getcwd()
     os.chdir(run_dir)
     if not os.path.exists(ic_source):
         log.error(
@@ -266,7 +263,7 @@ def _make_forcing_links(run_desc, run_dir, starting_dir):
         os.symlink(link_path, link_name)
     with open('NEMO-forcing_rev.txt', 'wt') as f:
         f.writelines(hg.parents(nemo_forcing_dir, verbose=True))
-    os.chdir(starting_dir)
+    os.chdir(saved_cwd)
 
 
 def _check_atmos_files(run_desc, run_dir):
