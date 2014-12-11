@@ -245,10 +245,16 @@ def run_in_subprocess(run_id, run_desc, iodefs_file, results_dir):
     try:
         output = subprocess.check_output(
             cmd, stderr=subprocess.STDOUT, universal_newlines=True)
+        for line in output.splitlines():
+            if line:
+                log.info(line)
     except subprocess.CalledProcessError as e:
-        print(e.output)
-    finally:
-        print(output)
+        log.error(
+            'subprocess {cmd} failed with return code {status}'
+            .format(cmd=cmd, status=e.returncode))
+        for line in e.output.splitlines():
+            if line:
+                log.error(line)
     os.unlink(yaml_file)
 
 
