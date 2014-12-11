@@ -44,14 +44,15 @@ def test_get_parser(prepare_cmd):
 def test_copy_run_set_files_no_path(m_copy):
     """_copy_run_set_files creates correct symlink for source w/o path
     """
-    args = Mock(iodefs='iodef.xml')
-    args.desc_file.name = 'foo'
-    with patch('salishsea_cmd.prepare.os.chdir'):
-        prepare._copy_run_set_files(args, 'bar', 'baz')
+    desc_file = Mock()
+    desc_file.name = 'foo.yaml'
     pwd = os.getcwd()
+    with patch('salishsea_cmd.prepare.os.chdir'):
+        prepare._copy_run_set_files(
+            desc_file, pwd, 'iodef.xml', 'run_dir', 'starting_dir')
     expected = [
         call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
-        call(os.path.join(pwd, 'foo'), 'foo'),
+        call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
         call(os.path.join(pwd, 'xmlio_server.def'), 'xmlio_server.def'),
     ]
     assert m_copy.call_args_list == expected
@@ -61,14 +62,15 @@ def test_copy_run_set_files_no_path(m_copy):
 def test_copy_run_set_files_relative_path(m_copy):
     """_copy_run_set_files creates correct symlink for relative path source
     """
-    args = Mock(iodefs='../iodef.xml')
-    args.desc_file.name = 'foo'
-    with patch('salishsea_cmd.prepare.os.chdir'):
-        prepare._copy_run_set_files(args, 'bar', 'baz')
+    desc_file = Mock()
+    desc_file.name = 'foo.yaml'
     pwd = os.getcwd()
+    with patch('salishsea_cmd.prepare.os.chdir'):
+        prepare._copy_run_set_files(
+            desc_file, pwd, '../iodef.xml', 'run_dir', 'starting_dir')
     expected = [
         call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
-        call(os.path.join(pwd, 'foo'), 'foo'),
+        call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
         call(os.path.join(pwd, 'xmlio_server.def'), 'xmlio_server.def'),
     ]
     assert m_copy.call_args_list == expected
