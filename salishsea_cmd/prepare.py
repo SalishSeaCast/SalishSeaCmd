@@ -71,23 +71,52 @@ class Prepare(cliff.command.Command):
         The path to the run directory is logged to the console on completion
         of the set-up.
         """
-        run_desc = lib.load_run_desc(parsed_args.desc_file)
-        nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, parsed_args)
-        starting_dir = os.getcwd()
-        run_dir = _make_run_dir(run_desc)
-        _make_namelist(parsed_args, run_desc, run_dir)
-        _copy_run_set_files(parsed_args, run_dir, starting_dir)
-        _make_nemo_code_links(
-            nemo_code_repo, nemo_bin_dir, run_dir, starting_dir)
-        _make_grid_links(run_desc, run_dir, starting_dir)
-        _make_forcing_links(run_desc, run_dir, starting_dir)
-        _check_atmos_files(run_desc, run_dir)
+        run_dir = prepare(parsed_args.desc_file, parsed_args.iodefs)
         if not parsed_args.quiet:
             log.info('Created run directory {}'.format(run_dir))
         return run_dir
 
 
-def _check_nemo_exec(run_desc, args):
+def prepare(desc_file, iodefs):
+    """Create and prepare the temporary run directory.
+
+    The temporary run directory is created with a UUID as its name.
+    Symbolic links are created in the directory to the files and
+    directories specifed to run NEMO.
+    The output of :command:`hg parents` is recorded in the directory
+    for the NEMO-code and NEMO-forcing repos that the symlinks point to.
+    The path to the run directory is returned.
+
+    :arg desc_file: File handle of the open YAML run description file.
+    :type desc_file: file-like object
+
+    :arg iodefs: Path/filename of the NEMO IOM server defs file for the run.
+    :type iodefs: str
+
+    :returns: Path of the temporary run directory
+    :rtype: str
+    """
+    run_desc = lib.load_run_desc(desc_file)
+    nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc)
+    starting_dir = os.getcwd()
+    run_set_dir = os.path.dirname(os.path.abspath(desc_file.name))
+    run_dir = _make_run_dir(run_desc)
+    _make_namelist(
+        run_set_dir, run_desc, run_dir)
+    _copy_run_set_files(
+        desc_file, run_set_dir, iodefs, run_dir, starting_dir)
+    _make_nemo_code_links(
+        nemo_code_repo, nemo_bin_dir, run_dir, starting_dir)
+    _make_grid_links(
+        run_desc, run_dir, starting_dir)
+    _make_forcing_links(
+        run_desc, run_dir, starting_dir)
+    _check_atmos_files(
+        run_desc, run_dir)
+    return run_dir
+
+
+def _check_nemo_exec(run_desc):
     nemo_code_repo = os.path.abspath(run_desc['paths']['NEMO-code'])
     config_dir = os.path.join(
         nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config_name'])
@@ -99,7 +128,7 @@ def _check_nemo_exec(run_desc, args):
             .format(nemo_exec))
         sys.exit(2)
     iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
-    if not os.path.exists(iom_server_exec) and not args.quiet:
+    if not os.path.exists(iom_server_exec):
         log.warn(
             '{} not found - are you running without key_iomput?'
             .format(iom_server_exec)
@@ -122,8 +151,7 @@ def _remove_run_dir(run_dir):
     os.rmdir(run_dir)
 
 
-def _make_namelist(args, run_desc, run_dir):
-    run_set_dir = os.path.dirname(os.path.abspath(args.desc_file.name))
+def _make_namelist(run_set_dir, run_desc, run_dir):
     namelists = run_desc['namelists']
     with open(os.path.join(run_dir, 'namelist'), 'wt') as namelist:
         for nl in namelists:
@@ -138,11 +166,10 @@ def _make_namelist(args, run_desc, run_dir):
         namelist.writelines(EMPTY_NAMELISTS)
 
 
-def _copy_run_set_files(args, run_dir, starting_dir):
-    run_set_dir = os.path.dirname(os.path.abspath(args.desc_file.name))
+def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, starting_dir):
     run_set_files = (
-        (args.iodefs, 'iodef.xml'),
-        (args.desc_file.name, os.path.basename(args.desc_file.name)),
+        (iodefs, 'iodef.xml'),
+        (desc_file.name, os.path.basename(desc_file.name)),
         ('xmlio_server.def', 'xmlio_server.def'),
     )
     os.chdir(run_dir)
