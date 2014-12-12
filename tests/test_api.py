@@ -96,25 +96,6 @@ class TestCombine(object):
 
 
 @pytest.mark.usefixture('api_module')
-class TestPrepare(object):
-    @patch('salishsea_cmd.api._run_subcommand')
-    def test_prepare_default_args(self, m_run_subcommand, api_module):
-        app, app_args = Mock(spec=cliff.app.App), []
-        api_module.prepare(app, app_args, 'run_desc_file', 'iodefs_file')
-        m_run_subcommand.assert_called_once_with(
-            app, app_args, ['prepare', 'run_desc_file', 'iodefs_file'])
-
-    @patch('salishsea_cmd.api._run_subcommand')
-    def test_prepare_quiet_arg(self, m_run_subcommand, api_module):
-        app, app_args = Mock(spec=cliff.app.App), []
-        api_module.prepare(
-            app, app_args, 'run_desc_file', 'iodefs_file', quiet=True)
-        m_run_subcommand.assert_called_once_with(
-            app, app_args,
-            ['prepare', 'run_desc_file', 'iodefs_file', '--quiet'])
-
-
-@pytest.mark.usefixture('api_module')
 class TestRunDescription(object):
     def test_no_arguments(self, api_module):
         run_desc = api_module.run_description()

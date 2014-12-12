@@ -81,10 +81,7 @@ class Run(cliff.command.Command):
         return parser
 
     def take_action(self, parsed_args):
-        run_dir_name = api.prepare(
-            self.app, self.app_args,
-            parsed_args.desc_file, parsed_args.iodefs,
-            parsed_args.quiet)
+        run_dir_name = api.prepare(parsed_args.desc_file, parsed_args.iodefs)
         run_dir = pathlib.Path(run_dir_name).resolve()
         namelist = namelist2dict((run_dir/'namelist').as_posix())
         procs = namelist['nammpp'][0]['jpnij']
