@@ -74,7 +74,7 @@ class Gather(cliff.command.Command):
         try:
             api.combine(
                 self.app, self.app_args,
-                parsed_args.desc_file.name, parsed_args.results_dir,
+                parsed_args.desc_file, parsed_args.results_dir,
                 parsed_args.keep_proc_results, parsed_args.no_compress,
                 parsed_args.compress_restart, parsed_args.delete_restart)
         except Exception:

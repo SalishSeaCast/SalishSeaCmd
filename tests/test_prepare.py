@@ -44,8 +44,7 @@ def test_get_parser(prepare_cmd):
 def test_copy_run_set_files_no_path(m_copy):
     """_copy_run_set_files creates correct symlink for source w/o path
     """
-    desc_file = Mock()
-    desc_file.name = 'foo.yaml'
+    desc_file = 'foo.yaml'
     pwd = os.getcwd()
     with patch('salishsea_cmd.prepare.os.chdir'):
         prepare._copy_run_set_files(desc_file, pwd, 'iodef.xml', 'run_dir')
@@ -61,8 +60,7 @@ def test_copy_run_set_files_no_path(m_copy):
 def test_copy_run_set_files_relative_path(m_copy):
     """_copy_run_set_files creates correct symlink for relative path source
     """
-    desc_file = Mock()
-    desc_file.name = 'foo.yaml'
+    desc_file = 'foo.yaml'
     pwd = os.getcwd()
     with patch('salishsea_cmd.prepare.os.chdir'):
         prepare._copy_run_set_files(desc_file, pwd, '../iodef.xml', 'run_dir')

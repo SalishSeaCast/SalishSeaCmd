@@ -32,21 +32,23 @@ __all__ = [
 def load_run_desc(desc_file):
     """Load the run description file contents into a data structure.
 
-    :arg desc_file: Handle of YAML run description file object.
-    :type desc_file: file-like object
+    :arg desc_file: File path/name of YAML run description file.
+    :type desc_file: str
 
     :returns: Contents of run description file parsed from YAML into a dict.
     :rtype: dict
     """
-    return yaml.load(desc_file)
+    with open(desc_file, 'rt') as f:
+        run_desc = yaml.load(f)
+    return run_desc
 
 
 def add_combine_gather_options(parser):
     """Add options that are common to combine and gather sub-commands.
     """
     parser.add_argument(
-        'desc_file', metavar='DESC_FILE', type=open,
-        help='run description YAML file')
+        'desc_file', metavar='DESC_FILE',
+        help='file path/name of run description YAML file')
     parser.add_argument(
         'results_dir', metavar='RESULTS_DIR',
         help='directory to store results into')

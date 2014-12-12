@@ -83,7 +83,7 @@ class Run(cliff.command.Command):
     def take_action(self, parsed_args):
         run_dir_name = api.prepare(
             self.app, self.app_args,
-            parsed_args.desc_file.name, parsed_args.iodefs,
+            parsed_args.desc_file, parsed_args.iodefs,
             parsed_args.quiet)
         run_dir = pathlib.Path(run_dir_name).resolve()
         namelist = namelist2dict((run_dir/'namelist').as_posix())
@@ -143,7 +143,7 @@ def _build_batch_script(
         u'{cleanup}'
         .format(
             defns=_definitions(
-                run_desc['run_id'], desc_file.name, run_dir, results_dir,
+                run_desc['run_id'], desc_file, run_dir, results_dir,
                 gather_opts, system, procs),
             modules=_modules(system),
             execute=_execute(system),
