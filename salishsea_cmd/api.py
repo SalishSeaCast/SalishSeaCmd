@@ -30,6 +30,8 @@ import subprocess
 import cliff.commandmanager
 import yaml
 
+from . import prepare as prepare_plug_in
+
 
 __all__ = ['combine', 'prepare', 'run_description', 'run_in_subprocess']
 
@@ -96,21 +98,15 @@ def combine(
     return result
 
 
-def prepare(app, app_args, run_desc_file, iodefs_file, quiet=False):
+def prepare(run_desc_file, iodefs_file):
     """Prepare a Salish Sea NEMO run.
 
-    A UUID named directory is created and symbolic links are created
-    in the directory to the files and directories specifed to run NEMO.
+    A UUID named temporary run directory is created and symbolic links
+    are created in the directory to the files and directories specifed
+    to run NEMO.
     The output of :command:`hg parents` is recorded in the directory
     for the NEMO-code and NEMO-forcing repos that the symlinks point to.
-    The path to the run directory is logged to the console on completion
-    of the set-up.
-
-    :arg app: Application instance invoking the command.
-    :type app: :py:class:`cliff.app.App`
-
-    :arg app_args: Application arguments.
-    :type app_args: :py:class:`argparse.Namespace`
+    The path to the run directory is returned.
 
     :arg run_desc_file: File path/name of the run description YAML file.
     :type run_desc_file: str
@@ -119,15 +115,10 @@ def prepare(app, app_args, run_desc_file, iodefs_file, quiet=False):
                        for the run.
     :type iodefs_file: str
 
-    :arg quite: Don't show the run directory path on completion;
-                defaults to :py:obj:`False`.
-    :type Boolean:
+    :returns: Path of the temporary run directory
+    :rtype: str
     """
-    argv = ['prepare', run_desc_file, iodefs_file]
-    if quiet:
-        argv.append('--quiet')
-    result = _run_subcommand(app, app_args, argv)
-    return result
+    return prepare_plug_in.prepare(run_desc_file, iodefs_file)
 
 
 def run_description(
