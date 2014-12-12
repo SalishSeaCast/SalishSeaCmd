@@ -87,10 +87,11 @@ def prepare(desc_file, iodefs):
     for the NEMO-code and NEMO-forcing repos that the symlinks point to.
     The path to the run directory is returned.
 
-    :arg desc_file: File handle of the open YAML run description file.
+    :arg desc_file: File path/name of the YAML run description file.
     :type desc_file: file-like object
 
-    :arg iodefs: Path/filename of the NEMO IOM server defs file for the run.
+    :arg iodefs: File path/name of the NEMO IOM server defs file for
+                 the run.
     :type iodefs: str
 
     :returns: Path of the temporary run directory
@@ -98,7 +99,7 @@ def prepare(desc_file, iodefs):
     """
     run_desc = lib.load_run_desc(desc_file)
     nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc)
-    run_set_dir = os.path.dirname(os.path.abspath(desc_file.name))
+    run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
     _make_namelist(run_set_dir, run_desc, run_dir)
     _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir)
@@ -162,7 +163,7 @@ def _make_namelist(run_set_dir, run_desc, run_dir):
 def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir):
     run_set_files = (
         (iodefs, 'iodef.xml'),
-        (desc_file.name, os.path.basename(desc_file.name)),
+        (desc_file, os.path.basename(desc_file)),
         ('xmlio_server.def', 'xmlio_server.def'),
     )
     saved_cwd = os.getcwd()
