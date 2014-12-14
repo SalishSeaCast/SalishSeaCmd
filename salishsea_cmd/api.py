@@ -37,6 +37,12 @@ __all__ = ['combine', 'prepare', 'run_description', 'run_in_subprocess']
 
 
 log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(name)s %(levelname)s: %(message)s')
+handler.setFormatter(formatter)
+log.addHandler(handler)
 
 
 def combine(
