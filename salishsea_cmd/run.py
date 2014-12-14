@@ -56,10 +56,10 @@ class Run(cliff.command.Command):
         '''
         parser.add_argument(
             'desc_file', metavar='DESC_FILE', type=open,
-            help='run description YAML file')
+            help='File path/name of run description YAML file')
         parser.add_argument(
             'iodefs', metavar='IO_DEFS',
-            help='NEMO IOM server defs file for run')
+            help='File path/name of NEMO IOM server defs file for run')
         parser.add_argument(
             'results_dir', metavar='RESULTS_DIR',
             help='directory to store results into')
