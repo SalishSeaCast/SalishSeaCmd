@@ -55,7 +55,7 @@ class Run(cliff.command.Command):
             If RESULTS_DIR does not exist it will be created.
         '''
         parser.add_argument(
-            'desc_file', metavar='DESC_FILE', type=open,
+            'desc_file', metavar='DESC_FILE',
             help='File path/name of run description YAML file')
         parser.add_argument(
             'iodefs', metavar='IO_DEFS',
