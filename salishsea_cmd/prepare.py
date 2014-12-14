@@ -51,7 +51,7 @@ class Prepare(cliff.command.Command):
             and print the path to the run directory.
         '''
         parser.add_argument(
-            'desc_file', metavar='DESC_FILE', type=open,
+            'desc_file', metavar='DESC_FILE',
             help='run description YAML file')
         parser.add_argument(
             'iodefs', metavar='IO_DEFS',
