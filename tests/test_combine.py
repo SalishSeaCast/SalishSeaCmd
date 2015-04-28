@@ -131,11 +131,12 @@ def test_move_results_makedirs(mock_makedirs, mock_move):
     """_move_results creates results_dir if it doesn't exist
     """
     combine._move_results(['foo', 'bar'], 'baz')
-    assert not mock_makedirs.called
+    assert mock_makedirs.called
 
 
+@patch('salishsea_cmd.combine.os.makedirs')
 @patch('salishsea_cmd.combine.shutil.move')
-def test_move_results_renames(mock_move):
+def test_move_results_renames(mock_move, mock_makedirs):
     """_move_results calls shutil.move for each results file
     """
     combine._move_results(['foo', 'bar'], 'baz')
