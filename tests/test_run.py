@@ -17,7 +17,7 @@
 """
 from __future__ import absolute_import
 
-from cStringIO import StringIO
+from six.moves import StringIO
 
 import cliff.app
 from mock import Mock
