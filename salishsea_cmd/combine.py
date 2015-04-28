@@ -135,6 +135,8 @@ def _move_results(name_roots, results_dir):
     if os.path.exists(abs_results_dir):
         if os.path.samefile(os.getcwd(), abs_results_dir):
             return
+    else:
+        os.makedirs(abs_results_dir)
     postfix = '' if results_dir.endswith('/') else '/'
     for fn in _results_files(name_roots):
         log.info('moving {} to {}{}'.format(fn, results_dir, postfix))
