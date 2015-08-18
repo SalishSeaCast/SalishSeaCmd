@@ -17,10 +17,11 @@
 """
 from __future__ import absolute_import
 
+from unittest.mock import Mock
+
 from six.moves import StringIO
 
 import cliff.app
-from mock import Mock
 import pytest
 import yaml
 

@@ -16,14 +16,15 @@
 """SalishSeaCmd prepare sub-command plug-in unit tests
 """
 from __future__ import absolute_import
-import os
 
-import cliff.app
-from mock import (
+import os
+from unittest.mock import (
     call,
     patch,
     Mock,
 )
+
+import cliff.app
 import pytest
 
 from salishsea_cmd import prepare
