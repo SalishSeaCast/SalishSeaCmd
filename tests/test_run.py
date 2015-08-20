@@ -15,9 +15,8 @@
 
 """SalishSeaCmd run sub-command plug-in unit tests
 """
+from io import StringIO
 from unittest.mock import Mock
-
-from six.moves import StringIO
 
 import cliff.app
 import pytest
