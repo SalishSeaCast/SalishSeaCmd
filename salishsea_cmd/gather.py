@@ -17,8 +17,6 @@
 
 Gather results files from a Salish Sea NEMO run into a specified directory.
 """
-from __future__ import absolute_import
-
 import logging
 import os
 import shutil

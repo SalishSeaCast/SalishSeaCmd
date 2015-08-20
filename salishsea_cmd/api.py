@@ -21,8 +21,6 @@ Provides Python function interfaces to command processor sub-commands
 for use in other sub-command processor modules,
 and by other software.
 """
-from __future__ import absolute_import
-
 import logging
 import os
 import subprocess
