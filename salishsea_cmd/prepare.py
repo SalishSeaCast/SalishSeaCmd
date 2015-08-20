@@ -27,9 +27,10 @@ import uuid
 import arrow
 import cliff.command
 
-from . import lib
 import salishsea_tools.hg_commands as hg
 from salishsea_tools.namelist import namelist2dict
+
+from . import lib
 
 
 __all__ = ['Prepare']

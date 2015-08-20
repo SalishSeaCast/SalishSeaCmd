@@ -27,11 +27,12 @@ import subprocess
 import cliff.command
 import pathlib
 
+from salishsea_tools.namelist import namelist2dict
+
 from . import (
     api,
     lib,
 )
-from salishsea_tools.namelist import namelist2dict
 
 
 __all__ = ['Run', 'td2hms']
