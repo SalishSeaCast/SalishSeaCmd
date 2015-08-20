@@ -25,7 +25,7 @@ import __pkg_metadata__
 
 python_classifiers = [
     'Programming Language :: Python :: {0}'.format(py_version)
-    for py_version in ['2', '2.7', '3', '3.2', '3.3', '3.4']]
+    for py_version in ['3', '3.4']]
 other_classifiers = [
     'Development Status :: ' + __pkg_metadata__.DEV_STATUS,
     'License :: OSI Approved :: Apache Software License',
@@ -44,12 +44,12 @@ try:
 except IOError:
     long_description = ''
 install_requires = [
-    # see requirements.txt for versions most recently used in development
+    # see environment.yaml for versions most recently used in development
     'arrow',
     'cliff',
     'pathlib',
     'PyYAML',
-    # 'SalishSeaTools',
+    # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools
 ]
 
 setup(
