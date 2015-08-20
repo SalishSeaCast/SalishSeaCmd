@@ -18,8 +18,6 @@
 Sets up the necesaary symbolic links for a Salish Sea NEMO run
 in a specified directory and changes the pwd to that directory.
 """
-from __future__ import absolute_import
-
 import logging
 import os
 import shutil

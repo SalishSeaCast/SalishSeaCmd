@@ -18,8 +18,6 @@
 Download CGRF products atmospheric forcing files from Dalhousie rsync
 repository and symlink with the file names that NEMO expects.
 """
-from __future__ import absolute_import
-
 import argparse
 import datetime
 import getpass

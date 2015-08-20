@@ -18,8 +18,6 @@
 Combine per-processor files from an MPI Salish Sea NEMO run into single
 files with the same name-root and move them to a specified directory.
 """
-from __future__ import absolute_import
-
 import glob
 import gzip
 import logging
