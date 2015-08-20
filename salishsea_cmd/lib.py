@@ -15,8 +15,6 @@
 
 """Utility functions for use by SalishSeaCmd command plug-ins.
 """
-from __future__ import absolute_import
-
 import subprocess
 
 import yaml

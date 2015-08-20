@@ -15,8 +15,6 @@
 
 """SalishSeaCmd combine sub-command plug-in unit tests
 """
-from __future__ import absolute_import
-
 from unittest.mock import (
     Mock,
     patch,
