@@ -47,7 +47,6 @@ install_requires = [
     # see environment.yaml for versions most recently used in development
     'arrow',
     'cliff',
-    'pathlib',
     'PyYAML',
     # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools
 ]
