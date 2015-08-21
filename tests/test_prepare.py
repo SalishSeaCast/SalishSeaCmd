@@ -37,9 +37,32 @@ def prepare_cmd(prepare_module):
     return prepare_module.Prepare(Mock(spec=cliff.app.App), [])
 
 
-def test_get_parser(prepare_cmd):
-    parser = prepare_cmd.get_parser('salishsea prepare')
-    assert parser.prog == 'salishsea prepare'
+class TestGetParser:
+    def test_get_parser(self, prepare_cmd):
+        parser = prepare_cmd.get_parser('salishsea prepare')
+        assert parser.prog == 'salishsea prepare'
+
+    def test_parsed_args_defaults(self, prepare_cmd):
+        parser = prepare_cmd.get_parser('salishsea prepare')
+        parsed_args = parser.parse_args(['foo', 'bar'])
+        assert parsed_args.desc_file == 'foo'
+        assert parsed_args.iodefs == 'bar'
+        assert not parsed_args.nemo34
+        assert not parsed_args.quiet
+
+    def test_parsed_args_nemo34(self, prepare_cmd):
+        parser = prepare_cmd.get_parser('salishsea prepare')
+        parsed_args = parser.parse_args(['foo', 'bar', '--nemo3.4'])
+        assert parsed_args.desc_file == 'foo'
+        assert parsed_args.iodefs == 'bar'
+        assert parsed_args.nemo34
+
+    def test_parsed_args_quiet(self, prepare_cmd):
+        parser = prepare_cmd.get_parser('salishsea prepare')
+        parsed_args = parser.parse_args(['foo', 'bar', '-q'])
+        assert parsed_args.desc_file == 'foo'
+        assert parsed_args.iodefs == 'bar'
+        assert parsed_args.quiet
 
 
 @patch.object(prepare_module().shutil, 'copy2')
