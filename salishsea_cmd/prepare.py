@@ -42,11 +42,10 @@ log = logging.getLogger(__name__)
 class Prepare(cliff.command.Command):
     """Prepare a Salish Sea NEMO run
     """
-
     def get_parser(self, prog_name):
         parser = super(Prepare, self).get_parser(prog_name)
         parser.description = '''
-            Set up the Salish Sea NEMO run described in DESC_FILE
+            Set up the Salish Sea NEMO-3.6 run described in DESC_FILE
             and print the path to the run directory.
         '''
         parser.add_argument(
@@ -55,6 +54,11 @@ class Prepare(cliff.command.Command):
         parser.add_argument(
             'iodefs', metavar='IO_DEFS',
             help='NEMO IOM server defs file for run')
+        parser.add_argument(
+            '--nemo3.4', dest='nemo34', action='store_true',
+            help='''
+            Prepare a NEMO-3.4 run;
+            the default is to prepare a NEMO-3.6 run''')
         parser.add_argument(
             '-q', '--quiet', action='store_true',
             help="don't show the run directory path on completion")
