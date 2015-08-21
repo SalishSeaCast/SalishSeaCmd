@@ -25,13 +25,16 @@ from unittest.mock import (
 import cliff.app
 import pytest
 
-from salishsea_cmd import prepare
+
+@pytest.fixture
+def prepare_module():
+    from salishsea_cmd import prepare
+    return prepare
 
 
 @pytest.fixture
-def prepare_cmd():
-    import salishsea_cmd.prepare
-    return salishsea_cmd.prepare.Prepare(Mock(spec=cliff.app.App), [])
+def prepare_cmd(prepare_module):
+    return prepare_module.Prepare(Mock(spec=cliff.app.App), [])
 
 
 def test_get_parser(prepare_cmd):
@@ -39,14 +42,15 @@ def test_get_parser(prepare_cmd):
     assert parser.prog == 'salishsea prepare'
 
 
-@patch('salishsea_cmd.prepare.shutil.copy2')
-def test_copy_run_set_files_no_path(m_copy):
+@patch.object(prepare_module().shutil, 'copy2')
+def test_copy_run_set_files_no_path(m_copy, prepare_module):
     """_copy_run_set_files creates correct symlink for source w/o path
     """
     desc_file = 'foo.yaml'
     pwd = os.getcwd()
     with patch('salishsea_cmd.prepare.os.chdir'):
-        prepare._copy_run_set_files(desc_file, pwd, 'iodef.xml', 'run_dir')
+        prepare_module._copy_run_set_files(
+            desc_file, pwd, 'iodef.xml', 'run_dir')
     expected = [
         call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
         call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
@@ -55,14 +59,15 @@ def test_copy_run_set_files_no_path(m_copy):
     assert m_copy.call_args_list == expected
 
 
-@patch('salishsea_cmd.prepare.shutil.copy2')
-def test_copy_run_set_files_relative_path(m_copy):
+@patch.object(prepare_module().shutil, 'copy2')
+def test_copy_run_set_files_relative_path(m_copy, prepare_module):
     """_copy_run_set_files creates correct symlink for relative path source
     """
     desc_file = 'foo.yaml'
     pwd = os.getcwd()
-    with patch('salishsea_cmd.prepare.os.chdir'):
-        prepare._copy_run_set_files(desc_file, pwd, '../iodef.xml', 'run_dir')
+    with patch.object(prepare_module.os, 'chdir'):
+        prepare_module._copy_run_set_files(
+            desc_file, pwd, '../iodef.xml', 'run_dir')
     expected = [
         call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
         call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
@@ -71,29 +76,28 @@ def test_copy_run_set_files_relative_path(m_copy):
     assert m_copy.call_args_list == expected
 
 
-@patch('salishsea_cmd.prepare.log')
-def test_make_grid_links_no_forcing_dir(m_log):
+@patch.object(prepare_module(), 'log')
+def test_make_grid_links_no_forcing_dir(m_log, prepare_module):
     run_desc = {
         'paths': {
             'forcing': 'foo',
         },
     }
-    prepare._remove_run_dir = Mock()
-    p_exists = patch(
-        'salishsea_cmd.prepare.os.path.exists', return_value=False)
-    p_abspath = patch(
-        'salishsea_cmd.prepare.os.path.abspath',
-        side_effect=lambda path: path)
+    prepare_module._remove_run_dir = Mock()
+    p_exists = patch.object(
+        prepare_module.os.path, 'exists', return_value=False)
+    p_abspath = patch.object(
+        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
     with pytest.raises(SystemExit), p_exists, p_abspath:
-        prepare._make_grid_links(run_desc, 'run_dir')
+        prepare_module._make_grid_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
-    prepare._remove_run_dir.assert_called_once_with('run_dir')
+    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
 
-@patch('salishsea_cmd.prepare.log')
-def test_make_grid_links_no_link_path(m_log):
+@patch.object(prepare_module(), 'log')
+def test_make_grid_links_no_link_path(m_log, prepare_module):
     run_desc = {
         'paths': {
             'forcing': 'foo',
@@ -103,42 +107,39 @@ def test_make_grid_links_no_link_path(m_log):
             'bathymetry': 'bathy.nc',
         },
     }
-    prepare._remove_run_dir = Mock()
-    p_exists = patch(
-        'salishsea_cmd.prepare.os.path.exists',
-        side_effect=[True, False])
-    p_abspath = patch(
-        'salishsea_cmd.prepare.os.path.abspath',
-        side_effect=lambda path: path)
-    p_chdir = patch('salishsea_cmd.prepare.os.chdir')
+    prepare_module._remove_run_dir = Mock()
+    p_exists = patch.object(
+        prepare_module.os.path, 'exists', side_effect=[True, False])
+    p_abspath = patch.object(
+        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
+    p_chdir = patch.object(prepare_module.os, 'chdir')
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-        prepare._make_grid_links(run_desc, 'run_dir')
+        prepare_module._make_grid_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         'foo/grid/coordinates.nc not found; cannot create symlink - '
         'please check the forcing path and grid file names '
         'in your run description file')
-    prepare._remove_run_dir.assert_called_once_with('run_dir')
+    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
 
-@patch('salishsea_cmd.prepare.log')
-def test_make_forcing_links_no_forcing_dir(m_log):
+@patch.object(prepare_module(), 'log')
+def test_make_forcing_links_no_forcing_dir(m_log, prepare_module):
     run_desc = {
         'paths': {
             'forcing': 'foo',
         },
     }
-    prepare._remove_run_dir = Mock()
-    p_exists = patch(
-        'salishsea_cmd.prepare.os.path.exists', return_value=False)
-    p_abspath = patch(
-        'salishsea_cmd.prepare.os.path.abspath',
-        side_effect=lambda path: path)
+    prepare_module._remove_run_dir = Mock()
+    p_exists = patch.object(
+        prepare_module.os.path, 'exists', return_value=False)
+    p_abspath = patch.object(
+        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
     with pytest.raises(SystemExit), p_exists, p_abspath:
-        prepare._make_forcing_links(run_desc, 'run_dir')
+        prepare_module._make_forcing_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         'foo not found; cannot create symlinks - '
         'please check the forcing path in your run description file')
-    prepare._remove_run_dir.assert_called_once_with('run_dir')
+    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
 
 @pytest.mark.parametrize(
@@ -148,8 +149,10 @@ def test_make_forcing_links_no_forcing_dir(m_log):
         ('initial_strat/', 'foo/initial_strat/'),
     ],
 )
-@patch('salishsea_cmd.prepare.log')
-def test_make_forcing_links_no_restart_path(m_log, link_path, expected):
+@patch.object(prepare_module(), 'log')
+def test_make_forcing_links_no_restart_path(
+    m_log, link_path, expected, prepare_module,
+):
     run_desc = {
         'paths': {
             'forcing': 'foo',
@@ -161,25 +164,23 @@ def test_make_forcing_links_no_restart_path(m_log, link_path, expected):
             'rivers': 'rivers/',
         },
     }
-    prepare._remove_run_dir = Mock()
-    p_exists = patch(
-        'salishsea_cmd.prepare.os.path.exists',
-        side_effect=[True, False])
-    p_abspath = patch(
-        'salishsea_cmd.prepare.os.path.abspath',
-        side_effect=lambda path: path)
-    p_chdir = patch('salishsea_cmd.prepare.os.chdir')
+    prepare_module._remove_run_dir = Mock()
+    p_exists = patch.object(
+        prepare_module.os.path, 'exists', side_effect=[True, False])
+    p_abspath = patch.object(
+        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
+    p_chdir = patch.object(prepare_module.os, 'chdir')
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-        prepare._make_forcing_links(run_desc, 'run_dir')
+        prepare_module._make_forcing_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         '{} not found; cannot create symlink - '
         'please check the forcing path and initial conditions file names '
         'in your run description file'.format(expected))
-    prepare._remove_run_dir.assert_called_once_with('run_dir')
+    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
 
-@patch('salishsea_cmd.prepare.log')
-def test_make_forcing_links_no_forcing_path(m_log):
+@patch.object(prepare_module(), 'log')
+def test_make_forcing_links_no_forcing_path(m_log, prepare_module):
     run_desc = {
         'paths': {
             'forcing': 'foo',
@@ -191,19 +192,17 @@ def test_make_forcing_links_no_forcing_path(m_log):
             'rivers': 'rivers/',
         },
     }
-    prepare._remove_run_dir = Mock()
-    p_exists = patch(
-        'salishsea_cmd.prepare.os.path.exists',
-        side_effect=[True, True, False])
-    p_abspath = patch(
-        'salishsea_cmd.prepare.os.path.abspath',
-        side_effect=lambda path: path)
-    p_chdir = patch('salishsea_cmd.prepare.os.chdir')
-    p_symlink = patch('salishsea_cmd.prepare.os.symlink')
+    prepare_module._remove_run_dir = Mock()
+    p_exists = patch.object(
+        prepare_module.os.path, 'exists', side_effect=[True, True, False])
+    p_abspath = patch.object(
+        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
+    p_chdir = patch.object(prepare_module.os, 'chdir')
+    p_symlink = patch.object(prepare_module.os, 'symlink')
     with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir, p_symlink:
-        prepare._make_forcing_links(run_desc, 'run_dir')
+        prepare_module._make_forcing_links(run_desc, 'run_dir')
     m_log.error.assert_called_once_with(
         'foo/bar not found; cannot create symlink - '
         'please check the forcing paths and file names '
         'in your run description file')
-    prepare._remove_run_dir.assert_called_once_with('run_dir')
+    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
