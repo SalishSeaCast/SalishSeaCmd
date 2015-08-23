@@ -74,13 +74,14 @@ class Prepare(cliff.command.Command):
         The path to the run directory is logged to the console on completion
         of the set-up.
         """
-        run_dir = prepare(parsed_args.desc_file, parsed_args.iodefs)
+        run_dir = prepare(
+            parsed_args.desc_file, parsed_args.iodefs, parsed_args.nemo34)
         if not parsed_args.quiet:
             log.info('Created run directory {}'.format(run_dir))
         return run_dir
 
 
-def prepare(desc_file, iodefs):
+def prepare(desc_file, iodefs, nemo34):
     """Create and prepare the temporary run directory.
 
     The temporary run directory is created with a UUID as its name.
@@ -96,6 +97,10 @@ def prepare(desc_file, iodefs):
     :arg iodefs: File path/name of the NEMO IOM server defs file for
                  the run.
     :type iodefs: str
+
+    :arg nemo34: Prepare a NEMO-3.4 run;
+                 the default is to prepare a NEMO-3.6 run
+    :type nemo34: boolean
 
     :returns: Path of the temporary run directory
     :rtype: str
@@ -114,6 +119,21 @@ def prepare(desc_file, iodefs):
 
 
 def _check_nemo_exec(run_desc):
+    """Calculate absolute paths of NEMO code repo & NEMO executable's
+    directorty.
+
+    Confirm that the NEMO executable exists, terminating if it does not.
+
+    For NEMO-3.4 runs, confirm check that the IOM server executable
+    exists, issuing a warning if it does not.
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :arg nemo34: Prepare a NEMO-3.4 run;
+                 the default is to prepare a NEMO-3.6 run
+    :type nemo34: boolean
+    """
     nemo_code_repo = os.path.abspath(run_desc['paths']['NEMO-code'])
     config_dir = os.path.join(
         nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config_name'])
