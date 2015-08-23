@@ -81,13 +81,44 @@ class TestCheckNemoExec:
                 run_desc)
         assert nemo_code_repo == p_code
 
-    def test_nemo_code_repo_not_found(self, prepare_module):
+    def test_nemo_bin_dir_path(self, prepare_module, tmpdir):
+        p_code = tmpdir.ensure_dir('NEMO-3.6-code')
+        run_desc = {
+            'config_name': 'SalishSea',
+            'paths': {'NEMO-code': str(p_code)},
+        }
+        p_bin_dir = p_code.ensure_dir(
+            'NEMOGCM', 'CONFIG', 'SalishSea', 'BLD', 'bin')
+        with patch.object(prepare_module.os.path, 'exists', return_value=True):
+            nemo_code_repo, nemo_bin_dir = prepare_module._check_nemo_exec(
+                run_desc)
+        assert nemo_bin_dir == p_bin_dir
+
+    def test_nemo_exec_not_found(self, prepare_module):
         run_desc = {
             'config_name': 'SalishSea',
             'paths': {'NEMO-code': '../../NEMO-3.6-code'},
         }
         with pytest.raises(SystemExit):
             prepare_module._check_nemo_exec(run_desc)
+
+    @patch.object(prepare_module(), 'log')
+    def test_iom_server_exec_not_found(self, m_log, prepare_module, tmpdir):
+        p_code = tmpdir.ensure_dir('NEMO-3.6-code')
+        run_desc = {
+            'config_name': 'SalishSea',
+            'paths': {'NEMO-code': str(p_code)},
+        }
+        p_bin_dir = p_code.ensure_dir(
+            'NEMOGCM', 'CONFIG', 'SalishSea', 'BLD', 'bin')
+        p_exists = patch.object(
+            prepare_module.os.path, 'exists', side_effect=[True, False])
+        with p_exists:
+            nemo_code_repo, nemo_bin_dir = prepare_module._check_nemo_exec(
+                run_desc)
+        m_log.warn.assert_called_once_with(
+            '{}/server.exe not found - are you running without key_iomput?'
+            .format(p_bin_dir))
 
 
 @patch.object(prepare_module().shutil, 'copy2')
