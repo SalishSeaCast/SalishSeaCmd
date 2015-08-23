@@ -106,7 +106,7 @@ def prepare(desc_file, iodefs, nemo34):
     :rtype: str
     """
     run_desc = lib.load_run_desc(desc_file)
-    nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc)
+    nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
     _make_namelist(run_set_dir, run_desc, run_dir)
@@ -118,7 +118,7 @@ def prepare(desc_file, iodefs, nemo34):
     return run_dir
 
 
-def _check_nemo_exec(run_desc):
+def _check_nemo_exec(run_desc, nemo34):
     """Calculate absolute paths of NEMO code repo & NEMO executable's
     directorty.
 
@@ -147,12 +147,13 @@ def _check_nemo_exec(run_desc):
             '{} not found - did you forget to build it?'
             .format(nemo_exec))
         raise SystemExit(2)
-    iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
-    if not os.path.exists(iom_server_exec):
-        log.warn(
-            '{} not found - are you running without key_iomput?'
-            .format(iom_server_exec)
-        )
+    if nemo34:
+        iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
+        if not os.path.exists(iom_server_exec):
+            log.warn(
+                '{} not found - are you running without key_iomput?'
+                .format(iom_server_exec)
+            )
     return nemo_code_repo, nemo_bin_dir
 
 
