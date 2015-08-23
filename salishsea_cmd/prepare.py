@@ -122,7 +122,8 @@ def _check_nemo_exec(run_desc):
     """Calculate absolute paths of NEMO code repo & NEMO executable's
     directorty.
 
-    Confirm that the NEMO executable exists, terminating if it does not.
+    Confirm that the NEMO executable exists, raising a SystemExit
+    exception if it does not.
 
     For NEMO-3.4 runs, confirm check that the IOM server executable
     exists, issuing a warning if it does not.
@@ -133,6 +134,8 @@ def _check_nemo_exec(run_desc):
     :arg nemo34: Prepare a NEMO-3.4 run;
                  the default is to prepare a NEMO-3.6 run
     :type nemo34: boolean
+
+    :raises: SystemExit
     """
     nemo_code_repo = os.path.abspath(run_desc['paths']['NEMO-code'])
     config_dir = os.path.join(
@@ -143,7 +146,7 @@ def _check_nemo_exec(run_desc):
         log.error(
             '{} not found - did you forget to build it?'
             .format(nemo_exec))
-        sys.exit(2)
+        raise SystemExit(2)
     iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
     if not os.path.exists(iom_server_exec):
         log.warn(

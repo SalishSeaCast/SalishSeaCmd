@@ -38,6 +38,8 @@ def prepare_cmd(prepare_module):
 
 
 class TestGetParser:
+    """Unit tests for `salishsea prepare` sub-command command-line parser.
+    """
     def test_get_parser(self, prepare_cmd):
         parser = prepare_cmd.get_parser('salishsea prepare')
         assert parser.prog == 'salishsea prepare'
@@ -63,6 +65,29 @@ class TestGetParser:
         assert parsed_args.desc_file == 'foo'
         assert parsed_args.iodefs == 'bar'
         assert parsed_args.quiet
+
+
+class TestCheckNemoExec:
+    """Unit tests for `salishsea prepare` _check_nemo_exec() function.
+    """
+    def test_nemo_code_repo_path(self, prepare_module, tmpdir):
+        p_code = tmpdir.ensure_dir('NEMO-3.6-code')
+        run_desc = {
+            'config_name': 'SalishSea',
+            'paths': {'NEMO-code': str(p_code)},
+        }
+        with patch.object(prepare_module.os.path, 'exists', return_value=True):
+            nemo_code_repo, nemo_bin_dir = prepare_module._check_nemo_exec(
+                run_desc)
+        assert nemo_code_repo == p_code
+
+    def test_nemo_code_repo_not_found(self, prepare_module):
+        run_desc = {
+            'config_name': 'SalishSea',
+            'paths': {'NEMO-code': '../../NEMO-3.6-code'},
+        }
+        with pytest.raises(SystemExit):
+            prepare_module._check_nemo_exec(run_desc)
 
 
 @patch.object(prepare_module().shutil, 'copy2')
