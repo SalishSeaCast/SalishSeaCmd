@@ -45,7 +45,7 @@ class Prepare(cliff.command.Command):
     def get_parser(self, prog_name):
         parser = super(Prepare, self).get_parser(prog_name)
         parser.description = '''
-            Set up the Salish Sea NEMO-3.6 run described in DESC_FILE
+            Set up the Salish Sea NEMO described in DESC_FILE
             and print the path to the run directory.
         '''
         parser.add_argument(
@@ -107,6 +107,9 @@ def prepare(desc_file, iodefs, nemo34):
     """
     run_desc = lib.load_run_desc(desc_file)
     nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
+    xios_bin_dir = (
+        _check_xios_exec(run_desc) if not nemo34
+        else None)
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
     _make_namelist(run_set_dir, run_desc, run_dir)
@@ -120,7 +123,7 @@ def prepare(desc_file, iodefs, nemo34):
 
 def _check_nemo_exec(run_desc, nemo34):
     """Calculate absolute paths of NEMO code repo & NEMO executable's
-    directorty.
+    directory.
 
     Confirm that the NEMO executable exists, raising a SystemExit
     exception if it does not.
@@ -155,6 +158,27 @@ def _check_nemo_exec(run_desc, nemo34):
                 .format(iom_server_exec)
             )
     return nemo_code_repo, nemo_bin_dir
+
+
+def _check_xios_exec(run_desc):
+    """Calculate absolute path of XIOS executable's directory.
+
+    Confirm that the XIOS executable exists, raising a SystemExit
+    exception if it does not.
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :raises: SystemExit
+    """
+    xios_code_repo = os.path.abspath(run_desc['paths']['XIOS'])
+    xios_bin_dir = os.path.join(xios_code_repo, 'bin')
+    xios_exec = os.path.join(xios_bin_dir, 'xios_server.exe')
+    if not os.path.exists(xios_exec):
+        log.error(
+            '{} not found - did you forget to build it?'.format(xios_exec))
+        raise SystemExit
+    return xios_bin_dir
 
 
 def _make_run_dir(run_desc):
