@@ -182,6 +182,14 @@ def _check_xios_exec(run_desc):
 
 
 def _make_run_dir(run_desc):
+    """Create the directory from which NEMO will be run.
+
+    The location is the directory comes from the run description,
+    and its name is a hostname- and time-based UUID.
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+    """
     run_dir = os.path.join(
         run_desc['paths']['runs directory'], str(uuid.uuid1()))
     os.mkdir(run_dir)
