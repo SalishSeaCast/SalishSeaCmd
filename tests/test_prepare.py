@@ -67,6 +67,70 @@ class TestGetParser:
         assert parsed_args.quiet
 
 
+class TestPrepare:
+    """Unit tests for `salishsea prepare` prepare() function.
+    """
+    @patch.object(prepare_module().lib, 'load_run_desc')
+    @patch.object(
+        prepare_module(), '_check_nemo_exec', return_value=('repo', 'bin_dir'))
+    @patch.object(prepare_module().os.path, 'dirname')
+    @patch.object(prepare_module(), '_make_run_dir')
+    @patch.object(prepare_module(), '_make_namelist')
+    @patch.object(prepare_module(), '_copy_run_set_files')
+    @patch.object(prepare_module(), '_make_nemo_code_links')
+    @patch.object(prepare_module(), '_make_grid_links')
+    @patch.object(prepare_module(), '_make_forcing_links')
+    @patch.object(prepare_module(), '_check_atmos_files')
+    def test_prepare_nemo34(
+        self, m_caf, m_mfl, m_mgl, m_mncl, m_crsf, m_mnl, m_mrd, m_dirname,
+        m_cne, m_lrd, prepare_module,
+    ):
+        run_dir = prepare_module.prepare(
+            'SalishSea.yaml', 'iodefs.xml', nemo34=True)
+        m_lrd.assert_called_once_with('SalishSea.yaml')
+        m_cne.assert_called_once_with(m_lrd(), True)
+        m_dirname.assert_called_once_with(os.path.abspath('SalishSea.yaml'))
+        m_mrd.assert_called_once_with(m_lrd())
+        m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd())
+        m_crsf.assert_called_once_with(
+            'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd())
+        m_mncl.assert_called_once_with('repo', 'bin_dir', m_mrd())
+        m_mgl.assert_called_once_with(m_lrd(), m_mrd())
+        m_mfl.assert_called_once_with(m_lrd(), m_mrd())
+        m_caf.assert_called_once_with(m_lrd(), m_mrd())
+        assert run_dir == m_mrd()
+
+    @patch.object(prepare_module().lib, 'load_run_desc')
+    @patch.object(
+        prepare_module(), '_check_nemo_exec', return_value=('repo', 'bin_dir'))
+    @patch.object(prepare_module().os.path, 'dirname')
+    @patch.object(prepare_module(), '_make_run_dir')
+    @patch.object(prepare_module(), '_make_namelist')
+    @patch.object(prepare_module(), '_copy_run_set_files')
+    @patch.object(prepare_module(), '_make_nemo_code_links')
+    @patch.object(prepare_module(), '_make_grid_links')
+    @patch.object(prepare_module(), '_make_forcing_links')
+    @patch.object(prepare_module(), '_check_atmos_files')
+    def test_prepare_nemo36(
+        self, m_caf, m_mfl, m_mgl, m_mncl, m_crsf, m_mnl, m_mrd, m_dirname,
+        m_cne, m_lrd, prepare_module,
+    ):
+        run_dir = prepare_module.prepare(
+            'SalishSea.yaml', 'iodefs.xml', nemo34=False)
+        m_lrd.assert_called_once_with('SalishSea.yaml')
+        m_cne.assert_called_once_with(m_lrd(), False)
+        m_dirname.assert_called_once_with(os.path.abspath('SalishSea.yaml'))
+        m_mrd.assert_called_once_with(m_lrd())
+        m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd())
+        m_crsf.assert_called_once_with(
+            'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd())
+        m_mncl.assert_called_once_with('repo', 'bin_dir', m_mrd())
+        m_mgl.assert_called_once_with(m_lrd(), m_mrd())
+        m_mfl.assert_called_once_with(m_lrd(), m_mrd())
+        m_caf.assert_called_once_with(m_lrd(), m_mrd())
+        assert run_dir == m_mrd()
+
+
 class TestCheckNemoExec:
     """Unit tests for `salishsea prepare` _check_nemo_exec() function.
     """
