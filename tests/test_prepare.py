@@ -225,6 +225,18 @@ class TestCheckXiosExec:
             prepare_module._check_xios_exec(run_desc)
 
 
+@patch.object(prepare_module().uuid, 'uuid1', return_value='uuid')
+def test_make_run_dir(m_uuid1, prepare_module, tmpdir):
+    """_make_run_dir() creates directory w/ UUID v1 name
+    """
+    p_runs_dir = tmpdir.ensure_dir('SalishSea')
+    run_desc = {
+        'paths': {'runs directory': str(p_runs_dir)},
+    }
+    run_dir = prepare_module._make_run_dir(run_desc)
+    assert run_dir == os.path.join(str(p_runs_dir), m_uuid1())
+
+
 @patch.object(prepare_module().shutil, 'copy2')
 def test_copy_run_set_files_no_path(m_copy, prepare_module):
     """_copy_run_set_files creates correct symlink for source w/o path
