@@ -73,6 +73,7 @@ class TestPrepare:
     @patch.object(prepare_module().lib, 'load_run_desc')
     @patch.object(
         prepare_module(), '_check_nemo_exec', return_value=('repo', 'bin_dir'))
+    @patch.object(prepare_module(), '_check_xios_exec')
     @patch.object(prepare_module().os.path, 'dirname')
     @patch.object(prepare_module(), '_make_run_dir')
     @patch.object(prepare_module(), '_make_namelist')
@@ -83,12 +84,13 @@ class TestPrepare:
     @patch.object(prepare_module(), '_check_atmos_files')
     def test_prepare_nemo34(
         self, m_caf, m_mfl, m_mgl, m_mncl, m_crsf, m_mnl, m_mrd, m_dirname,
-        m_cne, m_lrd, prepare_module,
+        m_cxe, m_cne, m_lrd, prepare_module,
     ):
         run_dir = prepare_module.prepare(
             'SalishSea.yaml', 'iodefs.xml', nemo34=True)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_cne.assert_called_once_with(m_lrd(), True)
+        assert not m_cxe.called
         m_dirname.assert_called_once_with(os.path.abspath('SalishSea.yaml'))
         m_mrd.assert_called_once_with(m_lrd())
         m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd())
@@ -103,6 +105,7 @@ class TestPrepare:
     @patch.object(prepare_module().lib, 'load_run_desc')
     @patch.object(
         prepare_module(), '_check_nemo_exec', return_value=('repo', 'bin_dir'))
+    @patch.object(prepare_module(), '_check_xios_exec')
     @patch.object(prepare_module().os.path, 'dirname')
     @patch.object(prepare_module(), '_make_run_dir')
     @patch.object(prepare_module(), '_make_namelist')
@@ -113,12 +116,13 @@ class TestPrepare:
     @patch.object(prepare_module(), '_check_atmos_files')
     def test_prepare_nemo36(
         self, m_caf, m_mfl, m_mgl, m_mncl, m_crsf, m_mnl, m_mrd, m_dirname,
-        m_cne, m_lrd, prepare_module,
+        m_cxe, m_cne, m_lrd, prepare_module,
     ):
         run_dir = prepare_module.prepare(
             'SalishSea.yaml', 'iodefs.xml', nemo34=False)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_cne.assert_called_once_with(m_lrd(), False)
+        m_cxe.assert_called_once_with(m_lrd())
         m_dirname.assert_called_once_with(os.path.abspath('SalishSea.yaml'))
         m_mrd.assert_called_once_with(m_lrd())
         m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd())
@@ -197,6 +201,28 @@ class TestCheckNemoExec:
             nemo_code_repo, nemo_bin_dir = prepare_module._check_nemo_exec(
                 run_desc, nemo34=False)
         assert m_exists.call_count == 1
+
+
+class TestCheckXiosExec:
+    """Unit tests for `salishsea prepare` _check_xios_exec() function.
+    """
+    def test_xios_bin_dir_path(self, prepare_module, tmpdir):
+        p_xios = tmpdir.ensure_dir('XIOS')
+        run_desc = {
+            'paths': {'XIOS': str(p_xios)},
+        }
+        p_bin_dir = p_xios.ensure_dir('bin')
+        p_bin_dir.ensure('xios_server.exe')
+        xios_bin_dir = prepare_module._check_xios_exec(run_desc)
+        assert xios_bin_dir == p_bin_dir
+
+    def test_xios_exec_not_found(self, prepare_module, tmpdir):
+        p_xios = tmpdir.ensure_dir('XIOS')
+        run_desc = {
+            'paths': {'XIOS': str(p_xios)},
+        }
+        with pytest.raises(SystemExit):
+            prepare_module._check_xios_exec(run_desc)
 
 
 @patch.object(prepare_module().shutil, 'copy2')
