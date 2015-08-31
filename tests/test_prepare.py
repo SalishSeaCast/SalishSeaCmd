@@ -93,7 +93,7 @@ class TestPrepare:
         assert not m_cxe.called
         m_dirname.assert_called_once_with(os.path.abspath('SalishSea.yaml'))
         m_mrd.assert_called_once_with(m_lrd())
-        m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd())
+        m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd(), True)
         m_crsf.assert_called_once_with(
             'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd())
         m_mncl.assert_called_once_with('repo', 'bin_dir', m_mrd())
@@ -125,7 +125,7 @@ class TestPrepare:
         m_cxe.assert_called_once_with(m_lrd())
         m_dirname.assert_called_once_with(os.path.abspath('SalishSea.yaml'))
         m_mrd.assert_called_once_with(m_lrd())
-        m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd())
+        m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd(), False)
         m_crsf.assert_called_once_with(
             'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd())
         m_mncl.assert_called_once_with('repo', 'bin_dir', m_mrd())
@@ -243,7 +243,13 @@ class TestMakeRunDir:
 class TestMakeNamelist:
     """Unit tests for `salishsea prepare` _make_namelist() function.
     """
-    def test_nemo34_make_namelist(self, prepare_module, tmpdir):
+    @pytest.mark.parametrize('nemo34, namelist_filename', [
+        (True, 'namelist'),
+        (False, 'namelist_cfg'),
+    ])
+    def test_make_namelist(
+        self, nemo34, namelist_filename, prepare_module, tmpdir,
+    ):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
         run_desc = {
@@ -253,10 +259,13 @@ class TestMakeNamelist:
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
         prepare_module._make_namelist(
-            str(p_run_set_dir), run_desc, str(p_run_dir))
-        assert p_run_dir.join('namelist').check()
+            str(p_run_set_dir), run_desc, str(p_run_dir), nemo34)
+        assert p_run_dir.join(namelist_filename).check()
 
-    def test_make_namelist_file_not_found_error(self, prepare_module, tmpdir):
+    @pytest.mark.parametrize('nemo34', [True, False])
+    def test_make_namelist_file_not_found_error(
+        self, nemo34, prepare_module, tmpdir,
+    ):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         run_desc = {
             'namelists': [
@@ -266,7 +275,7 @@ class TestMakeNamelist:
         p_run_dir = tmpdir.ensure_dir('run_dir')
         with pytest.raises(SystemExit):
             prepare_module._make_namelist(
-                str(p_run_set_dir), run_desc, str(p_run_dir))
+                str(p_run_set_dir), run_desc, str(p_run_dir), nemo34)
 
     def test_nemo34_make_namelist_ends_with_empty_namelists(
         self, prepare_module, tmpdir,
@@ -280,9 +289,25 @@ class TestMakeNamelist:
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
         prepare_module._make_namelist(
-            str(p_run_set_dir), run_desc, str(p_run_dir))
+            str(p_run_set_dir), run_desc, str(p_run_dir), nemo34=True)
         namelist = p_run_dir.join('namelist').read()
         assert namelist.endswith(prepare_module.EMPTY_NAMELISTS)
+
+    def test_nemo36_make_namelist_does_not_end_with_empty_namelists(
+        self, prepare_module, tmpdir,
+    ):
+        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
+        p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
+        run_desc = {
+            'namelists': [
+                str(p_run_set_dir.join('namelist.time')),
+            ],
+        }
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        prepare_module._make_namelist(
+            str(p_run_set_dir), run_desc, str(p_run_dir), nemo34=False)
+        namelist = p_run_dir.join('namelist_cfg').read()
+        assert not namelist.endswith(prepare_module.EMPTY_NAMELISTS)
 
 
 @patch.object(prepare_module().shutil, 'copy2')
