@@ -197,6 +197,14 @@ def _make_run_dir(run_desc):
 
 
 def _remove_run_dir(run_dir):
+    """Remove all files from run_dir, then remove run_dir.
+
+    Intended to be used as a clean-up operation when some other part
+    of the prepare process fails.
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+    """
     if not os.path.exists(run_dir):
         return
     for fn in os.listdir(run_dir):
