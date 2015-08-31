@@ -205,11 +205,12 @@ def _remove_run_dir(run_dir):
     :arg run_dir: Path of the temporary run directory.
     :type run_dir: str
     """
-    if not os.path.exists(run_dir):
-        return
-    for fn in os.listdir(run_dir):
-        os.remove(os.path.join(run_dir, fn))
-    os.rmdir(run_dir)
+    try:
+        for fn in os.listdir(run_dir):
+            os.remove(os.path.join(run_dir, fn))
+        os.rmdir(run_dir)
+    except FileNotFoundError:
+        pass
 
 
 def _make_namelist(run_set_dir, run_desc, run_dir, nemo34):
