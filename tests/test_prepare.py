@@ -331,38 +331,40 @@ class TestMakeNamelist:
         assert not namelist.endswith(prepare_module.EMPTY_NAMELISTS)
 
 
-@patch.object(prepare_module().shutil, 'copy2')
-def test_copy_run_set_files_no_path(m_copy, prepare_module):
-    """_copy_run_set_files creates correct symlink for source w/o path
+class TestCopyRunSetFiles:
+    """Unit tests for `salishsea prepare` _copy_run_set_files() function.
     """
-    desc_file = 'foo.yaml'
-    pwd = os.getcwd()
-    with patch('salishsea_cmd.prepare.os.chdir'):
-        prepare_module._copy_run_set_files(
-            desc_file, pwd, 'iodef.xml', 'run_dir')
-    expected = [
-        call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
-        call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
-        call(os.path.join(pwd, 'xmlio_server.def'), 'xmlio_server.def'),
-    ]
-    assert m_copy.call_args_list == expected
+    @patch.object(prepare_module().shutil, 'copy2')
+    def test_copy_run_set_files_no_path(self, m_copy, prepare_module):
+        """_copy_run_set_files creates correct symlink for source w/o path
+        """
+        desc_file = 'foo.yaml'
+        pwd = os.getcwd()
+        with patch('salishsea_cmd.prepare.os.chdir'):
+            prepare_module._copy_run_set_files(
+                desc_file, pwd, 'iodef.xml', 'run_dir')
+        expected = [
+            call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
+            call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
+            call(os.path.join(pwd, 'xmlio_server.def'), 'xmlio_server.def'),
+        ]
+        assert m_copy.call_args_list == expected
 
-
-@patch.object(prepare_module().shutil, 'copy2')
-def test_copy_run_set_files_relative_path(m_copy, prepare_module):
-    """_copy_run_set_files creates correct symlink for relative path source
-    """
-    desc_file = 'foo.yaml'
-    pwd = os.getcwd()
-    with patch.object(prepare_module.os, 'chdir'):
-        prepare_module._copy_run_set_files(
-            desc_file, pwd, '../iodef.xml', 'run_dir')
-    expected = [
-        call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
-        call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
-        call(os.path.join(pwd, 'xmlio_server.def'), 'xmlio_server.def'),
-    ]
-    assert m_copy.call_args_list == expected
+    @patch.object(prepare_module().shutil, 'copy2')
+    def test_copy_run_set_files_relative_path(self, m_copy, prepare_module):
+        """_copy_run_set_files creates correct symlink for relative path source
+        """
+        desc_file = 'foo.yaml'
+        pwd = os.getcwd()
+        with patch.object(prepare_module.os, 'chdir'):
+            prepare_module._copy_run_set_files(
+                desc_file, pwd, '../iodef.xml', 'run_dir')
+        expected = [
+            call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
+            call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
+            call(os.path.join(pwd, 'xmlio_server.def'), 'xmlio_server.def'),
+        ]
+        assert m_copy.call_args_list == expected
 
 
 @patch.object(prepare_module(), 'log')
