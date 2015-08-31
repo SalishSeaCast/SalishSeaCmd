@@ -177,7 +177,7 @@ def _check_xios_exec(run_desc):
     if not os.path.exists(xios_exec):
         log.error(
             '{} not found - did you forget to build it?'.format(xios_exec))
-        raise SystemExit
+        raise SystemExit(2)
     return xios_bin_dir
 
 
@@ -212,10 +212,10 @@ def _make_namelist(run_set_dir, run_desc, run_dir):
                 with open(os.path.join(run_set_dir, nl), 'rt') as f:
                     namelist.writelines(f.readlines())
                     namelist.write('\n\n')
-            except IOError as e:
+            except FileNotFoundError as e:
                 log.error(e)
                 _remove_run_dir(run_dir)
-                sys.exit(2)
+                raise SystemExit(2)
         namelist.writelines(EMPTY_NAMELISTS)
 
 
