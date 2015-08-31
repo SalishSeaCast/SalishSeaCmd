@@ -248,6 +248,13 @@ class TestRemoveRunDir:
         prepare_module._remove_run_dir(str(p_run_dir))
         assert not p_run_dir.check()
 
+    def test_remove_run_dir_file(self, prepare_module, tmpdir):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        p_run_dir.ensure('namelist')
+        prepare_module._remove_run_dir(str(p_run_dir))
+        assert not p_run_dir.join('namelist').check()
+        assert not p_run_dir.check()
+
     @patch.object(prepare_module().os, 'rmdir')
     def test_remove_run_dir_no_run_dir(self, m_rmdir, prepare_module, tmpdir):
         prepare_module._remove_run_dir('run_dir')
