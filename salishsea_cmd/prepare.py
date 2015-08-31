@@ -112,7 +112,7 @@ def prepare(desc_file, iodefs, nemo34):
         else None)
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
-    _make_namelist(run_set_dir, run_desc, run_dir)
+    _make_namelist(run_set_dir, run_desc, run_dir, nemo34)
     _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir)
     _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir)
     _make_grid_links(run_desc, run_dir)
@@ -204,9 +204,33 @@ def _remove_run_dir(run_dir):
     os.rmdir(run_dir)
 
 
-def _make_namelist(run_set_dir, run_desc, run_dir):
+def _make_namelist(run_set_dir, run_desc, run_dir, nemo34):
+    """Build the namelist file for the run in run_dir by concatenating
+    the list of namelist section files provided in run_desc.
+
+    If any of the required namelist section files are missing,
+    delete the run directory and raise a SystemExit exception.
+
+    :arg run_set_dir: Directory containing the run description file,
+                      from which relative paths for the namelist section
+                      files start.
+    :type run_set_dir: str
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+
+    :arg nemo34: Prepare a NEMO-3.4 run;
+                 the default is to prepare a NEMO-3.6 run
+    :type nemo34: boolean
+
+    :raises: SystemExit
+    """
     namelists = run_desc['namelists']
-    with open(os.path.join(run_dir, 'namelist'), 'wt') as namelist:
+    namelist_filename = 'namelist' if nemo34 else 'namelist_cfg'
+    with open(os.path.join(run_dir, namelist_filename), 'wt') as namelist:
         for nl in namelists:
             try:
                 with open(os.path.join(run_set_dir, nl), 'rt') as f:
@@ -216,7 +240,8 @@ def _make_namelist(run_set_dir, run_desc, run_dir):
                 log.error(e)
                 _remove_run_dir(run_dir)
                 raise SystemExit(2)
-        namelist.writelines(EMPTY_NAMELISTS)
+        if nemo34:
+            namelist.writelines(EMPTY_NAMELISTS)
 
 
 def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir):
