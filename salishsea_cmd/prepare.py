@@ -254,6 +254,23 @@ def _make_namelist(run_set_dir, run_desc, run_dir, nemo34):
 
 
 def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir):
+    """Copy the run-set files given on the command-line into run_dir.
+
+    :arg desc_file: File path/name of the YAML run description file.
+    :type desc_file: file-like object
+
+    :arg run_set_dir: Directory containing the run description file,
+                      from which relative paths for the namelist section
+                      files start.
+    :type run_set_dir: str
+
+    :arg iodefs: File path/name of the NEMO IOM server defs file for
+                 the run.
+    :type iodefs: str
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+    """
     run_set_files = (
         (iodefs, 'iodef.xml'),
         (desc_file, os.path.basename(desc_file)),
