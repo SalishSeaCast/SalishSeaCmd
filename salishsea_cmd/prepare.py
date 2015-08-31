@@ -138,6 +138,10 @@ def _check_nemo_exec(run_desc, nemo34):
                  the default is to prepare a NEMO-3.6 run
     :type nemo34: boolean
 
+    :returns: Absolute paths of NEMO code repo & NEMO executable's
+              directory.
+    :rtype: 2-tuple
+
     :raises: SystemExit
     """
     nemo_code_repo = os.path.abspath(run_desc['paths']['NEMO-code'])
@@ -292,6 +296,22 @@ def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, nemo34):
 
 
 def _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir):
+    """Create symlinks in run_dir to the NEMO executables and record the
+    NEMO code repository revision used for the run.
+
+    The NEMO code revision record is the output of the
+    :command:`hg parents` in the NEMO code repo.
+    It is stored in the :file:`NEMO-code_rev.txt` file in run_dir.
+
+    :arg nemo_code_repo: Absolute path of NEMO code repo.
+    :type nemo_code_repo: str
+
+    :arg nemo_bin_dir: Absolute path of directory containing NEMO executable.
+    :type nemo_code_repo: str
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+    """
     nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
     saved_cwd = os.getcwd()
     os.chdir(run_dir)
