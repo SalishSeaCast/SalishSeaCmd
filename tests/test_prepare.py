@@ -95,7 +95,7 @@ class TestPrepare:
         m_mrd.assert_called_once_with(m_lrd())
         m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd(), True)
         m_crsf.assert_called_once_with(
-            'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd())
+            'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd(), True)
         m_mncl.assert_called_once_with('repo', 'bin_dir', m_mrd())
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd())
@@ -127,7 +127,7 @@ class TestPrepare:
         m_mrd.assert_called_once_with(m_lrd())
         m_mnl.assert_called_once_with(m_dirname(), m_lrd(), m_mrd(), False)
         m_crsf.assert_called_once_with(
-            'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd())
+            'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd(), False)
         m_mncl.assert_called_once_with('repo', 'bin_dir', m_mrd())
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd())
@@ -335,14 +335,14 @@ class TestCopyRunSetFiles:
     """Unit tests for `salishsea prepare` _copy_run_set_files() function.
     """
     @patch.object(prepare_module().shutil, 'copy2')
-    def test_copy_run_set_files_no_path(self, m_copy, prepare_module):
+    def test_nemo34_copy_run_set_files_no_path(self, m_copy, prepare_module):
         """_copy_run_set_files creates correct symlink for source w/o path
         """
         desc_file = 'foo.yaml'
         pwd = os.getcwd()
         with patch('salishsea_cmd.prepare.os.chdir'):
             prepare_module._copy_run_set_files(
-                desc_file, pwd, 'iodef.xml', 'run_dir')
+                desc_file, pwd, 'iodef.xml', 'run_dir', nemo34=True)
         expected = [
             call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
             call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
@@ -351,18 +351,52 @@ class TestCopyRunSetFiles:
         assert m_copy.call_args_list == expected
 
     @patch.object(prepare_module().shutil, 'copy2')
-    def test_copy_run_set_files_relative_path(self, m_copy, prepare_module):
+    def test_nemo36_copy_run_set_files_no_path(self, m_copy, prepare_module):
+        """_copy_run_set_files creates correct symlink for source w/o path
+        """
+        desc_file = 'foo.yaml'
+        pwd = os.getcwd()
+        with patch('salishsea_cmd.prepare.os.chdir'):
+            prepare_module._copy_run_set_files(
+                desc_file, pwd, 'iodef.xml', 'run_dir', nemo34=False)
+        expected = [
+            call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
+            call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
+        ]
+        assert m_copy.call_args_list == expected
+
+    @patch.object(prepare_module().shutil, 'copy2')
+    def test_nemo34_copy_run_set_files_relative_path(
+        self, m_copy, prepare_module,
+    ):
         """_copy_run_set_files creates correct symlink for relative path source
         """
         desc_file = 'foo.yaml'
         pwd = os.getcwd()
         with patch.object(prepare_module.os, 'chdir'):
             prepare_module._copy_run_set_files(
-                desc_file, pwd, '../iodef.xml', 'run_dir')
+                desc_file, pwd, '../iodef.xml', 'run_dir', nemo34=True)
         expected = [
             call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
             call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
             call(os.path.join(pwd, 'xmlio_server.def'), 'xmlio_server.def'),
+        ]
+        assert m_copy.call_args_list == expected
+
+    @patch.object(prepare_module().shutil, 'copy2')
+    def test_nemo36_copy_run_set_files_relative_path(
+        self, m_copy, prepare_module,
+    ):
+        """_copy_run_set_files creates correct symlink for relative path source
+        """
+        desc_file = 'foo.yaml'
+        pwd = os.getcwd()
+        with patch.object(prepare_module.os, 'chdir'):
+            prepare_module._copy_run_set_files(
+                desc_file, pwd, '../iodef.xml', 'run_dir', nemo34=False)
+        expected = [
+            call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
+            call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
         ]
         assert m_copy.call_args_list == expected
 
