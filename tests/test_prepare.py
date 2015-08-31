@@ -240,6 +240,51 @@ class TestMakeRunDir:
         assert run_dir == os.path.join(str(p_runs_dir), m_uuid1())
 
 
+class TestMakeNamelist:
+    """Unit tests for `salishsea prepare` _make_namelist() function.
+    """
+    def test_nemo34_make_namelist(self, prepare_module, tmpdir):
+        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
+        p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
+        run_desc = {
+            'namelists': [
+                str(p_run_set_dir.join('namelist.time')),
+            ],
+        }
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        prepare_module._make_namelist(
+            str(p_run_set_dir), run_desc, str(p_run_dir))
+        assert p_run_dir.join('namelist').check()
+
+    def test_make_namelist_file_not_found_error(self, prepare_module, tmpdir):
+        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
+        run_desc = {
+            'namelists': [
+                str(p_run_set_dir.join('namelist.time')),
+            ],
+        }
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with pytest.raises(SystemExit):
+            prepare_module._make_namelist(
+                str(p_run_set_dir), run_desc, str(p_run_dir))
+
+    def test_nemo34_make_namelist_ends_with_empty_namelists(
+        self, prepare_module, tmpdir,
+    ):
+        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
+        p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
+        run_desc = {
+            'namelists': [
+                str(p_run_set_dir.join('namelist.time')),
+            ],
+        }
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        prepare_module._make_namelist(
+            str(p_run_set_dir), run_desc, str(p_run_dir))
+        namelist = p_run_dir.join('namelist').read()
+        assert namelist.endswith(prepare_module.EMPTY_NAMELISTS)
+
+
 @patch.object(prepare_module().shutil, 'copy2')
 def test_copy_run_set_files_no_path(m_copy, prepare_module):
     """_copy_run_set_files creates correct symlink for source w/o path
