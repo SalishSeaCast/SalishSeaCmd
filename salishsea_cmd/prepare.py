@@ -112,7 +112,7 @@ def prepare(desc_file, iodefs, nemo34):
         else None)
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
-    _make_namelist(run_set_dir, run_desc, run_dir, nemo34)
+    _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34)
     _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, nemo34)
     _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir)
     _make_grid_links(run_desc, run_dir)
@@ -217,7 +217,7 @@ def _remove_run_dir(run_dir):
         pass
 
 
-def _make_namelist(run_set_dir, run_desc, run_dir, nemo34):
+def _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
     """Build the namelist file for the run in run_dir by concatenating
     the list of namelist section files provided in run_desc.
 
@@ -234,6 +234,9 @@ def _make_namelist(run_set_dir, run_desc, run_dir, nemo34):
 
     :arg run_dir: Path of the temporary run directory.
     :type run_dir: str
+
+    :arg nemo_code_repo: Absolute path of NEMO code repo.
+    :type nemo_code_repo: str
 
     :arg nemo34: Prepare a NEMO-3.4 run;
                  the default is to prepare a NEMO-3.6 run
@@ -255,6 +258,13 @@ def _make_namelist(run_set_dir, run_desc, run_dir, nemo34):
                 raise SystemExit(2)
         if nemo34:
             namelist.writelines(EMPTY_NAMELISTS)
+        else:
+            ref_namelist = os.path.join(
+                nemo_code_repo, 'NEMOGCM', 'CONFIG', 'SHARED', 'namelist_ref')
+            saved_cwd = os.getcwd()
+            os.chdir(run_dir)
+            os.symlink(ref_namelist, 'namelist_ref')
+            os.chdir(saved_cwd)
 
 
 def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, nemo34):
