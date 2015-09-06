@@ -364,6 +364,17 @@ def _make_executable_links(
 
 
 def _make_grid_links(run_desc, run_dir):
+    """Create symlinks to the file names that NEMO expects in run_dir
+    to the bathymetry and coordinates files given in the run_desc dict.
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+
+    :raises: SystemExit
+    """
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     if not os.path.exists(nemo_forcing_dir):
         log.error(
@@ -372,7 +383,7 @@ def _make_grid_links(run_desc, run_dir):
             .format(nemo_forcing_dir)
         )
         _remove_run_dir(run_dir)
-        sys.exit(2)
+        raise SystemExit(2)
     grid_dir = os.path.join(nemo_forcing_dir, 'grid')
     grid_files = (
         (run_desc['grid']['coordinates'], 'coordinates.nc'),
@@ -389,7 +400,7 @@ def _make_grid_links(run_desc, run_dir):
                 'in your run description file'
                 .format(link_path))
             _remove_run_dir(run_dir)
-            sys.exit(2)
+            raise SystemExit(2)
         os.symlink(link_path, link_name)
     os.chdir(saved_cwd)
 

@@ -528,50 +528,50 @@ class TestMakeExecutableLinks:
             assert p_run_dir.join('XIOS-code_rev.txt').check(file=True)
 
 
-@patch.object(prepare_module(), 'log')
-def test_make_grid_links_no_forcing_dir(m_log, prepare_module):
-    run_desc = {
-        'paths': {
-            'forcing': 'foo',
-        },
-    }
-    prepare_module._remove_run_dir = Mock()
-    p_exists = patch.object(
-        prepare_module.os.path, 'exists', return_value=False)
-    p_abspath = patch.object(
-        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
-    with pytest.raises(SystemExit), p_exists, p_abspath:
-        prepare_module._make_grid_links(run_desc, 'run_dir')
-    m_log.error.assert_called_once_with(
-        'foo not found; cannot create symlinks - '
-        'please check the forcing path in your run description file')
-    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
+class TestMakeGridLinks:
+    @patch.object(prepare_module(), 'log')
+    def test_no_forcing_dir(self, m_log, prepare_module):
+        run_desc = {
+            'paths': {
+                'forcing': 'foo',
+            },
+        }
+        prepare_module._remove_run_dir = Mock()
+        p_exists = patch.object(
+            prepare_module.os.path, 'exists', return_value=False)
+        p_abspath = patch.object(
+            prepare_module.os.path, 'abspath', side_effect=lambda path: path)
+        with pytest.raises(SystemExit), p_exists, p_abspath:
+            prepare_module._make_grid_links(run_desc, 'run_dir')
+        m_log.error.assert_called_once_with(
+            'foo not found; cannot create symlinks - '
+            'please check the forcing path in your run description file')
+        prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
-
-@patch.object(prepare_module(), 'log')
-def test_make_grid_links_no_link_path(m_log, prepare_module):
-    run_desc = {
-        'paths': {
-            'forcing': 'foo',
-        },
-        'grid': {
-            'coordinates': 'coordinates.nc',
-            'bathymetry': 'bathy.nc',
-        },
-    }
-    prepare_module._remove_run_dir = Mock()
-    p_exists = patch.object(
-        prepare_module.os.path, 'exists', side_effect=[True, False])
-    p_abspath = patch.object(
-        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
-    p_chdir = patch.object(prepare_module.os, 'chdir')
-    with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-        prepare_module._make_grid_links(run_desc, 'run_dir')
-    m_log.error.assert_called_once_with(
-        'foo/grid/coordinates.nc not found; cannot create symlink - '
-        'please check the forcing path and grid file names '
-        'in your run description file')
-    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
+    @patch.object(prepare_module(), 'log')
+    def test_no_link_path(self, m_log, prepare_module):
+        run_desc = {
+            'paths': {
+                'forcing': 'foo',
+            },
+            'grid': {
+                'coordinates': 'coordinates.nc',
+                'bathymetry': 'bathy.nc',
+            },
+        }
+        prepare_module._remove_run_dir = Mock()
+        p_exists = patch.object(
+            prepare_module.os.path, 'exists', side_effect=[True, False])
+        p_abspath = patch.object(
+            prepare_module.os.path, 'abspath', side_effect=lambda path: path)
+        p_chdir = patch.object(prepare_module.os, 'chdir')
+        with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
+            prepare_module._make_grid_links(run_desc, 'run_dir')
+        m_log.error.assert_called_once_with(
+            'foo/grid/coordinates.nc not found; cannot create symlink - '
+            'please check the forcing path and grid file names '
+            'in your run description file')
+        prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
 
 @patch.object(prepare_module(), 'log')
