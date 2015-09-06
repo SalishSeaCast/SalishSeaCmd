@@ -78,12 +78,12 @@ class TestPrepare:
     @patch.object(prepare_module(), '_make_run_dir')
     @patch.object(prepare_module(), '_make_namelist')
     @patch.object(prepare_module(), '_copy_run_set_files')
-    @patch.object(prepare_module(), '_make_nemo_code_links')
+    @patch.object(prepare_module(), '_make_executable_links')
     @patch.object(prepare_module(), '_make_grid_links')
     @patch.object(prepare_module(), '_make_forcing_links')
     @patch.object(prepare_module(), '_check_atmos_files')
     def test_prepare_nemo34(
-        self, m_caf, m_mfl, m_mgl, m_mncl, m_crsf, m_mnl, m_mrd, m_dirname,
+        self, m_caf, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd, m_dirname,
         m_cxe, m_cne, m_lrd, prepare_module,
     ):
         run_dir = prepare_module.prepare(
@@ -97,7 +97,8 @@ class TestPrepare:
             m_dirname(), m_lrd(), m_mrd(), 'repo', True)
         m_crsf.assert_called_once_with(
             'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd(), True)
-        m_mncl.assert_called_once_with('repo', 'bin_dir', m_mrd())
+        m_mel.assert_called_once_with(
+            'repo', 'bin_dir', m_mrd(), True, None, None)
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd())
         m_caf.assert_called_once_with(m_lrd(), m_mrd())
@@ -105,18 +106,21 @@ class TestPrepare:
 
     @patch.object(prepare_module().lib, 'load_run_desc')
     @patch.object(
-        prepare_module(), '_check_nemo_exec', return_value=('repo', 'bin_dir'))
-    @patch.object(prepare_module(), '_check_xios_exec')
+        prepare_module(), '_check_nemo_exec',
+        return_value=('nemo_repo', 'nemo_bin_dir'))
+    @patch.object(
+        prepare_module(), '_check_xios_exec',
+        return_value=('xios_repo', 'xios_bin_dir'))
     @patch.object(prepare_module().os.path, 'dirname')
     @patch.object(prepare_module(), '_make_run_dir')
     @patch.object(prepare_module(), '_make_namelist')
     @patch.object(prepare_module(), '_copy_run_set_files')
-    @patch.object(prepare_module(), '_make_nemo_code_links')
+    @patch.object(prepare_module(), '_make_executable_links')
     @patch.object(prepare_module(), '_make_grid_links')
     @patch.object(prepare_module(), '_make_forcing_links')
     @patch.object(prepare_module(), '_check_atmos_files')
     def test_prepare_nemo36(
-        self, m_caf, m_mfl, m_mgl, m_mncl, m_crsf, m_mnl, m_mrd, m_dirname,
+        self, m_caf, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd, m_dirname,
         m_cxe, m_cne, m_lrd, prepare_module,
     ):
         run_dir = prepare_module.prepare(
@@ -127,10 +131,12 @@ class TestPrepare:
         m_dirname.assert_called_once_with(os.path.abspath('SalishSea.yaml'))
         m_mrd.assert_called_once_with(m_lrd())
         m_mnl.assert_called_once_with(
-            m_dirname(), m_lrd(), m_mrd(), 'repo', False)
+            m_dirname(), m_lrd(), m_mrd(), 'nemo_repo', False)
         m_crsf.assert_called_once_with(
             'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd(), False)
-        m_mncl.assert_called_once_with('repo', 'bin_dir', m_mrd())
+        m_mel.assert_called_once_with(
+            'nemo_repo', 'nemo_bin_dir', m_mrd(), False,
+            'xios_repo', 'xios_bin_dir')
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd())
         m_caf.assert_called_once_with(m_lrd(), m_mrd())
@@ -142,13 +148,14 @@ class TestCheckNemoExec:
     """
     def test_nemo_code_repo_path(self, prepare_module, tmpdir):
         p_code = tmpdir.ensure_dir('NEMO-3.6-code')
+        p_code.ensure(
+            'NEMOGCM', 'CONFIG', 'SalishSea', 'BLD', 'bin', 'nemo.exe')
         run_desc = {
             'config_name': 'SalishSea',
             'paths': {'NEMO-code': str(p_code)},
         }
-        with patch.object(prepare_module.os.path, 'exists', return_value=True):
-            nemo_code_repo, nemo_bin_dir = prepare_module._check_nemo_exec(
-                run_desc, nemo34=False)
+        nemo_code_repo, nemo_bin_dir = prepare_module._check_nemo_exec(
+            run_desc, nemo34=False)
         assert nemo_code_repo == p_code
 
     def test_nemo_bin_dir_path(self, prepare_module, tmpdir):
@@ -159,9 +166,9 @@ class TestCheckNemoExec:
         }
         p_bin_dir = p_code.ensure_dir(
             'NEMOGCM', 'CONFIG', 'SalishSea', 'BLD', 'bin')
-        with patch.object(prepare_module.os.path, 'exists', return_value=True):
-            nemo_code_repo, nemo_bin_dir = prepare_module._check_nemo_exec(
-                run_desc, nemo34=False)
+        p_bin_dir.ensure('nemo.exe')
+        nemo_code_repo, nemo_bin_dir = prepare_module._check_nemo_exec(
+            run_desc, nemo34=False)
         assert nemo_bin_dir == p_bin_dir
 
     def test_nemo_exec_not_found(self, prepare_module, tmpdir):
@@ -215,7 +222,9 @@ class TestCheckXiosExec:
         }
         p_bin_dir = p_xios.ensure_dir('bin')
         p_bin_dir.ensure('xios_server.exe')
-        xios_bin_dir = prepare_module._check_xios_exec(run_desc)
+        xios_code_repo, xios_bin_dir = prepare_module._check_xios_exec(
+            run_desc)
+        assert xios_code_repo == p_xios
         assert xios_bin_dir == p_bin_dir
 
     def test_xios_exec_not_found(self, prepare_module, tmpdir):
@@ -420,6 +429,103 @@ class TestCopyRunSetFiles:
             call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
         ]
         assert m_copy.call_args_list == expected
+
+
+class TestMakeExecutableLinks:
+    """Unit tests for `salishsea prepare` _make_executable_links() function.
+    """
+    @pytest.mark.parametrize('nemo34', [True, False])
+    def test_nemo_exe_symlink(self, nemo34, prepare_module, tmpdir):
+        p_nemo_bin_dir = tmpdir.ensure_dir(
+            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin')
+        p_nemo_bin_dir.ensure('nemo.exe')
+        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with patch.object(prepare_module.hg, 'parents'):
+            prepare_module._make_executable_links(
+                'nemo_code_repo', str(p_nemo_bin_dir), str(p_run_dir),
+                nemo34, 'xios_code_repo', str(p_xios_bin_dir))
+        assert p_run_dir.join('nemo.exe').check(file=True, link=True)
+
+    @pytest.mark.parametrize('nemo34', [True, False])
+    def test_server_exe_symlink(self, nemo34, prepare_module, tmpdir):
+        p_nemo_bin_dir = tmpdir.ensure_dir(
+            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin')
+        p_nemo_bin_dir.ensure('nemo.exe')
+        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
+        if nemo34:
+            p_nemo_bin_dir.ensure('server.exe')
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with patch.object(prepare_module.hg, 'parents'):
+            prepare_module._make_executable_links(
+                'nemo_code_repo', str(p_nemo_bin_dir), str(p_run_dir),
+                nemo34, 'xios_code_repo', str(p_xios_bin_dir))
+        assert p_run_dir.join('nemo.exe').check(file=True, link=True)
+        if nemo34:
+            assert p_run_dir.join('server.exe').check(file=True, link=True)
+        else:
+            assert not p_run_dir.join('server.exe').check(file=True, link=True)
+
+    @pytest.mark.parametrize('nemo34, xios_code_repo', [
+        (True, None),
+        (False, 'xios_code_repo'),
+    ])
+    def test_xios_server_exe_symlink(
+        self, nemo34, xios_code_repo, prepare_module, tmpdir,
+    ):
+        p_nemo_bin_dir = tmpdir.ensure_dir(
+            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin')
+        p_nemo_bin_dir.ensure('nemo.exe')
+        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
+        if not nemo34:
+            p_xios_bin_dir.ensure('xios_server.exe')
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with patch.object(prepare_module.hg, 'parents'):
+            prepare_module._make_executable_links(
+                'nemo_code_repo', str(p_nemo_bin_dir), str(p_run_dir),
+                nemo34, xios_code_repo, str(p_xios_bin_dir))
+        if nemo34:
+            assert not p_run_dir.join('xios_server.exe').check(
+                file=True, link=True)
+        else:
+            assert p_run_dir.join('xios_server.exe').check(
+                file=True, link=True)
+
+    @pytest.mark.parametrize('nemo34', [True, False])
+    def test_nemo_code_rev_file(self, nemo34, prepare_module, tmpdir):
+        p_nemo_bin_dir = tmpdir.ensure_dir(
+            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin')
+        p_nemo_bin_dir.ensure('nemo.exe')
+        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with patch.object(prepare_module.hg, 'parents'):
+            prepare_module._make_executable_links(
+                'nemo_code_repo', str(p_nemo_bin_dir), str(p_run_dir),
+                nemo34, 'xios_code_repo', str(p_xios_bin_dir))
+        assert p_run_dir.join('NEMO-code_rev.txt').check(file=True)
+
+    @pytest.mark.parametrize('nemo34, xios_code_repo', [
+        (True, None),
+        (False, 'xios_code_repo'),
+    ])
+    def test_xios_code_rev_file(
+        self, nemo34, xios_code_repo, prepare_module, tmpdir,
+    ):
+        p_nemo_bin_dir = tmpdir.ensure_dir(
+            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin')
+        p_nemo_bin_dir.ensure('nemo.exe')
+        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
+        if not nemo34:
+            p_xios_bin_dir.ensure('xios_server.exe')
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with patch.object(prepare_module.hg, 'parents'):
+            prepare_module._make_executable_links(
+                'nemo_code_repo', str(p_nemo_bin_dir), str(p_run_dir),
+                nemo34, xios_code_repo, str(p_xios_bin_dir))
+        if nemo34:
+            assert not p_run_dir.join('XIOS-code_rev.txt').check(file=True)
+        else:
+            assert p_run_dir.join('XIOS-code_rev.txt').check(file=True)
 
 
 @patch.object(prepare_module(), 'log')
