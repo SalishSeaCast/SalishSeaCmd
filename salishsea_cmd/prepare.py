@@ -107,14 +107,16 @@ def prepare(desc_file, iodefs, nemo34):
     """
     run_desc = lib.load_run_desc(desc_file)
     nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
-    xios_bin_dir = (
+    xios_code_repo, xios_bin_dir = (
         _check_xios_exec(run_desc) if not nemo34
-        else None)
+        else (None, None))
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
     _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34)
     _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, nemo34)
-    _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir)
+    _make_executable_links(
+        nemo_code_repo, nemo_bin_dir, run_dir, nemo34,
+        xios_code_repo, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
     _make_forcing_links(run_desc, run_dir)
     _check_atmos_files(run_desc, run_dir)
@@ -165,13 +167,18 @@ def _check_nemo_exec(run_desc, nemo34):
 
 
 def _check_xios_exec(run_desc):
-    """Calculate absolute path of XIOS executable's directory.
+    """Calculate absolute path of XIOS code repo & XIOS executable's
+    directory.
 
     Confirm that the XIOS executable exists, raising a SystemExit
     exception if it does not.
 
     :arg run_desc: Run description dictionary.
     :type run_desc: dict
+
+    :returns: Absolute paths of XIO code repo & XIOS executable's
+              directory.
+    :rtype: 2-tuple
 
     :raises: SystemExit
     """
@@ -182,7 +189,7 @@ def _check_xios_exec(run_desc):
         log.error(
             '{} not found - did you forget to build it?'.format(xios_exec))
         raise SystemExit(2)
-    return xios_bin_dir
+    return xios_code_repo, xios_bin_dir
 
 
 def _make_run_dir(run_desc):
@@ -305,13 +312,20 @@ def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, nemo34):
     os.chdir(saved_cwd)
 
 
-def _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir):
-    """Create symlinks in run_dir to the NEMO executables and record the
-    NEMO code repository revision used for the run.
+def _make_executable_links(
+    nemo_code_repo, nemo_bin_dir, run_dir, nemo34,
+    xios_code_repo, xios_bin_dir,
+):
+    """Create symlinks in run_dir to the NEMO and I/O server executables
+    and record the code repository revision(s) used for the run.
 
     The NEMO code revision record is the output of the
     :command:`hg parents` in the NEMO code repo.
     It is stored in the :file:`NEMO-code_rev.txt` file in run_dir.
+
+    For NEMO-3.6 runs the XIOS code revision record is the output of the
+    :command:`hg parents` in the XIOS code repo.
+    It is stored in the :file:`XIOS-code_rev.txt` file in run_dir.
 
     :arg nemo_code_repo: Absolute path of NEMO code repo.
     :type nemo_code_repo: str
@@ -321,16 +335,31 @@ def _make_nemo_code_links(nemo_code_repo, nemo_bin_dir, run_dir):
 
     :arg run_dir: Path of the temporary run directory.
     :type run_dir: str
+
+    :arg nemo34: Prepare a NEMO-3.4 run;
+                 the default is to prepare a NEMO-3.6 run
+    :type nemo34: boolean
+
+    :arg xios_code_repo: Absolute path of XIOS code repo.
+    :type xios_code_repo: str
+
+    :arg xios_bin_dir: Absolute path of directory containing XIOS executable.
+    :type xios_code_repo: str
     """
     nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
     saved_cwd = os.getcwd()
     os.chdir(run_dir)
     os.symlink(nemo_exec, 'nemo.exe')
-    iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
-    if os.path.exists(iom_server_exec):
-        os.symlink(iom_server_exec, 'server.exe')
     with open('NEMO-code_rev.txt', 'wt') as f:
         f.writelines(hg.parents(nemo_code_repo, verbose=True))
+    iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
+    if nemo34 and os.path.exists(iom_server_exec):
+        os.symlink(iom_server_exec, 'server.exe')
+    if not nemo34:
+        xios_server_exec = os.path.join(xios_bin_dir, 'xios_server.exe')
+        os.symlink(xios_server_exec, 'xios_server.exe')
+        with open('XIOS-code_rev.txt', 'wt') as f:
+            f.writelines(hg.parents(xios_code_repo, verbose=True))
     os.chdir(saved_cwd)
 
 
