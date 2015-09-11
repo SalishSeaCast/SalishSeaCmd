@@ -574,87 +574,87 @@ class TestMakeGridLinks:
         prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
 
-@patch.object(prepare_module(), 'log')
-def test_make_forcing_links_no_forcing_dir(m_log, prepare_module):
-    run_desc = {
-        'paths': {
-            'forcing': 'foo',
-        },
-    }
-    prepare_module._remove_run_dir = Mock()
-    p_exists = patch.object(
-        prepare_module.os.path, 'exists', return_value=False)
-    p_abspath = patch.object(
-        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
-    with pytest.raises(SystemExit), p_exists, p_abspath:
-        prepare_module._make_forcing_links(run_desc, 'run_dir')
-    m_log.error.assert_called_once_with(
-        'foo not found; cannot create symlinks - '
-        'please check the forcing path in your run description file')
-    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
+class TestMakeForcingLinks:
+    @patch.object(prepare_module(), 'log')
+    def test_make_forcing_links_no_forcing_dir(self, m_log, prepare_module):
+        run_desc = {
+            'paths': {
+                'forcing': 'foo',
+            },
+        }
+        prepare_module._remove_run_dir = Mock()
+        p_exists = patch.object(
+            prepare_module.os.path, 'exists', return_value=False)
+        p_abspath = patch.object(
+            prepare_module.os.path, 'abspath', side_effect=lambda path: path)
+        with pytest.raises(SystemExit), p_exists, p_abspath:
+            prepare_module._make_forcing_links(run_desc, 'run_dir')
+        m_log.error.assert_called_once_with(
+            'foo not found; cannot create symlinks - '
+            'please check the forcing path in your run description file')
+        prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
+    @pytest.mark.parametrize(
+        'link_path, expected',
+        [
+            ('SalishSea_00475200_restart.nc', 'SalishSea_00475200_restart.nc'),
+            ('initial_strat/', 'foo/initial_strat/'),
+        ],
+    )
+    @patch.object(prepare_module(), 'log')
+    def test_make_forcing_links_no_restart_path(
+        self, m_log, link_path, expected, prepare_module,
+    ):
+        run_desc = {
+            'paths': {
+                'forcing': 'foo',
+            },
+            'forcing': {
+                'atmospheric': 'bar',
+                'initial conditions': link_path,
+                'open boundaries': 'open_boundaries/',
+                'rivers': 'rivers/',
+            },
+        }
+        prepare_module._remove_run_dir = Mock()
+        p_exists = patch.object(
+            prepare_module.os.path, 'exists', side_effect=[True, False])
+        p_abspath = patch.object(
+            prepare_module.os.path, 'abspath', side_effect=lambda path: path)
+        p_chdir = patch.object(prepare_module.os, 'chdir')
+        with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
+            prepare_module._make_forcing_links(run_desc, 'run_dir')
+        m_log.error.assert_called_once_with(
+            '{} not found; cannot create symlink - '
+            'please check the forcing path and initial conditions file names '
+            'in your run description file'.format(expected))
+        prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
-@pytest.mark.parametrize(
-    'link_path, expected',
-    [
-        ('SalishSea_00475200_restart.nc', 'SalishSea_00475200_restart.nc'),
-        ('initial_strat/', 'foo/initial_strat/'),
-    ],
-)
-@patch.object(prepare_module(), 'log')
-def test_make_forcing_links_no_restart_path(
-    m_log, link_path, expected, prepare_module,
-):
-    run_desc = {
-        'paths': {
-            'forcing': 'foo',
-        },
-        'forcing': {
-            'atmospheric': 'bar',
-            'initial conditions': link_path,
-            'open boundaries': 'open_boundaries/',
-            'rivers': 'rivers/',
-        },
-    }
-    prepare_module._remove_run_dir = Mock()
-    p_exists = patch.object(
-        prepare_module.os.path, 'exists', side_effect=[True, False])
-    p_abspath = patch.object(
-        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
-    p_chdir = patch.object(prepare_module.os, 'chdir')
-    with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-        prepare_module._make_forcing_links(run_desc, 'run_dir')
-    m_log.error.assert_called_once_with(
-        '{} not found; cannot create symlink - '
-        'please check the forcing path and initial conditions file names '
-        'in your run description file'.format(expected))
-    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
-
-
-@patch.object(prepare_module(), 'log')
-def test_make_forcing_links_no_forcing_path(m_log, prepare_module):
-    run_desc = {
-        'paths': {
-            'forcing': 'foo',
-        },
-        'forcing': {
-            'atmospheric': 'bar',
-            'initial conditions': 'initial_strat/',
-            'open boundaries': 'open_boundaries/',
-            'rivers': 'rivers/',
-        },
-    }
-    prepare_module._remove_run_dir = Mock()
-    p_exists = patch.object(
-        prepare_module.os.path, 'exists', side_effect=[True, True, False])
-    p_abspath = patch.object(
-        prepare_module.os.path, 'abspath', side_effect=lambda path: path)
-    p_chdir = patch.object(prepare_module.os, 'chdir')
-    p_symlink = patch.object(prepare_module.os, 'symlink')
-    with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir, p_symlink:
-        prepare_module._make_forcing_links(run_desc, 'run_dir')
-    m_log.error.assert_called_once_with(
-        'foo/bar not found; cannot create symlink - '
-        'please check the forcing paths and file names '
-        'in your run description file')
-    prepare_module._remove_run_dir.assert_called_once_with('run_dir')
+    @patch.object(prepare_module(), 'log')
+    def test_make_forcing_links_no_forcing_path(self, m_log, prepare_module):
+        run_desc = {
+            'paths': {
+                'forcing': 'foo',
+            },
+            'forcing': {
+                'atmospheric': 'bar',
+                'initial conditions': 'initial_strat/',
+                'open boundaries': 'open_boundaries/',
+                'rivers': 'rivers/',
+            },
+        }
+        prepare_module._remove_run_dir = Mock()
+        p_exists = patch.object(
+            prepare_module.os.path, 'exists', side_effect=[True, True, False])
+        p_abspath = patch.object(
+            prepare_module.os.path, 'abspath', side_effect=lambda path: path)
+        p_chdir = patch.object(prepare_module.os, 'chdir')
+        p_symlink = patch.object(prepare_module.os, 'symlink')
+        with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
+            with p_symlink:
+                prepare_module._make_forcing_links(run_desc, 'run_dir')
+        m_log.error.assert_called_once_with(
+            'foo/bar not found; cannot create symlink - '
+            'please check the forcing paths and file names '
+            'in your run description file')
+        prepare_module._remove_run_dir.assert_called_once_with('run_dir')
