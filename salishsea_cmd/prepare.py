@@ -21,7 +21,6 @@ in a specified directory and changes the pwd to that directory.
 import logging
 import os
 import shutil
-import sys
 import uuid
 
 import arrow
@@ -113,7 +112,8 @@ def prepare(desc_file, iodefs, nemo34):
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
     _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34)
-    _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, nemo34)
+    _copy_run_set_files(
+        run_desc, desc_file, run_set_dir, iodefs, run_dir, nemo34)
     _make_executable_links(
         nemo_code_repo, nemo_bin_dir, run_dir, nemo34,
         xios_code_repo, xios_bin_dir)
@@ -274,10 +274,27 @@ def _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
             os.chdir(saved_cwd)
 
 
-def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, nemo34):
-    """Copy the run-set files given on the command-line into run_dir.
+def _copy_run_set_files(
+    run_desc, desc_file, run_set_dir, iodefs, run_dir, nemo34,
+):
+    """Copy the run-set files given into run_dir.
+
+    For all versions of NEMO the YAML run description file and the
+    IO defs files (both from the command-line) are copied.
+    The IO defs file is copied as :file:`iodef.xml` because that is the
+    name that NEMO-3.4 or XIOS expects.
 
     For NEMO-3.4, the :file:`xmlio_server.def` file is alco copied.
+
+    For NEMO-3.6, the domain defs and field defs files used by XIOS
+    are also copied.
+    Those file paths/names of those file are taken from the :kbd:`output`
+    stanza of the YAML run description file.
+    They are copied to :file:`domain_def.xml` and :file:`field_def.xml`,
+    repectively, because those are the file names that XIOS expects.
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
 
     :arg desc_file: File path/name of the YAML run description file.
     :type desc_file: file-like object
@@ -299,15 +316,22 @@ def _copy_run_set_files(desc_file, run_set_dir, iodefs, run_dir, nemo34):
     :type nemo34: boolean
     """
     run_set_files = [
-        (iodefs, 'iodef.xml'),
-        (desc_file, os.path.basename(desc_file)),
+        (os.path.join(run_set_dir, iodefs), 'iodef.xml'),
+        (os.path.join(run_set_dir, desc_file), os.path.basename(desc_file)),
     ]
     if nemo34:
-        run_set_files.append(('xmlio_server.def', 'xmlio_server.def'))
+        run_set_files.append(
+            (os.path.join(run_set_dir, 'xmlio_server.def'),
+             'xmlio_server.def'))
+    else:
+        run_set_files.extend([
+            (os.path.abspath(run_desc['output']['domain']), 'domain_def.xml'),
+            (os.path.abspath(run_desc['output']['fields']), 'field_def.xml'),
+        ])
     saved_cwd = os.getcwd()
     os.chdir(run_dir)
     for source, dest_name in run_set_files:
-        source_path = os.path.normpath(os.path.join(run_set_dir, source))
+        source_path = os.path.normpath(source)
         shutil.copy2(source_path, dest_name)
     os.chdir(saved_cwd)
 
@@ -364,7 +388,7 @@ def _make_executable_links(
 
 
 def _make_grid_links(run_desc, run_dir):
-    """Create symlinks to the file names that NEMO expects in run_dir
+    """Create symlinks in run_dir to the file names that NEMO expects
     to the bathymetry and coordinates files given in the run_desc dict.
 
     :arg run_desc: Run description dictionary.
