@@ -119,7 +119,7 @@ def prepare(desc_file, iodefs, nemo34):
         xios_code_repo, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
     _make_forcing_links(run_desc, run_dir)
-    _check_atmos_files(run_desc, run_dir)
+    _check_atmos_files(run_desc, run_dir, nemo34)
     return run_dir
 
 
@@ -470,7 +470,7 @@ def _make_forcing_links(run_desc, run_dir):
     os.chdir(saved_cwd)
 
 
-def _check_atmos_files(run_desc, run_dir):
+def _check_atmos_files(run_desc, run_dir, nemo34):
     """Confirm that the atmospheric forcing files necessary for the run
     are present. Sections of the namelist file are parsed to determine
     the necessary files, and the date ranges required for the run.
@@ -481,9 +481,14 @@ def _check_atmos_files(run_desc, run_dir):
     :arg run_dir: Path of the temporary run directory.
     :type run_dir: str
 
+    :arg nemo34: Prepare a NEMO-3.4 run;
+                 the default is to prepare a NEMO-3.6 run
+    :type nemo34: boolean
+
     :raises: SystemExit
     """
-    namelist = namelist2dict(os.path.join(run_dir, 'namelist'))
+    namelist_filename = 'namelist' if nemo34 else 'namelist_cfg'
+    namelist = namelist2dict(os.path.join(run_dir, namelist_filename))
     if not namelist['namsbc'][0]['ln_blk_core']:
         return
     date0 = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
