@@ -471,6 +471,18 @@ def _make_forcing_links(run_desc, run_dir):
 
 
 def _check_atmos_files(run_desc, run_dir):
+    """Confirm that the atmospheric forcing files necessary for the run
+    are present. Sections of the namelist file are parsed to determine
+    the necessary files, and the date ranges required for the run.
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+
+    :raises: SystemExit
+    """
     namelist = namelist2dict(os.path.join(run_dir, 'namelist'))
     if not namelist['namsbc'][0]['ln_blk_core']:
         return
@@ -521,7 +533,8 @@ def _check_atmos_files(run_desc, run_dir):
                     atmos_dir = run_desc['forcing']['atmospheric']
                     log.error(
                         '{file_path} not found; '
-                        'please confirm that CGRF files for {startm1} through '
+                        'please confirm that atmospheric forcing files '
+                        'for {startm1} through '
                         '{end} are in the {dir} collection, '
                         'and that atmospheric forcing paths in your '
                         'run description and surface boundary conditions '
@@ -534,7 +547,7 @@ def _check_atmos_files(run_desc, run_dir):
                         )
                     )
                     _remove_run_dir(run_dir)
-                    sys.exit(2)
+                    raise SystemExit(2)
 
 
 # All of the namelists that NEMO requires, but empty so that they result
