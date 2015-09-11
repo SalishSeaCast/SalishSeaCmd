@@ -550,7 +550,7 @@ def _check_atmos_files(run_desc, run_dir):
                     raise SystemExit(2)
 
 
-# All of the namelists that NEMO requires, but empty so that they result
+# All of the namelists that NEMO-3.4 requires, but empty so that they result
 # in the defaults defined in the NEMO code being used.
 EMPTY_NAMELISTS = """
 &namrun        !  Parameters of the run
