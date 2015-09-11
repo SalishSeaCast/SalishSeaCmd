@@ -101,7 +101,7 @@ class TestPrepare:
             'repo', 'bin_dir', m_mrd(), True, None, None)
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd())
-        m_caf.assert_called_once_with(m_lrd(), m_mrd())
+        m_caf.assert_called_once_with(m_lrd(), m_mrd(), True)
         assert run_dir == m_mrd()
 
     @patch.object(prepare_module().lib, 'load_run_desc')
@@ -139,7 +139,7 @@ class TestPrepare:
             'xios_repo', 'xios_bin_dir')
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd())
-        m_caf.assert_called_once_with(m_lrd(), m_mrd())
+        m_caf.assert_called_once_with(m_lrd(), m_mrd(), False)
         assert run_dir == m_mrd()
 
 
