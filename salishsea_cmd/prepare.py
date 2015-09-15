@@ -21,6 +21,7 @@ in a specified directory and changes the pwd to that directory.
 import logging
 import os
 import shutil
+import time
 import uuid
 
 import arrow
@@ -216,6 +217,8 @@ def _remove_run_dir(run_dir):
     :arg run_dir: Path of the temporary run directory.
     :type run_dir: str
     """
+    # Allow time for the OS to flush file buffers to disk
+    time.sleep(0.1)
     try:
         for fn in os.listdir(run_dir):
             os.remove(os.path.join(run_dir, fn))
@@ -272,6 +275,69 @@ def _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
             os.chdir(run_dir)
             os.symlink(ref_namelist, 'namelist_ref')
             os.chdir(saved_cwd)
+    _set_mpi_decomposition(namelist_filename, run_desc, run_dir)
+
+
+def _set_mpi_decomposition(namelist_filename, run_desc, run_dir):
+    """Update the &nammpp namelist jpni & jpnj values with the MPI
+    decomposition values from the run description.
+
+    A SystemExit exeception is raise if there is no MPI decomposition
+    specified in the run description.
+
+    :arg namelist_filename: The name of the namelist file.
+    :type namelist_filename: str
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+
+    :raises: SystemExit
+    """
+    try:
+        jpni, jpnj = run_desc['MPI decomposition'].split('x')
+    except KeyError:
+        log.error(
+            'MPI decomposition value not found in YAML run description file. '
+            'Please add a line like:\n'
+            '  MPI decomposition: 8x18\n'
+            'that says how you want the domain distributed over the '
+            'processors in the i (longitude) and j (latitude) dimensions.'
+        )
+        _remove_run_dir(run_dir)
+        raise SystemExit(2)
+    with open(os.path.join(run_dir, namelist_filename), 'rt') as f:
+        lines = f.readlines()
+    for key, new_value in {'jpni': jpni, 'jpnj': jpnj}.items():
+        value, i = _get_namelist_value(key, lines)
+        lines[i] = lines[i].replace(value, new_value)
+    with open(os.path.join(run_dir, namelist_filename), 'wt') as f:
+        f.writelines(lines)
+
+
+def _get_namelist_value(key, lines):
+    """Return the value corresponding to key in lines, and the index
+    at which key was found.
+
+    lines is expected to be a NEMO namelist in the form of a list of strings.
+
+    :arg key: The namelist key to find the value and line number of.
+    :type key: str
+
+    :arg lines: The namelist lines.
+    :type lines: list
+
+    :returns: The value corresponding to key,
+              and the index in lines at check key was found.
+    :rtype: 2-tuple
+    """
+    line_index = [
+        i for i, line in enumerate(lines)
+        if line.strip() and line.split()[0] == key][-1]
+    value = lines[line_index].split()[2]
+    return value, line_index
 
 
 def _copy_run_set_files(
