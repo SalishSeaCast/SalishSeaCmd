@@ -15,11 +15,15 @@
 
 config_name: SalishSea
 
+# How is the domain to be distributed over the processors in the
+# i (longitude) and j (latitude) directions?
+# These values are used to set the &nammpp namelist jpni & jpnj values
+# and to set the number of processors and nodes in the PBS script
+MPI decomposition: 8x18
+
 # For runs on systems that use qsub/PBS/TORQUE
 run_id: example
 walltime: 10:00:00
-nodes: 27
-processors_per_node: 12
 email: dlatornell@example.com
 
 paths:
@@ -50,4 +54,9 @@ namelists:
   - namelist.bottom
   - namelist.tracers
   - namelist.dynamics
-  - namelist.compute.12x27
+  - namelist.vertical
+  - namelist.compute
+
+output:
+  domain: domain_def.xml
+  fields: ../../NEMO-3.6-code/NEMOGCM/CONFIG/SHARED/field_def.xml
