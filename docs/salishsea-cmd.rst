@@ -23,6 +23,12 @@ Salish Sea NEMO Command Processor
 The Salish Sea NEMO command processor,
 :program:`salishsea`,
 is a command line tool for doing various operations associated with the :ref:`SalishSeaNEMO` model.
+It is provided by the :kbd:`SalishSeaCmd` package in the `tools repo`_.
+
+.. _tools repo: https://bitbucket.org/salishsea/tools/
+
+The :kbd:`SalishSeaCmd` package is a Python 3 package.
+It was developed and tested under Python 3.4 and should work with that and later versions of Python.
 
 
 Installation
@@ -31,25 +37,28 @@ Installation
 These instructions assume that:
 
 * You have an up to date clone of the `tools repo`_
-* You have the :ref:`AnacondaPythonDistro` installed
-* :file:`$HOME/anaconda/bin` is included in your :envvar:`PATH` environment variable
-* You have installed the :ref:`SalishSeaTools` package
+* You have the :ref:`AnacondaPythonDistro` or `Miniconda`_ installed
+* :file:`$HOME/anaconda3/bin` or :file:`$HOME/anaconda/bin` is included in your :envvar:`PATH` environment variable if your are using the :ref:`AnacondaPythonDistro`,
+  or :file:`$HOME/miniconda3/bin` or :file:`$HOME/miniconda/bin` is included in your :envvar:`PATH` environment variable if your are using
 
-.. _tools repo: https://bitbucket.org/salishsea/tools/
+.. _Miniconda: http://conda.pydata.org/miniconda.html
 
-Use :program:`pip`
-(the Python package installer)
-to install the :kbd:`SalishSeaCmd` package from the `tools repo`_ in editable mode so that :program:`salishsea` will be automatically updated as the repo evolves:
+Use :program:`conda`
+(the Miniconda/Anaconda package manager)
+to create a :kbd:`salishsea-cmd` environment in which the :kbd:`SalishSeaCmd` package dependencies are installed:
 
 .. code-block:: bash
 
-    cd tools/SalishSeaCmd
-    pip install --editable .
+    $ cd tools
+    $ conda env create -f SalishSeaCmd/environment.yaml
 
-Experienced Python developers may wish to install :program:`salishsea` in other ways:
+Activate the :kbd:`salishsea-cmd` environment and install the :kbd:`SalishSeaTools` and :kbd:`SalishSeaCmd` packaged from the `tools repo`_ in editable mode so that :program:`salishsea` will be automatically updated as the repo evolves:
 
-* In a Python virtual environment
-* In :file:`$HOME/.local/` via the :command:`pip install --user` option
+.. code-block:: bash
+
+    $ source activate salishsea-cmd
+    (salishsea-cmd)$ pip install --editable SalishSeaTools
+    (salishsea-cmd)$ pip install --editable SalishSeaCmd
 
 
 :kbd:`<TAB>` Completion
