@@ -292,8 +292,10 @@ class TestMakeNamelist:
             ],
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
-        prepare_module._make_namelist(
-            str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code', nemo34)
+        with patch.object(prepare_module, '_set_mpi_decomposition'):
+            prepare_module._make_namelist(
+                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code',
+                nemo34)
         assert p_run_dir.join(namelist_filename).check()
 
     @pytest.mark.parametrize('nemo34', [True, False])
@@ -323,9 +325,10 @@ class TestMakeNamelist:
             ],
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
-        prepare_module._make_namelist(
-            str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code',
-            nemo34=True)
+        with patch.object(prepare_module, '_set_mpi_decomposition'):
+            prepare_module._make_namelist(
+                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code',
+                nemo34=True)
         namelist = p_run_dir.join('namelist').read()
         assert namelist.endswith(prepare_module.EMPTY_NAMELISTS)
 
@@ -340,9 +343,10 @@ class TestMakeNamelist:
             ],
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
-        prepare_module._make_namelist(
-            str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-3.6-code',
-            nemo34=False)
+        with patch.object(prepare_module, '_set_mpi_decomposition'):
+            prepare_module._make_namelist(
+                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-3.6-code',
+                nemo34=False)
         namelist = p_run_dir.join('namelist_cfg').read()
         assert not namelist.endswith(prepare_module.EMPTY_NAMELISTS)
 
@@ -357,9 +361,10 @@ class TestMakeNamelist:
         p_run_dir = tmpdir.ensure_dir('run_dir')
         p_code = tmpdir.ensure_dir('NEMO-3.6-code')
         p_code.ensure('NEMOGCM/CONFIG/SHARED/namelist_ref')
-        prepare_module._make_namelist(
-            str(p_run_set_dir), run_desc, str(p_run_dir), str(p_code),
-            nemo34=False)
+        with patch.object(prepare_module, '_set_mpi_decomposition'):
+            prepare_module._make_namelist(
+                str(p_run_set_dir), run_desc, str(p_run_dir), str(p_code),
+                nemo34=False)
         assert p_run_dir.join('namelist_ref').check(file=True, link=True)
 
 
