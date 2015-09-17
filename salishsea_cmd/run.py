@@ -85,35 +85,56 @@ class Run(cliff.command.Command):
         return parser
 
     def take_action(self, parsed_args):
-        run_dir_name = api.prepare(parsed_args.desc_file, parsed_args.iodefs)
-        run_dir = pathlib.Path(run_dir_name).resolve()
-        namelist = namelist2dict((run_dir/'namelist').as_posix())
-        procs = namelist['nammpp'][0]['jpnij']
-        results_dir = os.path.abspath(parsed_args.results_dir)
-        gather_opts = ''
-        if parsed_args.keep_proc_results:
-            gather_opts = ' '.join((gather_opts, '--keep-proc-results'))
-        if not parsed_args.compress:
-            gather_opts = ' '.join((gather_opts, '--no-compress'))
-        if parsed_args.compress_restart:
-            gather_opts = ' '.join((gather_opts, '--compress-restart'))
-        if parsed_args.delete_restart:
-            gather_opts = ' '.join((gather_opts, '--delete-restart'))
-        system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
-        batch_script = _build_batch_script(
-            parsed_args.desc_file, procs, results_dir, run_dir.as_posix(),
-            gather_opts, system)
-        batch_file = run_dir/'SalishSeaNEMO.sh'
-        with batch_file.open('wt') as f:
-            f.write(batch_script)
-        starting_dir = pathlib.Path.cwd()
-        os.chdir(run_dir.as_posix())
-        if system != 'nowcast0':
-            qsub_msg = subprocess.check_output(
-                'qsub SalishSeaNEMO.sh'.split(), universal_newlines=True)
-            if not parsed_args.quiet:
-                log.info(qsub_msg)
-        os.chdir(starting_dir.as_posix())
+        """Execute the `salishsea run1 sub-coomand.
+
+
+        """
+        qsub_msg = run(
+            parsed_args.desc_file, parsed_args.iodefs, parsed_args.results_dir,
+            parsed_args.nemo34, parsed_args.keep_proc_results,
+            parsed_args.compress, parsed_args.compress_restart,
+            parsed_args.delete_restart,
+        )
+        if not parsed_args.quiet:
+            log.info(qsub_msg)
+
+
+def run(
+    desc_file, iodefs, results_dir,
+    nemo34=False,
+    keep_proc_results=False,
+    compress=False,
+    compress_restart=False,
+    delete_restart=False,
+):
+    """Create and prepare
+    """
+    run_dir_name = api.prepare(desc_file, iodefs, nemo34)
+    run_dir = pathlib.Path(run_dir_name).resolve()
+    namelist = namelist2dict((run_dir/'namelist').as_posix())
+    procs = namelist['nammpp'][0]['jpnij']
+    results_dir = os.path.abspath(results_dir)
+    gather_opts = ''
+    if keep_proc_results:
+        gather_opts = ' '.join((gather_opts, '--keep-proc-results'))
+    if not compress:
+        gather_opts = ' '.join((gather_opts, '--no-compress'))
+    if compress_restart:
+        gather_opts = ' '.join((gather_opts, '--compress-restart'))
+    if delete_restart:
+        gather_opts = ' '.join((gather_opts, '--delete-restart'))
+    system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
+    batch_script = _build_batch_script(
+        desc_file, procs, results_dir, run_dir.as_posix(), gather_opts, system)
+    batch_file = run_dir/'SalishSeaNEMO.sh'
+    with batch_file.open('wt') as f:
+        f.write(batch_script)
+    starting_dir = pathlib.Path.cwd()
+    os.chdir(run_dir.as_posix())
+    qsub_msg = subprocess.check_output(
+        'qsub SalishSeaNEMO.sh'.split(), universal_newlines=True)
+    os.chdir(starting_dir.as_posix())
+    return qsub_msg
 
 
 def _build_batch_script(
