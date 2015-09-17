@@ -47,7 +47,7 @@ class Run(cliff.command.Command):
     def get_parser(self, prog_name):
         parser = super(Run, self).get_parser(prog_name)
         parser.description = '''
-            Prepare, execute, and gather the results from a Salish Sea NEMO
+            Prepare, execute, and gather the results from a Salish Sea NEMO-3.6
             run described in DESC_FILE and IO_DEFS.
             The results files from the run are gathered in RESULTS_DIR.
 
@@ -62,6 +62,11 @@ class Run(cliff.command.Command):
         parser.add_argument(
             'results_dir', metavar='RESULTS_DIR',
             help='directory to store results into')
+        parser.add_argument(
+            '--nemo3.4', dest='nemo34', action='store_true',
+            help='''
+            Do a NEMO-3.4 run;
+            the default is to do a NEMO-3.6 run''')
         parser.add_argument(
             '-q', '--quiet', action='store_true',
             help="don't show the run directory path or job submission message")
