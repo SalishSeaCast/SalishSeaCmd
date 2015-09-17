@@ -35,9 +35,40 @@ def run_cmd():
     return salishsea_cmd.run.Run(Mock(spec=cliff.app.App), [])
 
 
-def test_get_parser(run_cmd):
-    parser = run_cmd.get_parser('salishsea run')
-    assert parser.prog == 'salishsea run'
+class TestGetParser:
+    """Unit tests for `salishsea run` sub-command command-line parser.
+    """
+    def test_get_parser(self, run_cmd):
+        parser = run_cmd.get_parser('salishsea run')
+        assert parser.prog == 'salishsea run'
+
+    def test_parsed_args_defaults(self, run_cmd):
+        parser = run_cmd.get_parser('salishsea run')
+        parsed_args = parser.parse_args(['foo', 'bar', 'baz'])
+        assert parsed_args.desc_file == 'foo'
+        assert parsed_args.iodefs == 'bar'
+        assert parsed_args.results_dir == 'baz'
+        assert not parsed_args.nemo34
+        assert not parsed_args.quiet
+        assert not parsed_args.compress
+        assert not parsed_args.keep_proc_results
+        assert not parsed_args.compress_restart
+        assert not parsed_args.delete_restart
+
+    @pytest.mark.parametrize('flag, attr', [
+        ('--nemo3.4', 'nemo34'),
+        ('-q', 'quiet'),
+        ('--quiet', 'quiet'),
+        ('--compress', 'compress'),
+        ('--compress', 'compress'),
+        ('--keep-proc-results', 'keep_proc_results'),
+        ('--compress-restart', 'compress_restart'),
+        ('--delete-restart', 'delete_restart'),
+    ])
+    def test_parsed_args_flags(self, flag, attr, run_cmd):
+        parser = run_cmd.get_parser('salishsea run')
+        parsed_args = parser.parse_args(['foo', 'bar', 'baz', flag])
+        assert getattr(parsed_args, attr)
 
 
 def test_walltime_leading_zero(run_module):
