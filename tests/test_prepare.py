@@ -52,19 +52,15 @@ class TestGetParser:
         assert not parsed_args.nemo34
         assert not parsed_args.quiet
 
-    def test_parsed_args_nemo34(self, prepare_cmd):
+    @pytest.mark.parametrize('flag, attr', [
+        ('--nemo3.4', 'nemo34'),
+        ('-q', 'quiet'),
+        ('--quiet', 'quiet'),
+    ])
+    def test_parsed_args_flags(self, flag, attr, prepare_cmd):
         parser = prepare_cmd.get_parser('salishsea prepare')
-        parsed_args = parser.parse_args(['foo', 'bar', '--nemo3.4'])
-        assert parsed_args.desc_file == 'foo'
-        assert parsed_args.iodefs == 'bar'
-        assert parsed_args.nemo34
-
-    def test_parsed_args_quiet(self, prepare_cmd):
-        parser = prepare_cmd.get_parser('salishsea prepare')
-        parsed_args = parser.parse_args(['foo', 'bar', '-q'])
-        assert parsed_args.desc_file == 'foo'
-        assert parsed_args.iodefs == 'bar'
-        assert parsed_args.quiet
+        parsed_args = parser.parse_args(['foo', 'bar', flag])
+        assert getattr(parsed_args, attr)
 
 
 class TestPrepare:
