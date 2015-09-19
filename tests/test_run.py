@@ -114,6 +114,42 @@ class TestTakeAction:
         assert not m_log.info.called
 
 
+@patch.object(run_module(), '_get_n_processors', return_value=144)
+@patch.object(run_module().lib, 'load_run_desc')
+@patch.object(run_module().api, 'prepare')
+class TestRun:
+    """Unit tests for `salishsea run` run() function.
+    """
+    def test_run_nemo34(self, m_prepare, m_lrd, m_gnp, run_module, tmpdir):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        m_prepare.return_value = str(p_run_dir)
+        p_results_dir = tmpdir.ensure_dir('results_dir')
+        run_module.run(
+            'SalishSea.yaml', 'iodefs', str(p_results_dir), nemo34=True)
+        m_prepare.assert_called_once_with('SalishSea.yaml', 'iodefs', True)
+        m_lrd.assert_called_once_with('SalishSea.yaml')
+        m_gnp.assert_called_once_with(m_lrd())
+
+    def test_run_nemo36(self, m_prepare, m_lrd, m_gnp, run_module, tmpdir):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        m_prepare.return_value = str(p_run_dir)
+        p_results_dir = tmpdir.ensure_dir('results_dir')
+        run_module.run(
+            'SalishSea.yaml', 'iodefs', str(p_results_dir), nemo34=False)
+        m_prepare.assert_called_once_with('SalishSea.yaml', 'iodefs', False)
+        m_lrd.assert_called_once_with('SalishSea.yaml')
+        m_gnp.assert_called_once_with(m_lrd())
+
+
+class TestGetNProcessors:
+    """Unit test for `salishsea run` _get_n_processors() function.
+    """
+    def test_get_n_processors(self, run_module):
+        run_desc = {'MPI decomposition': '8x18'}
+        n_processors = run_module._get_n_processors(run_desc)
+        assert n_processors == 8*18
+
+
 def test_walltime_leading_zero(run_module):
     """Ensure correct handling of walltime w/ leading zero in YAML desc file
 
