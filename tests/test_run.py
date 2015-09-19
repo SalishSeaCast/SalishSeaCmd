@@ -16,7 +16,10 @@
 """SalishSeaCmd run sub-command plug-in unit tests
 """
 from io import StringIO
-from unittest.mock import Mock
+from unittest.mock import (
+    Mock,
+    patch,
+)
 
 import cliff.app
 import pytest
@@ -69,6 +72,46 @@ class TestGetParser:
         parser = run_cmd.get_parser('salishsea run')
         parsed_args = parser.parse_args(['foo', 'bar', 'baz', flag])
         assert getattr(parsed_args, attr)
+
+
+@patch.object(run_module(), 'log')
+@patch.object(run_module(), 'run', return_value='qsub message')
+class TestTakeAction:
+    """Unit tests for `salishsea run` sub-command take_action() method.
+    """
+    def test_take_action(self, m_run, m_log, run_cmd):
+        parsed_args = Mock(
+            desc_file='desc file',
+            iodefs='iodefs',
+            results_dir='results dir',
+            nemo34=False,
+            quiet=False,
+            keep_proc_results=False,
+            compress=False,
+            compress_restart=False,
+            delete_restart=False,
+        )
+        run_cmd.run(parsed_args)
+        m_run.assert_called_once_with(
+            'desc file', 'iodefs', 'results dir',
+            False, False, False, False, False,
+        )
+        m_log.info.assert_called_once_with('qsub message')
+
+    def test_take_action_quiet(self, m_run, m_log, run_cmd):
+        parsed_args = Mock(
+            desc_file='desc file',
+            iodefs='iodefs',
+            results_dir='results dir',
+            nemo34=False,
+            quiet=True,
+            keep_proc_results=False,
+            compress=False,
+            compress_restart=False,
+            delete_restart=False,
+        )
+        run_cmd.run(parsed_args)
+        assert not m_log.info.called
 
 
 def test_walltime_leading_zero(run_module):
