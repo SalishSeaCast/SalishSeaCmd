@@ -92,7 +92,7 @@ def prepare(desc_file, iodefs, nemo34):
     The path to the run directory is returned.
 
     :arg desc_file: File path/name of the YAML run description file.
-    :type desc_file: file-like object
+    :type desc_file: str
 
     :arg iodefs: File path/name of the NEMO IOM server defs file for
                  the run.
