@@ -18,8 +18,8 @@
 import os
 from unittest.mock import (
     call,
-    patch,
     Mock,
+    patch,
 )
 
 import cliff.app
