@@ -27,8 +27,6 @@ import subprocess
 import cliff.command
 import pathlib
 
-from salishsea_tools.namelist import namelist2dict
-
 from . import (
     api,
     lib,
@@ -158,9 +156,9 @@ def run(
     """
     run_dir_name = api.prepare(desc_file, iodefs, nemo34)
     run_dir = pathlib.Path(run_dir_name).resolve()
-    namelist = namelist2dict((run_dir/'namelist').as_posix())
-    procs = namelist['nammpp'][0]['jpnij']
-    results_dir = os.path.abspath(results_dir)
+    run_desc = lib.load_run_desc(desc_file)
+    n_processors = _get_n_processors(run_desc)
+    results_dir = pathlib.Path(results_dir)
     gather_opts = ''
     if keep_proc_results:
         gather_opts = ' '.join((gather_opts, '--keep-proc-results'))
@@ -172,7 +170,9 @@ def run(
         gather_opts = ' '.join((gather_opts, '--delete-restart'))
     system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
     batch_script = _build_batch_script(
-        desc_file, procs, results_dir, run_dir.as_posix(), gather_opts, system)
+        desc_file, n_processors, results_dir, run_dir.as_posix(), gather_opts,
+        system,
+    )
     batch_file = run_dir/'SalishSeaNEMO.sh'
     with batch_file.open('wt') as f:
         f.write(batch_script)
@@ -182,6 +182,20 @@ def run(
         'qsub SalishSeaNEMO.sh'.split(), universal_newlines=True)
     os.chdir(starting_dir.as_posix())
     return qsub_msg
+
+
+def _get_n_processors(run_desc):
+    """Return the total number of processors required for the run as
+    specificed by the MPI decomposition key in the run description.
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :returns: Number of processors required for the run.
+    :rtype: int
+    """
+    jpni, jpnj = map(int, run_desc['MPI decomposition'].split('x'))
+    return jpni * jpnj
 
 
 def _build_batch_script(
