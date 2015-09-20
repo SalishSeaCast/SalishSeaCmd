@@ -16,6 +16,7 @@
 """SalishSeaCmd run sub-command plug-in unit tests
 """
 from io import StringIO
+import pathlib
 from unittest.mock import (
     Mock,
     patch,
@@ -114,31 +115,33 @@ class TestTakeAction:
         assert not m_log.info.called
 
 
+@patch.object(run_module().subprocess, 'check_output', return_value='msg')
+@patch.object(run_module(), '_build_batch_script', return_value='script')
 @patch.object(run_module(), '_get_n_processors', return_value=144)
 @patch.object(run_module().lib, 'load_run_desc')
 @patch.object(run_module().api, 'prepare')
 class TestRun:
     """Unit tests for `salishsea run` run() function.
     """
-    def test_run_nemo34(self, m_prepare, m_lrd, m_gnp, run_module, tmpdir):
+    @pytest.mark.parametrize('nemo34', [True, False])
+    def test_run(
+        self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco, nemo34, run_module,
+        tmpdir,
+    ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = str(p_run_dir)
         p_results_dir = tmpdir.ensure_dir('results_dir')
-        run_module.run(
-            'SalishSea.yaml', 'iodefs', str(p_results_dir), nemo34=True)
-        m_prepare.assert_called_once_with('SalishSea.yaml', 'iodefs', True)
+        qsb_msg = run_module.run(
+            'SalishSea.yaml', 'iodefs', str(p_results_dir), nemo34)
+        m_prepare.assert_called_once_with('SalishSea.yaml', 'iodefs', nemo34)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_gnp.assert_called_once_with(m_lrd())
-
-    def test_run_nemo36(self, m_prepare, m_lrd, m_gnp, run_module, tmpdir):
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        m_prepare.return_value = str(p_run_dir)
-        p_results_dir = tmpdir.ensure_dir('results_dir')
-        run_module.run(
-            'SalishSea.yaml', 'iodefs', str(p_results_dir), nemo34=False)
-        m_prepare.assert_called_once_with('SalishSea.yaml', 'iodefs', False)
-        m_lrd.assert_called_once_with('SalishSea.yaml')
-        m_gnp.assert_called_once_with(m_lrd())
+        m_bbs.assert_called_once_with(
+            m_lrd(), 'SalishSea.yaml', 144, pathlib.Path(str(p_results_dir)),
+            str(p_run_dir), ' --no-compress', 'tom')
+        m_sco.assert_called_once_with(
+            ['qsub', 'SalishSeaNEMO.sh'], universal_newlines=True)
+        assert qsb_msg == 'msg'
 
 
 class TestGetNProcessors:
@@ -150,65 +153,54 @@ class TestGetNProcessors:
         assert n_processors == 8*18
 
 
-def test_walltime_leading_zero(run_module):
-    """Ensure correct handling of walltime w/ leading zero in YAML desc file
-
-    re: issue#16
+class TestPbsCommon:
+    """Unit tests for `salishsea run` _pbs_common() function.
     """
-    desc_file = StringIO(
-        'run_id: foo\n'
-        'walltime: 01:02:03\n')
-    run_desc = yaml.load(desc_file)
-    pbs_directives = run_module._pbs_common(
-        run_desc, 42, 'me@example.com', 'foo/')
-    assert u'walltime=1:02:03' in pbs_directives
+    def test_walltime_leading_zero(self, run_module):
+        """Ensure correct handling of walltime w/ leading zero in YAML desc file
+
+        re: issue#16
+        """
+        desc_file = StringIO(
+            'run_id: foo\n'
+            'walltime: 01:02:03\n')
+        run_desc = yaml.load(desc_file)
+        pbs_directives = run_module._pbs_common(
+            run_desc, 42, 'me@example.com', 'foo/')
+        assert 'walltime=1:02:03' in pbs_directives
+
+    def test_walltime_no_leading_zero(self, run_module):
+        """Ensure correct handling of walltime w/o leading zero in YAML desc file
+
+        re: issue#16
+        """
+        desc_file = StringIO(
+            'run_id: foo\n'
+            'walltime: 1:02:03\n')
+        run_desc = yaml.load(desc_file)
+        pbs_directives = run_module._pbs_common(
+            run_desc, 42, 'me@example.com', 'foo/')
+        assert 'walltime=1:02:03' in pbs_directives
 
 
-def test_walltime_no_leading_zero(run_module):
-    """Ensure correct handling of walltime w/o leading zero in YAML desc file
-
-    re: issue#16
+class TestPbsFeatures:
+    """Unit tests for `salishsea run _pbs_features() function.
     """
-    desc_file = StringIO(
-        'run_id: foo\n'
-        'walltime: 1:02:03\n')
-    run_desc = yaml.load(desc_file)
-    pbs_directives = run_module._pbs_common(
-        run_desc, 42, 'me@example.com', 'foo/')
-    assert u'walltime=1:02:03' in pbs_directives
+    @pytest.mark.parametrize('n_processors, nodes', [
+        (144, 12),
+    ])
+    def test_jasper(self, n_processors, nodes, run_module):
+        pbs_features = run_module._pbs_features(n_processors, 'jasper')
+        expected = (
+            '#PBS -l feature=X5675\n'
+            '#PBS -l nodes={}:ppn=12\n'.format(nodes)
+        )
+        assert pbs_features == expected
 
-
-def test_number_of_nodes_missing(run_module):
-    """KeyError raised & msg logged when nodes key missing from YAML desc file
-    """
-    desc_file = StringIO(
-        'run_id: foo\n'
-        'walltime: 1:02:03\n')
-    run_desc = yaml.load(desc_file)
-    with pytest.raises(KeyError):
-        run_module._pbs_features(run_desc, 'jasper')
-
-
-def test_processors_per_node_missing(run_module):
-    """KeyError raised & msg logged when ppn key missing from YAML desc file
-    """
-    desc_file = StringIO(
-        'run_id: foo\n'
-        'walltime: 1:02:03\n'
-        'nodes: 27\n')
-    run_desc = yaml.load(desc_file)
-    with pytest.raises(KeyError):
-        run_module._pbs_features(run_desc, 'jasper')
-
-
-def test_nodes_ppn(run_module):
-    """KeyError raised & msg logged when ppn key missing from YAML desc file
-    """
-    desc_file = StringIO(
-        'run_id: foo\n'
-        'walltime: 1:02:03\n'
-        'nodes: 27\n'
-        'processors_per_node: 12\n')
-    run_desc = yaml.load(desc_file)
-    pbs_features = run_module._pbs_features(run_desc, 'jasper')
-    assert u'#PBS -l nodes=27:ppn=12' in pbs_features
+    @pytest.mark.parametrize('system, expected', [
+        ('orcinus', '#PBS -l partition=QDR\n'),
+        ('salish', ''),
+    ])
+    def test_orcinus(self, system, expected, run_module):
+        pbs_features = run_module._pbs_features(144, system)
+        assert pbs_features == expected
