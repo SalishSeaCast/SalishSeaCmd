@@ -20,6 +20,7 @@ Salish Sea NEMO model.
 """
 import datetime
 import logging
+import math
 import os
 import socket
 import subprocess
@@ -170,8 +171,8 @@ def run(
         gather_opts = ' '.join((gather_opts, '--delete-restart'))
     system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
     batch_script = _build_batch_script(
-        desc_file, n_processors, results_dir, run_dir.as_posix(), gather_opts,
-        system,
+        run_desc, desc_file, n_processors, results_dir, run_dir.as_posix(),
+        gather_opts, system,
     )
     batch_file = run_dir/'SalishSeaNEMO.sh'
     with batch_file.open('wt') as f:
@@ -199,9 +200,39 @@ def _get_n_processors(run_desc):
 
 
 def _build_batch_script(
-    desc_file, procs, results_dir, run_dir, gather_opts, system,
+    run_desc, desc_file, n_processors, results_dir, run_dir, gather_opts,
+    system,
 ):
-    run_desc = lib.load_run_desc(desc_file)
+    """Build the Bash script that will execute the run.
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :arg desc_file: File path/name of the YAML run description file.
+    :type desc_file: str
+
+    :arg n_processors: Number of processors that the run will be executed on.
+    :type n_processors: int
+
+    :arg results_dir: Path of the directory in which to store the run
+                      results;
+                      it will be created if it does not exist.
+    :type results_dir: str
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+
+    :arg gather_opts: Option flags for the :command:`salishsea gather`
+                      command in the batch script.
+    :type gather_opts: str
+
+    :arg system: Name of the system that the run will be executed on;
+                 e.g. :kbd:`salish`, :kbd:`orcinus`
+    :type system: str
+
+    :returns: Bash script to execute the run.
+    :rtype: str
+    """
     script = '#!/bin/bash\n'
     if system != 'nowcast0':
         try:
@@ -213,7 +244,8 @@ def _build_batch_script(
             '{pbs_common}'
             '{pbs_features}\n'
             .format(
-                pbs_common=_pbs_common(run_desc, procs, email, results_dir),
+                pbs_common=_pbs_common(
+                    run_desc, n_processors, email, results_dir),
                 pbs_features=_pbs_features(run_desc, system)
                 )
         ))
@@ -227,7 +259,7 @@ def _build_batch_script(
         .format(
             defns=_definitions(
                 run_desc['run_id'], desc_file, run_dir, results_dir,
-                gather_opts, system, procs),
+                gather_opts, system, n_processors),
             modules=_modules(system),
             execute=_execute(system),
             fix_permissions=_fix_permissions(),
@@ -293,21 +325,11 @@ def td2hms(timedelta):
     return '{0[0]}:{0[1]:02d}:{0[2]:02d}'.format(hms)
 
 
-def _pbs_features(run_desc, system):
+def _pbs_features(n_processors, system):
     pbs_features = ''
     if system == 'jasper':
-        try:
-            nodes = run_desc['nodes']
-        except KeyError:
-            log.error('nodes key not found in run description YAML file')
-            raise
-        try:
-            ppn = run_desc['processors_per_node']
-        except KeyError:
-            log.error(
-                'processors_per_node key not found '
-                'in run description YAML file')
-            raise
+        ppn = 12
+        nodes = math.ceil(n_processors / ppn)
         pbs_features = (
             '#PBS -l feature=X5675\n'
             '#PBS -l nodes={}:ppn={}\n'.format(nodes, ppn)
