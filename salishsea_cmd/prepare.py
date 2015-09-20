@@ -363,7 +363,7 @@ def _copy_run_set_files(
     :type run_desc: dict
 
     :arg desc_file: File path/name of the YAML run description file.
-    :type desc_file: file-like object
+    :type desc_file: str
 
     :arg run_set_dir: Directory containing the run description file,
                       from which relative paths for the namelist section
