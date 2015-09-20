@@ -246,7 +246,7 @@ def _build_batch_script(
             .format(
                 pbs_common=_pbs_common(
                     run_desc, n_processors, email, results_dir),
-                pbs_features=_pbs_features(run_desc, system)
+                pbs_features=_pbs_features(n_processors, system)
                 )
         ))
     script = '\n'.join((
