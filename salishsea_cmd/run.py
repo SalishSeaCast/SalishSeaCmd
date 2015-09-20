@@ -202,7 +202,7 @@ def _build_batch_script(
     desc_file, procs, results_dir, run_dir, gather_opts, system,
 ):
     run_desc = lib.load_run_desc(desc_file)
-    script = u'#!/bin/bash\n'
+    script = '#!/bin/bash\n'
     if system != 'nowcast0':
         try:
             email = run_desc['email']
@@ -210,8 +210,8 @@ def _build_batch_script(
             email = '{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
         script = '\n'.join((
             script,
-            u'{pbs_common}'
-            u'{pbs_features}\n'
+            '{pbs_common}'
+            '{pbs_features}\n'
             .format(
                 pbs_common=_pbs_common(run_desc, procs, email, results_dir),
                 pbs_features=_pbs_features(run_desc, system)
@@ -219,11 +219,11 @@ def _build_batch_script(
         ))
     script = '\n'.join((
         script,
-        u'{defns}\n'
-        u'{modules}\n'
-        u'{execute}\n'
-        u'{fix_permissions}\n'
-        u'{cleanup}'
+        '{defns}\n'
+        '{modules}\n'
+        '{execute}\n'
+        '{fix_permissions}\n'
+        '{cleanup}'
         .format(
             defns=_definitions(
                 run_desc['run_id'], desc_file, run_dir, results_dir,
@@ -246,18 +246,18 @@ def _pbs_common(run_desc, procs, email, results_dir, pmem='2000mb'):
             hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = td2hms(td)
     pbs_directives = (
-        u'#PBS -N {run_id}\n'
-        u'#PBS -S /bin/bash\n'
-        u'#PBS -l procs={procs}\n'
-        u'# memory per processor\n'
-        u'#PBS -l pmem={pmem}\n'
-        u'#PBS -l walltime={walltime}\n'
-        u'# email when the job [b]egins and [e]nds, or is [a]borted\n'
-        u'#PBS -m bea\n'
-        u'#PBS -M {email}\n'
-        u'# stdout and stderr file paths/names\n'
-        u'#PBS -o {results_dir}/stdout\n'
-        u'#PBS -e {results_dir}/stderr\n'
+        '#PBS -N {run_id}\n'
+        '#PBS -S /bin/bash\n'
+        '#PBS -l procs={procs}\n'
+        '# memory per processor\n'
+        '#PBS -l pmem={pmem}\n'
+        '#PBS -l walltime={walltime}\n'
+        '# email when the job [b]egins and [e]nds, or is [a]borted\n'
+        '#PBS -m bea\n'
+        '#PBS -M {email}\n'
+        '# stdout and stderr file paths/names\n'
+        '#PBS -o {results_dir}/stdout\n'
+        '#PBS -e {results_dir}/stderr\n'
     ).format(
         run_id=run_desc['run_id'],
         procs=procs,
@@ -290,11 +290,11 @@ def td2hms(timedelta):
     for period_name, period_seconds in periods:
         period_value, seconds = divmod(seconds, period_seconds)
         hms.append(period_value)
-    return u'{0[0]}:{0[1]:02d}:{0[2]:02d}'.format(hms)
+    return '{0[0]}:{0[1]:02d}:{0[2]:02d}'.format(hms)
 
 
 def _pbs_features(run_desc, system):
-    pbs_features = u''
+    pbs_features = ''
     if system == 'jasper':
         try:
             nodes = run_desc['nodes']
@@ -309,12 +309,12 @@ def _pbs_features(run_desc, system):
                 'in run description YAML file')
             raise
         pbs_features = (
-            u'#PBS -l feature=X5675\n'
-            u'#PBS -l nodes={}:ppn={}\n'.format(nodes, ppn)
+            '#PBS -l feature=X5675\n'
+            '#PBS -l nodes={}:ppn={}\n'.format(nodes, ppn)
         )
     elif system == 'orcinus':
         pbs_features = (
-            u'#PBS -l partition=QDR\n'
+            '#PBS -l partition=QDR\n'
         )
     return pbs_features
 
@@ -331,13 +331,13 @@ def _definitions(
         home = '${PBS_O_HOME}'
         mpirun = 'mpirun'
     defns = (
-        u'RUN_ID="{run_id}"\n'
-        u'RUN_DESC="{run_desc_file}"\n'
-        u'WORK_DIR="{run_dir}"\n'
-        u'RESULTS_DIR="{results_dir}"\n'
-        u'MPIRUN="{mpirun}"\n'
-        u'GATHER="{salishsea_cmd} gather"\n'
-        u'GATHER_OPTS="{gather_opts}"\n'
+        'RUN_ID="{run_id}"\n'
+        'RUN_DESC="{run_desc_file}"\n'
+        'WORK_DIR="{run_dir}"\n'
+        'RESULTS_DIR="{results_dir}"\n'
+        'MPIRUN="{mpirun}"\n'
+        'GATHER="{salishsea_cmd} gather"\n'
+        'GATHER_OPTS="{gather_opts}"\n'
     ).format(
         run_id=run_id,
         run_desc_file=run_desc_file,
@@ -354,16 +354,16 @@ def _modules(system):
     modules = ''
     if system == 'jasper':
         modules = (
-            u'module load application/python/2.7.3\n'
-            u'module load library/netcdf/4.1.3\n'
-            u'module load library/szip/2.1\n'
-            u'module load application/nco/4.3.9\n'
+            'module load application/python/2.7.3\n'
+            'module load library/netcdf/4.1.3\n'
+            'module load library/szip/2.1\n'
+            'module load application/nco/4.3.9\n'
         )
     elif system == 'orcinus':
         modules = (
-            u'module load intel\n'
-            u'module load intel/14.0/netcdf_hdf5\n'
-            u'module load python\n'
+            'module load intel\n'
+            'module load intel/14.0/netcdf_hdf5\n'
+            'module load python\n'
         )
     return modules
 
@@ -371,34 +371,34 @@ def _modules(system):
 def _execute(system):
     mpirun_suffix = ' >>stdout 2>>stderr' if system == 'nowcast0' else ''
     script = (
-        u'cd ${WORK_DIR}\n'
-        u'echo "working dir: $(pwd)"\n'
-        u'\n'
-        u'echo "Starting run at $(date)"\n'
-        u'mkdir -p ${RESULTS_DIR}\n')
-    script += u'${{MPIRUN}} ./nemo.exe{}\n'.format(mpirun_suffix)
+        'cd ${WORK_DIR}\n'
+        'echo "working dir: $(pwd)"\n'
+        '\n'
+        'echo "Starting run at $(date)"\n'
+        'mkdir -p ${RESULTS_DIR}\n')
+    script += '${{MPIRUN}} ./nemo.exe{}\n'.format(mpirun_suffix)
     script += (
-        u'echo "Ended run at $(date)"\n'
-        u'\n'
-        u'echo "Results gathering started at $(date)"\n'
-        u'${GATHER} ${GATHER_OPTS} ${RUN_DESC} ${RESULTS_DIR}\n'
-        u'echo "Results gathering ended at $(date)"\n'
+        'echo "Ended run at $(date)"\n'
+        '\n'
+        'echo "Results gathering started at $(date)"\n'
+        '${GATHER} ${GATHER_OPTS} ${RUN_DESC} ${RESULTS_DIR}\n'
+        'echo "Results gathering ended at $(date)"\n'
     )
     return script
 
 
 def _fix_permissions():
     script = (
-        u'chmod go+rx ${RESULTS_DIR}\n'
-        u'chmod g+rw ${RESULTS_DIR}/*\n'
-        u'chmod o+r ${RESULTS_DIR}/*\n'
+        'chmod go+rx ${RESULTS_DIR}\n'
+        'chmod g+rw ${RESULTS_DIR}/*\n'
+        'chmod o+r ${RESULTS_DIR}/*\n'
     )
     return script
 
 
 def _cleanup():
     script = (
-        u'echo "Deleting run directory"\n'
-        u'rmdir $(pwd)\n'
+        'echo "Deleting run directory"\n'
+        'rmdir $(pwd)\n'
     )
     return script
