@@ -34,7 +34,7 @@ from . import (
 )
 
 
-__all__ = ['Run', 'td2hms']
+__all__ = ['Run', 'run', 'td2hms']
 
 
 log = logging.getLogger(__name__)
@@ -376,7 +376,7 @@ def _modules(system):
     modules = ''
     if system == 'jasper':
         modules = (
-            'module load application/python/2.7.3\n'
+            'module load application/python/3.4.3\n'
             'module load library/netcdf/4.1.3\n'
             'module load library/szip/2.1\n'
             'module load application/nco/4.3.9\n'
