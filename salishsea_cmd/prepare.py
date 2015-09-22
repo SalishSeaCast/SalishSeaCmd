@@ -33,7 +33,7 @@ from salishsea_tools.namelist import namelist2dict
 from . import lib
 
 
-__all__ = ['Prepare']
+__all__ = ['Prepare', 'prepare']
 
 
 log = logging.getLogger(__name__)
