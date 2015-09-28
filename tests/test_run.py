@@ -144,15 +144,6 @@ class TestRun:
         assert qsb_msg == 'msg'
 
 
-class TestGetNProcessors:
-    """Unit test for `salishsea run` _get_n_processors() function.
-    """
-    def test_get_n_processors(self, run_module):
-        run_desc = {'MPI decomposition': '8x18'}
-        n_processors = run_module._get_n_processors(run_desc)
-        assert n_processors == 8*18
-
-
 class TestPbsCommon:
     """Unit tests for `salishsea run` _pbs_common() function.
     """
