@@ -158,7 +158,7 @@ def run(
     run_dir_name = api.prepare(desc_file, iodefs, nemo34)
     run_dir = pathlib.Path(run_dir_name).resolve()
     run_desc = lib.load_run_desc(desc_file)
-    n_processors = _get_n_processors(run_desc)
+    n_processors = lib.get_n_processors(run_desc)
     results_dir = pathlib.Path(results_dir)
     gather_opts = ''
     if keep_proc_results:
@@ -183,20 +183,6 @@ def run(
         'qsub SalishSeaNEMO.sh'.split(), universal_newlines=True)
     os.chdir(starting_dir.as_posix())
     return qsub_msg
-
-
-def _get_n_processors(run_desc):
-    """Return the total number of processors required for the run as
-    specificed by the MPI decomposition key in the run description.
-
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
-
-    :returns: Number of processors required for the run.
-    :rtype: int
-    """
-    jpni, jpnj = map(int, run_desc['MPI decomposition'].split('x'))
-    return jpni * jpnj
 
 
 def _build_batch_script(
