@@ -69,9 +69,8 @@ def test_get_results_files(mock_glob):
         ['foo_0000.nc', 'foo_0001.nc', 'foo_0002.nc'],
     )
     args = Mock(delete_restart=False)
-    name_roots, ncores = combine._get_results_files(args)
+    name_roots = combine._get_results_files(args)
     assert name_roots == ['foo', 'bar']
-    assert ncores == 3
 
 
 @patch('salishsea_cmd.combine.log.error')
