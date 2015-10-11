@@ -68,9 +68,11 @@ class Combine(cliff.command.Command):
         The combined results files that `rebuild_nemo` produces are moved
         to the directory given by `parsed_args.results_dir`.
         """
+        run_desc = lib.load_run_desc(parsed_args.desc_file)
+        n_processors = lib.get_n_processors(run_desc)
         rebuild_nemo_script = _find_rebuild_nemo_script()
-        name_roots, ncores = _get_results_files(parsed_args)
-        _combine_results_files(rebuild_nemo_script, name_roots, ncores)
+        name_roots = _get_results_files(parsed_args)
+        _combine_results_files(rebuild_nemo_script, name_roots, n_processors)
         os.remove('nam_rebuild')
         _netcdf4_deflate_results(name_roots)
         _move_results(name_roots, parsed_args.results_dir)
@@ -105,8 +107,7 @@ def _get_results_files(args):
             'no files found that match the {} pattern'
             .format(result_pattern))
         sys.exit(2)
-    ncores = len(glob.glob(name_roots[0] + '_[0-9][0-9][0-9][0-9].nc'))
-    return name_roots, ncores
+    return name_roots
 
 
 def _combine_results_files(rebuild_nemo_script, name_roots, ncores):
