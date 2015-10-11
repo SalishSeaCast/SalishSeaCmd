@@ -117,7 +117,7 @@ class TestTakeAction:
 
 @patch.object(run_module().subprocess, 'check_output', return_value='msg')
 @patch.object(run_module(), '_build_batch_script', return_value='script')
-@patch.object(run_module(), '_get_n_processors', return_value=144)
+@patch.object(run_module().lib, 'get_n_processors', return_value=144)
 @patch.object(run_module().lib, 'load_run_desc')
 @patch.object(run_module().api, 'prepare')
 class TestRun:
@@ -131,14 +131,15 @@ class TestRun:
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = str(p_run_dir)
         p_results_dir = tmpdir.ensure_dir('results_dir')
-        qsb_msg = run_module.run(
-            'SalishSea.yaml', 'iodefs', str(p_results_dir), nemo34)
+        with patch.object(run_module.os, 'getenv', return_value='orcinus'):
+            qsb_msg = run_module.run(
+                'SalishSea.yaml', 'iodefs', str(p_results_dir), nemo34)
         m_prepare.assert_called_once_with('SalishSea.yaml', 'iodefs', nemo34)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_gnp.assert_called_once_with(m_lrd())
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, pathlib.Path(str(p_results_dir)),
-            str(p_run_dir), ' --no-compress', 'tom')
+            str(p_run_dir), ' --no-compress', 'orcinus')
         m_sco.assert_called_once_with(
             ['qsub', 'SalishSeaNEMO.sh'], universal_newlines=True)
         assert qsb_msg == 'msg'
