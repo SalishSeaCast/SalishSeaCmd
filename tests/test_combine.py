@@ -98,12 +98,17 @@ def test_get_results_files_delete_restart(mock_rm, mock_glob):
     assert mock_rm.call_count == 2
 
 
+@patch('salishsea_cmd.combine.glob.glob')
 @patch('salishsea_cmd.combine.subprocess.check_output')
-def test_combine_results_files(mock_chk_out):
+def test_combine_results_files(mock_chk_out, mock_glob):
     """_combine_results_files calls subprocess.check_output for each name-root
     """
+    mock_glob.side_effect = (
+        ['foo_0000.nc', 'foo_0001.nc', 'foo_0002.nc'],
+        ['bar_0000.nc', 'bar_0001.nc', 'bar_0002.nc'],
+    )
     combine._combine_results_files(
-        'rebuild_nemo', ['foo', 'bar'], 16)
+        'rebuild_nemo', ['foo', 'bar'], 3)
     assert mock_chk_out.call_count == 2
 
 

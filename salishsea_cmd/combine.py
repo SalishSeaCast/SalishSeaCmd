@@ -110,13 +110,20 @@ def _get_results_files(args):
     return name_roots
 
 
-def _combine_results_files(rebuild_nemo_script, name_roots, ncores):
+def _combine_results_files(rebuild_nemo_script, name_roots, n_processors):
     for fn in name_roots:
-        result = subprocess.check_output(
-            [rebuild_nemo_script, fn, str(ncores)],
-            stderr=subprocess.STDOUT,
-            universal_newlines=True)
-        log.info(result)
+        nfiles = len(glob.glob('{fn}_[0-9][0-9][0-9][0-9].nc'.format(fn=fn)))
+        if nfiles == 1:
+            shutil.move('{fn}_0000.nc'.format(fn=fn), '{fn}.nc'.format(fn=fn))
+            log.info('{fn}_0000.nc renamed to {fn}.nc'.format(fn=fn))
+        elif nfiles < n_processors:
+            log.info('{fn}_*.nc not combined'.format(fn=fn))
+        else:
+            result = subprocess.check_output(
+                [rebuild_nemo_script, fn, str(n_processors)],
+                stderr=subprocess.STDOUT,
+                universal_newlines=True)
+            log.info(result)
 
 
 def _netcdf4_deflate_results(name_roots):
