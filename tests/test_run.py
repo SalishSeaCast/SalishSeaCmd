@@ -95,7 +95,7 @@ class TestTakeAction:
         run_cmd.run(parsed_args)
         m_run.assert_called_once_with(
             'desc file', 'iodefs', 'results dir',
-            False, False, False, False, False,
+            False, False, False, False, False, False,
         )
         m_log.info.assert_called_once_with('qsub message')
 
