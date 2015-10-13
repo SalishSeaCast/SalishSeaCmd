@@ -94,9 +94,9 @@ class Run(cliff.command.Command):
         """
         qsub_msg = run(
             parsed_args.desc_file, parsed_args.iodefs, parsed_args.results_dir,
-            parsed_args.nemo34, parsed_args.keep_proc_results,
-            parsed_args.compress, parsed_args.compress_restart,
-            parsed_args.delete_restart,
+            parsed_args.nemo34, parsed_args.quiet,
+            parsed_args.keep_proc_results, parsed_args.compress,
+            parsed_args.compress_restart, parsed_args.delete_restart,
         )
         if not parsed_args.quiet:
             log.info(qsub_msg)
@@ -105,6 +105,7 @@ class Run(cliff.command.Command):
 def run(
     desc_file, iodefs, results_dir,
     nemo34=False,
+    quiet=False,
     keep_proc_results=False,
     compress=False,
     compress_restart=False,
@@ -135,6 +136,10 @@ def run(
                  the default is to prepare a NEMO-3.6 run
     :type nemo34: boolean
 
+    :arg quiet: Don't show the run directory path message;
+                the default is to show the temporary run directory path.
+    :type quiet: boolean
+
     :arg keep_proc_results: Don't delete per-processor results files;
                             defaults to :py:obj:`False`.
     :type keep_proc_results: boolean
@@ -156,6 +161,8 @@ def run(
     :rtype: str
     """
     run_dir_name = api.prepare(desc_file, iodefs, nemo34)
+    if not quiet:
+        log.info('Created run directory {}'.format(run_dir_name))
     run_dir = pathlib.Path(run_dir_name).resolve()
     run_desc = lib.load_run_desc(desc_file)
     n_processors = lib.get_n_processors(run_desc)
