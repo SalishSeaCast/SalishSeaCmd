@@ -139,7 +139,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd())
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, pathlib.Path(str(p_results_dir)),
-            str(p_run_dir), ' --no-compress', 'orcinus')
+            str(p_run_dir), '', 'orcinus')
         m_sco.assert_called_once_with(
             ['qsub', 'SalishSeaNEMO.sh'], universal_newlines=True)
         assert qsb_msg == 'msg'
