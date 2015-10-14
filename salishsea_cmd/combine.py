@@ -45,15 +45,11 @@ class Combine(cliff.command.Command):
         parser.description = '''
             Combine the per-processor results files from an MPI
             Salish Sea NEMO run described in DESC_FILE
-            into files in RESULTS_DIR
-            and compress them using gzip.
+            into files in RESULTS_DIR.
             Delete the per-processor files.
 
             If RESULTS_DIR does not exist it will be created.
         '''
-        parser.add_argument(
-            '--no-compress', action='store_true',
-            help="don't compress results files")
         lib.add_combine_gather_options(parser)
         return parser
 
@@ -155,7 +151,7 @@ def _results_files(name_roots):
 
 
 def _compress_results(name_roots, args):
-    if args.no_compress:
+    if not args.compress:
         return
     log.info('Starting compression...')
     for fn in _results_files(name_roots):

@@ -168,10 +168,10 @@ def run(
     n_processors = lib.get_n_processors(run_desc)
     results_dir = pathlib.Path(results_dir)
     gather_opts = ''
+    if compress:
+        gather_opts = ' '.join((gather_opts, '--compress'))
     if keep_proc_results:
         gather_opts = ' '.join((gather_opts, '--keep-proc-results'))
-    if not compress:
-        gather_opts = ' '.join((gather_opts, '--no-compress'))
     if compress_restart:
         gather_opts = ' '.join((gather_opts, '--compress-restart'))
     if delete_restart:
