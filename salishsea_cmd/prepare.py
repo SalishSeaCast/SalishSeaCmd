@@ -53,7 +53,12 @@ class Prepare(cliff.command.Command):
             help='run description YAML file')
         parser.add_argument(
             'iodefs', metavar='IO_DEFS',
-            help='NEMO IOM server defs file for run')
+            help='''
+            For NEMO-3.6 runs,
+            the XIOS IO server file and contained variable
+            definitions for the run.
+            For NEMO-3.4 runs,
+            the IOM server definitions file for run.''')
         parser.add_argument(
             '--nemo3.4', dest='nemo34', action='store_true',
             help='''
