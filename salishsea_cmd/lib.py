@@ -51,6 +51,9 @@ def add_combine_gather_options(parser):
         'results_dir', metavar='RESULTS_DIR',
         help='directory to store results into')
     parser.add_argument(
+        '--compress', action='store_true',
+        help="compress results files")
+    parser.add_argument(
         '--keep-proc-results', action='store_true',
         help="don't delete per-processor results files")
     parser.add_argument(

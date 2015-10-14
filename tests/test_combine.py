@@ -155,8 +155,8 @@ def test_result_files():
 
 @patch('salishsea_cmd.combine._results_files')
 def test_compress_results_no_compress(mock_res_files):
-    """_compress_results does nothing when args.no_compress is False
+    """_compress_results does nothing when args.compress is False
     """
-    args = Mock(no_compress=True)
+    args = Mock(compress=False)
     combine._compress_results(['foo', 'bar'], args)
     assert not mock_res_files.called

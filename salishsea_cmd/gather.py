@@ -45,14 +45,10 @@ class Gather(cliff.command.Command):
             described in DESC_FILE into files in RESULTS_DIR.
             The gathering process includes combining
             the per-processor results files,
-            compressing them using gzip
             and deleting the per-processor files.
 
             If RESULTS_DIR does not exist it will be created.
         '''
-        parser.add_argument(
-            '--no-compress', action='store_true',
-            help="don't compress results files")
         lib.add_combine_gather_options(parser)
         return parser
 
@@ -73,7 +69,7 @@ class Gather(cliff.command.Command):
             api.combine(
                 self.app, self.app_args,
                 parsed_args.desc_file, parsed_args.results_dir,
-                parsed_args.keep_proc_results, parsed_args.no_compress,
+                parsed_args.keep_proc_results, parsed_args.compress,
                 parsed_args.compress_restart, parsed_args.delete_restart)
         except Exception:
             raise
