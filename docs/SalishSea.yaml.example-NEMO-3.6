@@ -1,0 +1,58 @@
+# salishsea command processor run description example for NEMO-3.6
+#
+# Salish Sea full domain with:
+#   Smoothed JdF mouth bathymetry
+#   S4-1 uniform initial T and S, depth corrected
+#   Open, unstructured western boundary across Strait of Juan de Fuca
+#     Tidal forcing at mouth of JdF
+#     Masson, depth corrected, open boundaries
+#   Open, unstructured northern boundary across Johnstone Strait
+#     Tidal forcing just north of Port Nelson
+#     Seasonal T and S forcing based on Thomson (1982)
+#  Rivers run-off forcing
+#  Atmospheric forcing with operational GEM2.5 model products
+#    Constrained to no solid precipitation
+
+config_name: SalishSea
+
+# For runs on systems that use qsub/PBS/TORQUE; e.g. Westgrid
+run_id: example
+walltime: 10:00:00
+
+paths:
+  # If relative, paths are taken from current directory
+  NEMO-code: ../../../NEMO-3.6-code/
+  XIOS: ../../../XIOS/
+  forcing: ../../../NEMO-forcing/
+  runs directory: ../../../SalishSea/
+
+grid:
+  # If relative, paths are taken from forcing path above
+  coordinates: coordinates_seagrid_SalishSea.nc
+  bathymetry: bathy_meter_SalishSea2.nc
+
+forcing:
+  # If relative, paths are taken from forcing path above
+  atmospheric: /ocean/sallen/allen/research/MEOPAR/Operational/
+  initial conditions: initial_strat/
+  # The path and name of a restart file may be used as initial conditions
+  # initial conditions: /ocean/dlatorne/MEOPAR/SalishSea/results/spin-up/8sep17sep/SalishSea_02825280_restart.nc
+  open boundaries: open_boundaries/
+  rivers: rivers/
+
+namelists:
+  # If relative, paths are taken from current directory
+  - namelist.time
+  - namelist.domain
+  - namelist.surface
+  - namelist.lateral
+  - namelist.bottom
+  - namelist.tracer
+  - namelist.dynamics
+  - namelist.vertical
+  - namelist.compute
+
+output:
+  # If relative, paths are taken from current directory
+  domain: domain_def.xml
+  fields: ../../../NEMO-3.6-code/NEMOGCM/CONFIG/SHARED/field_def.xml

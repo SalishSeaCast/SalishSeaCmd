@@ -19,3 +19,16 @@
 ******************************
 Run Description File Structure
 ******************************
+
+:program:`salishsea` run description files are written in YAML_.
+They contain key-value pairs that define the names and locations of files and directories that :program:`salishsea` uses to manage Salish Sea NEMO runs and their results.
+
+.. _YAML: http://pyyaml.org/wiki/PyYAMLDocumentation
+
+NEMO-3.6 Run Description File
+=============================
+
+Example (from :file:`SS-run-sets/SalishSea/nemo3.6/SalishSea.yaml`):
+
+.. literalinclude:: SalishSea.yaml.example-NEMO-3.6
+   :language: yaml
