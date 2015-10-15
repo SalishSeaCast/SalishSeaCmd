@@ -339,8 +339,7 @@ you can get a Python traceback containing more information about the error by re
 :kbd:`get_cgrf` Sub-command
 ===========================
 
-The :command:`salishsea get_cgrf` command downloads CGRF products atmospheric forcing files from Dalhousie rsync
-repository and symlink with the file names that NEMO expects:
+The :command:`salishsea get_cgrf` command downloads CGRF products atmospheric forcing files from Dalhousie rsync repository and symlinks them with the file names that NEMO expects:
 
 .. code-block:: bash
 
