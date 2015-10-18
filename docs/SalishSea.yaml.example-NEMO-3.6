@@ -15,9 +15,17 @@
 
 config_name: SalishSea
 
-# For runs on systems that use qsub/PBS/TORQUE; e.g. Westgrid
+# How is the domain to be distributed over the processors in the
+# i (longitude) and j (latitude) directions?
+# These values are used to set the &nammpp namelist jpni & jpnj values
+# and to set the number of processors and nodes in the PBS script
+MPI decomposition: 8x18
+
+# For runs on systems that use qsub/PBS/TORQUE
 run_id: example
 walltime: 10:00:00
+# If missing, email address is set to ${USER}@eos.ubc.ca
+email: dlatornell@eos.ubc.ca
 
 paths:
   # If relative, paths are taken from current directory
@@ -27,7 +35,8 @@ paths:
   runs directory: ../../../SalishSea/
 
 grid:
-  # If relative, paths are taken from forcing path above
+  # If relative, paths are taken from the grid/ directory in the forcing
+  # path above
   coordinates: coordinates_seagrid_SalishSea.nc
   bathymetry: bathy_meter_SalishSea2.nc
 
