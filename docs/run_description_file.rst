@@ -1,4 +1,4 @@
-.. Copyright 2013-2015 The Salish Sea MEOPAR conttributors
+.. Copyright 2013-2015 The Salish Sea MEOPAR contributors
 .. and The University of British Columbia
 ..
 .. Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +40,7 @@ The meanings of the key-value pairs are:
 
 :kbd:`config_name`
   The name of the NEMO configuration to use for runs.
-  It is the name of a directory in :file:`NEMOGCM/CONFIG/` in the :kbd:`NEMO-3.6` code directory given by the :kbd:`NEMO` key in the :ref:`NEMO-3.6-Paths`.
+  It is the name of a directory in :file:`NEMOGCM/CONFIG/` in the :kbd:`NEMO-3.6-code` code directory given by the :kbd:`NEMO` key in the :ref:`NEMO-3.6-Paths`.
 
 :kbd:`MPI decomposition`
   Specify how the domain is to be distributed over the processors in the :kbd:`i` (longitude) and :kbd:`j` (latitude) directions;
@@ -56,7 +56,7 @@ The meanings of the key-value pairs are:
   The wall-clock time requested for the run.
   It limits the time that the job will run for on all machines,
   and it also affects queue priority for runs on Westgrid machines.
-  It is important to allow some buffer time when calculating your walltime limits to allow for indeterminancy of the NEMO run itself,
+  It is important to allow some buffer time when calculating your walltime limits to allow for indeterminacy of the NEMO run itself,
   as well as the time required to combine the per-processor results files into run results files at the end of the run.
 
 :kbd:`email`
@@ -101,12 +101,16 @@ If relative paths are given,
 they are appended to the :file:`grid/` directory of the :kbd:`forcing` path.
 
 :kbd:`coordinates`
-  The name of the coordinates file to use for the run,
-  typically :file:`coordinates_seagrid_SalishSea.nc`.
+  The name of the coordinates file to use for the run.
+  It is symlinked in the run directory as :file:`coordinates.nc`
+  (the file name required by NEMO).
+  The value is typically :file:`coordinates_seagrid_SalishSea.nc`.
 
 :kbd:`bathymetry`
-  The name of the bathymetry file to use for the run,
-  typically :file:`bathy_meter_SalishSea2.nc`.
+  The name of the bathymetry file to use for the run
+  It is symlinked in the run directory as :file:`bathy_meter.nc`
+  (the file name required by NEMO).
+  The value is typically :file:`bathy_meter_SalishSea2.nc`.
 
 
 .. _NEMO-3.6-Forcing:
@@ -114,7 +118,7 @@ they are appended to the :file:`grid/` directory of the :kbd:`forcing` path.
 :kbd:`forcing` Section
 ----------------------
 
-The :kbd:`forcing` section of the run description file contains key-value pairss that provide the names of directories in the :ref:`NEMO-forcing-repo` pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.6-Paths` where initial conditions and forcing files are found.
+The :kbd:`forcing` section of the run description file contains key-value pairs that provide the names of directories in the :ref:`NEMO-forcing-repo` pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.6-Paths` where initial conditions and forcing files are found.
 Those directory names are expected to appear in the appropriate places in the namelists.
 The paths may be either absolute or relative.
 If relative,
@@ -137,7 +141,7 @@ the paths are appended to the :kbd:`forcing` path given in the :ref:`NEMO-3.6-Pa
 
   .. code-block:: yaml
 
-      initial conditions: ../../SalishSea/results/50s_22-25Sep/SalishSea_00019008_restart.nc
+      initial conditions: /ocean/dlatorne/MEOPAR/SalishSea/results/spin-up/8sep17sep/SalishSea_02825280_restart.nc
 
   which will be symlinked in the run directory as :file:`restart.nc`.
 
@@ -208,3 +212,166 @@ they are appended to the directory containing the run description file.
   It is copied into the run directory as :file:`field_def.xml`
   (the file name required by XIOS).
   The value is typically a relative or absolute path to :file:`NEMO-3.6-code/NEMOGCM/CONFIG/SHARED/field_def.xml`.
+
+
+NEMO-3.4 Run Description File
+=============================
+
+.. warning::
+    Version 2.0 of the :kbd:`SalishSeaCmd` package introduced changes in the run description file structure that are not backward compatible.
+    Older run description files for NEMO-3.4 runs need to be updated before they can be successfully used with the :command:`salishsea run --nemo3.4` command.
+    Please see :ref:`SalishSeaCmdChangesThatBreakBackwardCompatibility` for details.
+
+Example (from :file:`SS-run-sets/SalishSea/SalishSea.yaml`):
+
+.. literalinclude:: SalishSea.yaml.example-NEMO-3.4
+   :language: yaml
+
+The meanings of the key-value pairs are:
+
+:kbd:`config_name`
+  The name of the NEMO configuration to use for runs.
+  It is the name of a directory in :file:`NEMOGCM/CONFIG/` in the :kbd:`NEMO-code` code directory given by the :kbd:`NEMO` key in the :ref:`NEMO-3.4-Paths`.
+
+:kbd:`MPI decomposition`
+  Specify how the domain is to be distributed over the processors in the :kbd:`i` (longitude) and :kbd:`j` (latitude) directions;
+  e.g. :kbd:`8x18`.
+  Those values are used to set the :kbd:`namelist.compute nammpp` namelist :kbd:`jpni` and :kbd:`jpnj` values,
+  to set the number of processors and nodes in the PBS script,
+  and to tell the :program:`REBUILD_NEMO` tool how many files to process.
+
+:kbd:`run_id`
+   The job identifier that appears in the :command:`qstat` listing.
+
+:kbd:`walltime`
+  The wall-clock time requested for the run.
+  It limits the time that the job will run for on all machines,
+  and it also affects queue priority for runs on Westgrid machines.
+  It is important to allow some buffer time when calculating your walltime limits to allow for indeterminacy of the NEMO run itself,
+  as well as the time required to combine the per-processor results files into run results files at the end of the run.
+
+:kbd:`email`
+  The email address at which you want to receive notification of the beginning and end of execution of the run,
+  as well as notification of abnormal abort messages.
+  The email key is only required if the address is different than would be constructed by combining your user id on the machine that the job runs on with :kbd:`@eos.ubc.ca`.
+
+
+.. _NEMO-3.4-Paths:
+
+:kbd:`paths` Section
+--------------------
+
+The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`salishsea` uses to find files in other repos that it needs.
+The paths may be either absolute or relative.
+
+:kbd:`NEMO-code`
+  The path to the :ref:`NEMO-code-repo` clone where the NEMO executable for the run is to be found.
+
+:kbd:`forcing`
+  The path to the :ref:`NEMO-forcing-repo` clone where the netCDF files for the grid coordinates,
+  bathymetry,
+  initial conditions,
+  open boundary conditions,
+  etc. are to be found.
+
+:kbd:`runs directory`
+  The path to the directory where run directories will be created by the :command:`salishsea run --nemo3.4` (or :command:`salishsea prepare --nemo3.4`) sub-command.
+
+
+.. _NEMO-3.4-Grid:
+
+:kbd:`grid` Section
+-------------------
+
+The :kbd:`grid` section of the run description file contains 2 key-value pairs that provide the names of the coordinates and bathymetry files to use for the run.
+Those file are presumed to be in the :file:`grid/` directory of the :ref:`NEMO-forcing-repo` clone pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.4-Paths`.
+If relative paths are given,
+they are appended to the :file:`grid/` directory of the :kbd:`forcing` path.
+
+:kbd:`coordinates`
+  The name of the coordinates file to use for the run.
+  It is symlinked in the run directory as :file:`coordinates.nc`
+  (the file name required by NEMO).
+  The value is typically :file:`coordinates_seagrid_SalishSea.nc`.
+
+:kbd:`bathymetry`
+  The name of the bathymetry file to use for the run
+  It is symlinked in the run directory as :file:`bathy_meter.nc`
+  (the file name required by NEMO).
+  The value is typically :file:`bathy_meter_SalishSea2.nc`.
+
+
+.. _NEMO-3.4-Forcing:
+
+:kbd:`forcing` Section
+----------------------
+
+The :kbd:`forcing` section of the run description file contains key-value pairss that provide the names of directories in the :ref:`NEMO-forcing-repo` pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.4-Paths` where initial conditions and forcing files are found.
+Those directory names are expected to appear in the appropriate places in the namelists.
+The paths may be either absolute or relative.
+If relative,
+the paths are appended to the :kbd:`forcing` path given in the :ref:`NEMO-3.4-Paths`.
+
+:kbd:`atmospheric`
+  The path to the :ref:`AtmosphericForcing` files.
+  It is symlinked as :file:`NEMO-atmos/` in the run directory,
+  and that directory name must be used in the :kbd:`namelist.surface namsbc_core` and :kbd:`namesbc_apr` namelist.
+
+:kbd:`initial conditions`
+  The path to the :ref:`NEMO-forcing` files.
+  It is symlinked as :file:`initial_strat/` in the run directory,
+  and that directory name must be used in the :kbd:`namlist.domain namtsd` namelist.
+
+  The :kbd:`initial conditions` key can,
+  alternatively,
+  be used to give the path to and name of a restart file,
+  e.g.:
+
+  .. code-block:: yaml
+
+      initial conditions: /ocean/dlatorne/MEOPAR/SalishSea/results/spin-up/8sep17sep/SalishSea_02825280_restart.nc
+
+  which will be symlinked in the run directory as :file:`restart.nc`.
+
+:kbd:`open boundaries`
+  The path to the :ref:`OBC` files.
+  It is symlinked as :file:`open_boundaries/` in the run directory,
+  and that directory name must be used in the :kbd:`namelist.lateral nambdy_dat` namelists.
+
+:kbd:`rivers`
+  The path to the :ref:`RiverInput` files.
+  It is symlinked as :file:`rivers/` in the run directory,
+  and that directory name must be used in the :kbd:`namlist.domain namsbc_rnf` namelist.
+
+
+.. _NEMO-3.4-Namelists:
+
+:kbd:`namelists` Section
+------------------------
+
+The :kbd:`namelists` section of the run description file contains a list of NEMO namelist section files that will be concatenated to construct the :file:`namelist`
+(the file name required by NEMO)
+file for the run.
+The paths may be either absolute or relative.
+If relative paths are given,
+they are appended to the directory containing the run description file.
+
+Namelist sections that are specific to the run such as :file:`namelist.time` where the starting and ending timesteps and the restart configuration are defined are typically stored in the same directory as the run description file.
+That mean that they are simply listed by name in the :kbd:`namelists` section:
+
+.. code-block:: yaml
+
+    namelists:
+      - namelist.time
+
+On the other hand,
+when you want to use a namelist section that contains the group's current consensus best values,
+list it as a relative path from the location of your run description file to the "standard" nameslist section files in :file:`SS-run-sets/SalishSea/`:
+
+.. code-block:: yaml
+
+    namlists:
+      - ../../namelist.bottom
+
+That constructed :file:`namelist` is concluded with empty instances of all of the namelists that NEMO-3.4 requires so that default values will be used for any namelist variables not included in the namelist section files listed in the run description file.
+The blob of empty namelist instances is defined as a constant in the :py:mod:`SalishSeaCmd.salishsea_cmd.prepare.py` module.

@@ -1,4 +1,4 @@
-# salishsea command processor run description example
+# salishsea command processor run description example for NEMO-3.4
 #
 # Salish Sea full domain with:
 #   Smoothed JdF mouth bathymetry
@@ -9,7 +9,7 @@
 #   Open, unstructured northern boundary across Johnstone Strait
 #     Tidal forcing just north of Port Nelson
 #     Seasonal T and S forcing based on Thomson (1982)
-#  All River Monthly run-off forcing
+#  Rivers run-off forcing
 #  Atmospheric forcing with CGRF products
 #    Constrained to no solid precipitation
 
@@ -17,13 +17,14 @@ config_name: SalishSea
 
 # How is the domain to be distributed over the processors in the
 # i (longitude) and j (latitude) directions?
-# These values are used to set the &nammpp namelist jpni & jpnj values
+# These values are used to set the nammpp namelist jpni & jpnj values
 # and to set the number of processors and nodes in the PBS script
 MPI decomposition: 8x18
 
 # For runs on systems that use qsub/PBS/TORQUE
 run_id: example
 walltime: 10:00:00
+# If missing, email address is set to ${USER}@eos.ubc.ca
 email: dlatornell@example.com
 
 paths:
@@ -33,15 +34,17 @@ paths:
   runs directory: ../../SalishSea/
 
 grid:
-  # If relative, paths are taken from forcing path above
+  # If relative, paths are taken from the grid/ directory in the forcing
+  # path above
   coordinates: coordinates_seagrid_SalishSea.nc
   bathymetry: bathy_meter_SalishSea2.nc
 
 forcing:
   # If relative, paths are taken from forcing path above
   atmospheric: /ocean/dlatorne/MEOPAR/CGRF/NEMO-atmos/
-  # The path and name of a restart file may be used as initial conditions
   initial conditions: initial_strat/
+  # The path and name of a restart file may be used as initial conditions
+  # initial conditions: /ocean/dlatorne/MEOPAR/SalishSea/results/spin-up/8sep17sep/SalishSea_02825280_restart.nc
   open boundaries: open_boundaries/
   rivers: rivers/
 
@@ -56,7 +59,3 @@ namelists:
   - namelist.dynamics
   - namelist.vertical
   - namelist.compute
-
-output:
-  domain: domain_def.xml
-  fields: ../../NEMO-3.6-code/NEMOGCM/CONFIG/SHARED/field_def.xml
