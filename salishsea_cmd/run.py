@@ -376,11 +376,11 @@ def _modules(system):
         )
     elif system == 'orcinus':
         modules = (
-            u'module load intel\n'
-            u'module load intel/14.0/netcdf-4.3.3.1\n'
-            u'module load intel/14.0/netcdf-fortran-4.4.0\n'
-            u'module load intel/14.0/hdf5-1.8.15p1\n'
             u'module load python\n'
+            u'module load intel/14.0/netcdf-4.3.3.1_mpi\n'
+            u'module load intel/14.0/netcdf-fortran-4.4.0_mpi\n'
+            u'module load intel/14.0/hdf5-1.8.15p1_mpi\n'
+            u'module load intel/14.0/nco-4.5.2\n'
         )
     return modules
 
