@@ -123,14 +123,26 @@ class TestTakeAction:
 class TestRun:
     """Unit tests for `salishsea run` run() function.
     """
-    @pytest.mark.parametrize('nemo34', [True, False])
+    @pytest.mark.parametrize('nemo34, sep_xios_server, xios_servers', [
+        (True, None, 0),
+        (False, False, 0),
+        (False, True, 4),
+    ])
     def test_run(
-        self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco, nemo34, run_module,
-        tmpdir,
+        self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco,
+        nemo34, sep_xios_server, xios_servers,
+        run_module, tmpdir,
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = str(p_run_dir)
         p_results_dir = tmpdir.ensure_dir('results_dir')
+        if not nemo34:
+            m_lrd.return_value = {
+                'output': {
+                    'separate XIOS server': sep_xios_server,
+                    'XIOS servers': xios_servers,
+                }
+            }
         with patch.object(run_module.os, 'getenv', return_value='orcinus'):
             qsb_msg = run_module.run(
                 'SalishSea.yaml', 'iodefs', str(p_results_dir), nemo34)
@@ -138,8 +150,8 @@ class TestRun:
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_gnp.assert_called_once_with(m_lrd())
         m_bbs.assert_called_once_with(
-            m_lrd(), 'SalishSea.yaml', 144, pathlib.Path(str(p_results_dir)),
-            str(p_run_dir), '', 'orcinus')
+            m_lrd(), 'SalishSea.yaml', 144, xios_servers,
+            pathlib.Path(str(p_results_dir)), str(p_run_dir), '', 'orcinus')
         m_sco.assert_called_once_with(
             ['qsub', 'SalishSeaNEMO.sh'], universal_newlines=True)
         assert qsb_msg == 'msg'
