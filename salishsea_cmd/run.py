@@ -165,7 +165,11 @@ def run(
         log.info('Created run directory {}'.format(run_dir_name))
     run_dir = pathlib.Path(run_dir_name).resolve()
     run_desc = lib.load_run_desc(desc_file)
-    n_processors = lib.get_n_processors(run_desc)
+    nemo_processors = lib.get_n_processors(run_desc)
+    if not nemo34 and run_desc['output']['separate XIOS server']:
+        xios_processors = run_desc['output']['XIOS servers']
+    else:
+        xios_processors = 0
     results_dir = pathlib.Path(results_dir)
     gather_opts = ''
     if compress:
@@ -178,8 +182,8 @@ def run(
         gather_opts = ' '.join((gather_opts, '--delete-restart'))
     system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
     batch_script = _build_batch_script(
-        run_desc, desc_file, n_processors, results_dir, run_dir.as_posix(),
-        gather_opts, system,
+        run_desc, desc_file, nemo_processors, xios_processors, results_dir,
+        run_dir.as_posix(), gather_opts, system,
     )
     batch_file = run_dir/'SalishSeaNEMO.sh'
     with batch_file.open('wt') as f:
@@ -193,35 +197,32 @@ def run(
 
 
 def _build_batch_script(
-    run_desc, desc_file, n_processors, results_dir, run_dir, gather_opts,
-    system,
+    run_desc, desc_file, nemo_processors, xios_processors, results_dir,
+    run_dir, gather_opts, system,
 ):
     """Build the Bash script that will execute the run.
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :arg dict run_desc: Run description dictionary.
 
-    :arg desc_file: File path/name of the YAML run description file.
-    :type desc_file: str
+    :arg str desc_file: File path/name of the YAML run description file.
 
-    :arg n_processors: Number of processors that the run will be executed on.
-    :type n_processors: int
+    :arg int nemo_processors: Number of processors that NEMO will be executed
+                              on.
 
-    :arg results_dir: Path of the directory in which to store the run
+    :arg int xios_processors: Number of processors that XIOS will be executed
+                              on.
+
+    :arg str results_dir: Path of the directory in which to store the run
                       results;
                       it will be created if it does not exist.
-    :type results_dir: str
 
-    :arg run_dir: Path of the temporary run directory.
-    :type run_dir: str
+    :arg str run_dir: Path of the temporary run directory.
 
-    :arg gather_opts: Option flags for the :command:`salishsea gather`
+    :arg str gather_opts: Option flags for the :command:`salishsea gather`
                       command in the batch script.
-    :type gather_opts: str
 
-    :arg system: Name of the system that the run will be executed on;
+    :arg str system: Name of the system that the run will be executed on;
                  e.g. :kbd:`salish`, :kbd:`orcinus`
-    :type system: str
 
     :returns: Bash script to execute the run.
     :rtype: str
@@ -238,9 +239,10 @@ def _build_batch_script(
             u'{pbs_features}\n'
             .format(
                 pbs_common=_pbs_common(
-                    run_desc, n_processors, email, results_dir),
-                pbs_features=_pbs_features(n_processors, system)
-                )
+                    run_desc, nemo_processors + xios_processors, email,
+                    results_dir),
+                pbs_features=_pbs_features(
+                    nemo_processors + xios_processors, system))
         ))
     script = u'\n'.join((
         script,
@@ -251,8 +253,8 @@ def _build_batch_script(
         u'{cleanup}'
         .format(
             defns=_definitions(
-                run_desc['run_id'], desc_file, run_dir, results_dir,
-                gather_opts, system, n_processors),
+                run_desc, desc_file, run_dir, results_dir, gather_opts,
+                system, nemo_processors, xios_processors),
             modules=_modules(system),
             execute=_execute(system),
             fix_permissions=_fix_permissions(),
@@ -335,16 +337,19 @@ def _pbs_features(n_processors, system):
 
 
 def _definitions(
-    run_id, run_desc_file, run_dir, results_dir, gather_opts, system, procs,
+    run_desc, run_desc_file, run_dir, results_dir, gather_opts, system,
+    nemo_processors, xios_processors
 ):
+    mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
+    if xios_processors:
+        mpirun = u' '.join((
+            mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
     if system in 'salish nowcast0'.split():
         home = u'${HOME}'
-        mpirun = u'mpirun -n {procs}'.format(procs=procs)
         if system == 'nowcast0':
             mpirun = u' '.join((mpirun, '--hostfile', '${HOME}/mpi_hosts'))
     else:
         home = u'${PBS_O_HOME}'
-        mpirun = u'mpirun'
     defns = (
         u'RUN_ID="{run_id}"\n'
         u'RUN_DESC="{run_desc_file}"\n'
@@ -354,7 +359,7 @@ def _definitions(
         u'GATHER="{salishsea_cmd} gather"\n'
         u'GATHER_OPTS="{gather_opts}"\n'
     ).format(
-        run_id=run_id,
+        run_id=run_desc['run_id'],
         run_desc_file=run_desc_file,
         run_dir=run_dir,
         results_dir=results_dir,
@@ -393,7 +398,7 @@ def _execute(system):
         u'\n'
         u'echo "Starting run at $(date)"\n'
         u'mkdir -p ${RESULTS_DIR}\n')
-    script += u'${{MPIRUN}} ./nemo.exe{}\n'.format(mpirun_suffix)
+    script += u'${{MPIRUN}} {suffix}\n'.format(suffix=mpirun_suffix)
     script += (
         u'echo "Ended run at $(date)"\n'
         u'\n'
