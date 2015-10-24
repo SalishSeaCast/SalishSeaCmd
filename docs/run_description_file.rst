@@ -220,13 +220,7 @@ the number of XIOS servers to run.
 :kbd:`separate XIOS server`
   Boolean flag indicating whether the XIOS server should be run on separate processors from NEMO (:py:obj:`True`),
   or in attached mode on every NEMO processor (:py:obj:`False`).
-
-  .. note::
-      At present,
-      you must also edit your :file:`iodef.xml` to set the :kbd:`xios` context :kbd:`using_server` variable value to :kbd:`true` to use separate XIOS server(s),
-      or :kbd:`false` to run in attached mode.
-
-      The :command:`salishsea prepare` command plug-in will eventually be updated to handle changing the value in the :file:`iodef.xml` file so that :kbd:`separate XIOS server` becomes the "single source of truth".
+  The :command:`salishsea prepare` command sets the value of the :kbd:`using_server` variable in the :kbd:`xios` context in the copy of the :file:`iodef.xml` file in the temporary run directory to reflect the :kbd:`separate XIOS server` value.
 
 :kbd:`XIOS server`
   The number of XIOS servers to run when the value of :kbd:`separate XIOS server` it :py:obj:`True`.
