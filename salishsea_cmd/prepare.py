@@ -23,6 +23,7 @@ import os
 import shutil
 import time
 import uuid
+import xml.etree.ElementTree
 
 import arrow
 import cliff.command
@@ -404,7 +405,50 @@ def _copy_run_set_files(
     for source, dest_name in run_set_files:
         source_path = os.path.normpath(source)
         shutil.copy2(source_path, dest_name)
+    if not nemo34:
+        _set_xios_server_mode(run_desc, run_dir)
     os.chdir(saved_cwd)
+
+
+def _set_xios_server_mode(run_desc, run_dir):
+    """Update the :file:`iodef.xml` :kbd:`xios` context :kbd:`using_server`
+    variable text with the :kbd:`separate XIOS server` value from the
+    run description.
+
+    :arg dict run_desc: Run description dictionary.
+
+    :arg str run_dir: Path of the temporary run directory.
+
+    :raises: SystemExit
+    """
+    try:
+        sep_xios_server = run_desc['output']['separate XIOS server']
+    except KeyError:
+        log.error(
+            'separate XIOS server key/value not found in output section '
+            'of YAML run description file. '
+            'Please add lines like:\n'
+            '  separate XIOS server: True\n'
+            '  XIOS servers: 1\n'
+            'that say whether to run the XIOS server(s) attached or detached, '
+            'and how many of them to use.'
+        )
+        _remove_run_dir(run_dir)
+        raise SystemExit(2)
+    tree = xml.etree.ElementTree.parse('iodef.xml')
+    root = tree.getroot()
+    using_server = root.find(
+        'context[@id="xios"]//variable[@id="using_server"]')
+    using_server.text = 'true' if sep_xios_server else 'false'
+    using_server_line = xml.etree.ElementTree.tostring(using_server).decode()
+    with open('iodef.xml', 'rt') as f:
+        lines = f.readlines()
+    for i, line in enumerate(lines):
+        if 'using_server' in line:
+            lines[i] = using_server_line
+            break
+    with open('iodef.xml', 'wt') as f:
+        f.writelines(lines)
 
 
 def _make_executable_links(

@@ -339,7 +339,10 @@ class TestCopyRunSetFiles:
     """Unit tests for `salishsea prepare` _copy_run_set_files() function.
     """
     @patch.object(prepare_module().shutil, 'copy2')
-    def test_nemo34_copy_run_set_files_no_path(self, m_copy, prepare_module):
+    @patch.object(prepare_module(), '_set_xios_server_mode')
+    def test_nemo34_copy_run_set_files_no_path(
+        self, m_sxsm, m_copy, prepare_module,
+    ):
         """_copy_run_set_files creates correct symlink for source w/o path
         """
         run_desc = {}
@@ -357,7 +360,10 @@ class TestCopyRunSetFiles:
         assert m_copy.call_args_list == expected
 
     @patch.object(prepare_module().shutil, 'copy2')
-    def test_nemo36_copy_run_set_files_no_path(self, m_copy, prepare_module):
+    @patch.object(prepare_module(), '_set_xios_server_mode')
+    def test_nemo36_copy_run_set_files_no_path(
+        self, m_sxsm, m_copy, prepare_module,
+    ):
         """_copy_run_set_files creates correct symlink for source w/o path
         """
         run_desc = {
@@ -381,8 +387,9 @@ class TestCopyRunSetFiles:
         assert m_copy.call_args_list == expected
 
     @patch.object(prepare_module().shutil, 'copy2')
+    @patch.object(prepare_module(), '_set_xios_server_mode')
     def test_nemo34_copy_run_set_files_relative_path(
-        self, m_copy, prepare_module,
+        self, m_sxsm, m_copy, prepare_module,
     ):
         """_copy_run_set_files creates correct symlink for relative path source
         """
@@ -401,8 +408,9 @@ class TestCopyRunSetFiles:
         assert m_copy.call_args_list == expected
 
     @patch.object(prepare_module().shutil, 'copy2')
+    @patch.object(prepare_module(), '_set_xios_server_mode')
     def test_nemo36_copy_run_set_files_relative_path(
-        self, m_copy, prepare_module,
+        self, m_sxsm, m_copy, prepare_module,
     ):
         """_copy_run_set_files creates correct symlink for relative path source
         """
