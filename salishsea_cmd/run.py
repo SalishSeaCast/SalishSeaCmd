@@ -254,9 +254,9 @@ def _build_batch_script(
         .format(
             defns=_definitions(
                 run_desc, desc_file, run_dir, results_dir, gather_opts,
-                system, nemo_processors, xios_processors),
+                system),
             modules=_modules(system),
-            execute=_execute(system),
+            execute=_execute(nemo_processors, xios_processors),
             fix_permissions=_fix_permissions(),
             cleanup=_cleanup(),
         )
@@ -338,24 +338,13 @@ def _pbs_features(n_processors, system):
 
 def _definitions(
     run_desc, run_desc_file, run_dir, results_dir, gather_opts, system,
-    nemo_processors, xios_processors
 ):
-    mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
-    if xios_processors:
-        mpirun = u' '.join((
-            mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
-    if system in 'salish nowcast0'.split():
-        home = u'${HOME}'
-        if system == 'nowcast0':
-            mpirun = u' '.join((mpirun, '--hostfile', '${HOME}/mpi_hosts'))
-    else:
-        home = u'${PBS_O_HOME}'
+    home = u'${HOME}' if system == 'salish' else u'${PBS_O_HOME}'
     defns = (
         u'RUN_ID="{run_id}"\n'
         u'RUN_DESC="{run_desc_file}"\n'
         u'WORK_DIR="{run_dir}"\n'
         u'RESULTS_DIR="{results_dir}"\n'
-        u'MPIRUN="{mpirun}"\n'
         u'GATHER="{salishsea_cmd} gather"\n'
         u'GATHER_OPTS="{gather_opts}"\n'
     ).format(
@@ -363,7 +352,6 @@ def _definitions(
         run_desc_file=run_desc_file,
         run_dir=run_dir,
         results_dir=results_dir,
-        mpirun=mpirun,
         salishsea_cmd=os.path.join(home, '.local/bin/salishsea'),
         gather_opts=gather_opts,
     )
@@ -391,15 +379,18 @@ def _modules(system):
     return modules
 
 
-def _execute(system):
-    mpirun_suffix = u' >>stdout 2>>stderr' if system == 'nowcast0' else u''
+def _execute(nemo_processors, xios_processors):
+    mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
+    if xios_processors:
+        mpirun = u' '.join((
+            mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
     script = (
         u'cd ${WORK_DIR}\n'
         u'echo "working dir: $(pwd)"\n'
         u'\n'
         u'echo "Starting run at $(date)"\n'
         u'mkdir -p ${RESULTS_DIR}\n')
-    script += u'${{MPIRUN}} {suffix}\n'.format(suffix=mpirun_suffix)
+    script += u'{mpirun}\n'.format(mpirun=mpirun)
     script += (
         u'echo "Ended run at $(date)"\n'
         u'\n'
