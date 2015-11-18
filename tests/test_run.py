@@ -192,6 +192,7 @@ class TestPbsFeatures:
     """
     @pytest.mark.parametrize('n_processors, nodes', [
         (144, 12),
+        (145, 13),
     ])
     def test_jasper(self, n_processors, nodes, run_module):
         pbs_features = run_module._pbs_features(n_processors, 'jasper')
