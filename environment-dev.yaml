@@ -27,7 +27,7 @@ dependencies:
 - pandas
 - pip
 - pytest
-- python=3.4
+- python=3
 - pytz
 - requests
 - scipy
