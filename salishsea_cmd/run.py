@@ -18,6 +18,8 @@
 Prepare for, execute, and gather the results of a run of the
 Salish Sea NEMO model.
 """
+from __future__ import division
+
 import datetime
 import logging
 import math
@@ -327,7 +329,7 @@ def _pbs_features(n_processors, system):
         nodes = math.ceil(n_processors / ppn)
         pbs_features = (
             u'#PBS -l feature=X5675\n'
-            u'#PBS -l nodes={}:ppn={}\n'.format(nodes, ppn)
+            u'#PBS -l nodes={}:ppn={}\n'.format(int(nodes), ppn)
         )
     elif system == 'orcinus':
         pbs_features = (
