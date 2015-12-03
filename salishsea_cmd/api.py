@@ -208,7 +208,7 @@ def run_description(
             'bathymetry': 'bathy_meter_SalishSea2.nc',
         },
         'forcing': {
-            'atmospheric': '/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/',
+            'atmospheric': '/results/forcing/atmospheric/GEM2.5/operational/',
             'initial conditions': init_conditions,
             'open boundaries': 'open_boundaries/',
             'rivers': 'rivers/',

@@ -111,7 +111,8 @@ class TestRunDescription(object):
                 'bathymetry': 'bathy_meter_SalishSea2.nc',
             },
             'forcing': {
-                'atmospheric': '/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/',
+                'atmospheric':
+                    '/results/forcing/atmospheric/GEM2.5/operational/',
                 'initial conditions': None,
                 'open boundaries': 'open_boundaries/',
                 'rivers': 'rivers/',
@@ -166,7 +167,8 @@ class TestRunDescription(object):
                 'bathymetry': 'bathy_meter_SalishSea2.nc',
             },
             'forcing': {
-                'atmospheric': '/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/',
+                'atmospheric':
+                    '/results/forcing/atmospheric/GEM2.5/operational/',
                 'initial conditions':
                     '../../22-25Sep/SalishSea_00019008_restart.nc',
                 'open boundaries': 'open_boundaries/',
