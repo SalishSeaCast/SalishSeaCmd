@@ -130,6 +130,7 @@ def prepare(run_desc_file, iodefs_file, nemo34=False):
 def run_description(
     run_id=None,
     walltime=None,
+    mpi_decomposition='8x18',
     NEMO_code=None,
     XIOS_code=None,
     forcing=None,
@@ -156,6 +157,8 @@ def run_description(
                      listing.
 
     :arg str walltime: Wall-clock time requested for the run.
+
+    :arg str mpi_decomposition: MPI decomposition to use for the run.
 
     :arg str NEMO_code: Path to the :file:`NEMO-code/` directory where the
                         NEMO executable, etc. for the run are to be found.
@@ -192,6 +195,7 @@ def run_description(
     """
     run_description = {
         'config_name': 'SalishSea',
+        'MPI decomposition': mpi_decomposition,
         'run_id': run_id,
         'walltime': walltime,
         'paths': {
@@ -217,7 +221,7 @@ def run_description(
             'namelist.bottom',
             'namelist.tracers',
             'namelist.dynamics',
-            'namelist.compute.12x27',
+            'namelist.compute',
         ],
     }
     if not nemo34:

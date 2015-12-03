@@ -100,6 +100,7 @@ class TestRunDescription(object):
             'config_name': 'SalishSea',
             'run_id': None,
             'walltime': None,
+            'MPI decomposition': '8x18',
             'paths': {
                 'NEMO-code': None,
                 'forcing': None,
@@ -123,7 +124,7 @@ class TestRunDescription(object):
                 'namelist.bottom',
                 'namelist.tracers',
                 'namelist.dynamics',
-                'namelist.compute.12x27',
+                'namelist.compute',
             ],
         }
         if not nemo34:
@@ -142,6 +143,7 @@ class TestRunDescription(object):
         run_desc = api_module.run_description(
             run_id='foo',
             walltime='1:00:00',
+            mpi_decomposition='6x14',
             NEMO_code='../../NEMO-code/',
             XIOS_code=XIOS_code,
             forcing='../../NEMO-forcing/',
@@ -153,6 +155,7 @@ class TestRunDescription(object):
             'config_name': 'SalishSea',
             'run_id': 'foo',
             'walltime': '1:00:00',
+            'MPI decomposition': '6x14',
             'paths': {
                 'NEMO-code': '../../NEMO-code/',
                 'forcing': '../../NEMO-forcing/',
@@ -177,7 +180,7 @@ class TestRunDescription(object):
                 'namelist.bottom',
                 'namelist.tracers',
                 'namelist.dynamics',
-                'namelist.compute.12x27',
+                'namelist.compute',
             ],
         }
         if not nemo34:
