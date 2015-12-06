@@ -234,7 +234,9 @@ def run_description(
     return run_description
 
 
-def run_in_subprocess(run_id, run_desc, iodefs_file, results_dir, nemo34):
+def run_in_subprocess(
+    run_id, run_desc, iodefs_file, results_dir, nemo34=False,
+):
     """Execute `salishsea run` in a subprocess.
 
     :arg str run_id: Job identifier that appears in the :command:`qstat`
