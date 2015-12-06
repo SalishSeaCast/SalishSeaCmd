@@ -234,21 +234,22 @@ def run_description(
     return run_description
 
 
-def run_in_subprocess(run_id, run_desc, iodefs_file, results_dir):
+def run_in_subprocess(run_id, run_desc, iodefs_file, results_dir, nemo34):
     """Execute `salishsea run` in a subprocess.
 
-    :arg run_id: Job identifier that appears in the :command:`qstat` listing.
-                 A temporary run description YAML file is created with
-                 the name :file:`{run_id}_subprocess_run.yaml`.
-    :type run_id: str
+    :arg str run_id: Job identifier that appears in the :command:`qstat`
+                     listing.
+                     A temporary run description YAML file is created
+                     with the name :file:`{run_id}_subprocess_run.yaml`.
 
-    :arg run_desc: Run description data structure that will be written to
-                   the temporary YAML file.
-    :type run_desc: dict
+    :arg dict run_desc: Run description data structure that will be
+                        written to the temporary YAML file.
 
-    :arg iodefs_file:  File path/name of the NEMO IOM server defs file
-                       for the run.
-    :type iodefs_file: str
+    :arg str iodefs_file:  File path/name of the NEMO IOM server defs
+                           file for the run.
+
+    :arg boolean nemo34: Execute a NEMO-3.4 run;
+                         the default is to execute a NEMO-3.6 run
 
     :arg results_dir: Directory to store results into.
     :type results_dir: str
@@ -256,7 +257,10 @@ def run_in_subprocess(run_id, run_desc, iodefs_file, results_dir):
     yaml_file = '{}_subprocess_run.yaml'.format(run_id)
     with open(yaml_file, 'wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
-    cmd = ['salishsea', 'run', yaml_file, iodefs_file, results_dir]
+    cmd = ['salishsea', 'run']
+    if nemo34:
+        cmd.append('--nemo3.4')
+    cmd.extend([yaml_file, iodefs_file, results_dir])
     try:
         output = subprocess.check_output(
             cmd, stderr=subprocess.STDOUT, universal_newlines=True)
