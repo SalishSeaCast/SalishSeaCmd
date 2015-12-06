@@ -112,16 +112,14 @@ def prepare(run_desc_file, iodefs_file, nemo34=False):
     for the NEMO-code and NEMO-forcing repos that the symlinks point to.
     The path to the run directory is returned.
 
-    :arg run_desc_file: File path/name of the run description YAML file.
-    :type run_desc_file: str
+    :arg str run_desc_file: File path/name of the run description YAML
+                            file.
 
-    :arg iodefs_file:  File path/name of the NEMO IOM server defs file
-                       for the run.
-    :type iodefs_file: str
+    :arg str iodefs_file:  File path/name of the NEMO IOM server defs file
+                           for the run.
 
-    :arg nemo34: Prepare a NEMO-3.4 run;
-                 the default is to prepare a NEMO-3.6 run
-    :type nemo34: boolean
+    :arg boolean nemo34: Prepare a NEMO-3.4 run;
+                         the default is to prepare a NEMO-3.6 run
 
     :returns: Path of the temporary run directory
     :rtype: str
@@ -133,9 +131,11 @@ def run_description(
     run_id=None,
     walltime=None,
     NEMO_code=None,
+    XIOS_code=None,
     forcing=None,
     runs_dir=None,
     init_conditions=None,
+    nemo34=False,
 ):
     """Return a Salish Sea NEMO run description dict template.
 
@@ -152,38 +152,43 @@ def run_description(
         for runs on Westgrid, but needs to be changed for runs on
         :kbd:`salish`.
 
-    :arg run_id: job identifier that appears in the :command:`qstat` listing.
-    :type run_id': str
+    :arg str run_id: Job identifier that appears in the :command:`qstat`
+                     listing.
 
-    :arg walltime: Wall-clock time requested for the run.
-    :type walltime: str
+    :arg str walltime: Wall-clock time requested for the run.
 
-    :arg NEMO_code: Path to the :file:`NEMO-code/` directory where the
-                    NEMO executable, etc. for the run are to be found.
-                    If a relative path is used it will start from the
-                    current directory.
-    :type NEMO_code: str
+    :arg str NEMO_code: Path to the :file:`NEMO-code/` directory where the
+                        NEMO executable, etc. for the run are to be found.
+                        If a relative path is used it will start from the
+                        current directory.
 
-    :arg forcing: Path to the :file:`NEMO-forcing/` directory where the
-                  netCDF files for the grid coordinates, bathymetry,
-                  initial conditions, open boundary conditions, etc.
-                  are found.
-                  If a relative path is used it will start from the
-                  current directory.
-    :type forcing: str
+    :arg str XIOS_code: Path to the :file:`XIOS/` directory where the
+                        XIOS executable for the run are to be found.
+                        If a relative path is used it will start from the
+                        current directory.
 
-    :arg runs_dir: Path to the directory where run directories will be
-                  created.
-                  If a relative path is used it will start from the
-                  current directory.
-    :type runs_dir: str
+    :arg str forcing: Path to the :file:`NEMO-forcing/` directory where the
+                      netCDF files for the grid coordinates, bathymetry,
+                      initial conditions, open boundary conditions, etc.
+                      are found.
+                      If a relative path is used it will start from the
+                      current directory.
 
-    :arg init_conditions: Name of sub-directory in :file:`NEMO-forcing/`
-                          where initial conditions files are to be found,
-                          or the path to and name of a restart file.
-                          If a relative path is used for a restart file
-                          it will start from the  current directory.
-    :type init_conditions: str
+    :arg str runs_dir: Path to the directory where run directories will be
+                       created.
+                       If a relative path is used it will start from the
+                       current directory.
+
+    :arg str init_conditions: Name of sub-directory in :file:`NEMO-forcing/`
+                              where initial conditions files are to be found,
+                              or the path to and name of a restart file.
+                              If a relative path is used for a restart file
+                              it will start from the  current directory.
+
+    :arg boolean nemo34: Return run description dict template a NEMO-3.4
+                         run;
+                         the default is to return the dict for a
+                         NEMO-3.6 run.
     """
     run_description = {
         'config_name': 'SalishSea',
@@ -215,6 +220,17 @@ def run_description(
             'namelist.compute.12x27',
         ],
     }
+    if not nemo34:
+        run_description['paths']['XIOS'] = XIOS_code
+        run_description['output'] = {
+            'domain': 'domain_def.xml',
+            'fields': None,
+            'separate XIOS server': True,
+            'XIOS servers': 1,
+        }
+        if NEMO_code is not None:
+            run_description['output']['fields'] = os.path.join(
+                NEMO_code, 'NEMOGCM/CONFIG/SHARED/field_def.xml')
     return run_description
 
 
