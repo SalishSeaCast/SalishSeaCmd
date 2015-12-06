@@ -50,16 +50,28 @@ forcing:
   rivers: rivers/
 
 namelists:
+  # The namelist section files in the lists below will be concatenated
+  # to create a namelist file whose name is the key under which the files
+  # are listed. The keys are the names of the namelist files that NEMO-3.6
+  # expects.
+  #
+  # The only required key is namelist_cfg.
+  #
   # If relative, paths are taken from current directory
-  - namelist.time
-  - namelist.domain
-  - namelist.surface
-  - namelist.lateral
-  - namelist.bottom
-  - namelist.tracer
-  - namelist.dynamics
-  - namelist.vertical
-  - namelist.compute
+  namelist_cfg:
+    - namelist.time
+    - namelist.domain
+    - namelist.surface
+    - namelist.lateral
+    - namelist.bottom
+    - namelist.tracer
+    - namelist.dynamics
+    - namelist.vertical
+    - namelist.compute
+  namelist_top_cfg:
+    - namelist_top_cfg
+  namelist_pisces_cfg:
+    - namelist_pisces_cfg
 
 output:
   # If relative, paths are taken from current directory
