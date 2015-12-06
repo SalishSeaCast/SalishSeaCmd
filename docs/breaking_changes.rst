@@ -20,6 +20,48 @@
 :kbd:`SalishSeaCmd` Changes That Break Backward Compatibility
 *************************************************************
 
+Version 2.1
+===========
+
+The following changes that were introduced in version 2.1 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
+
+* For NEMO-3.6 the :kbd:`namelists` section of the run description YAML file is now a dict of lists.
+  The dict keys are the names of the :file:`namelist*_cfg` files to create and the element(s) of the list under each key are the namelist section files to be concatenated to create the file named by the key.
+  For example:
+
+  .. code-block:: yaml
+
+      namelists:
+        namelist_cfg:
+          - namelist.time
+          - namelist.domain
+          - namelist.surface
+          - namelist.lateral
+          - namelist.bottom
+          - namelist.tracer
+          - namelist.dynamics
+          - namelist.vertical
+          - namelist.compute
+        namelist_top_cfg:
+          - namelist_top_cfg
+        namelist_pisces_cfg:
+          - namelist_pisces_cfg
+
+  The :kbd:`namelist_cfg` key is required to create the basic namelist for running NEMO-3.6.
+  Other :kbd:`namelist*_cfg` keys are optional.
+  At least 1 namelist section file is required for each :kbd:`namelist*_cfg` key that is used.
+
+  See :ref:`NEMO-3.6-Namelists` for details.
+
+  For NEMO-3.4 the :kbd:`namelists` section remains a simple list of namelist section files,
+  and construction of namelists for tracers,
+  biology,
+  etc. is not supported.
+
+* The :py:func:`SalishSeaCmd.api.run_description` and :py:func:`SalishSeaCmd.api.run_in_subprocess` functions now accept a ::kbd:`nemo34` argument that defaults to :py:obj:`False`.
+  That means that those functions now assume that their objective is a NEMO-3.6 run.
+
+
 Version 2.0
 ===========
 
@@ -32,7 +74,7 @@ The following changes that were introduced in version 2.0 of the :kbd:`SalishSea
   :kbd:`gather`,
   and :kbd:`combine` sub-commands are now all consistent in defaulting to no compression of the results files.
 
-* The run description file must now contain an :kbd:`MPI decomposition` key-value pair,
+* The run description YAML file must now contain an :kbd:`MPI decomposition` key-value pair,
   for example:
 
   .. code-block:: yaml
