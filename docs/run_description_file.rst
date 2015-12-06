@@ -161,20 +161,45 @@ the paths are appended to the :kbd:`forcing` path given in the :ref:`NEMO-3.6-Pa
 :kbd:`namelists` Section
 ------------------------
 
-The :kbd:`namelists` section of the run description file contains a list of NEMO namelist section files that will be concatenated to construct the :file:`namelist_cfg`
-(the file name required by NEMO)
+The :kbd:`namelists` section of the run description file contains a dict of lists of NEMO namelist section files that will be concatenated to construct :file:`namelist*_cfg` files
+(the file names required by NEMO)
 file for the run.
 The paths may be either absolute or relative.
 If relative paths are given,
 they are appended to the directory containing the run description file.
 
-Namelist sections that are specific to the run such as :file:`namelist.time` where the starting and ending timesteps and the restart configuration are defined are typically stored in the same directory as the run description file.
-That mean that they are simply listed by name in the :kbd:`namelists` section:
+Here is an example :kbd:`namelist` section:
 
 .. code-block:: yaml
 
     namelists:
-      - namelist.time
+      namelist_cfg:
+        - namelist.time
+        - namelist.domain
+        - namelist.surface
+        - namelist.lateral
+        - namelist.bottom
+        - namelist.tracer
+        - namelist.dynamics
+        - namelist.vertical
+        - namelist.compute
+      namelist_top_cfg:
+        - namelist_top_cfg
+      namelist_pisces_cfg:
+        - namelist_pisces_cfg
+
+A :kbd:`namelist_cfg` key must be present,
+other :kbd:`namelist*_cfg` keys are optional.
+Each :kbd:`namelist*_cfg` section must be a list containing at least 1 namelist section file.
+
+Namelist sections that are specific to the run such as :file:`namelist.time` where the starting and ending timesteps and the restart configuration are defined are typically stored in the same directory as the run description file.
+That mean that they are simply listed by name in the appropriate :kbd:`namelist*_cfg` section:
+
+.. code-block:: yaml
+
+    namelists:
+      namelist_cfg:
+        - namelist.time
 
 On the other hand,
 when you want to use a namelist section that contains the group's current consensus best values,
@@ -183,9 +208,14 @@ list it as a relative path from the location of your run description file to the
 .. code-block:: yaml
 
     namlists:
-      - ../../nemo3.6/namelist.bottom
+      namelist_cfg:
+        - ../../nemo3.6/namelist.bottom
 
-The :file:`NEMOGCM/CONFIG/SHARED/namelist_ref` file is symlinked into the run directory to provide default values that will be used for any namelist variables not included in the namelist section files listed in the :kbd:`namelists` section.
+For each :kbd:`namelist*_cfg` key a :file:`NEMOGCM/CONFIG/SHARED/namelist*_ref` file is symlinked into the run directory to provide default values that will be used for any namelist variables not included in the namelist section files listed in the :kbd:`namelists` section.
+So,
+:file:`NEMOGCM/CONFIG/SHARED/namelist_ref` will always be symlinked and,
+if the :kbd:`namelist_top_cfg` key is present,
+the :file:`NEMOGCM/CONFIG/SHARED/namelist_top_ref` file will also be symlinked into the run directory.
 
 
 .. _NEMO-3.6-Output:

@@ -68,7 +68,7 @@ class TestGetParser:
 @patch.object(prepare_module(), '_check_xios_exec')
 @patch.object(prepare_module().os.path, 'dirname')
 @patch.object(prepare_module(), '_make_run_dir')
-@patch.object(prepare_module(), '_make_namelist')
+@patch.object(prepare_module(), '_make_namelists')
 @patch.object(prepare_module(), '_copy_run_set_files')
 @patch.object(prepare_module(), '_make_executable_links')
 @patch.object(prepare_module(), '_make_grid_links')
@@ -241,16 +241,29 @@ class TestRemoveRunDir:
         assert not m_rmdir.called
 
 
-class TestMakeNamelist:
-    """Unit tests for `salishsea prepare` _make_namelist() function.
+class TestMakeNamelists:
+    """Unit tests for `salishsea prepare` _make_namelists() function.
     """
-    @pytest.mark.parametrize('nemo34, namelist_filename', [
-        (True, 'namelist'),
-        (False, 'namelist_cfg'),
-    ])
-    def test_make_namelist(
-        self, nemo34, namelist_filename, prepare_module, tmpdir,
-    ):
+    def test_nemo34(self, prepare_module):
+        with patch.object(prepare_module, '_make_namelist_nemo34') as m_mn34:
+            prepare_module._make_namelists(
+                'run_set_dir', 'run_desc', 'run_dir', 'nemo_code_repo',
+                nemo34=True)
+        m_mn34.assert_called_once_with('run_set_dir', 'run_desc', 'run_dir')
+
+    def test_nemo36(self, prepare_module):
+        with patch.object(prepare_module, '_make_namelists_nemo36') as m_mn36:
+            prepare_module._make_namelists(
+                'run_set_dir', 'run_desc', 'run_dir', 'nemo_code_repo',
+                nemo34=False)
+        m_mn36.assert_called_once_with(
+            'run_set_dir', 'run_desc', 'run_dir', 'nemo_code_repo')
+
+
+class TestMakeNamelistNEMO34:
+    """Unit tests for `salishsea prepare` _make_namelist_nemo34() function.
+    """
+    def test_make_namelist_nemo34(self, prepare_module, tmpdir):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
         run_desc = {
@@ -260,15 +273,11 @@ class TestMakeNamelist:
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
         with patch.object(prepare_module, '_set_mpi_decomposition'):
-            prepare_module._make_namelist(
-                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code',
-                nemo34)
-        assert p_run_dir.join(namelist_filename).check()
+            prepare_module._make_namelist_nemo34(
+                str(p_run_set_dir), run_desc, str(p_run_dir))
+        assert p_run_dir.join('namelist').check()
 
-    @pytest.mark.parametrize('nemo34', [True, False])
-    def test_make_namelist_file_not_found_error(
-        self, nemo34, prepare_module, tmpdir,
-    ):
+    def test_make_file_not_found_error(self, prepare_module, tmpdir):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         run_desc = {
             'namelists': [
@@ -277,11 +286,10 @@ class TestMakeNamelist:
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
         with pytest.raises(SystemExit):
-            prepare_module._make_namelist(
-                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code',
-                nemo34)
+            prepare_module._make_namelist_nemo34(
+                str(p_run_set_dir), run_desc, str(p_run_dir))
 
-    def test_nemo34_namelist_ends_with_empty_namelists(
+    def test_namelist_ends_with_empty_namelists(
         self, prepare_module, tmpdir,
     ):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
@@ -293,46 +301,120 @@ class TestMakeNamelist:
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
         with patch.object(prepare_module, '_set_mpi_decomposition'):
-            prepare_module._make_namelist(
-                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code',
-                nemo34=True)
+            prepare_module._make_namelist_nemo34(
+                str(p_run_set_dir), run_desc, str(p_run_dir))
         namelist = p_run_dir.join('namelist').read()
         assert namelist.endswith(prepare_module.EMPTY_NAMELISTS)
 
-    def test_nemo36_namelist_does_not_end_with_empty_namelists(
-        self, prepare_module, tmpdir,
-    ):
+
+class TestMakeNamelistNEMO36:
+    """Unit tests for `salishsea prepare` _make_namelist_nemo36() function.
+    """
+    def test_make_namelists_nemo36(self, prepare_module, tmpdir):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
+        p_run_set_dir.join('namelist_top').write('&namtrc\n&end\n')
+        p_run_set_dir.join('namelist_pisces').write('&nampisbio\n&end\n')
         run_desc = {
-            'namelists': [
-                str(p_run_set_dir.join('namelist.time')),
-            ],
+            'namelists': {
+                'namelist_cfg': [
+                    str(p_run_set_dir.join('namelist.time')),
+                ],
+                'namelist_top_cfg': [
+                    str(p_run_set_dir.join('namelist_top')),
+                ],
+                'namelist_pisces_cfg': [
+                    str(p_run_set_dir.join('namelist_pisces')),
+                ],
+            }
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
         with patch.object(prepare_module, '_set_mpi_decomposition'):
-            prepare_module._make_namelist(
-                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-3.6-code',
-                nemo34=False)
-        namelist = p_run_dir.join('namelist_cfg').read()
-        assert not namelist.endswith(prepare_module.EMPTY_NAMELISTS)
+            prepare_module._make_namelists_nemo36(
+                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code')
+        assert p_run_dir.join('namelist_cfg').check()
+        assert p_run_dir.join('namelist_top_cfg').check()
+        assert p_run_dir.join('namelist_pisces_cfg').check()
 
-    def test_nemo36_namelist_ref_symlink(self, prepare_module, tmpdir):
+    def test_file_not_found_error(self, prepare_module, tmpdir):
+        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
+        run_desc = {
+            'namelists': {
+                'namelist_cfg': [
+                    str(p_run_set_dir.join('namelist.time')),
+                ],
+            }
+        }
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with pytest.raises(SystemExit):
+            prepare_module._make_namelists_nemo36(
+                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code')
+
+    def test_namelist_ref_symlinks(self, prepare_module, tmpdir):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
+        p_run_set_dir.join('namelist_top').write('&namtrc\n&end\n')
+        p_run_set_dir.join('namelist_pisces').write('&nampisbio\n&end\n')
         run_desc = {
-            'namelists': [
-                str(p_run_set_dir.join('namelist.time')),
-            ],
+            'namelists': {
+                'namelist_cfg': [
+                    str(p_run_set_dir.join('namelist.time')),
+                ],
+                'namelist_top_cfg': [
+                    str(p_run_set_dir.join('namelist_top')),
+                ],
+                'namelist_pisces_cfg': [
+                    str(p_run_set_dir.join('namelist_pisces')),
+                ],
+            }
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
         p_code = tmpdir.ensure_dir('NEMO-3.6-code')
         p_code.ensure('NEMOGCM/CONFIG/SHARED/namelist_ref')
+        p_code.ensure('NEMOGCM/CONFIG/SHARED/namelist_top_ref')
+        p_code.ensure('NEMOGCM/CONFIG/SHARED/namelist_pisces_ref')
         with patch.object(prepare_module, '_set_mpi_decomposition'):
-            prepare_module._make_namelist(
-                str(p_run_set_dir), run_desc, str(p_run_dir), str(p_code),
-                nemo34=False)
+            prepare_module._make_namelists_nemo36(
+                str(p_run_set_dir), run_desc, str(p_run_dir), str(p_code))
         assert p_run_dir.join('namelist_ref').check(file=True, link=True)
+        assert p_run_dir.join('namelist_top_ref').check(file=True, link=True)
+        assert p_run_dir.join('namelist_pisces_ref').check(
+            file=True, link=True)
+
+    def test_namelist_cfg_set_mpi_decomposition(self, prepare_module, tmpdir):
+        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
+        p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
+        p_run_set_dir.join('namelist_top').write('&namtrc\n&end\n')
+        run_desc = {
+            'namelists': {
+                'namelist_cfg': [
+                    str(p_run_set_dir.join('namelist.time')),
+                ],
+                'namelist_top_cfg': [
+                    str(p_run_set_dir.join('namelist_top')),
+                ],
+            }
+        }
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with patch.object(prepare_module, '_set_mpi_decomposition') as m_smd:
+            prepare_module._make_namelists_nemo36(
+                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code')
+        m_smd.assert_called_once_with('namelist_cfg', run_desc, str(p_run_dir))
+
+    def test_no_namelist_cfg_error(self, prepare_module, tmpdir):
+        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
+        p_run_set_dir.join('namelist_top').write('&namtrc\n&end\n')
+        run_desc = {
+            'namelists': {
+                'namelist_top_cfg': [
+                    str(p_run_set_dir.join('namelist_top')),
+                ],
+            }
+        }
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with pytest.raises(SystemExit):
+            prepare_module._make_namelists_nemo36(
+                str(p_run_set_dir), run_desc, str(p_run_dir), 'NEMO-code')
 
 
 class TestCopyRunSetFiles:
