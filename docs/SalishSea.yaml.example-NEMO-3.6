@@ -42,7 +42,7 @@ grid:
 
 forcing:
   # If relative, paths are taken from forcing path above
-  atmospheric: /ocean/sallen/allen/research/MEOPAR/Operational/
+  atmospheric: /results/forcing/atmospheric/GEM2.5/operational/
   initial conditions: initial_strat/
   # The path and name of a restart file may be used as initial conditions
   # initial conditions: /ocean/dlatorne/MEOPAR/SalishSea/results/spin-up/8sep17sep/SalishSea_02825280_restart.nc
@@ -50,16 +50,28 @@ forcing:
   rivers: rivers/
 
 namelists:
+  # The namelist section files in the lists below will be concatenated
+  # to create a namelist file whose name is the key under which the files
+  # are listed. The keys are the names of the namelist files that NEMO-3.6
+  # expects.
+  #
+  # The only required key is namelist_cfg.
+  #
   # If relative, paths are taken from current directory
-  - namelist.time
-  - namelist.domain
-  - namelist.surface
-  - namelist.lateral
-  - namelist.bottom
-  - namelist.tracer
-  - namelist.dynamics
-  - namelist.vertical
-  - namelist.compute
+  namelist_cfg:
+    - namelist.time
+    - namelist.domain
+    - namelist.surface
+    - namelist.lateral
+    - namelist.bottom
+    - namelist.tracer
+    - namelist.dynamics
+    - namelist.vertical
+    - namelist.compute
+  namelist_top_cfg:
+    - namelist_top_cfg
+  namelist_pisces_cfg:
+    - namelist_pisces_cfg
 
 output:
   # If relative, paths are taken from current directory
