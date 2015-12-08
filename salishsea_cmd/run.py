@@ -30,7 +30,7 @@ import subprocess
 import cliff.command
 import pathlib
 
-from . import (
+from salishsea_cmd import (
     api,
     lib,
 )
