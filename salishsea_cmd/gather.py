@@ -23,7 +23,7 @@ import shutil
 
 import cliff.command
 
-from . import (
+from salishsea_cmd import (
     api,
     lib,
 )

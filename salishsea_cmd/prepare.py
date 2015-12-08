@@ -31,7 +31,7 @@ import cliff.command
 import salishsea_tools.hg_commands as hg
 from salishsea_tools.namelist import namelist2dict
 
-from . import lib
+from salishsea_cmd import lib
 
 
 __all__ = ['Prepare', 'prepare']
@@ -118,7 +118,7 @@ def prepare(desc_file, iodefs, nemo34):
         else (None, None))
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
-    _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34)
+    _make_namelists(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34)
     _copy_run_set_files(
         run_desc, desc_file, run_set_dir, iodefs, run_dir, nemo34)
     _make_executable_links(
@@ -233,9 +233,9 @@ def _remove_run_dir(run_dir):
         pass
 
 
-def _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
-    """Build the namelist file for the run in run_dir by concatenating
-    the list of namelist section files provided in run_desc.
+def _make_namelists(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
+    """Build the namelist file(s) for the run in run_dir by concatenating
+    the list(s) of namelist section files provided in run_desc.
 
     If any of the required namelist section files are missing,
     delete the run directory and raise a SystemExit exception.
@@ -260,8 +260,34 @@ def _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
 
     :raises: SystemExit
     """
+    if nemo34:
+        _make_namelist_nemo34(run_set_dir, run_desc, run_dir)
+    else:
+        _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo)
+
+
+def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
+    """Build the namelist file for the NEMO-3.4 run in run_dir by
+    concatenating the list of namelist section files provided in run_desc.
+
+    If any of the required namelist section files are missing,
+    delete the run directory and raise a SystemExit exception.
+
+    :arg run_set_dir: Directory containing the run description file,
+                      from which relative paths for the namelist section
+                      files start.
+    :type run_set_dir: str
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+
+    :raises: SystemExit
+    """
     namelists = run_desc['namelists']
-    namelist_filename = 'namelist' if nemo34 else 'namelist_cfg'
+    namelist_filename = 'namelist'
     with open(os.path.join(run_dir, namelist_filename), 'wt') as namelist:
         for nl in namelists:
             try:
@@ -272,16 +298,58 @@ def _make_namelist(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
                 log.error(e)
                 _remove_run_dir(run_dir)
                 raise SystemExit(2)
-        if nemo34:
-            namelist.writelines(EMPTY_NAMELISTS)
-        else:
-            ref_namelist = os.path.join(
-                nemo_code_repo, 'NEMOGCM', 'CONFIG', 'SHARED', 'namelist_ref')
-            saved_cwd = os.getcwd()
-            os.chdir(run_dir)
-            os.symlink(ref_namelist, 'namelist_ref')
-            os.chdir(saved_cwd)
+        namelist.writelines(EMPTY_NAMELISTS)
     _set_mpi_decomposition(namelist_filename, run_desc, run_dir)
+
+
+def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
+    """Build the namelist files for the NEMO-3.6 run in run_dir by
+    concatenating the lists of namelist section files provided in run_desc.
+
+    If any of the required namelist section files are missing,
+    delete the run directory and raise a SystemExit exception.
+
+    :arg run_set_dir: Directory containing the run description file,
+                      from which relative paths for the namelist section
+                      files start.
+    :type run_set_dir: str
+
+    :arg run_desc: Run description dictionary.
+    :type run_desc: dict
+
+    :arg run_dir: Path of the temporary run directory.
+    :type run_dir: str
+
+    :arg nemo_code_repo: Absolute path of NEMO code repo.
+    :type nemo_code_repo: str
+
+    :raises: SystemExit
+    """
+    for namelist_filename in run_desc['namelists']:
+        with open(os.path.join(run_dir, namelist_filename), 'wt') as namelist:
+            for nl in run_desc['namelists'][namelist_filename]:
+                try:
+                    with open(os.path.join(run_set_dir, nl), 'rt') as f:
+                        namelist.writelines(f.readlines())
+                        namelist.write('\n\n')
+                except FileNotFoundError as e:
+                    log.error(e)
+                    _remove_run_dir(run_dir)
+                    raise SystemExit(2)
+        ref_namelist = namelist_filename.replace('_cfg', '_ref')
+        ref_namelist_path = os.path.join(
+            nemo_code_repo, 'NEMOGCM', 'CONFIG', 'SHARED', ref_namelist)
+        saved_cwd = os.getcwd()
+        os.chdir(run_dir)
+        os.symlink(ref_namelist_path, ref_namelist)
+        os.chdir(saved_cwd)
+    if 'namelist_cfg' in run_desc['namelists']:
+        _set_mpi_decomposition('namelist_cfg', run_desc, run_dir)
+    else:
+        log.error(
+            'No namelist_cfg key found in namelists section of run '
+            'description')
+        raise SystemExit(2)
 
 
 def _set_mpi_decomposition(namelist_filename, run_desc, run_dir):
