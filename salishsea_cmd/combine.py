@@ -28,7 +28,7 @@ import sys
 
 import cliff.command
 
-from . import lib
+from salishsea_cmd import lib
 
 
 __all__ = ['Combine']

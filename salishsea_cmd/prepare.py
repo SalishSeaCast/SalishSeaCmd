@@ -31,7 +31,7 @@ import cliff.command
 import salishsea_tools.hg_commands as hg
 from salishsea_tools.namelist import namelist2dict
 
-from . import lib
+from salishsea_cmd import lib
 
 
 __all__ = ['Prepare', 'prepare']

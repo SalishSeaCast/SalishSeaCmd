@@ -28,7 +28,7 @@ import subprocess
 import cliff.commandmanager
 import yaml
 
-from . import prepare as prepare_plug_in
+from salishsea_cmd import prepare as prepare_plug_in
 
 
 __all__ = ['combine', 'prepare', 'run_description', 'run_in_subprocess']
