@@ -31,7 +31,6 @@ def api_module():
     return api
 
 
-@pytest.mark.usefixture('api_module')
 class TestCombine(object):
     @patch('salishsea_cmd.api._run_subcommand')
     def test_combine_default_args(self, m_run_subcommand, api_module):
@@ -93,14 +92,15 @@ class TestCombine(object):
              '--no-compress', '--compress-restart', '--delete-restart'])
 
 
-@pytest.mark.usefixture('api_module')
 class TestRunDescription(object):
-    def test_no_arguments(self, api_module):
-        run_desc = api_module.run_description()
+    @pytest.mark.parametrize('nemo34', [True, False])
+    def test_no_arguments(self, nemo34, api_module):
+        run_desc = api_module.run_description(nemo34=nemo34)
         expected = {
             'config_name': 'SalishSea',
             'run_id': None,
             'walltime': None,
+            'MPI decomposition': '8x18',
             'paths': {
                 'NEMO-code': None,
                 'forcing': None,
@@ -111,7 +111,8 @@ class TestRunDescription(object):
                 'bathymetry': 'bathy_meter_SalishSea2.nc',
             },
             'forcing': {
-                'atmospheric': '/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/',
+                'atmospheric':
+                    '/results/forcing/atmospheric/GEM2.5/operational/',
                 'initial conditions': None,
                 'open boundaries': 'open_boundaries/',
                 'rivers': 'rivers/',
@@ -124,24 +125,38 @@ class TestRunDescription(object):
                 'namelist.bottom',
                 'namelist.tracers',
                 'namelist.dynamics',
-                'namelist.compute.12x27',
+                'namelist.compute',
             ],
         }
+        if not nemo34:
+            expected['paths']['XIOS'] = None
+            expected['output'] = {
+                'domain': 'domain_def.xml',
+                'fields': None,
+                'separate XIOS server': True,
+                'XIOS servers': 1,
+            }
         assert run_desc == expected
 
-    def test_all_arguments(self, api_module):
+    @pytest.mark.parametrize('nemo34', [True, False])
+    def test_all_arguments(self, nemo34, api_module):
+        XIOS_code = None if nemo34 else '../../XIOS/'
         run_desc = api_module.run_description(
             run_id='foo',
             walltime='1:00:00',
+            mpi_decomposition='6x14',
             NEMO_code='../../NEMO-code/',
+            XIOS_code=XIOS_code,
             forcing='../../NEMO-forcing/',
             runs_dir='../../SalishSea/',
             init_conditions='../../22-25Sep/SalishSea_00019008_restart.nc',
+            nemo34=nemo34,
         )
         expected = {
             'config_name': 'SalishSea',
             'run_id': 'foo',
             'walltime': '1:00:00',
+            'MPI decomposition': '6x14',
             'paths': {
                 'NEMO-code': '../../NEMO-code/',
                 'forcing': '../../NEMO-forcing/',
@@ -152,8 +167,10 @@ class TestRunDescription(object):
                 'bathymetry': 'bathy_meter_SalishSea2.nc',
             },
             'forcing': {
-                'atmospheric': '/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/',
-                'initial conditions': '../../22-25Sep/SalishSea_00019008_restart.nc',
+                'atmospheric':
+                    '/results/forcing/atmospheric/GEM2.5/operational/',
+                'initial conditions':
+                    '../../22-25Sep/SalishSea_00019008_restart.nc',
                 'open boundaries': 'open_boundaries/',
                 'rivers': 'rivers/',
             },
@@ -165,13 +182,21 @@ class TestRunDescription(object):
                 'namelist.bottom',
                 'namelist.tracers',
                 'namelist.dynamics',
-                'namelist.compute.12x27',
+                'namelist.compute',
             ],
         }
+        if not nemo34:
+            expected['paths']['XIOS'] = '../../XIOS/'
+            expected['output'] = {
+                'domain': 'domain_def.xml',
+                'fields':
+                    '../../NEMO-code/NEMOGCM/CONFIG/SHARED/field_def.xml',
+                'separate XIOS server': True,
+                'XIOS servers': 1,
+            }
         assert run_desc == expected
 
 
-@pytest.mark.usefixture('api_module')
 class TestRunSubcommand(object):
     def test_command_not_found_raised(self, api_module):
         app = Mock(spec=cliff.app.App)
