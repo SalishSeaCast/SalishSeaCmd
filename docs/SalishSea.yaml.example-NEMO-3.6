@@ -41,13 +41,32 @@ grid:
   bathymetry: bathy_meter_SalishSea2.nc
 
 forcing:
+  # The keys below are the names of symlinks that will be created.
+  # The targets of those symlinks will be the paths named by the associated
+  # "link to:" keys;
+  # e.g. a symlink named NEMO-atmos will be created to
+  # /results/forcing/atmospheric/GEM2.5/operational/
+  #
+  # You only need to include keys that are used in the namelist(s) for
+  # your run.
+  #
   # If relative, paths are taken from forcing path above
-  atmospheric: /results/forcing/atmospheric/GEM2.5/operational/
-  initial conditions: initial_strat/
-  # The path and name of a restart file may be used as initial conditions
-  # initial conditions: /ocean/dlatorne/MEOPAR/SalishSea/results/spin-up/8sep17sep/SalishSea_02825280_restart.nc
-  open boundaries: open_boundaries/
-  rivers: rivers/
+  NEMO-atmos:
+    link to: /results/forcing/atmospheric/GEM2.5/operational/
+  initial_strat:
+    link to: initial_strat/
+  initial_green:
+    link to: initial_green/
+  # Typically, you would use either 1 or more initial conditions directories
+  # (above), or restart files (below), but not both
+  restart.nc:
+    link to: /results/SalishSea/nowcast/05may15/SalishSea_02056320_restart.nc
+  restart_trc.nc:
+    link to: /results/SalishSea/nowcast-green/06dec15/SalishSea_00004320_restart_trc.nc
+  open_boundaries:
+    link to: open_boundaries/
+  rivers:
+    link to: rivers/
 
 namelists:
   # The namelist section files in the lists below will be concatenated

@@ -118,42 +118,44 @@ they are appended to the :file:`grid/` directory of the :kbd:`forcing` path.
 :kbd:`forcing` Section
 ----------------------
 
-The :kbd:`forcing` section of the run description file contains key-value pairs that provide the names of directories in the :ref:`NEMO-forcing-repo` pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.6-Paths` where initial conditions and forcing files are found.
-Those directory names are expected to appear in the appropriate places in the namelists.
+The :kbd:`forcing` section of the run description file contains sub-sections that provide the names of directories and file that are to be symlinked in the run directory for NEMO to use to read initial conditions and forcing values from.
+
+An example :kbd:`forcing` section:
+
+.. code-block:: yaml
+
+    forcing:
+      NEMO-atmos:
+        link to: /results/forcing/atmospheric/GEM2.5/operational/
+      rivers:
+        link to: rivers/
+
+The sub-section keys
+(:kbd:`NEMO-atmos` and :kbd:`rivers` above)
+are the names of the symlinks that will be created in the run directory.
+Those names are expected to appear in the appropriate places in the namelists.
+The values associated with the :kbd:`link to` keys are the targets of the symlinks that will be created in the run directory.
 The paths may be either absolute or relative.
 If relative,
 the paths are appended to the :kbd:`forcing` path given in the :ref:`NEMO-3.6-Paths`.
 
-:kbd:`atmospheric`
-  The path to the :ref:`AtmosphericForcing` files.
-  It is symlinked as :file:`NEMO-atmos/` in the run directory,
-  and that directory name must be used in the :kbd:`namelist.surface namsbc_core` and :kbd:`namesbc_apr` namelist.
+To provide a restart file for a run to use for initialization,
+include a sub-section like:
 
-:kbd:`initial conditions`
-  The path to the :ref:`NEMO-forcing` files.
-  It is symlinked as :file:`initial_strat/` in the run directory,
-  and that directory name must be used in the :kbd:`namlist.domain namtsd` namelist.
+.. code-block:: yaml
 
-  The :kbd:`initial conditions` key can,
-  alternatively,
-  be used to give the path to and name of a restart file,
-  e.g.:
+    forcing:
+      ...
+      restart.nc:
+        link to: /results/SalishSea/spin-up/8sep17sep/SalishSea_02825280_restart.nc
 
-  .. code-block:: yaml
+NEMO requires that the name of the restart file be :kbd:`restart.nc`,
+so that is the key that you must use.
+For a tracers restart file the required file name (key) is :kbd:`restart_trc.nc`.
 
-      initial conditions: /ocean/dlatorne/MEOPAR/SalishSea/results/spin-up/8sep17sep/SalishSea_02825280_restart.nc
-
-  which will be symlinked in the run directory as :file:`restart.nc`.
-
-:kbd:`open boundaries`
-  The path to the :ref:`OBC` files.
-  It is symlinked as :file:`open_boundaries/` in the run directory,
-  and that directory name must be used in the :kbd:`namelist.lateral nambdy_dat` namelists.
-
-:kbd:`rivers`
-  The path to the :ref:`RiverInput` files.
-  It is symlinked as :file:`rivers/` in the run directory,
-  and that directory name must be used in the :kbd:`namlist.domain namsbc_rnf` namelist.
+Apart from the restart file keys,
+you are free to use any keys that you wish with the understanding that the key will be the name of the symlink that will be created in the run directory,
+and that name will also need to appear as a directory name in the appropriate namelist.
 
 
 .. _NEMO-3.6-Namelists:

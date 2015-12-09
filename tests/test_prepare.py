@@ -107,7 +107,7 @@ class TestPrepare:
             m_cne_return[0], m_cne_return[1], m_mrd(), nemo34,
             m_cxe_return[0], m_cxe_return[1])
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
-        m_mfl.assert_called_once_with(m_lrd(), m_mrd())
+        m_mfl.assert_called_once_with(m_lrd(), m_mrd(), nemo34)
         m_caf.assert_called_once_with(m_lrd(), m_mrd(), nemo34)
         assert run_dir == m_mrd()
 
@@ -665,8 +665,40 @@ class TestMakeGridLinks:
 
 
 class TestMakeForcingLinks:
+    """Unit tests for `salishsea prepare` _make_forcing_links() function.
+    """
+    def test_nemo34(self, prepare_module, tmpdir):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        run_desc = {'paths': {'forcing': 'nemo_forcing_dir'}}
+        patch_exists = patch.object(
+            prepare_module.os.path, 'exists', return_value=True)
+        patch_mfl34 = patch.object(
+            prepare_module, '_make_forcing_links_nemo34')
+        patch_hgp = patch.object(prepare_module.hg, 'parents')
+        with patch_exists, patch_hgp, patch_mfl34 as m_mfl34:
+            prepare_module._make_forcing_links(
+                run_desc, str(p_run_dir), nemo34=True)
+        m_mfl34.assert_called_once_with(run_desc, str(p_run_dir))
+
+    def test_nemo36(self, prepare_module, tmpdir):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        run_desc = {'paths': {'forcing': 'nemo_forcing_dir'}}
+        patch_exists = patch.object(
+            prepare_module.os.path, 'exists', return_value=True)
+        patch_mfl36 = patch.object(
+            prepare_module, '_make_forcing_links_nemo36')
+        patch_hgp = patch.object(prepare_module.hg, 'parents')
+        with patch_exists, patch_hgp, patch_mfl36 as m_mfl36:
+            prepare_module._make_forcing_links(
+                run_desc, str(p_run_dir), nemo34=False)
+        m_mfl36.assert_called_once_with(run_desc, str(p_run_dir))
+
+    @pytest.mark.parametrize('nemo34', [True, False])
     @patch.object(prepare_module(), 'log')
-    def test_make_forcing_links_no_forcing_dir(self, m_log, prepare_module):
+    def test_make_forcing_links_no_forcing_dir(
+        self, m_log, nemo34, prepare_module, tmpdir,
+    ):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
         run_desc = {
             'paths': {
                 'forcing': 'foo',
@@ -678,12 +710,17 @@ class TestMakeForcingLinks:
         p_abspath = patch.object(
             prepare_module.os.path, 'abspath', side_effect=lambda path: path)
         with pytest.raises(SystemExit), p_exists, p_abspath:
-            prepare_module._make_forcing_links(run_desc, 'run_dir')
+            prepare_module._make_forcing_links(
+                run_desc, str(p_run_dir), nemo34)
         m_log.error.assert_called_once_with(
             'foo not found; cannot create symlinks - '
             'please check the forcing path in your run description file')
-        prepare_module._remove_run_dir.assert_called_once_with('run_dir')
+        prepare_module._remove_run_dir.assert_called_once_with(str(p_run_dir))
 
+
+class TestMakeForcingLinksNEMO34:
+    """Unit tests for `salishsea prepare` _make_forcing_links_nemo34() function.
+    """
     @pytest.mark.parametrize(
         'link_path, expected',
         [
@@ -708,12 +745,12 @@ class TestMakeForcingLinks:
         }
         prepare_module._remove_run_dir = Mock()
         p_exists = patch.object(
-            prepare_module.os.path, 'exists', side_effect=[True, False])
+            prepare_module.os.path, 'exists', return_value=False)
         p_abspath = patch.object(
             prepare_module.os.path, 'abspath', side_effect=lambda path: path)
         p_chdir = patch.object(prepare_module.os, 'chdir')
         with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-            prepare_module._make_forcing_links(run_desc, 'run_dir')
+            prepare_module._make_forcing_links_nemo34(run_desc, 'run_dir')
         m_log.error.assert_called_once_with(
             '{} not found; cannot create symlink - '
             'please check the forcing path and initial conditions file names '
@@ -735,16 +772,76 @@ class TestMakeForcingLinks:
         }
         prepare_module._remove_run_dir = Mock()
         p_exists = patch.object(
-            prepare_module.os.path, 'exists', side_effect=[True, True, False])
+            prepare_module.os.path, 'exists', side_effect=[True, False])
         p_abspath = patch.object(
             prepare_module.os.path, 'abspath', side_effect=lambda path: path)
         p_chdir = patch.object(prepare_module.os, 'chdir')
         p_symlink = patch.object(prepare_module.os, 'symlink')
         with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
             with p_symlink:
-                prepare_module._make_forcing_links(run_desc, 'run_dir')
+                prepare_module._make_forcing_links_nemo34(
+                    run_desc, 'run_dir')
         m_log.error.assert_called_once_with(
             'foo/bar not found; cannot create symlink - '
             'please check the forcing paths and file names '
             'in your run description file')
+        prepare_module._remove_run_dir.assert_called_once_with('run_dir')
+
+
+class TestMakeForcingLinksNEMO36:
+    """Unit tests for `salishsea prepare` _make_forcing_links_nemo36() function.
+    """
+    def test_abs_path_link(self, prepare_module, tmpdir):
+        p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
+        p_atmos_ops = tmpdir.ensure_dir(
+            'results/forcing/atmospheric/GEM2.5/operational')
+        run_desc = {
+            'paths': {
+                'forcing': str(p_nemo_forcing),
+            },
+            'forcing': {
+                'NEMO-atmos': {
+                    'link to': str(p_atmos_ops),
+                }}}
+        patch_symlink = patch.object(prepare_module.os, 'symlink')
+        with patch_symlink as m_symlink:
+            prepare_module._make_forcing_links_nemo36(run_desc, 'run_dir')
+        m_symlink.assert_called_once_with(p_atmos_ops, 'NEMO-atmos')
+
+    def test_rel_path_link(self, prepare_module, tmpdir):
+        p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
+        p_nemo_forcing.ensure_dir('rivers')
+        run_desc = {
+            'paths': {
+                'forcing': str(p_nemo_forcing),
+            },
+            'forcing': {
+                'rivers': {
+                    'link to': 'rivers',
+                }}}
+        patch_symlink = patch.object(prepare_module.os, 'symlink')
+        with patch_symlink as m_symlink:
+            prepare_module._make_forcing_links_nemo36(run_desc, 'run_dir')
+        m_symlink.assert_called_once_with(
+            p_nemo_forcing.join('rivers'), 'rivers')
+
+    @patch.object(prepare_module(), 'log')
+    def test_no_link_path(self, m_log, prepare_module, tmpdir):
+        p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
+        run_desc = {
+            'paths': {
+                'forcing': str(p_nemo_forcing),
+            },
+            'forcing': {
+                'rivers': {
+                    'link to': 'rivers',
+                }}}
+        prepare_module._remove_run_dir = Mock()
+        with pytest.raises(SystemExit):
+            prepare_module._make_forcing_links_nemo36(run_desc, 'run_dir')
+        m_log.error.assert_called_once_with(
+            '{} not found; cannot create symlink - '
+            'please check the forcing paths and file names '
+            'in your run description file'
+            .format(p_nemo_forcing.join('rivers')))
         prepare_module._remove_run_dir.assert_called_once_with('run_dir')
