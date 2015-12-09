@@ -125,7 +125,7 @@ def prepare(desc_file, iodefs, nemo34):
         nemo_code_repo, nemo_bin_dir, run_dir, nemo34,
         xios_code_repo, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
-    _make_forcing_links(run_desc, run_dir)
+    _make_forcing_links(run_desc, run_dir, nemo34)
     _check_atmos_files(run_desc, run_dir, nemo34)
     return run_dir
 
@@ -534,24 +534,21 @@ def _make_executable_links(
     :command:`hg parents` in the XIOS code repo.
     It is stored in the :file:`XIOS-code_rev.txt` file in run_dir.
 
-    :arg nemo_code_repo: Absolute path of NEMO code repo.
-    :type nemo_code_repo: str
+    :arg str nemo_code_repo: Absolute path of NEMO code repo.
 
-    :arg nemo_bin_dir: Absolute path of directory containing NEMO executable.
-    :type nemo_code_repo: str
+    :arg str nemo_bin_dir: Absolute path of directory containing NEMO
+                           executable.
 
-    :arg run_dir: Path of the temporary run directory.
-    :type run_dir: str
+    :arg str run_dir: Path of the temporary run directory.
 
-    :arg nemo34: Prepare a NEMO-3.4 run;
-                 the default is to prepare a NEMO-3.6 run
-    :type nemo34: boolean
+    :arg boolean nemo34: Make executable links for a NEMO-3.4 run
+                         if :py:obj:`True`,
+                         otherwise make links for a NEMO-3.6 run.
 
-    :arg xios_code_repo: Absolute path of XIOS code repo.
-    :type xios_code_repo: str
+    :arg str xios_code_repo: Absolute path of XIOS code repo.
 
-    :arg xios_bin_dir: Absolute path of directory containing XIOS executable.
-    :type xios_code_repo: str
+    :arg str xios_bin_dir: Absolute path of directory containing XIOS
+                           executable.
     """
     nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
     saved_cwd = os.getcwd()
@@ -574,11 +571,9 @@ def _make_grid_links(run_desc, run_dir):
     """Create symlinks in run_dir to the file names that NEMO expects
     to the bathymetry and coordinates files given in the run_desc dict.
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :arg dict run_desc: Run description dictionary.
 
-    :arg run_dir: Path of the temporary run directory.
-    :type run_dir: str
+    :arg str run_dir: Path of the temporary run directory.
 
     :raises: SystemExit
     """
@@ -612,22 +607,24 @@ def _make_grid_links(run_desc, run_dir):
     os.chdir(saved_cwd)
 
 
-def _make_forcing_links(run_desc, run_dir):
-    """Create symlinks in run_dir to the forcing directory/file names
-    that the Salish Sea model uses by convention, and record the
-    NEMO-forcing repo revision used for the run.
+def _make_forcing_links(run_desc, run_dir, nemo34):
+    """Create symlinks in run_dir to the forcing directory/file names,
+    and record the NEMO-forcing repo revision used for the run.
 
     The NEMO-forcing revision record is the output of the
     :command:`hg parents` in the NEMO-forcing repo.
     It is stored in the :file:`NEMO-forcing_rev.txt` file in run_dir.
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :arg dict run_desc: Run description dictionary.
 
-    :arg run_dir: Path of the temporary run directory.
-    :type run_dir: str
+    :arg str run_dir: Path of the temporary run directory.
 
-    :raises: SystemExit
+    :arg boolean nemo34: Make forcing links for a NEMO-3.4 run
+                         if :py:obj:`True`,
+                         otherwise make links for a NEMO-3.6 run.
+
+    :raises: :py:exc:`SystemExit` if the NEMO-forcing repo path does not
+             exist
     """
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     if not os.path.exists(nemo_forcing_dir):
@@ -638,6 +635,28 @@ def _make_forcing_links(run_desc, run_dir):
         )
         _remove_run_dir(run_dir)
         raise SystemExit(2)
+    saved_cwd = os.getcwd()
+    os.chdir(run_dir)
+    if nemo34:
+        _make_forcing_links_nemo34(run_desc, run_dir)
+    else:
+        _make_forcing_links_nemo36(run_desc, run_dir)
+    with open(os.path.join(run_dir, 'NEMO-forcing_rev.txt'), 'wt') as f:
+        f.writelines(hg.parents(nemo_forcing_dir, verbose=True))
+    os.chdir(saved_cwd)
+
+
+def _make_forcing_links_nemo34(run_desc, run_dir):
+    """For a NEMO-3.4 run, create symlinks in run_dir to the forcing
+    directory/file names that the Salish Sea model uses by convention.
+
+    :arg dict run_desc: Run description dictionary.
+
+    :arg str run_dir: Path of the temporary run directory.
+
+    :raises: :py:exc:`SystemExit` if a symlink target does not exist
+    """
+    nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     init_conditions = run_desc['forcing']['initial conditions']
     if 'restart' in init_conditions:
         ic_source = os.path.abspath(init_conditions)
@@ -650,8 +669,6 @@ def _make_forcing_links(run_desc, run_dir):
         (run_desc['forcing']['open boundaries'], 'open_boundaries'),
         (run_desc['forcing']['rivers'], 'rivers')
     )
-    saved_cwd = os.getcwd()
-    os.chdir(run_dir)
     if not os.path.exists(ic_source):
         log.error(
             '{} not found; cannot create symlink - '
@@ -672,9 +689,32 @@ def _make_forcing_links(run_desc, run_dir):
             _remove_run_dir(run_dir)
             raise SystemExit(2)
         os.symlink(link_path, link_name)
-    with open('NEMO-forcing_rev.txt', 'wt') as f:
-        f.writelines(hg.parents(nemo_forcing_dir, verbose=True))
-    os.chdir(saved_cwd)
+
+
+def _make_forcing_links_nemo36(run_desc, run_dir):
+    """For a NEMO-3.6 run, create symlinks in run_dir to the forcing
+    directory/file names given in the run description forcing section.
+
+    :arg dict run_desc: Run description dictionary.
+
+    :arg str run_dir: Path of the temporary run directory.
+
+    :raises: :py:exc:`SystemExit` if a symlink target does not exist
+    """
+    nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
+    for link_name in run_desc['forcing']:
+        link_path = run_desc['forcing'][link_name]['link to']
+        if not os.path.isabs(link_path):
+            link_path = os.path.join(nemo_forcing_dir, link_path)
+        if not os.path.exists(link_path):
+            log.error(
+                '{} not found; cannot create symlink - '
+                'please check the forcing paths and file names '
+                'in your run description file'
+                .format(link_path))
+            _remove_run_dir(run_dir)
+            raise SystemExit(2)
+        os.symlink(link_path, link_name)
 
 
 def _check_atmos_files(run_desc, run_dir, nemo34):
