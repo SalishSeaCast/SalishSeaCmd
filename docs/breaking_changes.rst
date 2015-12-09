@@ -25,6 +25,34 @@ Version 2.1
 
 The following changes that were introduced in version 2.1 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
 
+* For NEMO-3.6 the :kbd:`forcing` section of the run description YAML file now contains sub-sections that provide the names of directories and file that are to be symlinked in the run directory for NEMO to use to read initial conditions and forcing values from.
+  For example:
+
+  .. code-block:: yaml
+
+      forcing:
+        NEMO-atmos:
+          link to: /results/forcing/atmospheric/GEM2.5/operational/
+        restart.nc:
+          link to: /results/SalishSea/nowcast-green/06dec15/SalishSea_00004320_restart.nc
+        restart_trc.nc:
+          link to: /results/SalishSea/nowcast-green/06dec15/SalishSea_00004320_restart_trc.nc
+        open_boundaries:
+          link to: open_boundaries/
+        rivers:
+          link to: rivers/
+
+  The keys are the names of the symlinks that will be created in the run directory.
+  Those names are expected to appear in the appropriate places in the namelists.
+  The values associated with the :kbd:`link to` keys are the targets of the symlinks that will be created.
+
+  See :ref:`NEMO-3.6-Forcing` for details.
+
+  For NEMO-3.4 the :kbd:`forcing` section is unchanged,
+  the hard-coded symlink names remain the same,
+  and provision of a tracers restart file is not supported.
+
+
 * For NEMO-3.6 the :kbd:`namelists` section of the run description YAML file is now a dict of lists.
   The dict keys are the names of the :file:`namelist*_cfg` files to create and the element(s) of the list under each key are the namelist section files to be concatenated to create the file named by the key.
   For example:
