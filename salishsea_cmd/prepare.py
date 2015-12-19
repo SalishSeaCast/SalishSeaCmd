@@ -229,7 +229,7 @@ def _remove_run_dir(run_dir):
         for fn in os.listdir(run_dir):
             os.remove(os.path.join(run_dir, fn))
         os.rmdir(run_dir)
-    except FileNotFoundError:
+    except (FileNotFoundError, IOError):
         pass
 
 
@@ -294,7 +294,7 @@ def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
                 with open(os.path.join(run_set_dir, nl), 'rt') as f:
                     namelist.writelines(f.readlines())
                     namelist.write('\n\n')
-            except FileNotFoundError as e:
+            except (FileNotFoundError, IOError) as e:
                 log.error(e)
                 _remove_run_dir(run_dir)
                 raise SystemExit(2)
@@ -332,7 +332,7 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
                     with open(os.path.join(run_set_dir, nl), 'rt') as f:
                         namelist.writelines(f.readlines())
                         namelist.write('\n\n')
-                except FileNotFoundError as e:
+                except (FileNotFoundError, IOError) as e:
                     log.error(e)
                     _remove_run_dir(run_dir)
                     raise SystemExit(2)
