@@ -185,7 +185,7 @@ def run(
     system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
     batch_script = _build_batch_script(
         run_desc, desc_file, nemo_processors, xios_processors, results_dir,
-        run_dir.as_posix(), gather_opts, system,
+        run_dir.as_posix(), gather_opts, system, nemo34,
     )
     batch_file = run_dir/'SalishSeaNEMO.sh'
     with batch_file.open('wt') as f:
@@ -200,7 +200,7 @@ def run(
 
 def _build_batch_script(
     run_desc, desc_file, nemo_processors, xios_processors, results_dir,
-    run_dir, gather_opts, system,
+    run_dir, gather_opts, system, nemo34
 ):
     """Build the Bash script that will execute the run.
 
@@ -225,6 +225,9 @@ def _build_batch_script(
 
     :arg str system: Name of the system that the run will be executed on;
                  e.g. :kbd:`salish`, :kbd:`orcinus`
+
+    :arg boolean nemo34: Build batch script for a NEMO-3.4 run;
+                         the default is to do so for a NEMO-3.6 run.
 
     :returns: Bash script to execute the run.
     :rtype: str
@@ -257,7 +260,7 @@ def _build_batch_script(
             defns=_definitions(
                 run_desc, desc_file, run_dir, results_dir, gather_opts,
                 system),
-            modules=_modules(system),
+            modules=_modules(system, nemo34),
             execute=_execute(nemo_processors, xios_processors),
             fix_permissions=_fix_permissions(),
             cleanup=_cleanup(),
@@ -340,6 +343,7 @@ def _pbs_features(n_processors, system):
 
 def _definitions(
     run_desc, run_desc_file, run_dir, results_dir, gather_opts, system,
+    nemo34,
 ):
     home = u'${HOME}' if system == 'salish' else u'${PBS_O_HOME}'
     defns = (
@@ -360,7 +364,7 @@ def _definitions(
     return defns
 
 
-def _modules(system):
+def _modules(system, nemo34):
     modules = u''
     if system == 'jasper':
         modules = (
@@ -370,14 +374,21 @@ def _modules(system):
             u'module load application/nco/4.3.9\n'
         )
     elif system == 'orcinus':
-        modules = (
-            u'module load intel\n'
-            u'module load intel/14.0/netcdf-4.3.3.1_mpi\n'
-            u'module load intel/14.0/netcdf-fortran-4.4.0_mpi\n'
-            u'module load intel/14.0/hdf5-1.8.15p1_mpi\n'
-            u'module load intel/14.0/nco-4.5.2\n'
-            u'module load python\n'
-        )
+        if nemo34:
+            modules = (
+                u'module load intel\n'
+                u'module load intel/14.0/netcdf_hdf5\n'
+                u'module load python\n'
+            )
+        else:
+            modules = (
+                u'module load intel\n'
+                u'module load intel/14.0/netcdf-4.3.3.1_mpi\n'
+                u'module load intel/14.0/netcdf-fortran-4.4.0_mpi\n'
+                u'module load intel/14.0/hdf5-1.8.15p1_mpi\n'
+                u'module load intel/14.0/nco-4.5.2\n'
+                u'module load python\n'
+            )
     return modules
 
 
