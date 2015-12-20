@@ -635,15 +635,12 @@ def _make_forcing_links(run_desc, run_dir, nemo34):
         )
         _remove_run_dir(run_dir)
         raise SystemExit(2)
-    saved_cwd = os.getcwd()
-    os.chdir(run_dir)
     if nemo34:
         _make_forcing_links_nemo34(run_desc, run_dir)
     else:
         _make_forcing_links_nemo36(run_desc, run_dir)
     with open(os.path.join(run_dir, 'NEMO-forcing_rev.txt'), 'wt') as f:
         f.writelines(hg.parents(nemo_forcing_dir, verbose=True))
-    os.chdir(saved_cwd)
 
 
 def _make_forcing_links_nemo34(run_desc, run_dir):
@@ -660,14 +657,17 @@ def _make_forcing_links_nemo34(run_desc, run_dir):
     init_conditions = run_desc['forcing']['initial conditions']
     if 'restart' in init_conditions:
         ic_source = os.path.abspath(init_conditions)
-        ic_link_name = 'restart.nc'
+        ic_link_name = os.path.join(run_dir, 'restart.nc')
     else:
         ic_source = os.path.join(nemo_forcing_dir, init_conditions)
-        ic_link_name = 'initial_strat'
+        ic_link_name = os.path.join(run_dir, 'initial_strat')
     forcing_dirs = (
-        (run_desc['forcing']['atmospheric'], 'NEMO-atmos'),
-        (run_desc['forcing']['open boundaries'], 'open_boundaries'),
-        (run_desc['forcing']['rivers'], 'rivers')
+        (run_desc['forcing']['atmospheric'],
+            os.path.join(run_dir, 'NEMO-atmos')),
+        (run_desc['forcing']['open boundaries'],
+            os.path.join(run_dir, 'open_boundaries')),
+        (run_desc['forcing']['rivers'],
+            os.path.join(run_dir, 'rivers'))
     )
     if not os.path.exists(ic_source):
         log.error(
