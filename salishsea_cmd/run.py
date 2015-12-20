@@ -343,7 +343,6 @@ def _pbs_features(n_processors, system):
 
 def _definitions(
     run_desc, run_desc_file, run_dir, results_dir, gather_opts, system,
-    nemo34,
 ):
     home = u'${HOME}' if system == 'salish' else u'${PBS_O_HOME}'
     defns = (
