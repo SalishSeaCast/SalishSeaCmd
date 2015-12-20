@@ -73,7 +73,6 @@ class TestGetParser:
 @patch.object(prepare_module(), '_make_executable_links')
 @patch.object(prepare_module(), '_make_grid_links')
 @patch.object(prepare_module(), '_make_forcing_links')
-@patch.object(prepare_module(), '_check_atmos_files')
 class TestPrepare:
     """Unit tests for `salishsea prepare` prepare() function.
     """
@@ -82,7 +81,7 @@ class TestPrepare:
         (False, ('nemo_repo', 'nemo_bin_dir'), ('xios_repo', 'xios_bin_dir')),
     ])
     def test_prepare(
-        self, m_caf, m_mfl, m_mgl,
+        self, m_mfl, m_mgl,
         m_mel, m_crsf, m_mnl, m_mrd, m_dirname, m_cxe, m_cne, m_lrd,
         nemo34, m_cne_return, m_cxe_return, prepare_module,
     ):
@@ -108,7 +107,6 @@ class TestPrepare:
             m_cxe_return[0], m_cxe_return[1])
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd(), nemo34)
-        m_caf.assert_called_once_with(m_lrd(), m_mrd(), nemo34)
         assert run_dir == m_mrd()
 
 
@@ -728,9 +726,10 @@ class TestMakeForcingLinksNEMO34:
             ('initial_strat/', 'foo/initial_strat/'),
         ],
     )
+    @patch.object(prepare_module(), '_check_atmos_files')
     @patch.object(prepare_module(), 'log')
     def test_make_forcing_links_no_restart_path(
-        self, m_log, link_path, expected, prepare_module,
+        self, m_log, m_caf, link_path, expected, prepare_module,
     ):
         run_desc = {
             'paths': {
@@ -757,8 +756,11 @@ class TestMakeForcingLinksNEMO34:
             'in your run description file'.format(expected))
         prepare_module._remove_run_dir.assert_called_once_with('run_dir')
 
+    @patch.object(prepare_module(), '_check_atmos_files')
     @patch.object(prepare_module(), 'log')
-    def test_make_forcing_links_no_forcing_path(self, m_log, prepare_module):
+    def test_make_forcing_links_no_forcing_path(
+        self, m_log, m_caf, prepare_module,
+    ):
         run_desc = {
             'paths': {
                 'forcing': 'foo',
