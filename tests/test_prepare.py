@@ -806,7 +806,7 @@ class TestMakeForcingLinksNEMO36:
         patch_symlink = patch.object(prepare_module.os, 'symlink')
         with patch_symlink as m_symlink:
             prepare_module._make_forcing_links_nemo36(run_desc, 'run_dir')
-        m_symlink.assert_called_once_with(p_atmos_ops, 'NEMO-atmos')
+        m_symlink.assert_called_once_with(p_atmos_ops, 'run_dir/NEMO-atmos')
 
     def test_rel_path_link(self, prepare_module, tmpdir):
         p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
@@ -823,7 +823,7 @@ class TestMakeForcingLinksNEMO36:
         with patch_symlink as m_symlink:
             prepare_module._make_forcing_links_nemo36(run_desc, 'run_dir')
         m_symlink.assert_called_once_with(
-            p_nemo_forcing.join('rivers'), 'rivers')
+            p_nemo_forcing.join('rivers'), 'run_dir/rivers')
 
     @patch.object(prepare_module(), 'log')
     def test_no_link_path(self, m_log, prepare_module, tmpdir):
