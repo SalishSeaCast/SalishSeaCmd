@@ -714,7 +714,7 @@ def _make_forcing_links_nemo36(run_desc, run_dir):
                 .format(link_path))
             _remove_run_dir(run_dir)
             raise SystemExit(2)
-        os.symlink(link_path, link_name)
+        os.symlink(link_path, os.path.join(run_dir, link_name))
 
 
 def _check_atmos_files(run_desc, run_dir, nemo34):
