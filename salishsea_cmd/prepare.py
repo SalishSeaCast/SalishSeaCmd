@@ -126,7 +126,6 @@ def prepare(desc_file, iodefs, nemo34):
         xios_code_repo, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
     _make_forcing_links(run_desc, run_dir, nemo34)
-    _check_atmos_files(run_desc, run_dir, nemo34)
     return run_dir
 
 
@@ -689,6 +688,7 @@ def _make_forcing_links_nemo34(run_desc, run_dir):
             _remove_run_dir(run_dir)
             raise SystemExit(2)
         os.symlink(link_path, link_name)
+    _check_atmos_files(run_desc, run_dir)
 
 
 def _make_forcing_links_nemo36(run_desc, run_dir):
@@ -701,6 +701,9 @@ def _make_forcing_links_nemo36(run_desc, run_dir):
 
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
     """
+    link_checkers = {
+        'atmospheric': _check_atmospheric_forcing_link,
+    }
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     for link_name in run_desc['forcing']:
         link_path = run_desc['forcing'][link_name]['link to']
@@ -715,27 +718,108 @@ def _make_forcing_links_nemo36(run_desc, run_dir):
             _remove_run_dir(run_dir)
             raise SystemExit(2)
         os.symlink(link_path, os.path.join(run_dir, link_name))
+        try:
+            link_checker = run_desc['forcing'][link_name]['check link']
+            link_checkers[link_checker['type']](
+                run_desc, run_dir, link_path,
+                link_checker['namelist filename'])
+        except KeyError:
+            if 'check link' not in run_desc['forcing'][link_name]:
+                # No forcing link checker specified
+                pass
+            else:
+                if link_checker is not None:
+                    log.error(
+                        'unknown forcing link checker: {}'
+                        .format(link_checker))
+                    _remove_run_dir(run_dir)
+                    raise SystemExit(2)
 
 
-def _check_atmos_files(run_desc, run_dir, nemo34):
+def _check_atmospheric_forcing_link(
+    run_desc, run_dir, link_path, namelist_filename,
+):
+    """Confirm that the atmospheric forcing files necessary for the run
+    are present.
+
+    Sections of the namelist file are parsed to determine
+    the necessary files, and the date ranges required for the run.
+    """
+    namelist = namelist2dict(os.path.join(run_dir, namelist_filename))
+    if not namelist['namsbc'][0]['ln_blk_core']:
+        return
+    start_date = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
+    it000 = namelist['namrun'][0]['nn_it000']
+    itend = namelist['namrun'][0]['nn_itend']
+    dt = namelist['namdom'][0]['rn_rdt']
+    end_date = start_date.replace(seconds=(itend - it000) * dt - 1)
+    qtys = (
+        'sn_wndi sn_wndj sn_qsr sn_qlw sn_tair sn_humi sn_prec sn_snow'
+        .split())
+    core_dir = namelist['namsbc_core'][0]['cn_dir']
+    file_info = {
+        'core': {
+            'dir': core_dir,
+            'params': [],
+        },
+    }
+    for qty in qtys:
+        flread_params = namelist['namsbc_core'][0][qty]
+        file_info['core']['params'].append(
+            (flread_params[0], flread_params[5]))
+    if namelist['namsbc'][0]['ln_apr_dyn']:
+        apr_dir = namelist['namsbc_apr'][0]['cn_dir']
+        file_info['apr'] = {
+            'dir': apr_dir,
+            'params': [],
+        }
+        flread_params = namelist['namsbc_apr'][0]['sn_apr']
+        file_info['apr']['params'].append((flread_params[0], flread_params[5]))
+    startm1 = start_date.replace(days=-1)
+    for r in arrow.Arrow.range('day', startm1, end_date):
+        for v in file_info.values():
+            for basename, period in v['params']:
+                if period == 'daily':
+                    file_path = os.path.join(
+                        v['dir'],
+                        '{basename}_'
+                        'y{date.year}m{date.month:02d}d{date.day:02d}.nc'
+                        .format(basename=basename, date=r))
+                elif period == 'yearly':
+                    file_path = os.path.join(
+                        v['dir'], '{basename}.nc'.format(basename=basename))
+                if not os.path.exists(os.path.join(run_dir, file_path)):
+                    log.error(
+                        '{file_path} not found; '
+                        'please confirm that atmospheric forcing files '
+                        'for {startm1} through '
+                        '{end} are in the {dir} collection, '
+                        'and that atmospheric forcing paths in your '
+                        'run description and surface boundary conditions '
+                        'namelist are in agreement.'
+                        .format(
+                            file_path=file_path,
+                            startm1=startm1.format('YYYY-MM-DD'),
+                            end=end_date.format('YYYY-MM-DD'),
+                            dir=link_path,
+                        )
+                    )
+                    _remove_run_dir(run_dir)
+                    raise SystemExit(2)
+
+
+def _check_atmos_files(run_desc, run_dir):
     """Confirm that the atmospheric forcing files necessary for the run
     are present. Sections of the namelist file are parsed to determine
     the necessary files, and the date ranges required for the run.
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :arg dict run_desc: Run description dictionary.
 
-    :arg run_dir: Path of the temporary run directory.
-    :type run_dir: str
-
-    :arg nemo34: Prepare a NEMO-3.4 run;
-                 the default is to prepare a NEMO-3.6 run
-    :type nemo34: boolean
+    :arg str run_dir: Path of the temporary run directory.
 
     :raises: SystemExit
     """
-    namelist_filename = 'namelist' if nemo34 else 'namelist_cfg'
-    namelist = namelist2dict(os.path.join(run_dir, namelist_filename))
+    namelist = namelist2dict(os.path.join(run_dir, 'namelist'))
     if not namelist['namsbc'][0]['ln_blk_core']:
         return
     date0 = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
