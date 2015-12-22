@@ -46,6 +46,24 @@ The following changes that were introduced in version 2.1 of the :kbd:`SalishSea
   Those names are expected to appear in the appropriate places in the namelists.
   The values associated with the :kbd:`link to` keys are the targets of the symlinks that will be created.
 
+  A sub-section that provides a directory of atmospheric forcing files to link to may also include a :kbd:`check link` sub-sub-section.
+  :kbd:`check link` contains 2 key-value pairs:
+
+  * The :kbd:`type` key provides the type of checking to perform on the link
+  * The value associated with the :kbd:`namelist filename` key is the name of the namelist file in which the atmospheric forcing link is used.
+
+  .. code-block:: yaml
+
+    forcing:
+      NEMO-atmos:
+        link to: /results/forcing/atmospheric/GEM2.5/operational/
+        check link:
+          type: atmospheric
+          namelist filename: namelist_cfg
+
+  Link checking can be disabled by excluding the :kbd:`check link` section,
+  or by setting the value associated with the :kbd:`type` key to :py:obj:`None`.
+
   See :ref:`NEMO-3.6-Forcing` for details.
 
   For NEMO-3.4 the :kbd:`forcing` section is unchanged,
