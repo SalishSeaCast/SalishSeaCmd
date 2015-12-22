@@ -157,6 +157,33 @@ Apart from the restart file keys,
 you are free to use any keys that you wish with the understanding that the key will be the name of the symlink that will be created in the run directory,
 and that name will also need to appear as a directory name in the appropriate namelist.
 
+The :command:`salishsea run` and :command:`salishsea prepare` commands and the :py:func:`salishsea_cmd.api.prepare` API function confirm that the targets of the symlinks exist,
+and exit with an error message if not.
+
+
+Atmospheric Forcing File Checks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Additional checking can be performed on the files in the atmospheric forcing directory.
+That checking confirms the existence of all of the atmospheric forcing files for the date range of the run.
+Doing so ensures that a run won't fail part way through due to a missing atmospheric forcing file.
+To enable the additional checking add a :kbd:`check link` section at the same level as the :kbd:`link to` key:
+
+.. code-block:: yaml
+
+    forcing:
+      NEMO-atmos:
+        link to: /results/forcing/atmospheric/GEM2.5/operational/
+        check link:
+          type: atmospheric
+          namelist filename: namelist_cfg
+
+The :kbd:`type` key provides the type of checking to perform on the link.
+The value associated with the :kbd:`namelist filename` key is the name of the namelist file in which the atmospheric forcing link is used.
+
+Link checking can be disabled by excluding the :kbd:`check link` section,
+or by setting the value associated with the :kbd:`type` key to :py:obj:`None`.
+
 
 .. _NEMO-3.6-Namelists:
 
