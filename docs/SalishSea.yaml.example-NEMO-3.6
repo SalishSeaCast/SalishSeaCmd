@@ -53,12 +53,15 @@ forcing:
   # If relative, paths are taken from forcing path above
   NEMO-atmos:
     link to: /results/forcing/atmospheric/GEM2.5/operational/
+    check link:
+      type: atmospheric
+      namelist filename: namelist_cfg
   initial_strat:
     link to: initial_strat/
   initial_green:
     link to: initial_green/
   # Typically, you would use either 1 or more initial conditions directories
-  # (above), or restart files (below), but not both
+  # (above), or 1 or more restart files (below), but not both
   restart.nc:
     link to: /results/SalishSea/nowcast/05may15/SalishSea_02056320_restart.nc
   restart_trc.nc:
