@@ -25,6 +25,10 @@ Version 2.1
 
 The following changes that were introduced in version 2.1 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
 
+* In the :py:func:`SalishSeaCmd.api.run_description` function,
+  the name of the argument that is used to pass in the path to the :file:`NEMO-forcing/` directory has been changed from :kbd:`forcing` to :kbd:`forcing_path`.
+  This change affects both NEMO-3.4 and NEMO-3.6 uses of the function.
+
 * For NEMO-3.6 the :kbd:`forcing` section of the run description YAML file now contains sub-sections that provide the names of directories and file that are to be symlinked in the run directory for NEMO to use to read initial conditions and forcing values from.
   For example:
 
@@ -104,7 +108,7 @@ The following changes that were introduced in version 2.1 of the :kbd:`SalishSea
   biology,
   etc. is not supported.
 
-* The :py:func:`SalishSeaCmd.api.run_description` and :py:func:`SalishSeaCmd.api.run_in_subprocess` functions now accept a ::kbd:`nemo34` argument that defaults to :py:obj:`False`.
+* The :py:func:`SalishSeaCmd.api.run_description` and :py:func:`SalishSeaCmd.api.run_in_subprocess` functions now accept a :kbd:`nemo34` argument that defaults to :py:obj:`False`.
   That means that those functions now assume that their objective is a NEMO-3.6 run.
 
 
