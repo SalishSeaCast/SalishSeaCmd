@@ -128,6 +128,7 @@ def prepare(run_desc_file, iodefs_file, nemo34=False):
 
 
 def run_description(
+    config_name='SalishSea',
     run_id=None,
     walltime=None,
     mpi_decomposition='8x18',
@@ -152,6 +153,8 @@ def run_description(
         :file:`/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/` which is appropriate
         for runs on Westgrid, but needs to be changed for runs on
         :kbd:`salish`.
+
+    :arg str config_name: NEMO configuration name to use for the run.
 
     :arg str run_id: Job identifier that appears in the :command:`qstat`
                      listing.
@@ -194,7 +197,7 @@ def run_description(
                          NEMO-3.6 run.
     """
     run_description = {
-        'config_name': 'SalishSea',
+        'config_name': config_name,
         'MPI decomposition': mpi_decomposition,
         'run_id': run_id,
         'walltime': walltime,

@@ -142,6 +142,7 @@ class TestRunDescription(object):
     def test_all_arguments(self, nemo34, api_module):
         XIOS_code = None if nemo34 else '../../XIOS/'
         run_desc = api_module.run_description(
+            config_name='SOG',
             run_id='foo',
             walltime='1:00:00',
             mpi_decomposition='6x14',
@@ -153,7 +154,7 @@ class TestRunDescription(object):
             nemo34=nemo34,
         )
         expected = {
-            'config_name': 'SalishSea',
+            'config_name': 'SOG',
             'run_id': 'foo',
             'walltime': '1:00:00',
             'MPI decomposition': '6x14',
