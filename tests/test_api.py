@@ -148,7 +148,7 @@ class TestRunDescription(object):
             mpi_decomposition='6x14',
             NEMO_code='../../NEMO-code/',
             XIOS_code=XIOS_code,
-            forcing='../../NEMO-forcing/',
+            forcing_path='../../NEMO-forcing/',
             runs_dir='../../SalishSea/',
             init_conditions='../../22-25Sep/SalishSea_00019008_restart.nc',
             nemo34=nemo34,

@@ -134,7 +134,7 @@ def run_description(
     mpi_decomposition='8x18',
     NEMO_code=None,
     XIOS_code=None,
-    forcing=None,
+    forcing_path=None,
     runs_dir=None,
     init_conditions=None,
     nemo34=False,
@@ -173,12 +173,12 @@ def run_description(
                         If a relative path is used it will start from the
                         current directory.
 
-    :arg str forcing: Path to the :file:`NEMO-forcing/` directory where the
-                      netCDF files for the grid coordinates, bathymetry,
-                      initial conditions, open boundary conditions, etc.
-                      are found.
-                      If a relative path is used it will start from the
-                      current directory.
+    :arg str forcing_path: Path to the :file:`NEMO-forcing/` directory
+                           where the netCDF files for the grid coordinates,
+                           bathymetry, initial conditions, open boundary
+                           conditions, etc. are found.
+                           If a relative path is used it will start from
+                           the current directory.
 
     :arg str runs_dir: Path to the directory where run directories will be
                        created.
@@ -203,7 +203,7 @@ def run_description(
         'walltime': walltime,
         'paths': {
             'NEMO-code': NEMO_code,
-            'forcing': forcing,
+            'forcing': forcing_path,
             'runs directory': runs_dir,
         },
         'grid': {
