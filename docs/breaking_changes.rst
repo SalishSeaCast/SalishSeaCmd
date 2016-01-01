@@ -25,10 +25,6 @@ Version 2.1
 
 The following changes that were introduced in version 2.1 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
 
-* In the :py:func:`SalishSeaCmd.api.run_description` function,
-  the name of the argument that is used to pass in the path to the :file:`NEMO-forcing/` directory has been changed from :kbd:`forcing` to :kbd:`forcing_path`.
-  This change affects both NEMO-3.4 and NEMO-3.6 uses of the function.
-
 * For NEMO-3.6 the :kbd:`forcing` section of the run description YAML file now contains sub-sections that provide the names of directories and file that are to be symlinked in the run directory for NEMO to use to read initial conditions and forcing values from.
   For example:
 
@@ -110,6 +106,18 @@ The following changes that were introduced in version 2.1 of the :kbd:`SalishSea
 
 * The :py:func:`SalishSeaCmd.api.run_description` and :py:func:`SalishSeaCmd.api.run_in_subprocess` functions now accept a :kbd:`nemo34` argument that defaults to :py:obj:`False`.
   That means that those functions now assume that their objective is a NEMO-3.6 run.
+
+* In the :py:func:`SalishSeaCmd.api.run_description` function,
+  the name of the argument that is used to pass in the path to the :file:`NEMO-forcing/` directory has been changed from :kbd:`forcing` to :kbd:`forcing_path`.
+  This change affects both NEMO-3.4 and NEMO-3.6 uses of the function.
+
+* The :py:func:`SalishSeaCmd.api.run_description` function now accepts a :kbd:`forcing` argument that can be used to pass in a forcing links :py:obj:`dict`.
+  The :py:obj:`dict` must match the forcing links data structure described in :ref:`RunDescriptionFileStructure` for the version of NEMO that you are using.
+  For NEMO-3.4,
+  the default value of :py:obj:`None` will result in "sensible" default values being set for the forcing links.
+  For NEMO-3.6,
+  it is impossible to guess what "sensible" default values might be,
+  so the default value of :py:obj:`None` is simply passed through.
 
 
 Version 2.0
