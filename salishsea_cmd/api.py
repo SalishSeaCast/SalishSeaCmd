@@ -138,6 +138,7 @@ def run_description(
     runs_dir=None,
     forcing=None,
     init_conditions=None,
+    namelists=None,
     nemo34=False,
 ):
     """Return a Salish Sea NEMO run description dict template.
@@ -191,7 +192,7 @@ def run_description(
                        defaults" for NEMO-3.4,
                        but :py:obj:`None` for NEMO-3.6.
                        See the :ref:`RunDescriptionFileStructure` docs
-                       for the versio of NEMO that you are using for
+                       for the version of NEMO that you are using for
                        details of the data structure.
 
     :arg str init_conditions: Name of sub-directory in :file:`NEMO-forcing/`
@@ -199,6 +200,14 @@ def run_description(
                               or the path to and name of a restart file.
                               If a relative path is used for a restart file
                               it will start from the  current directory.
+
+    :arg dict namelists: Namelists data structure.
+                         The default of :py:obj:`None` produces "sensible
+                         defaults" for a physics-only run for both NEMO-3.4,
+                         annd NEMO-3.6.
+                         See the :ref:`RunDescriptionFileStructure` docs
+                         for the version of NEMO that you are using for
+                         details of the data structure.
 
     :arg boolean nemo34: Return run description dict template a NEMO-3.4
                          run;
@@ -219,16 +228,6 @@ def run_description(
             'coordinates': 'coordinates_seagrid_SalishSea.nc',
             'bathymetry': 'bathy_meter_SalishSea2.nc',
         },
-        'namelists': [
-            'namelist.time',
-            'namelist.domain',
-            'namelist.surface',
-            'namelist.lateral',
-            'namelist.bottom',
-            'namelist.tracers',
-            'namelist.dynamics',
-            'namelist.compute',
-        ],
     }
     if nemo34:
         if forcing is None:
@@ -241,9 +240,37 @@ def run_description(
             }
         else:
             run_description['forcing'] = forcing
+        if namelists is None:
+            run_description['namelists'] = [
+                'namelist.time',
+                'namelist.domain',
+                'namelist.surface',
+                'namelist.lateral',
+                'namelist.bottom',
+                'namelist.tracers',
+                'namelist.dynamics',
+                'namelist.compute',
+            ]
+        else:
+            run_description['namelists'] = namelists
     else:
         run_description['paths']['XIOS'] = XIOS_code
         run_description['forcing'] = forcing
+        if namelists is None:
+            run_description['namelists'] = {
+                'namelist_cfg': [
+                    'namelist.time',
+                    'namelist.domain',
+                    'namelist.surface',
+                    'namelist.lateral',
+                    'namelist.bottom',
+                    'namelist.tracer',
+                    'namelist.dynamics',
+                    'namelist.vertical',
+                    'namelist.compute',
+                ]}
+        else:
+            run_description['namelists'] = namelists
         run_description['output'] = {
             'domain': 'domain_def.xml',
             'fields': None,

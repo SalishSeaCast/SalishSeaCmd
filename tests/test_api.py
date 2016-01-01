@@ -117,16 +117,6 @@ class TestRunDescription(object):
                 'open boundaries': 'open_boundaries/',
                 'rivers': 'rivers/',
             },
-            'namelists': [
-                'namelist.time',
-                'namelist.domain',
-                'namelist.surface',
-                'namelist.lateral',
-                'namelist.bottom',
-                'namelist.tracers',
-                'namelist.dynamics',
-                'namelist.compute',
-            ],
         }
         if nemo34:
             expected['forcing'] = {
@@ -136,9 +126,31 @@ class TestRunDescription(object):
                 'open boundaries': 'open_boundaries/',
                 'rivers': 'rivers/',
             }
+            expected['namelists'] = [
+                'namelist.time',
+                'namelist.domain',
+                'namelist.surface',
+                'namelist.lateral',
+                'namelist.bottom',
+                'namelist.tracers',
+                'namelist.dynamics',
+                'namelist.compute',
+            ]
         else:
             expected['paths']['XIOS'] = None
             expected['forcing'] = None
+            expected['namelists'] = {
+                'namelist_cfg': [
+                    'namelist.time',
+                    'namelist.domain',
+                    'namelist.surface',
+                    'namelist.lateral',
+                    'namelist.bottom',
+                    'namelist.tracer',
+                    'namelist.dynamics',
+                    'namelist.vertical',
+                    'namelist.compute',
+                ]}
             expected['output'] = {
                 'domain': 'domain_def.xml',
                 'fields': None,
@@ -147,8 +159,11 @@ class TestRunDescription(object):
             }
         assert run_desc == expected
 
-    @pytest.mark.parametrize('nemo34', [True, False])
-    def test_all_arguments(self, nemo34, api_module):
+    @pytest.mark.parametrize('nemo34, namelists', [
+        (True, []),
+        (False, {}),
+    ])
+    def test_all_arguments(self, nemo34, namelists, api_module):
         XIOS_code = None if nemo34 else '../../XIOS/'
         run_desc = api_module.run_description(
             config_name='SOG',
@@ -160,6 +175,8 @@ class TestRunDescription(object):
             forcing_path='../../NEMO-forcing/',
             runs_dir='../../SalishSea/',
             init_conditions='../../22-25Sep/SalishSea_00019008_restart.nc',
+            forcing={},
+            namelists=namelists,
             nemo34=nemo34,
         )
         expected = {
@@ -176,29 +193,12 @@ class TestRunDescription(object):
                 'coordinates': 'coordinates_seagrid_SalishSea.nc',
                 'bathymetry': 'bathy_meter_SalishSea2.nc',
             },
-            'namelists': [
-                'namelist.time',
-                'namelist.domain',
-                'namelist.surface',
-                'namelist.lateral',
-                'namelist.bottom',
-                'namelist.tracers',
-                'namelist.dynamics',
-                'namelist.compute',
-            ],
+            'forcing': {},
+            'namelists': namelists,
         }
-        if nemo34:
-            expected['forcing'] = {
-                'atmospheric':
-                    '/results/forcing/atmospheric/GEM2.5/operational/',
-                'initial conditions':
-                    '../../22-25Sep/SalishSea_00019008_restart.nc',
-                'open boundaries': 'open_boundaries/',
-                'rivers': 'rivers/',
-            }
-        else:
+        if not nemo34:
             expected['paths']['XIOS'] = '../../XIOS/'
-            expected['forcing'] = None
+            expected['namelists'] = {}
             expected['output'] = {
                 'domain': 'domain_def.xml',
                 'fields':
