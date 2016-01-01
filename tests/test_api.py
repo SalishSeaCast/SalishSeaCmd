@@ -128,8 +128,17 @@ class TestRunDescription(object):
                 'namelist.compute',
             ],
         }
-        if not nemo34:
+        if nemo34:
+            expected['forcing'] = {
+                'atmospheric':
+                    '/results/forcing/atmospheric/GEM2.5/operational/',
+                'initial conditions': None,
+                'open boundaries': 'open_boundaries/',
+                'rivers': 'rivers/',
+            }
+        else:
             expected['paths']['XIOS'] = None
+            expected['forcing'] = None
             expected['output'] = {
                 'domain': 'domain_def.xml',
                 'fields': None,
@@ -167,14 +176,6 @@ class TestRunDescription(object):
                 'coordinates': 'coordinates_seagrid_SalishSea.nc',
                 'bathymetry': 'bathy_meter_SalishSea2.nc',
             },
-            'forcing': {
-                'atmospheric':
-                    '/results/forcing/atmospheric/GEM2.5/operational/',
-                'initial conditions':
-                    '../../22-25Sep/SalishSea_00019008_restart.nc',
-                'open boundaries': 'open_boundaries/',
-                'rivers': 'rivers/',
-            },
             'namelists': [
                 'namelist.time',
                 'namelist.domain',
@@ -186,8 +187,18 @@ class TestRunDescription(object):
                 'namelist.compute',
             ],
         }
-        if not nemo34:
+        if nemo34:
+            expected['forcing'] = {
+                'atmospheric':
+                    '/results/forcing/atmospheric/GEM2.5/operational/',
+                'initial conditions':
+                    '../../22-25Sep/SalishSea_00019008_restart.nc',
+                'open boundaries': 'open_boundaries/',
+                'rivers': 'rivers/',
+            }
+        else:
             expected['paths']['XIOS'] = '../../XIOS/'
+            expected['forcing'] = None
             expected['output'] = {
                 'domain': 'domain_def.xml',
                 'fields':

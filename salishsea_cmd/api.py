@@ -136,6 +136,7 @@ def run_description(
     XIOS_code=None,
     forcing_path=None,
     runs_dir=None,
+    forcing=None,
     init_conditions=None,
     nemo34=False,
 ):
@@ -185,6 +186,14 @@ def run_description(
                        If a relative path is used it will start from the
                        current directory.
 
+    :arg dict forcing: Forcing link data structure.
+                       The default of :py:obj:`None` produces "sensible
+                       defaults" for NEMO-3.4,
+                       but :py:obj:`None` for NEMO-3.6.
+                       See the :ref:`RunDescriptionFileStructure` docs
+                       for the versio of NEMO that you are using for
+                       details of the data structure.
+
     :arg str init_conditions: Name of sub-directory in :file:`NEMO-forcing/`
                               where initial conditions files are to be found,
                               or the path to and name of a restart file.
@@ -210,12 +219,6 @@ def run_description(
             'coordinates': 'coordinates_seagrid_SalishSea.nc',
             'bathymetry': 'bathy_meter_SalishSea2.nc',
         },
-        'forcing': {
-            'atmospheric': '/results/forcing/atmospheric/GEM2.5/operational/',
-            'initial conditions': init_conditions,
-            'open boundaries': 'open_boundaries/',
-            'rivers': 'rivers/',
-        },
         'namelists': [
             'namelist.time',
             'namelist.domain',
@@ -227,8 +230,20 @@ def run_description(
             'namelist.compute',
         ],
     }
-    if not nemo34:
+    if nemo34:
+        if forcing is None:
+            run_description['forcing'] = {
+                'atmospheric':
+                    '/results/forcing/atmospheric/GEM2.5/operational/',
+                'initial conditions': init_conditions,
+                'open boundaries': 'open_boundaries/',
+                'rivers': 'rivers/',
+            }
+        else:
+            run_description['forcing'] = forcing
+    else:
         run_description['paths']['XIOS'] = XIOS_code
+        run_description['forcing'] = forcing
         run_description['output'] = {
             'domain': 'domain_def.xml',
             'fields': None,
