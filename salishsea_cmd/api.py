@@ -29,9 +29,14 @@ import cliff.commandmanager
 import yaml
 
 from salishsea_cmd import prepare as prepare_plug_in
+import salishsea_cmd.run
 
 
-__all__ = ['combine', 'prepare', 'run_description', 'run_in_subprocess']
+__all__ = [
+    'combine', 'prepare',
+    'run_description', 'run_in_subprocess',
+    'pbs_common',
+]
 
 
 log = logging.getLogger(__name__)
@@ -366,3 +371,30 @@ def _run_subcommand(app, app_args, argv):
         else:
             log.error(err)
     return result
+
+
+def pbs_common(
+    run_description, n_processors, email, results_dir, pmem='2000mb',
+):
+    """Return the common PBS directives used to run NEMO in a TORQUE/PBS
+    multiple processor context.
+
+    The string that is returned is intended for inclusion in a bash script
+    that will be to the TORQUE/PBS queue manager via the :command:`qsub`
+    command.
+
+    :arg dict run_description: Run description data structure.
+
+    :arg str email: Email address to send job begin, end & abort
+                    notifications to.
+
+    :arg str results_dir: Directory to store results into.
+
+    :arg str pmem: Memory per processor.
+
+    :returns: PBS directives for run script.
+    :rtype: Unicode str
+    """
+    pbs_directives = salishsea_cmd.run.pbs_common(
+        run_description, n_processors, email, results_dir, pmem)
+    return pbs_directives
