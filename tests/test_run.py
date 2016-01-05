@@ -159,7 +159,7 @@ class TestRun:
 
 
 class TestPbsCommon:
-    """Unit tests for `salishsea run` _pbs_common() function.
+    """Unit tests for `salishsea run` pbs_common() function.
     """
     def test_walltime_leading_zero(self, run_module):
         """Ensure correct handling of walltime w/ leading zero in YAML desc file
@@ -170,7 +170,7 @@ class TestPbsCommon:
             'run_id: foo\n'
             'walltime: 01:02:03\n')
         run_desc = yaml.load(desc_file)
-        pbs_directives = run_module._pbs_common(
+        pbs_directives = run_module.pbs_common(
             run_desc, 42, 'me@example.com', 'foo/')
         assert 'walltime=1:02:03' in pbs_directives
 
@@ -183,7 +183,7 @@ class TestPbsCommon:
             'run_id: foo\n'
             'walltime: 1:02:03\n')
         run_desc = yaml.load(desc_file)
-        pbs_directives = run_module._pbs_common(
+        pbs_directives = run_module.pbs_common(
             run_desc, 42, 'me@example.com', 'foo/')
         assert 'walltime=1:02:03' in pbs_directives
 

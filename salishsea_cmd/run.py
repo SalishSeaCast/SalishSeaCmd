@@ -243,7 +243,7 @@ def _build_batch_script(
             u'{pbs_common}'
             u'{pbs_features}\n'
             .format(
-                pbs_common=_pbs_common(
+                pbs_common=pbs_common(
                     run_desc, nemo_processors + xios_processors, email,
                     results_dir),
                 pbs_features=_pbs_features(
@@ -269,7 +269,7 @@ def _build_batch_script(
     return script
 
 
-def _pbs_common(run_desc, procs, email, results_dir, pmem='2000mb'):
+def pbs_common(run_desc, procs, email, results_dir, pmem='2000mb'):
     try:
         td = datetime.timedelta(seconds=run_desc['walltime'])
     except TypeError:
