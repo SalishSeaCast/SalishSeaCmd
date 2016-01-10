@@ -28,8 +28,8 @@ import subprocess
 import cliff.commandmanager
 import yaml
 
-from salishsea_cmd import prepare as prepare_plug_in
-import salishsea_cmd.run
+from salishsea_cmd import prepare as prepare_plugin
+from salishsea_cmd import run as run_plugin
 
 
 __all__ = [
@@ -129,7 +129,7 @@ def prepare(run_desc_file, iodefs_file, nemo34=False):
     :returns: Path of the temporary run directory
     :rtype: str
     """
-    return prepare_plug_in.prepare(run_desc_file, iodefs_file, nemo34)
+    return prepare_plugin.prepare(run_desc_file, iodefs_file, nemo34)
 
 
 def run_description(
@@ -395,6 +395,6 @@ def pbs_common(
     :returns: PBS directives for run script.
     :rtype: Unicode str
     """
-    pbs_directives = salishsea_cmd.run.pbs_common(
+    pbs_directives = run_plugin.pbs_common(
         run_description, n_processors, email, results_dir, pmem)
     return pbs_directives
