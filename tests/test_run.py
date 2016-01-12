@@ -15,7 +15,6 @@
 
 """SalishSeaCmd run sub-command plug-in unit tests
 """
-from io import StringIO
 import pathlib
 from unittest.mock import (
     Mock,
@@ -24,7 +23,6 @@ from unittest.mock import (
 
 import cliff.app
 import pytest
-import yaml
 
 
 @pytest.fixture
@@ -156,36 +154,6 @@ class TestRun:
         m_sco.assert_called_once_with(
             ['qsub', 'SalishSeaNEMO.sh'], universal_newlines=True)
         assert qsb_msg == 'msg'
-
-
-class TestPbsCommon:
-    """Unit tests for `salishsea run` pbs_common() function.
-    """
-    def test_walltime_leading_zero(self, run_module):
-        """Ensure correct handling of walltime w/ leading zero in YAML desc file
-
-        re: issue#16
-        """
-        desc_file = StringIO(
-            'run_id: foo\n'
-            'walltime: 01:02:03\n')
-        run_desc = yaml.load(desc_file)
-        pbs_directives = run_module.pbs_common(
-            run_desc, 42, 'me@example.com', 'foo/')
-        assert 'walltime=1:02:03' in pbs_directives
-
-    def test_walltime_no_leading_zero(self, run_module):
-        """Ensure correct handling of walltime w/o leading zero in YAML desc file
-
-        re: issue#16
-        """
-        desc_file = StringIO(
-            'run_id: foo\n'
-            'walltime: 1:02:03\n')
-        run_desc = yaml.load(desc_file)
-        pbs_directives = run_module.pbs_common(
-            run_desc, 42, 'me@example.com', 'foo/')
-        assert 'walltime=1:02:03' in pbs_directives
 
 
 class TestPbsFeatures:
