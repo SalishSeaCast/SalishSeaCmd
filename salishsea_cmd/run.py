@@ -243,7 +243,7 @@ def _build_batch_script(
             u'{pbs_common}'
             u'{pbs_features}\n'
             .format(
-                pbs_common=pbs_common(
+                pbs_common=api.pbs_common(
                     run_desc, nemo_processors + xios_processors, email,
                     results_dir),
                 pbs_features=_pbs_features(
@@ -267,62 +267,6 @@ def _build_batch_script(
         )
     ))
     return script
-
-
-def pbs_common(run_desc, procs, email, results_dir, pmem='2000mb'):
-    try:
-        td = datetime.timedelta(seconds=run_desc['walltime'])
-    except TypeError:
-        t = datetime.datetime.strptime(run_desc['walltime'], '%H:%M:%S').time()
-        td = datetime.timedelta(
-            hours=t.hour, minutes=t.minute, seconds=t.second)
-    walltime = td2hms(td)
-    pbs_directives = (
-        u'#PBS -N {run_id}\n'
-        u'#PBS -S /bin/bash\n'
-        u'#PBS -l procs={procs}\n'
-        u'# memory per processor\n'
-        u'#PBS -l pmem={pmem}\n'
-        u'#PBS -l walltime={walltime}\n'
-        u'# email when the job [b]egins and [e]nds, or is [a]borted\n'
-        u'#PBS -m bea\n'
-        u'#PBS -M {email}\n'
-        u'# stdout and stderr file paths/names\n'
-        u'#PBS -o {results_dir}/stdout\n'
-        u'#PBS -e {results_dir}/stderr\n'
-    ).format(
-        run_id=run_desc['run_id'],
-        procs=procs,
-        pmem=pmem,
-        walltime=walltime,
-        email=email,
-        results_dir=results_dir,
-    )
-    return pbs_directives
-
-
-def td2hms(timedelta):
-    """Return a string that is the timedelta value formated as H:M:S
-    with leading zeros on the minutes and seconds values.
-
-    :arg timedelta: Time interval to format.
-    :type timedelta: :py:obj:datetime.timedelta
-
-    :returns: H:M:S string with leading zeros on the minutes and seconds
-              values.
-    :rtype: unicode
-    """
-    seconds = int(timedelta.total_seconds())
-    periods = (
-        ('hour', 60*60),
-        ('minute', 60),
-        ('second', 1),
-    )
-    hms = []
-    for period_name, period_seconds in periods:
-        period_value, seconds = divmod(seconds, period_seconds)
-        hms.append(period_value)
-    return u'{0[0]}:{0[1]:02d}:{0[2]:02d}'.format(hms)
 
 
 def _pbs_features(n_processors, system):
