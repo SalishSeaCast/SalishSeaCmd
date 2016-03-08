@@ -26,7 +26,7 @@ is a command-line tool for doing various operations associated with the :ref:`Sa
 It is provided by the :kbd:`SalishSeaCmd` package in the :ref:`tools-repo` repository.
 
 The :kbd:`SalishSeaCmd` package is a Python 3 package.
-It was developed and tested under Python 3.4 and should work with that and later versions of Python.
+It is developed and tested under Python 3.5 and should work with that and later versions of Python.
 
 
 Contents:

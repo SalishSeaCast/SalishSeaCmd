@@ -1,4 +1,4 @@
-.. Copyright 2013-2016 The Salish Sea MEOPAR conttributors
+.. Copyright 2013-2016 The Salish Sea MEOPAR contributors
 .. and The University of British Columbia
 ..
 .. Licensed under the Apache License, Version 2.0 (the "License");
@@ -121,7 +121,7 @@ The output looks something like::
   reading sources... [100%] results_server/nowcast-green
   looking for now-outdated files... none found
   pickling environment... done
-  done
+  checking consistency... done
   preparing documents... done
   writing output... [100%] results_server/nowcast-green
   generating indices...
