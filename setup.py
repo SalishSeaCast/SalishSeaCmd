@@ -59,8 +59,8 @@ setup(
     author='Doug Latornell',
     author_email='djl@douglatornell.ca',
     url=(
-        'http://salishsea-meopar-tools.readthedocs.org/en/latest/SalishSeaCmd/'
-        'salishsea-cmd.html'),
+        'http://salishsea-meopar-tools.readthedocs.org/en/latest/'
+        'SalishSeaCmd/'),
     license='Apache License, Version 2.0',
     classifiers=python_classifiers + other_classifiers,
     platforms=['MacOS X', 'Linux'],
