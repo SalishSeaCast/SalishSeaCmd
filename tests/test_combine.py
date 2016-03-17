@@ -23,7 +23,11 @@ from unittest.mock import (
 import cliff.app
 import pytest
 
-from salishsea_cmd import combine
+
+@pytest.fixture(scope='module')
+def combine_module():
+    from salishsea_cmd import combine
+    return combine
 
 
 @pytest.fixture
@@ -37,31 +41,35 @@ def test_get_parser(combine_cmd):
     assert parser.prog == 'salishsea combine'
 
 
-@patch('salishsea_cmd.combine.os.path.realpath')
-@patch('salishsea_cmd.combine.os.path.lexists')
-def test_find_rebuild_nemo_script_found(mock_lexists, mock_realpath):
+@patch.object(combine_module().os.path, 'realpath')
+@patch.object(combine_module().os.path, 'lexists')
+def test_find_rebuild_nemo_script_found(
+        mock_lexists, mock_realpath, combine_module,
+):
     """_find_rebuild_nemo_exec returns script name if executable exists
     """
     mock_realpath.return_value = (
         'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin/nemo.exe')
     mock_lexists.return_value = True
-    script = combine._find_rebuild_nemo_script()
+    script = combine_module._find_rebuild_nemo_script()
     assert script == 'NEMO-code/NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo'
 
 
-@patch('salishsea_cmd.combine.log.error')
-@patch('salishsea_cmd.combine.os.path.lexists')
-def test_find_rebuild_nemo_script_not_found(mock_lexists, mock_log):
+@patch.object(combine_module().log, 'error')
+@patch.object(combine_module().os.path, 'lexists')
+def test_find_rebuild_nemo_script_not_found(
+    mock_lexists, mock_log, combine_module,
+):
     """_find_rebuild_nemo_exec logs error if executable not found
     """
     mock_lexists.return_value = False
     with pytest.raises(SystemExit):
-        combine._find_rebuild_nemo_script()
+        combine_module._find_rebuild_nemo_script()
     assert mock_log.called
 
 
-@patch('salishsea_cmd.combine.glob.glob')
-def test_get_results_files(mock_glob):
+@patch.object(combine_module().glob, 'glob')
+def test_get_results_files(mock_glob, combine_module):
     """_get_results_files returns list of name-roots and count of files
     """
     mock_glob.side_effect = (
@@ -69,23 +77,23 @@ def test_get_results_files(mock_glob):
         ['foo_0000.nc', 'foo_0001.nc', 'foo_0002.nc'],
     )
     args = Mock(delete_restart=False)
-    name_roots = combine._get_results_files(args)
+    name_roots = combine_module._get_results_files(args)
     assert name_roots == ['foo', 'bar']
 
 
-@patch('salishsea_cmd.combine.log.error')
-def test_get_results_files_none_found(mock_log):
+@patch.object(combine_module().log, 'error')
+def test_get_results_files_none_found(mock_log, combine_module):
     """_get_results_files logs error if no results files exists
     """
     args = Mock(delete_restart=False)
     with pytest.raises(SystemExit):
-        combine._get_results_files(args)
+        combine_module._get_results_files(args)
     assert mock_log.called
 
 
-@patch('salishsea_cmd.combine.glob.glob')
-@patch('salishsea_cmd.combine.os.remove')
-def test_get_results_files_delete_restart(mock_rm, mock_glob):
+@patch.object(combine_module().glob, 'glob')
+@patch.object(combine_module().os, 'remove')
+def test_get_results_files_delete_restart(mock_rm, mock_glob, combine_module):
     """_get_results_files deletes restart files
     """
     mock_glob.side_effect = (
@@ -94,69 +102,69 @@ def test_get_results_files_delete_restart(mock_rm, mock_glob):
         ['foo_0000.nc', 'foo_0001.nc', 'foo_0002.nc'],
     )
     args = Mock(delete_restart=True)
-    combine._get_results_files(args)
+    combine_module._get_results_files(args)
     assert mock_rm.call_count == 2
 
 
-@patch('salishsea_cmd.combine.glob.glob')
-@patch('salishsea_cmd.combine.subprocess.check_output')
-def test_combine_results_files(mock_chk_out, mock_glob):
+@patch.object(combine_module().glob, 'glob')
+@patch.object(combine_module().subprocess, 'check_output')
+def test_combine_results_files(mock_chk_out, mock_glob, combine_module):
     """_combine_results_files calls subprocess.check_output for each name-root
     """
     mock_glob.side_effect = (
         ['foo_0000.nc', 'foo_0001.nc', 'foo_0002.nc'],
         ['bar_0000.nc', 'bar_0001.nc', 'bar_0002.nc'],
     )
-    combine._combine_results_files(
+    combine_module._combine_results_files(
         'rebuild_nemo', ['foo', 'bar'], 3)
     assert mock_chk_out.call_count == 2
 
 
-@patch('salishsea_cmd.lib.netcdf4_deflate')
-def test_netcdf4_deflate_results(mock_nc4_dfl):
-    """_netcdf4_deflate_results calls subprocess.check_output per name-root
+@patch.object(combine_module().lib, 'netcdf4_deflate')
+def test_netcdf4_deflate_results(mock_nc4_dfl, combine_module):
+    """_netcdf4_deflate_results calls lib.netcdf4_deflate per name-root
     """
-    combine._netcdf4_deflate_results(['foo', 'bar'])
+    combine_module._netcdf4_deflate_results(['foo', 'bar'])
     assert mock_nc4_dfl.call_count == 2
 
 
-@patch('salishsea_cmd.combine.shutil.move')
-def test_move_results_pwd(mock_move):
+@patch.object(combine_module().shutil, 'move')
+def test_move_results_pwd(mock_move, combine_module):
     """_move_results does nothing if results_dir is pwd
     """
-    combine._move_results(['foo'], './')
+    combine_module._move_results(['foo'], './')
     assert not mock_move.called
 
 
-@patch('salishsea_cmd.combine.shutil.move')
-@patch('salishsea_cmd.combine.os.makedirs')
-def test_move_results_makedirs(mock_makedirs, mock_move):
+@patch.object(combine_module().shutil, 'move')
+@patch.object(combine_module().os, 'makedirs')
+def test_move_results_makedirs(mock_makedirs, mock_move, combine_module):
     """_move_results creates results_dir if it doesn't exist
     """
-    combine._move_results(['foo', 'bar'], 'baz')
+    combine_module._move_results(['foo', 'bar'], 'baz')
     assert mock_makedirs.called
 
 
-@patch('salishsea_cmd.combine.os.makedirs')
-@patch('salishsea_cmd.combine.shutil.move')
-def test_move_results_renames(mock_move, mock_makedirs):
+@patch.object(combine_module().os, 'makedirs')
+@patch.object(combine_module().shutil, 'move')
+def test_move_results_renames(mock_move, mock_makedirs, combine_module):
     """_move_results calls shutil.move for each results file
     """
-    combine._move_results(['foo', 'bar'], 'baz')
+    combine_module._move_results(['foo', 'bar'], 'baz')
     assert mock_move.call_count == 2
 
 
-def test_result_files():
+def test_result_files(combine_module):
     """_results_files generator yields name-root with .nc appended
     """
-    fn = next(combine._results_files(['foo', 'bar']))
+    fn = next(combine_module._results_files(['foo', 'bar']))
     assert fn == 'foo.nc'
 
 
-@patch('salishsea_cmd.combine._results_files')
-def test_compress_results_no_compress(mock_res_files):
+@patch.object(combine_module(), '_results_files')
+def test_compress_results_no_compress(mock_res_files, combine_module):
     """_compress_results does nothing when args.compress is False
     """
     args = Mock(compress=False)
-    combine._compress_results(['foo', 'bar'], args)
+    combine_module._compress_results(['foo', 'bar'], args)
     assert not mock_res_files.called
