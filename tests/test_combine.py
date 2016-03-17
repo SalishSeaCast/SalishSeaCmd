@@ -30,8 +30,8 @@ def combine_module():
     return combine
 
 
-@pytest.fixture
-def combine_cmd(scope='module'):
+@pytest.fixture(scope='module')
+def combine_cmd():
     import salishsea_cmd.combine
     return salishsea_cmd.combine.Combine(Mock(spec=cliff.app.App), [])
 
@@ -127,11 +127,15 @@ class TestCombineResultsFiles:
 
 
 class TestNetcdf4DeflateResults:
+    """Unit tests for combine._netcdf4_deflate_results() function.
+    """
+    @patch.object(combine_module().glob, 'glob')
     @patch.object(combine_module().lib, 'netcdf4_deflate')
-    def test_netcdf4_deflate_results(self, mock_nc4_dfl, combine_module):
-        """_netcdf4_deflate_results calls lib.netcdf4_deflate per name-root
-        """
-        combine_module._netcdf4_deflate_results(['foo', 'bar'])
+    def test_netcdf4_deflate_results(
+        self, mock_nc4_dfl, mock_glob, combine_module,
+    ):
+        mock_glob.return_value = ['foo.nc', 'bar.nc']
+        combine_module._netcdf4_deflate_results()
         assert mock_nc4_dfl.call_count == 2
 
 

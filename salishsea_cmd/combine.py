@@ -122,9 +122,9 @@ def _combine_results_files(rebuild_nemo_script, name_roots, n_processors):
             log.info(result)
 
 
-def _netcdf4_deflate_results(name_roots):
+def _netcdf4_deflate_results():
     log.info('Starting netCDF4 deflation...')
-    for fn in _results_files(name_roots):
+    for fn in glob.glob('*.nc'):
         result = lib.netcdf4_deflate(fn)
         if result:
             log.info(result)
