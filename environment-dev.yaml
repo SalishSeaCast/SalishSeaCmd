@@ -37,3 +37,4 @@ dependencies:
   - arrow
   - cliff
   - ipdb
+  - nbsphinx
