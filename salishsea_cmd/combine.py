@@ -66,9 +66,9 @@ class Combine(cliff.command.Command):
         """
         run_desc = lib.load_run_desc(parsed_args.desc_file)
         n_processors = lib.get_n_processors(run_desc)
-        rebuild_nemo_script = _find_rebuild_nemo_script()
         name_roots = _get_results_files(parsed_args)
         if name_roots:
+            rebuild_nemo_script = _find_rebuild_nemo_script()
             _combine_results_files(rebuild_nemo_script, name_roots, n_processors)
             os.remove('nam_rebuild')
         _netcdf4_deflate_results()
