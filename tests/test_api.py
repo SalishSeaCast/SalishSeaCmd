@@ -270,8 +270,8 @@ class TestPbsCommon:
         re: issue#16
         """
         desc_file = StringIO(
-            'run_id: foo\n'
-            'walltime: 01:02:03\n')
+            u'run_id: foo\n'
+            u'walltime: 01:02:03\n')
         run_desc = yaml.load(desc_file)
         pbs_directives = api_module.pbs_common(
             run_desc, 42, 'me@example.com', 'foo/')
@@ -283,8 +283,8 @@ class TestPbsCommon:
         re: issue#16
         """
         desc_file = StringIO(
-            'run_id: foo\n'
-            'walltime: 1:02:03\n')
+            u'run_id: foo\n'
+            u'walltime: 1:02:03\n')
         run_desc = yaml.load(desc_file)
         pbs_directives = api_module.pbs_common(
             run_desc, 42, 'me@example.com', 'foo/')
