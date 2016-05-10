@@ -84,13 +84,12 @@ class TestGetResultsFiles:
         name_roots = combine_module._get_results_files(args)
         assert name_roots == ['foo', 'bar']
 
-    @patch.object(combine_module().log, 'error')
+    @patch.object(combine_module().log, 'info')
     def test_get_results_files_none_found(self, mock_log, combine_module):
-        """_get_results_files logs error if no results files exists
+        """_get_results_files logs info message if no results files exists
         """
         args = Mock(delete_restart=False)
-        with pytest.raises(SystemExit):
-            combine_module._get_results_files(args)
+        combine_module._get_results_files(args)
         assert mock_log.called
 
     @patch.object(combine_module().glob, 'glob')
