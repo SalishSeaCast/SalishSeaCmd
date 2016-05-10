@@ -15,7 +15,10 @@
 
 """SalishSeaCmd gather sub-command plug-in unit tests
 """
-from unittest.mock import Mock
+try:
+    from unittest.mock import Mock
+except ImportError:
+    from mock import Mock
 
 import cliff.app
 import pytest

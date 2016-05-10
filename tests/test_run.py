@@ -16,10 +16,16 @@
 """SalishSeaCmd run sub-command plug-in unit tests
 """
 import pathlib
-from unittest.mock import (
-    Mock,
-    patch,
-)
+try:
+    from unittest.mock import (
+        Mock,
+        patch,
+    )
+except ImportError:
+    from mock import (
+        Mock,
+        patch,
+    )
 
 import cliff.app
 import pytest

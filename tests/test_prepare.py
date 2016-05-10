@@ -16,11 +16,18 @@
 """SalishSeaCmd prepare sub-command plug-in unit tests
 """
 import os
-from unittest.mock import (
-    call,
-    Mock,
-    patch,
-)
+try:
+    from unittest.mock import (
+        call,
+        Mock,
+        patch,
+    )
+except ImportError:
+    from mock import (
+        call,
+        Mock,
+        patch,
+    )
 
 import cliff.app
 import pytest
