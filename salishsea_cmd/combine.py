@@ -68,12 +68,14 @@ class Combine(cliff.command.Command):
         n_processors = lib.get_n_processors(run_desc)
         rebuild_nemo_script = _find_rebuild_nemo_script()
         name_roots = _get_results_files(parsed_args)
-        _combine_results_files(rebuild_nemo_script, name_roots, n_processors)
-        os.remove('nam_rebuild')
+        if name_roots:
+            _combine_results_files(rebuild_nemo_script, name_roots, n_processors)
+            os.remove('nam_rebuild')
         _netcdf4_deflate_results()
-        _move_results(name_roots, parsed_args.results_dir)
-        _compress_results(name_roots, parsed_args)
-        _delete_results_files(name_roots, parsed_args)
+        if name_roots:
+            _move_results(name_roots, parsed_args.results_dir)
+            _compress_results(name_roots, parsed_args)
+            _delete_results_files(name_roots, parsed_args)
 
 
 def _find_rebuild_nemo_script():
@@ -99,10 +101,9 @@ def _get_results_files(args):
     result_pattern = '*_0000.nc'
     name_roots = [fn[:-8] for fn in glob.glob(result_pattern)]
     if not name_roots:
-        log.error(
+        log.info(
             'no files found that match the {} pattern'
             .format(result_pattern))
-        sys.exit(2)
     return name_roots
 
 
