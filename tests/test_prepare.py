@@ -241,7 +241,7 @@ class TestRemoveRunDir:
         assert not p_run_dir.check()
 
     @patch.object(prepare_module().os, 'rmdir')
-    def test_remove_run_dir_no_run_dir(self, m_rmdir, prepare_module, tmpdir):
+    def test_remove_run_dir_no_run_dir(self, m_rmdir, prepare_module):
         prepare_module._remove_run_dir('run_dir')
         assert not m_rmdir.called
 
