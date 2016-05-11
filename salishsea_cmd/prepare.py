@@ -228,7 +228,7 @@ def _remove_run_dir(run_dir):
         for fn in os.listdir(run_dir):
             os.remove(os.path.join(run_dir, fn))
         os.rmdir(run_dir)
-    except IOError:
+    except OSError:
         pass
 
 
