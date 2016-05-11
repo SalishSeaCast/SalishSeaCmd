@@ -120,7 +120,7 @@ class TestTakeAction:
 
 
 @patch.object(run_module().subprocess, 'check_output', return_value='msg')
-@patch.object(run_module(), '_build_batch_script', return_value='script')
+@patch.object(run_module(), '_build_batch_script', return_value=u'script')
 @patch.object(run_module().lib, 'get_n_processors', return_value=144)
 @patch.object(run_module().lib, 'load_run_desc')
 @patch.object(run_module().api, 'prepare')
