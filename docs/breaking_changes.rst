@@ -26,7 +26,7 @@ Version 2.2
 The following changes that were introduced in version 2.2 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
 
 * Specification of which :file:`iodef.xml` file NEMO should use has been moved from the command-line to the YAML run description file;
-  see :ref:`salishsea-run` or use :command:`salishsea run --help` to see the new command-line usage.
+  see :ref:`salishsea-run` or use :command:`salishsea help run` to see the new command-line usage.
 
   * For NEMO-3.6 the :kbd:`output` section of the run description YAML file must now contain a :kbd:`files` key,
     the value of which is the file path/name of the :file:`iodef.xml` file to use for the run.
