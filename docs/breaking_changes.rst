@@ -20,6 +20,12 @@
 :kbd:`SalishSeaCmd` Changes That Break Backward Compatibility
 *************************************************************
 
+Version 2.2
+===========
+
+The following changes that were introduced in version 2.2 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
+
+
 Version 2.1
 ===========
 
