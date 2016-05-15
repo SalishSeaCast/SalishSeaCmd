@@ -97,7 +97,7 @@ The results are gathered in the specified results directory.
 
     usage: salishsea run [-h] [--nemo3.4] [-q] [--compress] [--keep-proc-results]
                          [--compress-restart] [--delete-restart]
-                         DESC_FILE IO_DEFS RESULTS_DIR
+                         DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
     described in DESC_FILE and IO_DEFS. The results files from the run are
@@ -105,7 +105,6 @@ The results are gathered in the specified results directory.
 
     positional arguments:
       DESC_FILE            File path/name of run description YAML file
-      IO_DEFS              File path/name of NEMO IOM server defs file for run
       RESULTS_DIR          directory to store results into
 
     optional arguments:
@@ -139,13 +138,14 @@ Example:
 
 .. code-block:: bash
 
-    $ salishsea run SalishSea.yaml iodef.xml ../../SalishSea/myrun
+    $ salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
 
     salishsea_cmd.run INFO: salishsea_cmd.prepare Created run directory ../../SalishSea/38e87e0c-472d-11e3-9c8e-0025909a8461
     salishsea_cmd.run INFO: 3330782.orca2.ibb
 
 If the :command:`salishsea run` command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+
 
 .. _salishsea-prepare:
 
@@ -157,16 +157,13 @@ and IOM server definitions files:
 
 .. code-block:: bash
 
-    usage: salishsea prepare [-h] [--nemo3.4] [-q] DESC_FILE IO_DEFS
+    usage: salishsea prepare [-h] [--nemo3.4] [-q] DESC_FILE
 
     Set up the Salish Sea NEMO described in DESC_FILE and print the path to the
     run directory.
 
     positional arguments:
       DESC_FILE    run description YAML file
-      IO_DEFS      For NEMO-3.6 runs, the XIOS IO server file and contained
-                   variable definitions for the run. For NEMO-3.4 runs, the IOM
-                   server definitions file for run.
 
     optional arguments:
       -h, --help   show this help message and exit
