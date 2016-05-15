@@ -52,6 +52,14 @@ The following changes that were introduced in version 2.2 of the :kbd:`SalishSea
     If the path is relative,
     it is taken from the directory in which the run description YAML file resides.
 
+  This change also affects the :ref:`salishsea-prepare` sub-command,
+  and the the following APIs:
+
+  * :py:func:`salishsea_cmd.api.prepare`
+  * :py:func:`salishsea_cmd.api.run_description`
+  * :py:func:`salishsea_cmd.api.run_in_subprocess`
+
+
 
 Version 2.1
 ===========
