@@ -53,14 +53,6 @@ class Prepare(cliff.command.Command):
             'desc_file', metavar='DESC_FILE',
             help='run description YAML file')
         parser.add_argument(
-            'iodefs', metavar='IO_DEFS',
-            help='''
-            For NEMO-3.6 runs,
-            the XIOS IO server file and contained variable
-            definitions for the run.
-            For NEMO-3.4 runs,
-            the IOM server definitions file for run.''')
-        parser.add_argument(
             '--nemo3.4', dest='nemo34', action='store_true',
             help='''
             Prepare a NEMO-3.4 run;
@@ -80,14 +72,13 @@ class Prepare(cliff.command.Command):
         The path to the run directory is logged to the console on completion
         of the set-up.
         """
-        run_dir = prepare(
-            parsed_args.desc_file, parsed_args.iodefs, parsed_args.nemo34)
+        run_dir = prepare(parsed_args.desc_file, parsed_args.nemo34)
         if not parsed_args.quiet:
             log.info('Created run directory {}'.format(run_dir))
         return run_dir
 
 
-def prepare(desc_file, iodefs, nemo34):
+def prepare(desc_file, nemo34):
     """Create and prepare the temporary run directory.
 
     The temporary run directory is created with a UUID as its name.
@@ -99,10 +90,6 @@ def prepare(desc_file, iodefs, nemo34):
 
     :arg desc_file: File path/name of the YAML run description file.
     :type desc_file: str
-
-    :arg iodefs: File path/name of the NEMO IOM server defs file for
-                 the run.
-    :type iodefs: str
 
     :arg nemo34: Prepare a NEMO-3.4 run;
                  the default is to prepare a NEMO-3.6 run
@@ -119,8 +106,7 @@ def prepare(desc_file, iodefs, nemo34):
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
     _make_namelists(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34)
-    _copy_run_set_files(
-        run_desc, desc_file, run_set_dir, iodefs, run_dir, nemo34)
+    _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34)
     _make_executable_links(
         nemo_code_repo, nemo_bin_dir, run_dir, nemo34,
         xios_code_repo, xios_bin_dir)
@@ -413,9 +399,7 @@ def _get_namelist_value(key, lines):
     return value, line_index
 
 
-def _copy_run_set_files(
-    run_desc, desc_file, run_set_dir, iodefs, run_dir, nemo34,
-):
+def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
     """Copy the run-set files given into run_dir.
 
     For all versions of NEMO the YAML run description file and the
@@ -423,7 +407,7 @@ def _copy_run_set_files(
     The IO defs file is copied as :file:`iodef.xml` because that is the
     name that NEMO-3.4 or XIOS expects.
 
-    For NEMO-3.4, the :file:`xmlio_server.def` file is alco copied.
+    For NEMO-3.4, the :file:`xmlio_server.def` file is also copied.
 
     For NEMO-3.6, the domain defs and field defs files used by XIOS
     are also copied.
@@ -443,10 +427,6 @@ def _copy_run_set_files(
                       files start.
     :type run_set_dir: str
 
-    :arg iodefs: File path/name of the NEMO IOM server defs file for
-                 the run.
-    :type iodefs: str
-
     :arg run_dir: Path of the temporary run directory.
     :type run_dir: str
 
@@ -455,13 +435,12 @@ def _copy_run_set_files(
     :type nemo34: boolean
     """
     run_set_files = [
-        (os.path.join(run_set_dir, iodefs), 'iodef.xml'),
+        (os.path.abspath(run_desc['output']['files']), 'iodef.xml'),
         (os.path.join(run_set_dir, desc_file), os.path.basename(desc_file)),
     ]
     if nemo34:
         run_set_files.append(
-            (os.path.join(run_set_dir, 'xmlio_server.def'),
-             'xmlio_server.def'))
+            (os.path.join(run_set_dir, 'xmlio_server.def'), 'xmlio_server.def'))
     else:
         run_set_files.extend([
             (os.path.abspath(run_desc['output']['domain']), 'domain_def.xml'),

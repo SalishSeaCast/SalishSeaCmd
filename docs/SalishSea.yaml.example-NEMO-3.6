@@ -97,7 +97,8 @@ namelists:
 
 output:
   # If relative, paths are taken from current directory
-  domain: domain_def.xml
-  fields: ../../../NEMO-3.6-code/NEMOGCM/CONFIG/SHARED/field_def.xml
+  files: iodef.xml
+  domain: ../domain_def.xml
+  fields: field_def.xml
   separate XIOS server: True
   XIOS servers: 1
