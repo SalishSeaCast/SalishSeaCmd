@@ -52,9 +52,8 @@ class TestGetParser:
 
     def test_parsed_args_defaults(self, run_cmd):
         parser = run_cmd.get_parser('salishsea run')
-        parsed_args = parser.parse_args(['foo', 'bar', 'baz'])
+        parsed_args = parser.parse_args(['foo', 'baz'])
         assert parsed_args.desc_file == 'foo'
-        assert parsed_args.iodefs == 'bar'
         assert parsed_args.results_dir == 'baz'
         assert not parsed_args.nemo34
         assert not parsed_args.quiet
@@ -75,7 +74,7 @@ class TestGetParser:
     ])
     def test_parsed_args_flags(self, flag, attr, run_cmd):
         parser = run_cmd.get_parser('salishsea run')
-        parsed_args = parser.parse_args(['foo', 'bar', 'baz', flag])
+        parsed_args = parser.parse_args(['foo', 'baz', flag])
         assert getattr(parsed_args, attr)
 
 
@@ -87,7 +86,6 @@ class TestTakeAction:
     def test_take_action(self, m_run, m_log, run_cmd):
         parsed_args = Mock(
             desc_file='desc file',
-            iodefs='iodefs',
             results_dir='results dir',
             nemo34=False,
             quiet=False,
@@ -98,7 +96,7 @@ class TestTakeAction:
         )
         run_cmd.run(parsed_args)
         m_run.assert_called_once_with(
-            'desc file', 'iodefs', 'results dir',
+            'desc file', 'results dir',
             False, False, False, False, False, False,
         )
         m_log.info.assert_called_once_with('qsub message')
@@ -106,7 +104,6 @@ class TestTakeAction:
     def test_take_action_quiet(self, m_run, m_log, run_cmd):
         parsed_args = Mock(
             desc_file='desc file',
-            iodefs='iodefs',
             results_dir='results dir',
             nemo34=False,
             quiet=True,
@@ -149,8 +146,8 @@ class TestRun:
             }
         with patch.object(run_module.os, 'getenv', return_value='orcinus'):
             qsb_msg = run_module.run(
-                'SalishSea.yaml', 'iodefs', str(p_results_dir), nemo34)
-        m_prepare.assert_called_once_with('SalishSea.yaml', 'iodefs', nemo34)
+                'SalishSea.yaml', str(p_results_dir), nemo34)
+        m_prepare.assert_called_once_with('SalishSea.yaml', nemo34)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_gnp.assert_called_once_with(m_lrd())
         m_bbs.assert_called_once_with(

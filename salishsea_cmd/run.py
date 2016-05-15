@@ -58,9 +58,6 @@ class Run(cliff.command.Command):
             'desc_file', metavar='DESC_FILE',
             help='File path/name of run description YAML file')
         parser.add_argument(
-            'iodefs', metavar='IO_DEFS',
-            help='File path/name of NEMO IOM server defs file for run')
-        parser.add_argument(
             'results_dir', metavar='RESULTS_DIR',
             help='directory to store results into')
         parser.add_argument(
@@ -94,18 +91,16 @@ class Run(cliff.command.Command):
         :arg parsed_args: Arguments and options parsed from the command-line.
         :type parsed_args: :class:`argparse.Namespace` instance
         """
-        qsub_msg = run(
-            parsed_args.desc_file, parsed_args.iodefs, parsed_args.results_dir,
+        qsub_msg = run(parsed_args.desc_file, parsed_args.results_dir,
             parsed_args.nemo34, parsed_args.quiet,
             parsed_args.keep_proc_results, parsed_args.compress,
-            parsed_args.compress_restart, parsed_args.delete_restart,
-        )
+            parsed_args.compress_restart, parsed_args.delete_restart)
         if not parsed_args.quiet:
             log.info(qsub_msg)
 
 
 def run(
-    desc_file, iodefs, results_dir,
+    desc_file, results_dir,
     nemo34=False,
     quiet=False,
     keep_proc_results=False,
@@ -124,10 +119,6 @@ def run(
 
     :arg desc_file: File path/name of the YAML run description file.
     :type desc_file: str
-
-    :arg iodefs: File path/name of the NEMO IOM server defs file for
-                 the run.
-    :type iodefs: str
 
     :arg results_dir: Path of the directory in which to store the run
                       results;
@@ -162,7 +153,7 @@ def run(
               run script.
     :rtype: str
     """
-    run_dir_name = api.prepare(desc_file, iodefs, nemo34)
+    run_dir_name = api.prepare(desc_file, nemo34)
     if not quiet:
         log.info('Created run directory {}'.format(run_dir_name))
     run_dir = pathlib.Path(run_dir_name).resolve()

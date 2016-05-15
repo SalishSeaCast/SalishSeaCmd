@@ -107,7 +107,7 @@ def combine(
     return result
 
 
-def prepare(run_desc_file, iodefs_file, nemo34=False):
+def prepare(run_desc_file, nemo34=False):
     """Prepare a Salish Sea NEMO run.
 
     A UUID named temporary run directory is created and symbolic links
@@ -120,16 +120,13 @@ def prepare(run_desc_file, iodefs_file, nemo34=False):
     :arg str run_desc_file: File path/name of the run description YAML
                             file.
 
-    :arg str iodefs_file:  File path/name of the NEMO IOM server defs file
-                           for the run.
-
     :arg boolean nemo34: Prepare a NEMO-3.4 run;
                          the default is to prepare a NEMO-3.6 run
 
     :returns: Path of the temporary run directory
     :rtype: str
     """
-    return prepare_plugin.prepare(run_desc_file, iodefs_file, nemo34)
+    return prepare_plugin.prepare(run_desc_file, nemo34)
 
 
 def run_description(
@@ -152,14 +149,14 @@ def run_description(
     corresponding items.
     Otherwise,
     the returned run description dict
-    that must be updated by assigment statements to provide those values.
+    that must be updated by assignment statements to provide those values.
 
     .. note::
 
         The value of the :kbd:`['forcing']['atmospheric']` item is set to
-        :file:`/home/dlatorne/MEOPAR/CGRF/NEMO-atmos/` which is appropriate
-        for runs on Westgrid, but needs to be changed for runs on
-        :kbd:`salish`.
+        :file:`/results/forcing/atmospheric/GEM2.5/operational/` which is
+        appropriate for runs on :kbd:`salish`, but needs to be changed for runs
+        on WestGrid.
 
     :arg str config_name: NEMO configuration name to use for the run.
 
@@ -233,6 +230,9 @@ def run_description(
             'coordinates': 'coordinates_seagrid_SalishSea.nc',
             'bathymetry': 'bathy_meter_SalishSea2.nc',
         },
+        'output': {
+            'files': 'iodef.xml',
+        }
     }
     if nemo34:
         if forcing is None:

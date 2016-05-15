@@ -53,9 +53,8 @@ class TestGetParser:
 
     def test_parsed_args_defaults(self, prepare_cmd):
         parser = prepare_cmd.get_parser('salishsea prepare')
-        parsed_args = parser.parse_args(['foo', 'bar'])
+        parsed_args = parser.parse_args(['foo'])
         assert parsed_args.desc_file == 'foo'
-        assert parsed_args.iodefs == 'bar'
         assert not parsed_args.nemo34
         assert not parsed_args.quiet
 
@@ -66,7 +65,7 @@ class TestGetParser:
     ])
     def test_parsed_args_flags(self, flag, attr, prepare_cmd):
         parser = prepare_cmd.get_parser('salishsea prepare')
-        parsed_args = parser.parse_args(['foo', 'bar', flag])
+        parsed_args = parser.parse_args(['foo', flag])
         assert getattr(parsed_args, attr)
 
 
@@ -94,8 +93,7 @@ class TestPrepare:
     ):
         m_cne.return_value = m_cne_return
         m_cxe.return_value = m_cxe_return
-        run_dir = prepare_module.prepare(
-            'SalishSea.yaml', 'iodefs.xml', nemo34)
+        run_dir = prepare_module.prepare('SalishSea.yaml', nemo34)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_cne.assert_called_once_with(m_lrd(), nemo34)
         if nemo34:
@@ -107,8 +105,7 @@ class TestPrepare:
         m_mnl.assert_called_once_with(
             m_dirname(), m_lrd(), m_mrd(), m_cne_return[0], nemo34)
         m_crsf.assert_called_once_with(
-            m_lrd(), 'SalishSea.yaml', m_dirname(), 'iodefs.xml', m_mrd(),
-            nemo34)
+            m_lrd(), 'SalishSea.yaml', m_dirname(), m_mrd(), nemo34)
         m_mel.assert_called_once_with(
             m_cne_return[0], m_cne_return[1], m_mrd(), nemo34,
             m_cxe_return[0], m_cxe_return[1])
@@ -432,13 +429,12 @@ class TestCopyRunSetFiles:
     ):
         """_copy_run_set_files creates correct symlink for source w/o path
         """
-        run_desc = {}
+        run_desc = {'output': {'files': 'iodef.xml'}}
         desc_file = 'foo.yaml'
         pwd = os.getcwd()
         with patch('salishsea_cmd.prepare.os.chdir'):
             prepare_module._copy_run_set_files(
-                run_desc, desc_file, pwd, 'iodef.xml', 'run_dir',
-                nemo34=True)
+                run_desc, desc_file, pwd, 'run_dir', nemo34=True)
         expected = [
             call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
             call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
@@ -455,6 +451,7 @@ class TestCopyRunSetFiles:
         """
         run_desc = {
             'output': {
+                'files': 'iodef.xml',
                 'domain': 'domain_def.xml',
                 'fields': 'field_def.xml',
             },
@@ -463,8 +460,7 @@ class TestCopyRunSetFiles:
         pwd = os.getcwd()
         with patch('salishsea_cmd.prepare.os.chdir'):
             prepare_module._copy_run_set_files(
-                run_desc, desc_file, pwd, 'iodef.xml', 'run_dir',
-                nemo34=False)
+                run_desc, desc_file, pwd, 'run_dir', nemo34=False)
         expected = [
             call(os.path.join(pwd, 'iodef.xml'), 'iodef.xml'),
             call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
@@ -480,13 +476,12 @@ class TestCopyRunSetFiles:
     ):
         """_copy_run_set_files creates correct symlink for relative path source
         """
-        run_desc = {}
+        run_desc = {'output': {'files': '../iodef.xml'}}
         desc_file = 'foo.yaml'
         pwd = os.getcwd()
         with patch.object(prepare_module.os, 'chdir'):
             prepare_module._copy_run_set_files(
-                run_desc, desc_file, pwd, '../iodef.xml', 'run_dir',
-                nemo34=True)
+                run_desc, desc_file, pwd, 'run_dir', nemo34=True)
         expected = [
             call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
             call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),
@@ -503,6 +498,7 @@ class TestCopyRunSetFiles:
         """
         run_desc = {
             'output': {
+                'files': '../iodef.xml',
                 'domain': '../domain_def.xml',
                 'fields': '../field_def.xml',
             },
@@ -511,8 +507,7 @@ class TestCopyRunSetFiles:
         pwd = os.getcwd()
         with patch.object(prepare_module.os, 'chdir'):
             prepare_module._copy_run_set_files(
-                run_desc, desc_file, pwd, '../iodef.xml', 'run_dir',
-                nemo34=False)
+                run_desc, desc_file, pwd, 'run_dir', nemo34=False)
         expected = [
             call(os.path.join(os.path.dirname(pwd), 'iodef.xml'), 'iodef.xml'),
             call(os.path.join(pwd, 'foo.yaml'), 'foo.yaml'),

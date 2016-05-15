@@ -31,6 +31,11 @@ Run description files are typically stored in a sub-directory of your clone of t
 NEMO-3.6 Run Description File
 =============================
 
+.. warning::
+    Versions 2.1 and later of the :kbd:`SalishSeaCmd` package introduced changes in the run description file structure that are not backward compatible.
+    Older run description files for NEMO-3.6 runs need to be updated before they can be successfully used with the :command:`salishsea run` command.
+    Please see :ref:`SalishSeaCmdChangesThatBreakBackwardCompatibility` for details.
+
 Example (from :file:`SS-run-sets/SalishSea/nemo3.6/SalishSea.yaml`):
 
 .. literalinclude:: SalishSea.yaml.example-NEMO-3.6
@@ -252,10 +257,21 @@ the :file:`NEMOGCM/CONFIG/SHARED/namelist_top_ref` file will also be symlinked i
 :kbd:`output` Section
 ---------------------
 
-The :kbd:`output` section of the run description file contains key-value pairs that provide the names of the output domains and fields definitions files to be used by the XIOS server for the run.
+The :kbd:`output` section of the run description file contains key-value pairs that provide the names of the files that define the output files,
+domains,
+and fields to be used by the XIOS server for the run.
 The paths may be either absolute or relative.
 If relative paths are given,
 they are appended to the directory containing the run description file.
+
+:kbd:`files`
+  The path and name of the :file:`iodef.xml` output files definitions file to use for the run.
+  It is copied into the run directory as :file:`iodef.xml`
+  (the file name required by XIOS).
+  The value is typically either:
+
+  * a relative or absolute path to :file:`SS-run-sets/SalishSea/nemo3.6/iodef.xml`
+  * a relative or absolute run-specific output files definitions file
 
 :kbd:`domain`
   The path and name of the :file:`domain_def.xml` output domains definitions file to use for the run.
@@ -290,7 +306,7 @@ NEMO-3.4 Run Description File
 =============================
 
 .. warning::
-    Version 2.0 of the :kbd:`SalishSeaCmd` package introduced changes in the run description file structure that are not backward compatible.
+    Versions 2.0 and later of the :kbd:`SalishSeaCmd` package introduced changes in the run description file structure that are not backward compatible.
     Older run description files for NEMO-3.4 runs need to be updated before they can be successfully used with the :command:`salishsea run --nemo3.4` command.
     Please see :ref:`SalishSeaCmdChangesThatBreakBackwardCompatibility` for details.
 
@@ -447,3 +463,24 @@ list it as a relative path from the location of your run description file to the
 
 That constructed :file:`namelist` is concluded with empty instances of all of the namelists that NEMO-3.4 requires so that default values will be used for any namelist variables not included in the namelist section files listed in the run description file.
 The blob of empty namelist instances is defined as a constant in the :py:mod:`SalishSeaCmd.salishsea_cmd.prepare.py` module.
+
+
+.. _NEMO-3.4-Output:
+
+:kbd:`output` Section
+---------------------
+
+The :kbd:`output` section of the run description file contains a single key-value pair that provides the name of the file that defines the output files
+to be used by the XIOS server for the run.
+The path may be either absolute or relative.
+If relative a path is given,
+it is appended to the directory containing the run description file.
+
+:kbd:`files`
+  The path and name of the :file:`iodef.xml` output files definitions file to use for the run.
+  It is copied into the run directory as :file:`iodef.xml`
+  (the file name required by XIOS).
+  The value is typically either:
+
+  * a relative or absolute path to :file:`SS-run-sets/SalishSea/nemo3.6/iodef.xml`
+  * a relative or absolute run-specific output files definitions file
