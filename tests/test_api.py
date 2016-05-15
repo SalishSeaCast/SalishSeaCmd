@@ -125,6 +125,9 @@ class TestRunDescription(object):
                 'open boundaries': 'open_boundaries/',
                 'rivers': 'rivers/',
             },
+            'output': {
+                'files': 'iodef.xml',
+            },
         }
         if nemo34:
             expected['forcing'] = {
@@ -203,6 +206,9 @@ class TestRunDescription(object):
             },
             'forcing': {},
             'namelists': namelists,
+            'output': {
+                'files': 'iodef.xml',
+            }
         }
         if not nemo34:
             expected['paths']['XIOS'] = '../../XIOS/'
