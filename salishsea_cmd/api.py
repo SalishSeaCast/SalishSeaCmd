@@ -288,9 +288,7 @@ def run_description(
     return run_description
 
 
-def run_in_subprocess(
-    run_id, run_desc, iodefs_file, results_dir, nemo34=False,
-):
+def run_in_subprocess(run_id, run_desc, results_dir, nemo34=False):
     """Execute `salishsea run` in a subprocess.
 
     :arg str run_id: Job identifier that appears in the :command:`qstat`
@@ -300,9 +298,6 @@ def run_in_subprocess(
 
     :arg dict run_desc: Run description data structure that will be
                         written to the temporary YAML file.
-
-    :arg str iodefs_file:  File path/name of the NEMO IOM server defs
-                           file for the run.
 
     :arg boolean nemo34: Execute a NEMO-3.4 run;
                          the default is to execute a NEMO-3.6 run
@@ -316,7 +311,7 @@ def run_in_subprocess(
     cmd = ['salishsea', 'run']
     if nemo34:
         cmd.append('--nemo3.4')
-    cmd.extend([yaml_file, iodefs_file, results_dir])
+    cmd.extend([yaml_file, results_dir])
     try:
         output = subprocess.check_output(
             cmd, stderr=subprocess.STDOUT, universal_newlines=True)
