@@ -47,8 +47,8 @@ class TestGetParser:
 
 
 class TestFindRebuildNemoScrit:
-    @patch.object(salishsea_cmd.combine.os.path, 'realpath')
-    @patch.object(salishsea_cmd.combine.os.path, 'lexists')
+    @patch('salishsea_cmd.combine.os.path.realpath')
+    @patch('salishsea_cmd.combine.os.path.lexists')
     def test_find_rebuild_nemo_script_found(self, mock_lexists, mock_realpath):
         """_find_rebuild_nemo_exec returns script name if executable exists
         """
@@ -58,8 +58,8 @@ class TestFindRebuildNemoScrit:
         script = salishsea_cmd.combine._find_rebuild_nemo_script()
         assert script == 'NEMO-code/NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo'
 
-    @patch.object(salishsea_cmd.combine.log, 'error')
-    @patch.object(salishsea_cmd.combine.os.path, 'lexists')
+    @patch('salishsea_cmd.combine.log.error')
+    @patch('salishsea_cmd.combine.os.path.lexists')
     def test_find_rebuild_nemo_script_not_found(self, mock_lexists, mock_log):
         """_find_rebuild_nemo_exec logs error if executable not found
         """
@@ -70,7 +70,7 @@ class TestFindRebuildNemoScrit:
 
 
 class TestGetResultsFiles:
-    @patch.object(salishsea_cmd.combine.glob, 'glob')
+    @patch('salishsea_cmd.combine.glob.glob')
     def test_get_results_files(self, mock_glob):
         """_get_results_files returns list of name-roots and count of files
         """
@@ -82,7 +82,7 @@ class TestGetResultsFiles:
         name_roots = salishsea_cmd.combine._get_results_files(args)
         assert name_roots == ['foo', 'bar']
 
-    @patch.object(salishsea_cmd.combine.log, 'info')
+    @patch('salishsea_cmd.combine.log.info')
     def test_get_results_files_none_found(self, mock_log):
         """_get_results_files logs info message if no results files exists
         """
@@ -90,8 +90,8 @@ class TestGetResultsFiles:
         salishsea_cmd.combine._get_results_files(args)
         assert mock_log.called
 
-    @patch.object(salishsea_cmd.combine.glob, 'glob')
-    @patch.object(salishsea_cmd.combine.os, 'remove')
+    @patch('salishsea_cmd.combine.glob.glob')
+    @patch('salishsea_cmd.combine.os.remove')
     def test_get_results_files_delete_restart(self, mock_rm, mock_glob):
         """_get_results_files deletes restart files
         """
@@ -106,8 +106,8 @@ class TestGetResultsFiles:
 
 
 class TestCombineResultsFiles:
-    @patch.object(salishsea_cmd.combine.glob, 'glob')
-    @patch.object(salishsea_cmd.combine.subprocess, 'check_output')
+    @patch('salishsea_cmd.combine.glob.glob')
+    @patch('salishsea_cmd.combine.subprocess.check_output')
     def test_combine_results_files(self, mock_chk_out, mock_glob):
         """_combine_results_files calls subprocess.check_output for each name-root
         """
@@ -123,8 +123,8 @@ class TestCombineResultsFiles:
 class TestNetcdf4DeflateResults:
     """Unit tests for combine._netcdf4_deflate_results() function.
     """
-    @patch.object(salishsea_cmd.combine.glob, 'glob')
-    @patch.object(salishsea_cmd.combine.lib, 'netcdf4_deflate')
+    @patch('salishsea_cmd.combine.glob.glob')
+    @patch('salishsea_cmd.combine.lib.netcdf4_deflate')
     def test_netcdf4_deflate_results(self, mock_nc4_dfl, mock_glob):
         mock_glob.return_value = ['foo.nc', 'bar.nc']
         salishsea_cmd.combine._netcdf4_deflate_results()
@@ -132,23 +132,23 @@ class TestNetcdf4DeflateResults:
 
 
 class TestMoveResults:
-    @patch.object(salishsea_cmd.combine.shutil, 'move')
+    @patch('salishsea_cmd.combine.shutil.move')
     def test_move_results_pwd(self, mock_move):
         """_move_results does nothing if results_dir is pwd
         """
         salishsea_cmd.combine._move_results(['foo'], './')
         assert not mock_move.called
 
-    @patch.object(salishsea_cmd.combine.shutil, 'move')
-    @patch.object(salishsea_cmd.combine.os, 'makedirs')
+    @patch('salishsea_cmd.combine.shutil.move')
+    @patch('salishsea_cmd.combine.os.makedirs')
     def test_move_results_makedirs(self, mock_makedirs, mock_move):
         """_move_results creates results_dir if it doesn't exist
         """
         salishsea_cmd.combine._move_results(['foo', 'bar'], 'baz')
         assert mock_makedirs.called
 
-    @patch.object(salishsea_cmd.combine.os, 'makedirs')
-    @patch.object(salishsea_cmd.combine.shutil, 'move')
+    @patch('salishsea_cmd.combine.os.makedirs')
+    @patch('salishsea_cmd.combine.shutil.move')
     def test_move_results_renames(self, mock_move, mock_makedirs):
         """_move_results calls shutil.move for each results file
         """
@@ -165,7 +165,7 @@ class TestResultsFiles:
 
 
 class TestCompressResults:
-    @patch.object(salishsea_cmd.combine, '_results_files')
+    @patch('salishsea_cmd.combine._results_files')
     def test_compress_results_no_compress(self, mock_res_files):
         """_compress_results does nothing when args.compress is False
         """
