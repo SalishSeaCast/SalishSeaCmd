@@ -30,11 +30,7 @@ except ImportError:
 import cliff.app
 import pytest
 
-
-@pytest.fixture
-def run_module():
-    import salishsea_cmd.run
-    return salishsea_cmd.run
+import salishsea_cmd.run
 
 
 @pytest.fixture
@@ -78,8 +74,8 @@ class TestGetParser:
         assert getattr(parsed_args, attr)
 
 
-@patch.object(run_module(), 'log')
-@patch.object(run_module(), 'run', return_value='qsub message')
+@patch.object(salishsea_cmd.run, 'log')
+@patch.object(salishsea_cmd.run, 'run', return_value='qsub message')
 class TestTakeAction:
     """Unit tests for `salishsea run` sub-command take_action() method.
     """
@@ -116,11 +112,11 @@ class TestTakeAction:
         assert not m_log.info.called
 
 
-@patch.object(run_module().subprocess, 'check_output', return_value='msg')
-@patch.object(run_module(), '_build_batch_script', return_value=u'script')
-@patch.object(run_module().lib, 'get_n_processors', return_value=144)
-@patch.object(run_module().lib, 'load_run_desc')
-@patch.object(run_module().api, 'prepare')
+@patch.object(salishsea_cmd.run.subprocess, 'check_output', return_value='msg')
+@patch.object(salishsea_cmd.run, '_build_batch_script', return_value=u'script')
+@patch.object(salishsea_cmd.run.lib, 'get_n_processors', return_value=144)
+@patch.object(salishsea_cmd.run.lib, 'load_run_desc')
+@patch.object(salishsea_cmd.run.api, 'prepare')
 class TestRun:
     """Unit tests for `salishsea run` run() function.
     """
@@ -131,8 +127,7 @@ class TestRun:
     ])
     def test_run(
         self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco,
-        nemo34, sep_xios_server, xios_servers,
-        run_module, tmpdir,
+        nemo34, sep_xios_server, xios_servers, tmpdir,
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = str(p_run_dir)
@@ -144,8 +139,8 @@ class TestRun:
                     'XIOS servers': xios_servers,
                 }
             }
-        with patch.object(run_module.os, 'getenv', return_value='orcinus'):
-            qsb_msg = run_module.run(
+        with patch.object(salishsea_cmd.run.os, 'getenv', return_value='orcinus'):
+            qsb_msg = salishsea_cmd.run.run(
                 'SalishSea.yaml', str(p_results_dir), nemo34)
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34)
         m_lrd.assert_called_once_with('SalishSea.yaml')
@@ -166,8 +161,8 @@ class TestPbsFeatures:
         (144, 12),
         (145, 13),
     ])
-    def test_jasper(self, n_processors, nodes, run_module):
-        pbs_features = run_module._pbs_features(n_processors, 'jasper')
+    def test_jasper(self, n_processors, nodes):
+        pbs_features = salishsea_cmd.run._pbs_features(n_processors, 'jasper')
         expected = (
             '#PBS -l feature=X5675\n'
             '#PBS -l nodes={}:ppn=12\n'.format(nodes)
@@ -178,6 +173,6 @@ class TestPbsFeatures:
         ('orcinus', '#PBS -l partition=QDR\n'),
         ('salish', ''),
     ])
-    def test_orcinus(self, system, expected, run_module):
-        pbs_features = run_module._pbs_features(144, system)
+    def test_orcinus(self, system, expected):
+        pbs_features = salishsea_cmd.run._pbs_features(144, system)
         assert pbs_features == expected
