@@ -74,8 +74,8 @@ class TestGetParser:
         assert getattr(parsed_args, attr)
 
 
-@patch.object(salishsea_cmd.run, 'log')
-@patch.object(salishsea_cmd.run, 'run', return_value='qsub message')
+@patch('salishsea_cmd.run.log')
+@patch('salishsea_cmd.run.run', return_value='qsub message')
 class TestTakeAction:
     """Unit tests for `salishsea run` sub-command take_action() method.
     """
@@ -112,11 +112,11 @@ class TestTakeAction:
         assert not m_log.info.called
 
 
-@patch.object(salishsea_cmd.run.subprocess, 'check_output', return_value='msg')
-@patch.object(salishsea_cmd.run, '_build_batch_script', return_value=u'script')
-@patch.object(salishsea_cmd.run.lib, 'get_n_processors', return_value=144)
-@patch.object(salishsea_cmd.run.lib, 'load_run_desc')
-@patch.object(salishsea_cmd.run.api, 'prepare')
+@patch('salishsea_cmd.run.subprocess.check_output', return_value='msg')
+@patch('salishsea_cmd.run._build_batch_script', return_value=u'script')
+@patch('salishsea_cmd.run.lib.get_n_processors', return_value=144)
+@patch('salishsea_cmd.run.lib.load_run_desc')
+@patch('salishsea_cmd.run.api.prepare')
 class TestRun:
     """Unit tests for `salishsea run` run() function.
     """
@@ -139,7 +139,7 @@ class TestRun:
                     'XIOS servers': xios_servers,
                 }
             }
-        with patch.object(salishsea_cmd.run.os, 'getenv', return_value='orcinus'):
+        with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
             qsb_msg = salishsea_cmd.run.run(
                 'SalishSea.yaml', str(p_results_dir), nemo34)
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34)
