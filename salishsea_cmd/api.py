@@ -107,7 +107,7 @@ def combine(
     return result
 
 
-def prepare(run_desc_file, iodefs_file, nemo34=False):
+def prepare(run_desc_file, iodefs_file, nemo34=False, nocheck_init=False):
     """Prepare a Salish Sea NEMO run.
 
     A UUID named temporary run directory is created and symbolic links
@@ -126,12 +126,14 @@ def prepare(run_desc_file, iodefs_file, nemo34=False):
     :arg boolean nemo34: Prepare a NEMO-3.4 run;
                          the default is to prepare a NEMO-3.6 run
 
+    :arg nocheck_init: Suppress initial condition link check the
+                       default is to check 
+    :type nocheck_init: boolean
+
     :returns: Path of the temporary run directory
     :rtype: str
     """
-    return prepare_plugin.prepare(run_desc_file, iodefs_file, nemo34)
-
-
+    return prepare_plugin.prepare(run_desc_file, iodefs_file, nemo34, nocheck_init)
 def run_description(
     config_name='SalishSea',
     run_id=None,

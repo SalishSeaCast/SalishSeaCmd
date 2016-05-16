@@ -64,10 +64,24 @@ class Run(cliff.command.Command):
             'results_dir', metavar='RESULTS_DIR',
             help='directory to store results into')
         parser.add_argument(
+            '--nocheck-initial-conditions', dest='nocheck_init',
+            action='store_true',
+            help='''
+            Suppress checking of the initial conditions link.
+            Useful if you are submitting a job to wait on a
+            previous job''')
+        parser.add_argument(
             '--nemo3.4', dest='nemo34', action='store_true',
             help='''
             Do a NEMO-3.4 run;
             the default is to do a NEMO-3.6 run''')
+        parser.add_argument(
+            '--waitjob', type=int,
+            default=-1,
+            help='''
+            use -W waitjob in call to qsub, to make current job 
+            wait for on waitjob.  Waitjob is the queue job number
+            ''')
         parser.add_argument(
             '-q', '--quiet', action='store_true',
             help="don't show the run directory path or job submission message")
@@ -96,7 +110,8 @@ class Run(cliff.command.Command):
         """
         qsub_msg = run(
             parsed_args.desc_file, parsed_args.iodefs, parsed_args.results_dir,
-            parsed_args.nemo34, parsed_args.quiet,
+            parsed_args.nemo34, parsed_args.nocheck_init, parsed_args.waitjob,
+            parsed_args.quiet,
             parsed_args.keep_proc_results, parsed_args.compress,
             parsed_args.compress_restart, parsed_args.delete_restart,
         )
@@ -107,6 +122,8 @@ class Run(cliff.command.Command):
 def run(
     desc_file, iodefs, results_dir,
     nemo34=False,
+    nocheck_init=False,
+    waitjob=-1,
     quiet=False,
     keep_proc_results=False,
     compress=False,
@@ -138,6 +155,14 @@ def run(
                  the default is to prepare a NEMO-3.6 run
     :type nemo34: boolean
 
+    :arg nocheck_init: Suppress initial condition link check
+                       the default is to check
+    :type nocheck_init: boolean
+
+    :arg waitjob: use -W waitjob in call to qsub, to make current job 
+                  wait for on waitjob.  Waitjob is the queue job number
+    :type waitjob: int
+
     :arg quiet: Don't show the run directory path message;
                 the default is to show the temporary run directory path.
     :type quiet: boolean
@@ -162,7 +187,7 @@ def run(
               run script.
     :rtype: str
     """
-    run_dir_name = api.prepare(desc_file, iodefs, nemo34)
+    run_dir_name = api.prepare(desc_file, iodefs, nemo34, nocheck_init)
     if not quiet:
         log.info('Created run directory {}'.format(run_dir_name))
     run_dir = pathlib.Path(run_dir_name).resolve()
@@ -192,8 +217,12 @@ def run(
         f.write(batch_script)
     starting_dir = pathlib.Path.cwd()
     os.chdir(run_dir.as_posix())
+    if waitjob < 0:
+        call = 'qsub SalishSeaNEMO.sh'
+    else:
+        call = 'qsub -W depend=afterok:{} SalishSeaNEMO.sh'.format(waitjob)
     qsub_msg = subprocess.check_output(
-        'qsub SalishSeaNEMO.sh'.split(), universal_newlines=True)
+                call.split(), universal_newlines=True)
     os.chdir(starting_dir.as_posix())
     return qsub_msg
 
