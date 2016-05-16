@@ -127,7 +127,7 @@ def prepare(run_desc_file, iodefs_file, nemo34=False, nocheck_init=False):
                          the default is to prepare a NEMO-3.6 run
 
     :arg nocheck_init: Suppress initial condition link check the
-                       default is to check 
+                       default is to check
     :type nocheck_init: boolean
 
     :returns: Path of the temporary run directory
