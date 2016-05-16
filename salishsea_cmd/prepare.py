@@ -53,6 +53,13 @@ class Prepare(cliff.command.Command):
             'desc_file', metavar='DESC_FILE',
             help='run description YAML file')
         parser.add_argument(
+            '--nocheck-initial-conditions', dest='nocheck_init',
+            action='store_true',
+            help='''
+            Suppress checking of the initial conditions link.
+            Useful if you are submitting a job to wait on a
+            previous job''')
+        parser.add_argument(
             '--nemo3.4', dest='nemo34', action='store_true',
             help='''
             Prepare a NEMO-3.4 run;
@@ -72,13 +79,14 @@ class Prepare(cliff.command.Command):
         The path to the run directory is logged to the console on completion
         of the set-up.
         """
-        run_dir = prepare(parsed_args.desc_file, parsed_args.nemo34)
+        run_dir = prepare(
+            parsed_args.desc_file, parsed_args.nemo34, parsed_args.nocheck_init)
         if not parsed_args.quiet:
             log.info('Created run directory {}'.format(run_dir))
         return run_dir
 
 
-def prepare(desc_file, nemo34):
+def prepare(desc_file, nemo34, nocheck_init):
     """Create and prepare the temporary run directory.
 
     The temporary run directory is created with a UUID as its name.
@@ -94,6 +102,10 @@ def prepare(desc_file, nemo34):
     :arg nemo34: Prepare a NEMO-3.4 run;
                  the default is to prepare a NEMO-3.6 run
     :type nemo34: boolean
+
+    :arg nocheck_init: Suppress initial condition link check the
+                       default is to check
+    :type nocheck_init: boolean
 
     :returns: Path of the temporary run directory
     :rtype: str
@@ -111,7 +123,7 @@ def prepare(desc_file, nemo34):
         nemo_code_repo, nemo_bin_dir, run_dir, nemo34,
         xios_code_repo, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
-    _make_forcing_links(run_desc, run_dir, nemo34)
+    _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init)
     return run_dir
 
 
@@ -585,7 +597,7 @@ def _make_grid_links(run_desc, run_dir):
     os.chdir(saved_cwd)
 
 
-def _make_forcing_links(run_desc, run_dir, nemo34):
+def _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init):
     """Create symlinks in run_dir to the forcing directory/file names,
     and record the NEMO-forcing repo revision used for the run.
 
@@ -601,6 +613,10 @@ def _make_forcing_links(run_desc, run_dir, nemo34):
                          if :py:obj:`True`,
                          otherwise make links for a NEMO-3.6 run.
 
+    :arg nocheck_init: Suppress initial condition link check
+                       the default is to check
+    :type nocheck_init: boolean
+
     :raises: :py:exc:`SystemExit` if the NEMO-forcing repo path does not
              exist
     """
@@ -614,20 +630,24 @@ def _make_forcing_links(run_desc, run_dir, nemo34):
         _remove_run_dir(run_dir)
         raise SystemExit(2)
     if nemo34:
-        _make_forcing_links_nemo34(run_desc, run_dir)
+        _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init)
     else:
-        _make_forcing_links_nemo36(run_desc, run_dir)
+        _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init)
     with open(os.path.join(run_dir, 'NEMO-forcing_rev.txt'), 'wt') as f:
         f.writelines(hg.parents(nemo_forcing_dir, verbose=True))
 
 
-def _make_forcing_links_nemo34(run_desc, run_dir):
+def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
     """For a NEMO-3.4 run, create symlinks in run_dir to the forcing
     directory/file names that the Salish Sea model uses by convention.
 
     :arg dict run_desc: Run description dictionary.
 
     :arg str run_dir: Path of the temporary run directory.
+
+    :arg nocheck_init: Suppress initial condition link check
+                       the default is to check
+    :type nocheck_init: boolean
 
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
     """
@@ -647,7 +667,7 @@ def _make_forcing_links_nemo34(run_desc, run_dir):
         (run_desc['forcing']['rivers'],
             os.path.join(run_dir, 'rivers'))
     )
-    if not os.path.exists(ic_source):
+    if not os.path.exists(ic_source) and not nocheck_init:
         log.error(
             '{} not found; cannot create symlink - '
             'please check the forcing path and initial conditions file names '
@@ -670,13 +690,17 @@ def _make_forcing_links_nemo34(run_desc, run_dir):
     _check_atmos_files(run_desc, run_dir)
 
 
-def _make_forcing_links_nemo36(run_desc, run_dir):
+def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
     """For a NEMO-3.6 run, create symlinks in run_dir to the forcing
     directory/file names given in the run description forcing section.
 
     :arg dict run_desc: Run description dictionary.
 
     :arg str run_dir: Path of the temporary run directory.
+
+    :arg nocheck_init: Suppress initial condition link check
+                       the default is to check
+    :type nocheck_init: boolean
 
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
     """
@@ -689,13 +713,14 @@ def _make_forcing_links_nemo36(run_desc, run_dir):
         if not os.path.isabs(link_path):
             link_path = os.path.join(nemo_forcing_dir, link_path)
         if not os.path.exists(link_path):
-            log.error(
-                '{} not found; cannot create symlink - '
-                'please check the forcing paths and file names '
-                'in your run description file'
-                .format(link_path))
-            _remove_run_dir(run_dir)
-            raise SystemExit(2)
+            if link_name not in {'restart.nc', 'restart_trc.nc'} or not nocheck_init:
+                log.error(
+                    '{} not found; cannot create symlink - '
+                    'please check the forcing paths and file names '
+                    'in your run description file'
+                    .format(link_path))
+                _remove_run_dir(run_dir)
+                raise SystemExit(2)
         os.symlink(link_path, os.path.join(run_dir, link_name))
         try:
             link_checker = run_desc['forcing'][link_name]['check link']
