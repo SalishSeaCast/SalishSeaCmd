@@ -210,11 +210,10 @@ def run(
     starting_dir = pathlib.Path.cwd()
     os.chdir(run_dir.as_posix())
     if waitjob:
-        call = 'qsub -W depend=afterok:{} SalishSeaNEMO.sh'.format(waitjob)
+        cmd = 'qsub -W depend=afterok:{} SalishSeaNEMO.sh'.format(waitjob)
     else:
-        call = 'qsub SalishSeaNEMO.sh'
-    qsub_msg = subprocess.check_output(
-                call.split(), universal_newlines=True)
+        cmd = 'qsub SalishSeaNEMO.sh'
+    qsub_msg = subprocess.check_output(cmd.split(), universal_newlines=True)
     os.chdir(starting_dir.as_posix())
     return qsub_msg
 
