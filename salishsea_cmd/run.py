@@ -77,9 +77,9 @@ class Run(cliff.command.Command):
             the default is to do a NEMO-3.6 run''')
         parser.add_argument(
             '--waitjob', type=int,
-            default=-1,
+            default=0,
             help='''
-            use -W waitjob in call to qsub, to make current job 
+            use -W waitjob in call to qsub, to make current job
             wait for on waitjob.  Waitjob is the queue job number
             ''')
         parser.add_argument(
@@ -123,7 +123,7 @@ def run(
     desc_file, iodefs, results_dir,
     nemo34=False,
     nocheck_init=False,
-    waitjob=-1,
+    waitjob=0,
     quiet=False,
     keep_proc_results=False,
     compress=False,
@@ -159,7 +159,7 @@ def run(
                        the default is to check
     :type nocheck_init: boolean
 
-    :arg waitjob: use -W waitjob in call to qsub, to make current job 
+    :arg waitjob: use -W waitjob in call to qsub, to make current job
                   wait for on waitjob.  Waitjob is the queue job number
     :type waitjob: int
 
@@ -217,10 +217,10 @@ def run(
         f.write(batch_script)
     starting_dir = pathlib.Path.cwd()
     os.chdir(run_dir.as_posix())
-    if waitjob < 0:
-        call = 'qsub SalishSeaNEMO.sh'
-    else:
+    if waitjob:
         call = 'qsub -W depend=afterok:{} SalishSeaNEMO.sh'.format(waitjob)
+    else:
+        call = 'qsub SalishSeaNEMO.sh'
     qsub_msg = subprocess.check_output(
                 call.split(), universal_newlines=True)
     os.chdir(starting_dir.as_posix())
