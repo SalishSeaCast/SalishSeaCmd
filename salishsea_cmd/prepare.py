@@ -116,7 +116,7 @@ def prepare(desc_file, iodefs, nemo34, nocheck_init):
     :type nemo34: boolean
 
     :arg nocheck_init: Suppress initial condition link check the
-                       default is to check 
+                       default is to check
     :type nocheck_init: boolean
 
     :returns: Path of the temporary run directory
@@ -637,8 +637,6 @@ def _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init):
                        the default is to check
     :type nocheck_init: boolean
 
-    
-
     :raises: :py:exc:`SystemExit` if the NEMO-forcing repo path does not
              exist
     """
@@ -735,7 +733,7 @@ def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
         if not os.path.isabs(link_path):
             link_path = os.path.join(nemo_forcing_dir, link_path)
         if not os.path.exists(link_path):
-            if link_name not in ['restart.nc', 'restart_trc.nc'] or not nocheck_init:
+            if link_name not in {'restart.nc', 'restart_trc.nc'} or not nocheck_init:
                 log.error(
                     '{} not found; cannot create symlink - '
                     'please check the forcing paths and file names '
