@@ -68,7 +68,7 @@ class Combine(cliff.command.Command):
         n_processors = lib.get_n_processors(run_desc)
         name_roots = _get_results_files(parsed_args)
         if name_roots:
-            rebuild_nemo_script = _find_rebuild_nemo_script()
+            rebuild_nemo_script = _find_rebuild_nemo_script(run_desc)
             _combine_results_files(rebuild_nemo_script, name_roots, n_processors)
             os.remove('nam_rebuild')
         _netcdf4_deflate_results()
@@ -78,12 +78,10 @@ class Combine(cliff.command.Command):
             _delete_results_files(name_roots, parsed_args)
 
 
-def _find_rebuild_nemo_script():
-    nemo_exec_path = os.path.realpath('nemo.exe')
-    nemo_code_path = nemo_exec_path.split('NEMOGCM')[0]
+def _find_rebuild_nemo_script(run_desc):
+    nemo_code_repo = os.path.abspath(run_desc['paths']['NEMO-code'])
     rebuild_nemo_exec = os.path.join(
-        nemo_code_path,
-        'NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo.exe')
+        nemo_code_repo, 'NEMOGCM', 'TOOLS', 'REBUILD_NEMO', 'rebuild_nemo.exe')
     if not os.path.lexists(rebuild_nemo_exec):
         log.error(
             '{} not found - did you forget to build it?'
