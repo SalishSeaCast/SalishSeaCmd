@@ -84,6 +84,8 @@ class TestTakeAction:
             desc_file='desc file',
             results_dir='results dir',
             nemo34=False,
+            nocheck_init=False,
+            waitjob=0,
             quiet=False,
             keep_proc_results=False,
             compress=False,
@@ -93,8 +95,7 @@ class TestTakeAction:
         run_cmd.run(parsed_args)
         m_run.assert_called_once_with(
             'desc file', 'results dir',
-            False, False, False, False, False, False,
-        )
+            False, False, 0, False, False, False, False, False)
         m_log.info.assert_called_once_with('qsub message')
 
     def test_take_action_quiet(self, m_run, m_log, run_cmd):
@@ -142,7 +143,7 @@ class TestRun:
         with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
             qsb_msg = salishsea_cmd.run.run(
                 'SalishSea.yaml', str(p_results_dir), nemo34)
-        m_prepare.assert_called_once_with('SalishSea.yaml', nemo34)
+        m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_gnp.assert_called_once_with(m_lrd())
         m_bbs.assert_called_once_with(

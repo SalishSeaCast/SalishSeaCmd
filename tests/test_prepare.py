@@ -88,7 +88,8 @@ class TestPrepare:
     ):
         m_cne.return_value = m_cne_return
         m_cxe.return_value = m_cxe_return
-        run_dir = salishsea_cmd.prepare.prepare('SalishSea.yaml', nemo34)
+        run_dir = salishsea_cmd.prepare.prepare(
+            'SalishSea.yaml', nemo34, nocheck_init=False)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_cne.assert_called_once_with(m_lrd(), nemo34)
         if nemo34:
@@ -105,7 +106,7 @@ class TestPrepare:
             m_cne_return[0], m_cne_return[1], m_mrd(), nemo34,
             m_cxe_return[0], m_cxe_return[1])
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
-        m_mfl.assert_called_once_with(m_lrd(), m_mrd(), nemo34)
+        m_mfl.assert_called_once_with(m_lrd(), m_mrd(), nemo34, False)
         assert run_dir == m_mrd()
 
 
@@ -671,8 +672,8 @@ class TestMakeForcingLinks:
         patch_hgp = patch('salishsea_cmd.prepare.hg.parents')
         with patch_exists, patch_hgp, patch_mfl34 as m_mfl34:
             salishsea_cmd.prepare._make_forcing_links(
-                run_desc, str(p_run_dir), nemo34=True)
-        m_mfl34.assert_called_once_with(run_desc, str(p_run_dir))
+                run_desc, str(p_run_dir), nemo34=True, nocheck_init=False)
+        m_mfl34.assert_called_once_with(run_desc, str(p_run_dir), False)
 
     def test_nemo36(self, tmpdir):
         p_run_dir = tmpdir.ensure_dir('run_dir')
@@ -684,8 +685,8 @@ class TestMakeForcingLinks:
         patch_hgp = patch('salishsea_cmd.prepare.hg.parents')
         with patch_exists, patch_hgp, patch_mfl36 as m_mfl36:
             salishsea_cmd.prepare._make_forcing_links(
-                run_desc, str(p_run_dir), nemo34=False)
-        m_mfl36.assert_called_once_with(run_desc, str(p_run_dir))
+                run_desc, str(p_run_dir), nemo34=False, nocheck_init=False)
+        m_mfl36.assert_called_once_with(run_desc, str(p_run_dir), False)
 
     @pytest.mark.parametrize('nemo34', [True, False])
     @patch('salishsea_cmd.prepare.log')
@@ -706,7 +707,7 @@ class TestMakeForcingLinks:
             side_effect=lambda path: path)
         with pytest.raises(SystemExit), p_exists, p_abspath:
             salishsea_cmd.prepare._make_forcing_links(
-                run_desc, str(p_run_dir), nemo34)
+                run_desc, str(p_run_dir), nemo34, nocheck_init=False)
         m_log.error.assert_called_once_with(
             'foo not found; cannot create symlinks - '
             'please check the forcing path in your run description file')
@@ -749,7 +750,7 @@ class TestMakeForcingLinksNEMO34:
         p_chdir = patch('salishsea_cmd.prepare.os.chdir')
         with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
             salishsea_cmd.prepare._make_forcing_links_nemo34(
-                run_desc, 'run_dir')
+                run_desc, 'run_dir', nocheck_init=False)
         m_log.error.assert_called_once_with(
             '{} not found; cannot create symlink - '
             'please check the forcing path and initial conditions file names '
@@ -783,7 +784,7 @@ class TestMakeForcingLinksNEMO34:
         with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
             with p_symlink:
                 salishsea_cmd.prepare._make_forcing_links_nemo34(
-                    run_desc, 'run_dir')
+                    run_desc, 'run_dir', nocheck_init=False)
         m_log.error.assert_called_once_with(
             'foo/bar not found; cannot create symlink - '
             'please check the forcing paths and file names '
@@ -810,7 +811,7 @@ class TestMakeForcingLinksNEMO36:
         patch_symlink = patch('salishsea_cmd.prepare.os.symlink')
         with patch_symlink as m_symlink:
             salishsea_cmd.prepare._make_forcing_links_nemo36(
-                run_desc, 'run_dir')
+                run_desc, 'run_dir', nocheck_init=False)
         m_symlink.assert_called_once_with(p_atmos_ops, 'run_dir/NEMO-atmos')
 
     def test_rel_path_link(self, tmpdir):
@@ -827,7 +828,7 @@ class TestMakeForcingLinksNEMO36:
         patch_symlink = patch('salishsea_cmd.prepare.os.symlink')
         with patch_symlink as m_symlink:
             salishsea_cmd.prepare._make_forcing_links_nemo36(
-                run_desc, 'run_dir')
+                run_desc, 'run_dir', nocheck_init=False)
         m_symlink.assert_called_once_with(
             p_nemo_forcing.join('rivers'), 'run_dir/rivers')
 
@@ -845,7 +846,7 @@ class TestMakeForcingLinksNEMO36:
         salishsea_cmd.prepare._remove_run_dir = Mock()
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_forcing_links_nemo36(
-                run_desc, 'run_dir')
+                run_desc, 'run_dir', nocheck_init=False)
         m_log.error.assert_called_once_with(
             '{} not found; cannot create symlink - '
             'please check the forcing paths and file names '
