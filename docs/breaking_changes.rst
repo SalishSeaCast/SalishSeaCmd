@@ -166,9 +166,9 @@ Version 2.0
 
 The following changes that were introduced in version 2.0 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
 
-* The :kbd:`gather` and :kbd:`combine` sub-commands now take a :option:`--compress` command-line option to cause the results files to be :program:`gzip` compressed.
+* The :kbd:`gather` and :kbd:`combine` sub-commands now take a :kbd:`--compress` command-line option to cause the results files to be :program:`gzip` compressed.
   Previously,
-  :program:`gzip` compression was the default and the :option:`--no-compress` option was required to prevent it.
+  :program:`gzip` compression was the default and the :kbd:`--no-compress` option was required to prevent it.
   The :kbd:`run`,
   :kbd:`gather`,
   and :kbd:`combine` sub-commands are now all consistent in defaulting to no compression of the results files.

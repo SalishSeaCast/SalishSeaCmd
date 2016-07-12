@@ -77,7 +77,7 @@ and building the documentation with the commands:
     (salishsea-cmd)$ pip install --editable SalishSeaTools
     (salishsea-cmd)$ pip install --editable SalishSeaCmd
 
-The :option:`--editable` option in the :command:`pip install` commands above installs the :kbd:`SalishSeaTools` and :kbd:`SalishSeaCmd` packaged from the :ref:`tools-repo` via symlinks so that :program:`salishsea` in the :kbd:`salishsea-cmd` environment will be automatically updated as the repo evolves.
+The :kbd:`--editable` option in the :command:`pip install` commands above installs the :kbd:`SalishSeaTools` and :kbd:`SalishSeaCmd` packaged from the :ref:`tools-repo` via symlinks so that :program:`salishsea` in the :kbd:`salishsea-cmd` environment will be automatically updated as the repo evolves.
 
 To deactivate the environment use:
 
