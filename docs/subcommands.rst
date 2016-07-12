@@ -20,30 +20,28 @@
 :command:`salishsea` Sub-Commands
 *********************************
 
-The command :kbd:`salishsea --help` produces a list of the available :program:`salishsea` options and sub-commands:
+The command :kbd:`salishsea --help` produces a list of the available :program:`salishsea` options and sub-commands::
 
-.. code-block:: bash
+  usage: salishsea [--version] [-v] [--log-file LOG_FILE] [-q] [-h] [--debug]
 
-    usage: salishsea [--version] [-v] [--log-file LOG_FILE] [-q] [-h] [--debug]
+  Salish Sea NEMO Command Processor
 
-    Salish Sea NEMO Command Processor
+  optional arguments:
+    --version            show program's version number and exit
+    -v, --verbose        Increase verbosity of output. Can be repeated.
+    --log-file LOG_FILE  Specify a file to log output. Disabled by default.
+    -q, --quiet          Suppress output except warnings and errors.
+    -h, --help           Show this help message and exit.
+    --debug              Show tracebacks on errors.
 
-    optional arguments:
-      --version            show program's version number and exit
-      -v, --verbose        Increase verbosity of output. Can be repeated.
-      --log-file LOG_FILE  Specify a file to log output. Disabled by default.
-      -q, --quiet          Suppress output except warnings and errors.
-      -h, --help           Show this help message and exit.
-      --debug              Show tracebacks on errors.
-
-    Commands:
-      combine        Combine per-processor files from an MPI NEMO run into single files
-      complete       print bash completion command
-      gather         Gather results from a NEMO run; includes combining MPI results files
-      get_cgrf       Download and symlink CGRF atmospheric forcing files
-      help           print detailed help for another command
-      prepare        Prepare a Salish Sea NEMO run
-      run            Prepare, execute, and gather results from a Salish Sea NEMO model run.
+  Commands:
+    combine        Combine per-processor files from an MPI NEMO run into single files
+    complete       print bash completion command
+    gather         Gather results from a NEMO run; includes combining MPI results files
+    get_cgrf       Download and symlink CGRF atmospheric forcing files
+    help           print detailed help for another command
+    prepare        Prepare a Salish Sea NEMO run
+    run            Prepare, execute, and gather results from a Salish Sea NEMO model run.
 
 For details of the arguments and options for a sub-command use
 :command:`salishsea help <sub-command>`.
@@ -153,23 +151,21 @@ you can get a Python traceback containing more information about the error by re
 ==========================
 
 The :command:`salishsea prepare` command sets up a run directory from which to execute the Salish Sea NEMO run described in the specifed run description,
-and IOM server definitions files:
+and IOM server definitions files::
 
-.. code-block:: bash
+  usage: salishsea prepare [-h] [--nemo3.4] [-q] DESC_FILE
 
-    usage: salishsea prepare [-h] [--nemo3.4] [-q] DESC_FILE
+  Set up the Salish Sea NEMO described in DESC_FILE and print the path to the
+  run directory.
 
-    Set up the Salish Sea NEMO described in DESC_FILE and print the path to the
-    run directory.
+  positional arguments:
+    DESC_FILE    run description YAML file
 
-    positional arguments:
-      DESC_FILE    run description YAML file
-
-    optional arguments:
-      -h, --help   show this help message and exit
-      --nemo3.4    Prepare a NEMO-3.4 run; the default is to prepare a NEMO-3.6
-                   run
-      -q, --quiet  don't show the run directory path on completion
+  optional arguments:
+    -h, --help   show this help message and exit
+    --nemo3.4    Prepare a NEMO-3.4 run; the default is to prepare a NEMO-3.6
+                 run
+    -q, --quiet  don't show the run directory path on completion
 
 See the :ref:`RunDescriptionFileStructure` section for details of the run description file.
 
@@ -303,29 +299,27 @@ The run directory also contains symbolic links to:
 =========================
 
 The :command:`salishsea gather` command gather results from a Salish Sea NEMO run into a results directory.
-Its operation includes running the :command:`salishsea combine` command to combine the pre-processor MPI results files.
+Its operation includes running the :command:`salishsea combine` command to combine the pre-processor MPI results files::
 
-.. code-block:: bash
+  usage: salishsea gather [-h] [--compress] [--keep-proc-results]
+                          [--compress-restart] [--delete-restart]
+                          DESC_FILE RESULTS_DIR
 
-    usage: salishsea gather [-h] [--compress] [--keep-proc-results]
-                            [--compress-restart] [--delete-restart]
-                            DESC_FILE RESULTS_DIR
+  Gather the results files from a Salish Sea NEMO run described in DESC_FILE
+  into files in RESULTS_DIR. The gathering process includes combining the per-
+  processor results files, and deleting the per-processor files. If RESULTS_DIR
+  does not exist it will be created.
 
-    Gather the results files from a Salish Sea NEMO run described in DESC_FILE
-    into files in RESULTS_DIR. The gathering process includes combining the per-
-    processor results files, and deleting the per-processor files. If RESULTS_DIR
-    does not exist it will be created.
+  positional arguments:
+    DESC_FILE            file path/name of run description YAML file
+    RESULTS_DIR          directory to store results into
 
-    positional arguments:
-      DESC_FILE            file path/name of run description YAML file
-      RESULTS_DIR          directory to store results into
-
-    optional arguments:
-      -h, --help           show this help message and exit
-      --compress           compress results files
-      --keep-proc-results  don't delete per-processor results files
-      --compress-restart   compress restart file(s)
-      --delete-restart     delete restart file(s)
+  optional arguments:
+    -h, --help           show this help message and exit
+    --compress           compress results files
+    --keep-proc-results  don't delete per-processor results files
+    --compress-restart   compress restart file(s)
+    --delete-restart     delete restart file(s)
 
 If the :command:`salishsea gather` command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
