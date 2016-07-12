@@ -39,7 +39,7 @@ To install the :kbd:`SalishSeaCmd` package in your :kbd:`root` Anaconda or Minic
     $ pip install --editable SalishSeaTools
     $ pip install --editable SalishSeaCmd
 
-The :option:`--editable` option in the :command:`pip install` commands installs the packages via symlinks so that :program:`salishsea` will be automatically updated as the repo evolves.
+The :kbd:`--editable` option in the :command:`pip install` commands installs the packages via symlinks so that :program:`salishsea` will be automatically updated as the repo evolves.
 
 The :kbd:`SalishSeaCmd` package can also be installed in an isolated :program:`conda` environment.
 The common use case for doing so it development,
