@@ -121,17 +121,6 @@ class TestCombineResultsFiles:
         assert mock_chk_out.call_count == 2
 
 
-class TestNetcdf4DeflateResults:
-    """Unit tests for combine._netcdf4_deflate_results() function.
-    """
-    @patch('salishsea_cmd.combine.glob.glob')
-    @patch('salishsea_cmd.combine.lib.netcdf4_deflate')
-    def test_netcdf4_deflate_results(self, mock_nc4_dfl, mock_glob):
-        mock_glob.return_value = ['foo.nc', 'bar.nc']
-        salishsea_cmd.combine._netcdf4_deflate_results()
-        assert mock_nc4_dfl.call_count == 2
-
-
 class TestMoveResults:
     @patch('salishsea_cmd.combine.shutil.move')
     def test_move_results_pwd(self, mock_move):

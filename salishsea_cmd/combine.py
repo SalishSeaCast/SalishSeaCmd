@@ -123,12 +123,17 @@ def _combine_results_files(rebuild_nemo_script, name_roots, n_processors):
 
 def _netcdf4_deflate_results():
     log.info('Starting netCDF4 deflation...')
-    for fn in glob.glob('*.nc'):
-        result = lib.netcdf4_deflate(fn)
-        if result:
-            log.info(result)
-        else:
-            log.info('netCDF4 deflated {}'.format(fn))
+    patterns = (
+        '*_restart.nc', '*_restart_trc.nc',
+        '*_grid_[TUVW].nc', '*_ptrc_T.nc',
+    )
+    for pattern in patterns:
+        for fn in glob.glob(pattern):
+            result = lib.netcdf4_deflate(fn)
+            if result:
+                log.info(result)
+            else:
+                log.info('netCDF4 deflated {}'.format(fn))
 
 
 def _move_results(name_roots, results_dir):
