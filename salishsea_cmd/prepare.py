@@ -334,12 +334,14 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
                     _remove_run_dir(run_dir)
                     raise SystemExit(2)
         ref_namelist = namelist_filename.replace('_cfg', '_ref')
-        ref_namelist_path = os.path.join(
-            nemo_code_repo, 'NEMOGCM', 'CONFIG', 'SHARED', ref_namelist)
-        saved_cwd = os.getcwd()
-        os.chdir(run_dir)
-        os.symlink(ref_namelist_path, ref_namelist)
-        os.chdir(saved_cwd)
+        # only symlink ref_namelist if it is not included in yaml
+        if not (ref_namelist in run_desc['namelists']):
+            ref_namelist_path = os.path.join(
+                nemo_code_repo, 'NEMOGCM', 'CONFIG', 'SHARED', ref_namelist)
+            saved_cwd = os.getcwd()
+            os.chdir(run_dir)
+            os.symlink(ref_namelist_path, ref_namelist)
+            os.chdir(saved_cwd)
     if 'namelist_cfg' in run_desc['namelists']:
         _set_mpi_decomposition('namelist_cfg', run_desc, run_dir)
     else:
