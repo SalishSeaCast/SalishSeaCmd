@@ -76,13 +76,16 @@ The meanings of the key-value pairs are:
 --------------------
 
 The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`salishsea` uses to find files in other repos that it needs.
-The paths may be either absolute or relative.
 
 :kbd:`NEMO-code`
   The path to the :ref:`NEMO-3.6-code-repo` clone where the NEMO executable for the run is to be found.
+  An absolute path is required because the path is used in both the current  directory and the temporary run directory created in the :kbd:`runs directory`.
+  You can use :kbd:`~` or :kbd:`$HOME` in the path,
+  if you wish.
 
 :kbd:`XIOS`
   The path to the :ref:`XIOS-repo` clone where the XIOS executable for the run is to be found.
+  This path may be either absolute or relative.
 
 :kbd:`forcing`
   The path to the :ref:`NEMO-forcing-repo` clone where the netCDF files for the grid coordinates,
@@ -90,9 +93,11 @@ The paths may be either absolute or relative.
   initial conditions,
   open boundary conditions,
   etc. are to be found.
+  This path may be either absolute or relative.
 
 :kbd:`runs directory`
   The path to the directory where run directories will be created by the :command:`salishsea run` (or :command:`salishsea prepare`) sub-command.
+  This path may be either absolute or relative.
 
 
 .. _NEMO-3.6-Grid:
@@ -350,10 +355,12 @@ The meanings of the key-value pairs are:
 --------------------
 
 The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`salishsea` uses to find files in other repos that it needs.
-The paths may be either absolute or relative.
 
 :kbd:`NEMO-code`
   The path to the :ref:`NEMO-code-repo` clone where the NEMO executable for the run is to be found.
+  An absolute path is required because the path is used in both the current  directory and the temporary run directory created in the :kbd:`runs directory`.
+  You can use :kbd:`~` or :kbd:`$HOME` in the path,
+  if you wish.
 
 :kbd:`forcing`
   The path to the :ref:`NEMO-forcing-repo` clone where the netCDF files for the grid coordinates,
@@ -361,9 +368,11 @@ The paths may be either absolute or relative.
   initial conditions,
   open boundary conditions,
   etc. are to be found.
+  This path may be either absolute or relative.
 
 :kbd:`runs directory`
   The path to the directory where run directories will be created by the :command:`salishsea run --nemo3.4` (or :command:`salishsea prepare --nemo3.4`) sub-command.
+  This path may be either absolute or relative.
 
 
 .. _NEMO-3.4-Grid:

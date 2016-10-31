@@ -150,7 +150,8 @@ def _check_nemo_exec(run_desc, nemo34):
 
     :raises: SystemExit
     """
-    nemo_code_repo = os.path.abspath(run_desc['paths']['NEMO-code'])
+    nemo_code_repo = os.path.abspath(
+        os.path.expandvars(os.path.expanduser(run_desc['paths']['NEMO-code'])))
     config_dir = os.path.join(
         nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config_name'])
     nemo_bin_dir = os.path.join(nemo_code_repo, config_dir, 'BLD', 'bin')
