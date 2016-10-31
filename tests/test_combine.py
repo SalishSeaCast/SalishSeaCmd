@@ -46,21 +46,25 @@ class TestGetParser:
         assert parser.prog == 'salishsea combine'
 
 
+@patch('salishsea_cmd.combine.os.path.lexists')
 class TestFindRebuildNemoScrit:
+    @pytest.mark.parametrize('nemo_path, expected', [
+        ('NEMO-code', 'NEMO-code/NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo'),
+    ])
     @patch('salishsea_cmd.combine.os.path.abspath')
-    @patch('salishsea_cmd.combine.os.path.lexists')
-    def test_find_rebuild_nemo_script_found(self, mock_lexists, mock_abspath):
+    def test_find_rebuild_nemo_script_found(
+            self, mock_abspath, mock_lexists, nemo_path, expected,
+    ):
         """_find_rebuild_nemo_exec returns script name if executable exists
         """
         run_desc = {'paths': {'NEMO-code': 'NEMO-code'}}
-        mock_abspath.return_value = ('NEMO-code')
         mock_lexists.return_value = True
+        mock_abspath.return_value = nemo_path
         script = salishsea_cmd.combine._find_rebuild_nemo_script(run_desc)
-        assert script == 'NEMO-code/NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo'
+        assert script == expected
 
     @patch('salishsea_cmd.combine.log.error')
-    @patch('salishsea_cmd.combine.os.path.lexists')
-    def test_find_rebuild_nemo_script_not_found(self, mock_lexists, mock_log):
+    def test_find_rebuild_nemo_script_not_found(self, mock_log, mock_lexists):
         """_find_rebuild_nemo_exec logs error if executable not found
         """
         run_desc = {'paths': {'NEMO-code': 'NEMO-code'}}

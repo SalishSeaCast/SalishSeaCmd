@@ -79,7 +79,8 @@ class Combine(cliff.command.Command):
 
 
 def _find_rebuild_nemo_script(run_desc):
-    nemo_code_repo = os.path.abspath(run_desc['paths']['NEMO-code'])
+    nemo_code_repo = os.path.abspath(
+        os.path.expandvars(os.path.expanduser(run_desc['paths']['NEMO-code'])))
     rebuild_nemo_exec = os.path.join(
         nemo_code_repo, 'NEMOGCM', 'TOOLS', 'REBUILD_NEMO', 'rebuild_nemo.exe')
     if not os.path.lexists(rebuild_nemo_exec):
