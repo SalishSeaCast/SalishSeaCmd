@@ -28,8 +28,10 @@ walltime: 10:00:00
 email: dlatornell@example.com
 
 paths:
-  # If relative, paths are taken from current directory
-  NEMO-code: ../../../NEMO-3.6-code/
+  # Absolute path to NEMO-3.6-code repository clone.
+  # You can use ~ or $HOME if you wish.
+  NEMO-code: $HOME/MEOPAR/NEMO-3.6-code/
+  # If relative, paths below are taken from current directory
   XIOS: ../../../XIOS/
   forcing: ../../../NEMO-forcing/
   runs directory: ../../../SalishSea/
