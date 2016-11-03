@@ -380,9 +380,10 @@ def _set_mpi_decomposition(namelist_filename, run_desc, run_dir):
         )
         _remove_run_dir(run_dir)
         raise SystemExit(2)
+    jpnij = str(lib.get_n_processors(run_desc))
     with open(os.path.join(run_dir, namelist_filename), 'rt') as f:
         lines = f.readlines()
-    for key, new_value in {'jpni': jpni, 'jpnj': jpnj}.items():
+    for key, new_value in {'jpni': jpni, 'jpnj': jpnj, 'jpnij': jpnij}.items():
         value, i = _get_namelist_value(key, lines)
         lines[i] = lines[i].replace(value, new_value)
     with open(os.path.join(run_dir, namelist_filename), 'wt') as f:
