@@ -75,6 +75,20 @@ def get_n_processors(run_desc):
     :rtype: int
     """
     jpni, jpnj = map(int, run_desc['MPI decomposition'].split('x'))
+    try:
+        LPEflag = run_desc['Land processor elimination']
+    except KeyError:
+        LPEflag = True    # switch LPE on by default
+    
+    if LPEflag:
+        import os
+        csvpath = os.path.dirname(os.path.abspath(__file__))
+        csvfile = os.path.join(csvpath, 'salish.csv')
+        with open(csvfile, 'r') as f:
+            for line in iter(f):
+                cjpni, cjpnj, cnw = map(int, line.split(','))
+                if jpni == cjpni and jpnj == cjpnj:
+                    return cnw
     return jpni * jpnj
 
 
