@@ -69,6 +69,21 @@ The meanings of the key-value pairs are:
   as well as notification of abnormal abort messages.
   The email key is only required if the address is different than would be constructed by combining your user id on the machine that the job runs on with :kbd:`@eos.ubc.ca`.
 
+An optional key,
+:kbd:`Land processor elimination`,
+is available to control whether or not NEMO-3.6 runs are configured to perform calculations over the entire domain,
+or only on the MPI subdomains that contain water.
+Please see :ref:`LandProcessorElimination` for a detailed explanation,
+and use the :ref:`Preferred-MPI-LPE-Decompositions` table to guide your choice of value for :kbd:`MPI decomposition`.
+The :ref:`SalishSeaCmdProcessor` takes care of setting the correct number of processors based on your chosen :kbd:`MPI decomposition`.
+Land processor elimination is enabled by default,
+even if the :kbd:`Land processor elimination` key is not included in the run description file.
+If you have a reason to not use land processor elimination you can disable it with:
+
+.. code-block:: yaml
+
+    Land processor elimination: False
+
 
 .. _NEMO-3.6-Paths:
 
