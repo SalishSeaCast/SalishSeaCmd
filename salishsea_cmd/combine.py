@@ -125,7 +125,6 @@ def _combine_results_files(rebuild_nemo_script, name_roots, n_processors):
 def _netcdf4_deflate_results():
     log.info('Starting netCDF4 deflation...')
     patterns = (
-        '*_restart.nc', '*_restart_trc.nc',
         '*_grid_[TUVW].nc', '*_ptrc_T.nc',
     )
     for pattern in patterns:
