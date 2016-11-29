@@ -8,7 +8,6 @@ name: sphinx-build
 
 channels:
   - defaults
-  - ioos
 
 dependencies:
 - basemap
@@ -24,7 +23,6 @@ dependencies:
 - paramiko
 - pillow
 - pip
-- pynco
 - python=3
 - pytz
 - pyyaml
