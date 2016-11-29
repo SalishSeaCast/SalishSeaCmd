@@ -6,6 +6,10 @@
 
 name: sphinx-build
 
+channels:
+  - defaults
+  - ioos
+
 dependencies:
 - basemap
 - bottleneck
@@ -20,6 +24,7 @@ dependencies:
 - paramiko
 - pillow
 - pip
+- pynco
 - python=3
 - pytz
 - pyyaml
