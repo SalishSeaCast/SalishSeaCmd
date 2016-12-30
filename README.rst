@@ -2,14 +2,25 @@
 Salish Sea NEMO Command Processor
 *********************************
 
-The Salish Sea NEMO command processor, ``salishsea``, is a command line tool for doing various operations associated with the Salish Sea NEMO model.
+The Salish Sea NEMO command processor, ``salishsea``, is a command line tool for doing various operations associated with the `Salish Sea NEMO model`_.
+
+.. _Salish Sea NEMO model: http://salishsea-meopar-docs.readthedocs.io/en/latest/
 
 Use ``salishsea --help`` to get a list of the sub-commands available for doing things with and related to Salish Sea NEMO.
 Use ``salishsea help <sub-command>`` to get a synopsis of what a sub-command does,
 what its required arguments are,
 and what options are available to control it.
 
-Documentation for the command processor is in the ``docs/`` directory and is rendered at http://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaCmd/index.html.
+Documentation for the command processor is in the ``docs/`` directory and is rendered at http://salishsea-cmd.readthedocs.io/en/latest/.
+
+.. image:: https://readthedocs.org/projects/salishsea-cmd/badge/?version=latest
+    :target: http://salishsea-cmd.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
+This an extensible tool built on the OpenStack ``cliff``
+(`Command Line Interface Formulation Framework`_)
+package.
+It is a NEMO domain-specific command processor tool for the `Salish Sea NEMO model`_ that uses plug-ins from the `NEMO-Cmd`_ package.
 
 
 License
