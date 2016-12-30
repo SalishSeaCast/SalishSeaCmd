@@ -1,0 +1,28 @@
+# File map for 30-Dec-2016 creation of SalishSeaCmd repo
+# from the SalishSeaCmd/ directory of the tools repo.
+#
+# The following command was used to create the SalishSeaCmd repo:
+#    cd MEOPAR
+#    hg convert --filemap tools/SalishSeaCmd_filemap.txt tools SalishSeaCmd
+
+include .hgtags
+include environment-rtd.yml
+include LICENSE
+include readthedocs.yml
+include SalishSeaCmd/
+include SalishSeaCmd_filemap.txt
+
+rename SalishSeaCmd/docs docs
+rename SalishSeaCmd/salishsea_cmd salishsea_cmd
+rename SalishSeaCmd/tests tests
+rename SalishSeaCmd/.coveragerc .coveragerc
+rename SalishSeaCmd/README.rst README.rst
+rename SalishSeaCmd/__pkg_metadata__.py __pkg_metadata__.py
+rename SalishSeaCmd/environment.yaml environment-dev.yaml
+rename SalishSeaCmd/requirements.pip requirements.txt
+rename SalishSeaCmd/setup.py setup.py
+
+include docs/conf.py
+include docs/license_description.txt
+include docs/Makefile
+include docs/_static/
