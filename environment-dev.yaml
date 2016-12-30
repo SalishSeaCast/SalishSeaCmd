@@ -4,37 +4,58 @@
 # Create a conda environment in which the `salishsea` command can be run
 # with:
 #
-#   $ cd tools
 #   $ conda env create -f SalishSeaCmd/environment.yaml
 #   $ source activate salishsea-cmd
-#   (salishsea-cmd)$ pip install --editable SalishSeaTools
-#   (salishsea-cmd)$ pip install --editable SalishSeaCmd
+#   (salishsea-cmd)$ pip install --editable tools/SalishSeaTools
+#   (salishsea-cmd)$ pip install --editable NEMO-Cmd/
+#   (salishsea-cmd)$ pip install --editable SalishSeaCmd/
 #
 # The environment will also include all of the tools used to develop,
 # test, and document the SalishSeaCmd package.
 #
-# See the requirements.pip file for an exhaustive list of all of the
+# See the requirements.txt file for an exhaustive list of all of the
 # packages installed in the environment and their versions used in
 # recent development.
 
 name: salishsea-cmd
+
+channels:
+  - defaults
+
 dependencies:
-- coverage
-- ipython
-- matplotlib
-- netCDF4
-- numpy
-- pandas
-- pip
-- pytest
-- python=3
-- pytz
-- requests
-- scipy
-- sphinx
-- pip:
-  - angles
-  - arrow
-  - cliff
-  - ipdb
-  - nbsphinx
+  - netCDF4
+  - pip
+  - python=3.5
+  - pyyaml
+
+  # For SalishSeaTools package
+  - basemap
+  - bottleneck
+  - matplotlib
+  - numpy
+  - pandas
+  - requests
+  - scipy
+  - xarray
+
+  # For unit tests
+  - coverage
+  - pytest
+
+  # For documentation
+  - sphinx
+  - sphinx-rtd-theme
+
+  - pip:
+    - arrow
+    - cliff
+
+    # For SalishSeaTools package
+    - angles
+    - retrying
+
+    # For coding style
+    - yapf
+
+    # For unit and packaging testing under Python 2 and 3
+    - tox
