@@ -416,5 +416,9 @@ def _fix_permissions():
 
 
 def _cleanup():
-    script = (u'echo "Deleting run directory"\n' u'rmdir $(pwd)\n')
+    script = (
+        'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+        'rmdir $(pwd)\n'
+        'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+    )
     return script
