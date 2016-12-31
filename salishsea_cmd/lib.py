@@ -90,26 +90,3 @@ def get_n_processors(run_desc):
                 if jpni == cjpni and jpnj == cjpnj:
                     return cnw
     return jpni * jpnj
-
-
-def netcdf4_deflate(filename, dfl_lvl=4):
-    """Run `ncks -4 -L dfl_lvl` on filename *in place*.
-
-    The result is a netCDF4 file with its variables compressed
-    with Lempel-Ziv deflation.
-
-    :arg filename: Path/filename of the netCDF file to process.
-    :type filename: string
-
-    :arg dfl_lvl: Lempel-Ziv deflation level to use.
-    :type dfl_lvl: int
-
-    :returns: Output of the ncks command.
-    :rtype: string
-    """
-    result = subprocess.check_output(
-        ['ncks', '-4', '-L{}'.format(dfl_lvl), '-O', filename, filename],
-        stderr=subprocess.STDOUT,
-        universal_newlines=True,
-    )
-    return result
