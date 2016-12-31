@@ -29,7 +29,8 @@ The :kbd:`SalishSeaCmd` package is a Python 3 package.
 It is developed and tested under Python 3.5 and should work with that and later versions of Python.
 
 
-Contents:
+Contents
+========
 
 .. toctree::
    :maxdepth: 2
@@ -40,3 +41,15 @@ Contents:
    run_description_file
    api
    development
+
+
+License
+=======
+
+The NEMO command processor code and documentation are copyright 2013-2016 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+
+.. _Salish Sea MEOPAR Project Contributors: https://bitbucket.org/salishsea/docs/src/tip/CONTRIBUTORS.rst
+
+They are licensed under the Apache License, Version 2.0.
+http://www.apache.org/licenses/LICENSE-2.0
+Please see the LICENSE file for details of the license.
