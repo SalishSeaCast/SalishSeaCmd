@@ -22,21 +22,22 @@
 
 The command :kbd:`salishsea --help` produces a list of the available :program:`salishsea` options and sub-commands::
 
-  usage: salishsea [--version] [-v] [--log-file LOG_FILE] [-q] [-h] [--debug]
+  usage: salishsea [--version] [-v | -q] [--log-file LOG_FILE] [-h] [--debug]
 
   Salish Sea NEMO Command Processor
 
   optional arguments:
     --version            show program's version number and exit
     -v, --verbose        Increase verbosity of output. Can be repeated.
-    --log-file LOG_FILE  Specify a file to log output. Disabled by default.
     -q, --quiet          Suppress output except warnings and errors.
-    -h, --help           Show this help message and exit.
+    --log-file LOG_FILE  Specify a file to log output. Disabled by default.
+    -h, --help           Show help message and exit.
     --debug              Show tracebacks on errors.
 
   Commands:
     combine        Combine per-processor files from an MPI NEMO run into single files
     complete       print bash completion command
+    deflate        Deflate variables in netCDF files using Lempel-Ziv compression.
     gather         Gather results from a NEMO run; includes combining MPI results files
     get_cgrf       Download and symlink CGRF atmospheric forcing files
     help           print detailed help for another command
@@ -291,6 +292,25 @@ The run directory also contains symbolic links to:
   The initial conditions may be specified from a restart file instead of a directory of netCDF files,
   in which case the restart file is symlinked as :file:`restart.nc`,
   the file name expected by NEMO.
+
+
+.. _salishsea-deflate:
+
+:kbd:`deflate` Sub-command
+==========================
+
+The :command:`salishsea deflate` command deflates the variables in netCDF files using the Lempel-Ziv compression algorithm to reduce the size of the file on disk.
+It is provided by the `NEMO-Cmd`_ package.
+Please use:
+
+.. code-block:: bash
+
+    $ salishsea help deflate
+
+to see its usage,
+and see :ref:`nemocmd:nemo-deflate` for more details.
+
+.. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
 
 
 .. _salishsea-gather:

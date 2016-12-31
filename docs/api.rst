@@ -26,6 +26,8 @@ and by other software.
 
 .. autofunction:: salishsea_cmd.api.combine
 
+.. autofunction:: salishsea_cmd.api.deflate
+
 .. autofunction:: salishsea_cmd.api.prepare
 
 .. autofunction:: salishsea_cmd.api.run_description
