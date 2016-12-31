@@ -28,6 +28,7 @@ import subprocess
 import cliff.commandmanager
 import yaml
 
+from nemo_cmd import deflate as deflate_plugin
 from salishsea_cmd import prepare as prepare_plugin
 
 __all__ = [
@@ -105,6 +106,18 @@ def combine(
         argv.append('--delete-restart')
     result = _run_subcommand(app, app_args, argv)
     return result
+
+
+def deflate(filenames):
+    """Deflate variables in each of the netCDF files in filenames using
+    Lempel-Ziv compression.
+
+    Converts files to netCDF-4 format.
+    The deflated file replaces the original file.
+
+    :param list filenames: Paths/names of files to be deflated.
+    """
+    return deflate_plugin.deflate(filenames)
 
 
 def prepare(run_desc_file, nemo34=False, nocheck_init=False):

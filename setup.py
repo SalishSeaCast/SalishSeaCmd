@@ -71,6 +71,7 @@ setup(
         # Sub-command plug-ins:
         'salishsea.app': [
             'combine = salishsea_cmd.combine:Combine',
+            'deflate = nemo_cmd.deflate:Deflate',
             'gather = salishsea_cmd.gather:Gather',
             'get_cgrf = salishsea_cmd.get_cgrf:GetCGRF',
             'prepare = salishsea_cmd.prepare:Prepare',
