@@ -11,10 +11,10 @@ Use ``salishsea help <sub-command>`` to get a synopsis of what a sub-command doe
 what its required arguments are,
 and what options are available to control it.
 
-Documentation for the command processor is in the ``docs/`` directory and is rendered at http://salishsea-cmd.readthedocs.io/en/latest/.
+Documentation for the command processor is in the ``docs/`` directory and is rendered at http://salishseacmd.readthedocs.io/en/latest/.
 
-.. image:: https://readthedocs.org/projects/salishsea-cmd/badge/?version=latest
-    :target: http://salishsea-cmd.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
+    :target: http://salishseacmd.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 This an extensible tool built on the OpenStack ``cliff``
