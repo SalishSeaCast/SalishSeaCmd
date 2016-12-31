@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd command plug-in for prepare sub-command.
 
 Sets up the necesaary symbolic links for a Salish Sea NEMO run
@@ -33,9 +32,7 @@ from salishsea_tools.namelist import namelist2dict
 
 from salishsea_cmd import lib
 
-
 __all__ = ['Prepare', 'prepare']
-
 
 log = logging.getLogger(__name__)
 
@@ -43,6 +40,7 @@ log = logging.getLogger(__name__)
 class Prepare(cliff.command.Command):
     """Prepare a Salish Sea NEMO run
     """
+
     def get_parser(self, prog_name):
         parser = super(Prepare, self).get_parser(prog_name)
         parser.description = '''
@@ -50,23 +48,31 @@ class Prepare(cliff.command.Command):
             and print the path to the run directory.
         '''
         parser.add_argument(
-            'desc_file', metavar='DESC_FILE',
-            help='run description YAML file')
+            'desc_file', metavar='DESC_FILE', help='run description YAML file'
+        )
         parser.add_argument(
-            '--nocheck-initial-conditions', dest='nocheck_init',
+            '--nocheck-initial-conditions',
+            dest='nocheck_init',
             action='store_true',
             help='''
             Suppress checking of the initial conditions link.
             Useful if you are submitting a job to wait on a
-            previous job''')
+            previous job'''
+        )
         parser.add_argument(
-            '--nemo3.4', dest='nemo34', action='store_true',
+            '--nemo3.4',
+            dest='nemo34',
+            action='store_true',
             help='''
             Prepare a NEMO-3.4 run;
-            the default is to prepare a NEMO-3.6 run''')
+            the default is to prepare a NEMO-3.6 run'''
+        )
         parser.add_argument(
-            '-q', '--quiet', action='store_true',
-            help="don't show the run directory path on completion")
+            '-q',
+            '--quiet',
+            action='store_true',
+            help="don't show the run directory path on completion"
+        )
         return parser
 
     def take_action(self, parsed_args):
@@ -80,7 +86,8 @@ class Prepare(cliff.command.Command):
         of the set-up.
         """
         run_dir = prepare(
-            parsed_args.desc_file, parsed_args.nemo34, parsed_args.nocheck_init)
+            parsed_args.desc_file, parsed_args.nemo34, parsed_args.nocheck_init
+        )
         if not parsed_args.quiet:
             log.info('Created run directory {}'.format(run_dir))
         return run_dir
@@ -113,15 +120,16 @@ def prepare(desc_file, nemo34, nocheck_init):
     run_desc = lib.load_run_desc(desc_file)
     nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
     xios_code_repo, xios_bin_dir = (
-        _check_xios_exec(run_desc) if not nemo34
-        else (None, None))
+        _check_xios_exec(run_desc) if not nemo34 else (None, None)
+    )
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
     _make_namelists(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34)
     _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34)
     _make_executable_links(
-        nemo_code_repo, nemo_bin_dir, run_dir, nemo34,
-        xios_code_repo, xios_bin_dir)
+        nemo_code_repo, nemo_bin_dir, run_dir, nemo34, xios_code_repo,
+        xios_bin_dir
+    )
     _make_grid_links(run_desc, run_dir)
     _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init)
     return run_dir
@@ -151,15 +159,17 @@ def _check_nemo_exec(run_desc, nemo34):
     :raises: SystemExit
     """
     nemo_code_repo = os.path.abspath(
-        os.path.expandvars(os.path.expanduser(run_desc['paths']['NEMO-code'])))
+        os.path.expandvars(os.path.expanduser(run_desc['paths']['NEMO-code']))
+    )
     config_dir = os.path.join(
-        nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config_name'])
+        nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config_name']
+    )
     nemo_bin_dir = os.path.join(nemo_code_repo, config_dir, 'BLD', 'bin')
     nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
     if not os.path.exists(nemo_exec):
         log.error(
-            '{} not found - did you forget to build it?'
-            .format(nemo_exec))
+            '{} not found - did you forget to build it?'.format(nemo_exec)
+        )
         raise SystemExit(2)
     if nemo34:
         iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
@@ -192,7 +202,8 @@ def _check_xios_exec(run_desc):
     xios_exec = os.path.join(xios_bin_dir, 'xios_server.exe')
     if not os.path.exists(xios_exec):
         log.error(
-            '{} not found - did you forget to build it?'.format(xios_exec))
+            '{} not found - did you forget to build it?'.format(xios_exec)
+        )
         raise SystemExit(2)
     return xios_code_repo, xios_bin_dir
 
@@ -207,7 +218,8 @@ def _make_run_dir(run_desc):
     :type run_desc: dict
     """
     run_dir = os.path.join(
-        run_desc['paths']['runs directory'], str(uuid.uuid1()))
+        run_desc['paths']['runs directory'], str(uuid.uuid1())
+    )
     os.mkdir(run_dir)
     return run_dir
 
@@ -336,7 +348,8 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
                     raise SystemExit(2)
         ref_namelist = namelist_filename.replace('_cfg', '_ref')
         ref_namelist_path = os.path.join(
-            nemo_code_repo, 'NEMOGCM', 'CONFIG', 'SHARED', ref_namelist)
+            nemo_code_repo, 'NEMOGCM', 'CONFIG', 'SHARED', ref_namelist
+        )
         saved_cwd = os.getcwd()
         os.chdir(run_dir)
         os.symlink(ref_namelist_path, ref_namelist)
@@ -346,7 +359,8 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
     else:
         log.error(
             'No namelist_cfg key found in namelists section of run '
-            'description')
+            'description'
+        )
         raise SystemExit(2)
 
 
@@ -408,7 +422,8 @@ def _get_namelist_value(key, lines):
     """
     line_index = [
         i for i, line in enumerate(lines)
-        if line.strip() and line.split()[0] == key][-1]
+        if line.strip() and line.split()[0] == key
+    ][-1]
     value = lines[line_index].split()[2]
     return value, line_index
 
@@ -453,8 +468,9 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
         (os.path.join(run_set_dir, desc_file), os.path.basename(desc_file)),
     ]
     if nemo34:
-        run_set_files.append(
-            (os.path.join(run_set_dir, 'xmlio_server.def'), 'xmlio_server.def'))
+        run_set_files.append((
+            os.path.join(run_set_dir, 'xmlio_server.def'), 'xmlio_server.def'
+        ))
     else:
         run_set_files.extend([
             (os.path.abspath(run_desc['output']['domain']), 'domain_def.xml'),
@@ -498,7 +514,8 @@ def _set_xios_server_mode(run_desc, run_dir):
     tree = xml.etree.ElementTree.parse('iodef.xml')
     root = tree.getroot()
     using_server = root.find(
-        'context[@id="xios"]//variable[@id="using_server"]')
+        'context[@id="xios"]//variable[@id="using_server"]'
+    )
     using_server.text = 'true' if sep_xios_server else 'false'
     using_server_line = xml.etree.ElementTree.tostring(using_server).decode()
     with open('iodef.xml', 'rt') as f:
@@ -512,8 +529,12 @@ def _set_xios_server_mode(run_desc, run_dir):
 
 
 def _make_executable_links(
-    nemo_code_repo, nemo_bin_dir, run_dir, nemo34,
-    xios_code_repo, xios_bin_dir,
+    nemo_code_repo,
+    nemo_bin_dir,
+    run_dir,
+    nemo34,
+    xios_code_repo,
+    xios_bin_dir,
 ):
     """Create symlinks in run_dir to the NEMO and I/O server executables
     and record the code repository revision(s) used for the run.
@@ -591,8 +612,8 @@ def _make_grid_links(run_desc, run_dir):
             log.error(
                 '{} not found; cannot create symlink - '
                 'please check the forcing path and grid file names '
-                'in your run description file'
-                .format(link_path))
+                'in your run description file'.format(link_path)
+            )
             _remove_run_dir(run_dir)
             raise SystemExit(2)
         os.symlink(link_path, link_name)
@@ -661,20 +682,19 @@ def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
     else:
         ic_source = os.path.join(nemo_forcing_dir, init_conditions)
         ic_link_name = os.path.join(run_dir, 'initial_strat')
-    forcing_dirs = (
-        (run_desc['forcing']['atmospheric'],
-            os.path.join(run_dir, 'NEMO-atmos')),
-        (run_desc['forcing']['open boundaries'],
-            os.path.join(run_dir, 'open_boundaries')),
-        (run_desc['forcing']['rivers'],
-            os.path.join(run_dir, 'rivers'))
-    )
+    forcing_dirs = ((
+        run_desc['forcing']['atmospheric'],
+        os.path.join(run_dir, 'NEMO-atmos')
+    ), (
+        run_desc['forcing']['open boundaries'],
+        os.path.join(run_dir, 'open_boundaries')
+    ), (run_desc['forcing']['rivers'], os.path.join(run_dir, 'rivers')))
     if not os.path.exists(ic_source) and not nocheck_init:
         log.error(
             '{} not found; cannot create symlink - '
             'please check the forcing path and initial conditions file names '
-            'in your run description file'
-            .format(ic_source))
+            'in your run description file'.format(ic_source)
+        )
         _remove_run_dir(run_dir)
         raise SystemExit(2)
     os.symlink(ic_source, ic_link_name)
@@ -684,8 +704,8 @@ def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
             log.error(
                 '{} not found; cannot create symlink - '
                 'please check the forcing paths and file names '
-                'in your run description file'
-                .format(link_path))
+                'in your run description file'.format(link_path)
+            )
             _remove_run_dir(run_dir)
             raise SystemExit(2)
         os.symlink(link_path, link_name)
@@ -706,29 +726,29 @@ def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
 
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
     """
-    link_checkers = {
-        'atmospheric': _check_atmospheric_forcing_link,
-    }
+    link_checkers = {'atmospheric': _check_atmospheric_forcing_link,}
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     for link_name in run_desc['forcing']:
         link_path = run_desc['forcing'][link_name]['link to']
         if not os.path.isabs(link_path):
             link_path = os.path.join(nemo_forcing_dir, link_path)
         if not os.path.exists(link_path):
-            if link_name not in {'restart.nc', 'restart_trc.nc'} or not nocheck_init:
+            if link_name not in {
+                'restart.nc', 'restart_trc.nc'
+            } or not nocheck_init:
                 log.error(
                     '{} not found; cannot create symlink - '
                     'please check the forcing paths and file names '
-                    'in your run description file'
-                    .format(link_path))
+                    'in your run description file'.format(link_path)
+                )
                 _remove_run_dir(run_dir)
                 raise SystemExit(2)
         os.symlink(link_path, os.path.join(run_dir, link_name))
         try:
             link_checker = run_desc['forcing'][link_name]['check link']
             link_checkers[link_checker['type']](
-                run_desc, run_dir, link_path,
-                link_checker['namelist filename'])
+                run_desc, run_dir, link_path, link_checker['namelist filename']
+            )
         except KeyError:
             if 'check link' not in run_desc['forcing'][link_name]:
                 # No forcing link checker specified
@@ -737,13 +757,17 @@ def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
                 if link_checker is not None:
                     log.error(
                         'unknown forcing link checker: {}'
-                        .format(link_checker))
+                        .format(link_checker)
+                    )
                     _remove_run_dir(run_dir)
                     raise SystemExit(2)
 
 
 def _check_atmospheric_forcing_link(
-    run_desc, run_dir, link_path, namelist_filename,
+    run_desc,
+    run_dir,
+    link_path,
+    namelist_filename,
 ):
     """Confirm that the atmospheric forcing files necessary for the run
     are present.
@@ -760,8 +784,8 @@ def _check_atmospheric_forcing_link(
     dt = namelist['namdom'][0]['rn_rdt']
     end_date = start_date.replace(seconds=(itend - it000) * dt - 1)
     qtys = (
-        'sn_wndi sn_wndj sn_qsr sn_qlw sn_tair sn_humi sn_prec sn_snow'
-        .split())
+        'sn_wndi sn_wndj sn_qsr sn_qlw sn_tair sn_humi sn_prec sn_snow'.split()
+    )
     core_dir = namelist['namsbc_core'][0]['cn_dir']
     file_info = {
         'core': {
@@ -772,7 +796,8 @@ def _check_atmospheric_forcing_link(
     for qty in qtys:
         flread_params = namelist['namsbc_core'][0][qty]
         file_info['core']['params'].append(
-            (flread_params[0], flread_params[5]))
+            (flread_params[0], flread_params[5])
+        )
     if namelist['namsbc'][0]['ln_apr_dyn']:
         apr_dir = namelist['namsbc_apr'][0]['cn_dir']
         file_info['apr'] = {
@@ -790,10 +815,14 @@ def _check_atmospheric_forcing_link(
                         v['dir'],
                         '{basename}_'
                         'y{date.year}m{date.month:02d}d{date.day:02d}.nc'
-                        .format(basename=basename, date=r))
+                        .format(
+                            basename=basename, date=r
+                        )
+                    )
                 elif period == 'yearly':
                     file_path = os.path.join(
-                        v['dir'], '{basename}.nc'.format(basename=basename))
+                        v['dir'], '{basename}.nc'.format(basename=basename)
+                    )
                 if not os.path.exists(os.path.join(run_dir, file_path)):
                     log.error(
                         '{file_path} not found; '
@@ -802,8 +831,7 @@ def _check_atmospheric_forcing_link(
                         '{end} are in the {dir} collection, '
                         'and that atmospheric forcing paths in your '
                         'run description and surface boundary conditions '
-                        'namelist are in agreement.'
-                        .format(
+                        'namelist are in agreement.'.format(
                             file_path=file_path,
                             startm1=startm1.format('YYYY-MM-DD'),
                             end=end_date.format('YYYY-MM-DD'),
@@ -835,8 +863,8 @@ def _check_atmos_files(run_desc, run_dir):
     start_date = date0.replace(seconds=it000 * dt - 1)
     end_date = date0.replace(seconds=itend * dt - 1)
     qtys = (
-        'sn_wndi sn_wndj sn_qsr sn_qlw sn_tair sn_humi sn_prec sn_snow'
-        .split())
+        'sn_wndi sn_wndj sn_qsr sn_qlw sn_tair sn_humi sn_prec sn_snow'.split()
+    )
     core_dir = namelist['namsbc_core'][0]['cn_dir']
     file_info = {
         'core': {
@@ -847,7 +875,8 @@ def _check_atmos_files(run_desc, run_dir):
     for qty in qtys:
         flread_params = namelist['namsbc_core'][0][qty]
         file_info['core']['params'].append(
-            (flread_params[0], flread_params[5]))
+            (flread_params[0], flread_params[5])
+        )
     if namelist['namsbc'][0]['ln_apr_dyn']:
         apr_dir = namelist['namsbc_apr'][0]['cn_dir']
         file_info['apr'] = {
@@ -865,13 +894,18 @@ def _check_atmos_files(run_desc, run_dir):
                         v['dir'],
                         '{basename}_'
                         'y{date.year}m{date.month:02d}d{date.day:02d}.nc'
-                        .format(basename=basename, date=r))
+                        .format(
+                            basename=basename, date=r
+                        )
+                    )
                 elif period == 'yearly':
                     file_path = os.path.join(
-                        v['dir'], '{basename}.nc'.format(basename=basename))
+                        v['dir'], '{basename}.nc'.format(basename=basename)
+                    )
                 if not os.path.exists(os.path.join(run_dir, file_path)):
                     nemo_forcing_dir = os.path.abspath(
-                        run_desc['paths']['forcing'])
+                        run_desc['paths']['forcing']
+                    )
                     atmos_dir = run_desc['forcing']['atmospheric']
                     log.error(
                         '{file_path} not found; '
@@ -880,8 +914,7 @@ def _check_atmos_files(run_desc, run_dir):
                         '{end} are in the {dir} collection, '
                         'and that atmospheric forcing paths in your '
                         'run description and surface boundary conditions '
-                        'namelist are in agreement.'
-                        .format(
+                        'namelist are in agreement.'.format(
                             file_path=file_path,
                             startm1=startm1.format('YYYY-MM-DD'),
                             end=end_date.format('YYYY-MM-DD'),

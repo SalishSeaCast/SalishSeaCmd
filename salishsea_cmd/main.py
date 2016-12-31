@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd application
 
 Salish Sea NEMO Command Processor
@@ -27,7 +26,6 @@ import cliff.commandmanager
 
 from salishsea_cmd import __pkg_metadata__
 
-
 __all__ = ['main', 'SalishSeaApp']
 
 
@@ -39,7 +37,8 @@ class SalishSeaApp(cliff.app.App):
             description=__pkg_metadata__.DESCRIPTION,
             version=__pkg_metadata__.VERSION,
             command_manager=cliff.commandmanager.CommandManager(
-                'salishsea.app', convert_underscores=False),
+                'salishsea.app', convert_underscores=False
+            ),
             stderr=sys.stdout,
         )
 

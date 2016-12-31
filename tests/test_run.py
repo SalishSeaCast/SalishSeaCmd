@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd run sub-command plug-in unit tests
 """
 import pathlib
@@ -42,6 +41,7 @@ def run_cmd():
 class TestGetParser:
     """Unit tests for `salishsea run` sub-command command-line parser.
     """
+
     def test_get_parser(self, run_cmd):
         parser = run_cmd.get_parser('salishsea run')
         assert parser.prog == 'salishsea run'
@@ -58,16 +58,18 @@ class TestGetParser:
         assert not parsed_args.compress_restart
         assert not parsed_args.delete_restart
 
-    @pytest.mark.parametrize('flag, attr', [
-        ('--nemo3.4', 'nemo34'),
-        ('-q', 'quiet'),
-        ('--quiet', 'quiet'),
-        ('--compress', 'compress'),
-        ('--compress', 'compress'),
-        ('--keep-proc-results', 'keep_proc_results'),
-        ('--compress-restart', 'compress_restart'),
-        ('--delete-restart', 'delete_restart'),
-    ])
+    @pytest.mark.parametrize(
+        'flag, attr', [
+            ('--nemo3.4', 'nemo34'),
+            ('-q', 'quiet'),
+            ('--quiet', 'quiet'),
+            ('--compress', 'compress'),
+            ('--compress', 'compress'),
+            ('--keep-proc-results', 'keep_proc_results'),
+            ('--compress-restart', 'compress_restart'),
+            ('--delete-restart', 'delete_restart'),
+        ]
+    )
     def test_parsed_args_flags(self, flag, attr, run_cmd):
         parser = run_cmd.get_parser('salishsea run')
         parsed_args = parser.parse_args(['foo', 'baz', flag])
@@ -79,6 +81,7 @@ class TestGetParser:
 class TestTakeAction:
     """Unit tests for `salishsea run` sub-command take_action() method.
     """
+
     def test_take_action(self, m_run, m_log, run_cmd):
         parsed_args = Mock(
             desc_file='desc file',
@@ -94,8 +97,9 @@ class TestTakeAction:
         )
         run_cmd.run(parsed_args)
         m_run.assert_called_once_with(
-            'desc file', 'results dir',
-            False, False, 0, False, False, False, False, False)
+            'desc file', 'results dir', False, False, 0, False, False, False,
+            False, False
+        )
         m_log.info.assert_called_once_with('qsub message')
 
     def test_take_action_quiet(self, m_run, m_log, run_cmd):
@@ -121,14 +125,25 @@ class TestTakeAction:
 class TestRun:
     """Unit tests for `salishsea run` run() function.
     """
-    @pytest.mark.parametrize('nemo34, sep_xios_server, xios_servers', [
-        (True, None, 0),
-        (False, False, 0),
-        (False, True, 4),
-    ])
+
+    @pytest.mark.parametrize(
+        'nemo34, sep_xios_server, xios_servers', [
+            (True, None, 0),
+            (False, False, 0),
+            (False, True, 4),
+        ]
+    )
     def test_run(
-        self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco,
-        nemo34, sep_xios_server, xios_servers, tmpdir,
+        self,
+        m_prepare,
+        m_lrd,
+        m_gnp,
+        m_bbs,
+        m_sco,
+        nemo34,
+        sep_xios_server,
+        xios_servers,
+        tmpdir,
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = str(p_run_dir)
@@ -142,22 +157,25 @@ class TestRun:
             }
         with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
             qsb_msg = salishsea_cmd.run.run(
-                'SalishSea.yaml', str(p_results_dir), nemo34)
+                'SalishSea.yaml', str(p_results_dir), nemo34
+            )
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_gnp.assert_called_once_with(m_lrd())
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers,
-            pathlib.Path(str(p_results_dir)), str(p_run_dir), '', 'orcinus',
-            nemo34)
-        m_sco.assert_called_once_with(
-            ['qsub', 'SalishSeaNEMO.sh'], universal_newlines=True)
+            pathlib.Path(str(p_results_dir)),
+            str(p_run_dir), '', 'orcinus', nemo34
+        )
+        m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],
+                                      universal_newlines=True)
         assert qsb_msg == 'msg'
 
 
 class TestPbsFeatures:
     """Unit tests for `salishsea run _pbs_features() function.
     """
+
     @pytest.mark.parametrize('n_processors, nodes', [
         (144, 12),
         (145, 13),
@@ -170,10 +188,12 @@ class TestPbsFeatures:
         )
         assert pbs_features == expected
 
-    @pytest.mark.parametrize('system, expected', [
-        ('orcinus', '#PBS -l partition=QDR\n'),
-        ('salish', ''),
-    ])
+    @pytest.mark.parametrize(
+        'system, expected', [
+            ('orcinus', '#PBS -l partition=QDR\n'),
+            ('salish', ''),
+        ]
+    )
     def test_orcinus(self, system, expected):
         pbs_features = salishsea_cmd.run._pbs_features(144, system)
         assert pbs_features == expected

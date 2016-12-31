@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd combine sub-command plug-in unit tests
 """
 try:
@@ -41,6 +40,7 @@ def combine_cmd():
 class TestGetParser:
     """Unit tests for `salishsea combine` sub-command command-line parser.
     """
+
     def test_get_parser(self, combine_cmd):
         parser = combine_cmd.get_parser('salishsea combine')
         assert parser.prog == 'salishsea combine'
@@ -48,12 +48,18 @@ class TestGetParser:
 
 @patch('salishsea_cmd.combine.os.path.lexists')
 class TestFindRebuildNemoScrit:
-    @pytest.mark.parametrize('nemo_path, expected', [
-        ('NEMO-code', 'NEMO-code/NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo'),
-    ])
+    @pytest.mark.parametrize(
+        'nemo_path, expected', [
+            ('NEMO-code', 'NEMO-code/NEMOGCM/TOOLS/REBUILD_NEMO/rebuild_nemo'),
+        ]
+    )
     @patch('salishsea_cmd.combine.os.path.abspath')
     def test_find_rebuild_nemo_script_found(
-            self, mock_abspath, mock_lexists, nemo_path, expected,
+        self,
+        mock_abspath,
+        mock_lexists,
+        nemo_path,
+        expected,
     ):
         """_find_rebuild_nemo_exec returns script name if executable exists
         """
@@ -121,7 +127,8 @@ class TestCombineResultsFiles:
             ['bar_0000.nc', 'bar_0001.nc', 'bar_0002.nc'],
         )
         salishsea_cmd.combine._combine_results_files(
-            'rebuild_nemo', ['foo', 'bar'], 3)
+            'rebuild_nemo', ['foo', 'bar'], 3
+        )
         assert mock_chk_out.call_count == 2
 
 

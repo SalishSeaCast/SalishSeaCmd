@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd get_cgrf sub-command plug-in unit tests
 """
 try:
@@ -56,8 +55,16 @@ def test_get_parser(get_cgrf_cmd):
 @patch('salishsea_cmd.get_cgrf.tempfile.NamedTemporaryFile')
 @patch('salishsea_cmd.get_cgrf.os.listdir')
 def test_take_action_calls_get_cgrf(
-    m_listdir, m_NTF, m_rmdir, m_rm, m_mkdir, m_chdir, m_rebase, m_corr_press,
-    m_get_cgrf, get_cgrf_cmd,
+    m_listdir,
+    m_NTF,
+    m_rmdir,
+    m_rm,
+    m_mkdir,
+    m_chdir,
+    m_rebase,
+    m_corr_press,
+    m_get_cgrf,
+    get_cgrf_cmd,
 ):
     """take_action calls _get_cgrf for expected dates
     """
@@ -87,8 +94,16 @@ def test_take_action_calls_get_cgrf(
 @patch('salishsea_cmd.get_cgrf.tempfile.NamedTemporaryFile')
 @patch('salishsea_cmd.get_cgrf.os.listdir')
 def test_take_action_calls_rebase_cgrf_time(
-    m_listdir, m_NTF, m_rmdirs, m_rm, m_mkdir, m_chdir, m_get_cgrf, m_rebase,
-    m_corr_press, get_cgrf_cmd,
+    m_listdir,
+    m_NTF,
+    m_rmdirs,
+    m_rm,
+    m_mkdir,
+    m_chdir,
+    m_get_cgrf,
+    m_rebase,
+    m_corr_press,
+    get_cgrf_cmd,
 ):
     """take_action calls _rebase_cgrf_time for expected dates
     """
@@ -117,8 +132,16 @@ def test_take_action_calls_rebase_cgrf_time(
 @patch('salishsea_cmd.get_cgrf.tempfile.NamedTemporaryFile')
 @patch('salishsea_cmd.get_cgrf.os.listdir', return_value=['bar'])
 def test_take_action_removes_rsync_dirs(
-    m_listdir, m_NTF, m_rm, m_chdir, m_mkdir, m_get_cgrf, m_rebase,
-    m_corr_press, m_rmdir, get_cgrf_cmd,
+    m_listdir,
+    m_NTF,
+    m_rm,
+    m_chdir,
+    m_mkdir,
+    m_get_cgrf,
+    m_rebase,
+    m_corr_press,
+    m_rmdir,
+    get_cgrf_cmd,
 ):
     """take_action removes rsync-ed CGRF diretories
     """
@@ -129,8 +152,7 @@ def test_take_action_removes_rsync_dirs(
         userid='foo',
         passwd='bar',
     )
-    with patch('salishsea_cmd.get_cgrf.RSYNC_MIRROR_DIR',
-               '/foo/rsync-mirror'):
+    with patch('salishsea_cmd.get_cgrf.RSYNC_MIRROR_DIR', '/foo/rsync-mirror'):
         get_cgrf_cmd.take_action(args)
     expected = [
         call('/foo/rsync-mirror/2014-01-07'),
@@ -191,7 +213,10 @@ def test_get_cgrf_unzip(m_listdir, m_chmod, m_call):
 @patch('salishsea_cmd.get_cgrf.nc')
 @patch('salishsea_cmd.get_cgrf._improve_cgrf_file')
 def test_rebase_cgrf_time_calls_get_cgrf_hyperslab(
-    m_improve, m_nc, m_merge, m_get_slab,
+    m_improve,
+    m_nc,
+    m_merge,
+    m_get_slab,
 ):
     """_rebase_cgrf_time calls _get_cgrf_hyperslab with expected args
     """
@@ -211,7 +236,10 @@ def test_rebase_cgrf_time_calls_get_cgrf_hyperslab(
 @patch('salishsea_cmd.get_cgrf.nc')
 @patch('salishsea_cmd.get_cgrf._improve_cgrf_file')
 def test_rebase_cgrf_time_calls_merge_cgrf_hyperslabs(
-    m_improve, m_nc, m_get_slab, m_merge,
+    m_improve,
+    m_nc,
+    m_get_slab,
+    m_merge,
 ):
     """_rebase_cgrf_time calls _merge_cgrf_hyperslabs with expected args
     """
@@ -227,7 +255,10 @@ def test_rebase_cgrf_time_calls_merge_cgrf_hyperslabs(
 @patch('salishsea_cmd.get_cgrf._merge_cgrf_hyperslabs')
 @patch('salishsea_cmd.get_cgrf.nc')
 def test_rebase_cgrf_time_calls_improve_cgrf_file(
-    m_nc, m_merge, m_get_slab, m_improve,
+    m_nc,
+    m_merge,
+    m_get_slab,
+    m_improve,
 ):
     """_rebase_cgrf_time calls _improve_cgrf_file with expected args
     """
@@ -242,8 +273,10 @@ def test_rebase_cgrf_time_calls_improve_cgrf_file(
         ('u10', 'u-component 10m wind'),
         ('v10', 'v-component 10m wind'),
     )
-    expected = [call(var, descr, day, m_nc.Dataset('tmp2.nc').history)
-                for var, descr in vars]
+    expected = [
+        call(var, descr, day, m_nc.Dataset('tmp2.nc').history)
+        for var, descr in vars
+    ]
     salishsea_cmd.get_cgrf._rebase_cgrf_time(day)
     assert m_improve.mock_calls == expected
 
@@ -253,9 +286,10 @@ def test_get_cgrf_hyperslab(m_chk_call):
     """_get_cgrf_hyperslab invokes expected ncks command
     """
     day = arrow.get(2014, 1, 7)
-    with patch('salishsea_cmd.get_cgrf.RSYNC_MIRROR_DIR',
-               '/foo/rsync-mirror'):
-        salishsea_cmd.get_cgrf._get_cgrf_hyperslab(day, 'u10', 18, 23, 'tmp1.nc')
+    with patch('salishsea_cmd.get_cgrf.RSYNC_MIRROR_DIR', '/foo/rsync-mirror'):
+        salishsea_cmd.get_cgrf._get_cgrf_hyperslab(
+            day, 'u10', 18, 23, 'tmp1.nc'
+        )
     expected = (
         'ncks -4 -L4 -O -d time_counter,18,23 '
         '/foo/rsync-mirror/2014-01-07/2014010700_u10.nc tmp1.nc'
@@ -268,14 +302,15 @@ def test_merge_cgrf_hyperslabs(m_chk_out):
     """_merge_cgrf_hyperslabs invokes expected ncrcat command
     """
     day = arrow.get(2014, 1, 7)
-    with patch('salishsea_cmd.get_cgrf.NEMO_ATMOS_DIR',
-               '/foo/NEMO-atmos'):
+    with patch('salishsea_cmd.get_cgrf.NEMO_ATMOS_DIR', '/foo/NEMO-atmos'):
         salishsea_cmd.get_cgrf._merge_cgrf_hyperslabs(
-            day, 'u10', 'tmp1.nc', 'tmp2.nc')
+            day, 'u10', 'tmp1.nc', 'tmp2.nc'
+        )
     expected = (
         'ncrcat -O '
         'tmp1.nc tmp2.nc '
         '/foo/NEMO-atmos/u10_y2014m01d07.nc'
     ).split()
     m_chk_out.assert_called_once_with(
-        expected, stderr=-2, universal_newlines=True)
+        expected, stderr=-2, universal_newlines=True
+    )
