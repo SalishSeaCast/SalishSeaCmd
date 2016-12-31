@@ -32,8 +32,6 @@ from salishsea_tools.namelist import namelist2dict
 
 from salishsea_cmd import lib
 
-__all__ = ['Prepare', 'prepare']
-
 log = logging.getLogger(__name__)
 
 

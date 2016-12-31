@@ -33,8 +33,6 @@ import numpy as np
 
 from salishsea_tools import nc_tools
 
-__all__ = ['GetCGRF']
-
 log = logging.getLogger(__name__)
 
 SERVER = 'goapp.ocean.dal.ca::canadian_GDPS_reforecasts_v1'
