@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd command plug-in for get_cgrf sub-command.
 
 Download CGRF products atmospheric forcing files from Dalhousie rsync
@@ -34,18 +33,14 @@ import numpy as np
 
 from salishsea_tools import nc_tools
 
-
 __all__ = ['GetCGRF']
-
 
 log = logging.getLogger(__name__)
 
-
 SERVER = 'goapp.ocean.dal.ca::canadian_GDPS_reforecasts_v1'
 PERM664 = (
-    stat.S_IRUSR | stat.S_IWUSR |
-    stat.S_IRGRP | stat.S_IWGRP |
-    stat.S_IROTH)
+    stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH
+)
 PERM775 = PERM664 | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
 
 RSYNC_MIRROR_DIR = os.path.abspath('rsync-mirror')
@@ -57,6 +52,7 @@ ALTITUDE_DIR = os.path.abspath('NEMO-atmos')
 class GetCGRF(cliff.command.Command):
     """Download and symlink CGRF atmospheric forcing files
     """
+
     def get_parser(self, prog_name):
         parser = super(GetCGRF, self).get_parser(prog_name)
         parser.description = '''
@@ -65,17 +61,30 @@ class GetCGRF(cliff.command.Command):
             that NEMO expects.
         '''
         parser.add_argument(
-            'start_date', metavar='START_DATE', type=self._date_string,
-            help='1st date to download files for')
+            'start_date',
+            metavar='START_DATE',
+            type=self._date_string,
+            help='1st date to download files for'
+        )
         parser.add_argument(
-            '-d', '--days', type=int, default=1,
-            help='Number of days to download; defaults to 1')
+            '-d',
+            '--days',
+            type=int,
+            default=1,
+            help='Number of days to download; defaults to 1'
+        )
         parser.add_argument(
-            '--user', dest='userid', metavar='USERID',
-            help='User id for Dalhousie CGRF rsync repository')
+            '--user',
+            dest='userid',
+            metavar='USERID',
+            help='User id for Dalhousie CGRF rsync repository'
+        )
         parser.add_argument(
-            '--password', dest='passwd', metavar='PASSWD',
-            help='Passowrd for Dalhousie CGRF rsync repository')
+            '--password',
+            dest='passwd',
+            metavar='PASSWD',
+            help='Passowrd for Dalhousie CGRF rsync repository'
+        )
         return parser
 
     def take_action(self, parsed_args):
@@ -84,11 +93,13 @@ class GetCGRF(cliff.command.Command):
         NEMO expects.
         """
         userid = (
-            parsed_args.userid if parsed_args.userid is not None
-            else raw_input('User id: '))
+            parsed_args.userid
+            if parsed_args.userid is not None else raw_input('User id: ')
+        )
         passwd = (
-            parsed_args.passwd if parsed_args.passwd is not None
-            else getpass.getpass())
+            parsed_args.passwd
+            if parsed_args.passwd is not None else getpass.getpass()
+        )
         with tempfile.NamedTemporaryFile(mode='wt', delete=False) as f:
             f.write('{}\n'.format(passwd))
             passwd_file = f.name
@@ -111,7 +122,8 @@ class GetCGRF(cliff.command.Command):
         os.remove('tmp2.nc')
         for day in arrow.Arrow.range('day', start_date, end_date):
             rsync_dir = os.path.join(
-                RSYNC_MIRROR_DIR, day.format('YYYY-MM-DD'))
+                RSYNC_MIRROR_DIR, day.format('YYYY-MM-DD')
+            )
             log.info('Deleting {} files'.format(rsync_dir))
             for f in os.listdir(rsync_dir):
                 os.remove(os.path.join(rsync_dir, f))
@@ -123,11 +135,13 @@ class GetCGRF(cliff.command.Command):
             value = arrow.get(string)
         except arrow.parser.ParserError:
             raise argparse.ArgumentTypeError(
-                'Invalid start date: {}'.format(string))
+                'Invalid start date: {}'.format(string)
+            )
         if value < arrow.get(2002, 1, 1) or value > arrow.get(2012, 12, 31):
             raise argparse.ArgumentTypeError(
                 'Start date out of CGRF range 2002-01-01 to 2012-12-31: {}'
-                .format(string))
+                .format(string)
+            )
         return value
 
 
@@ -182,8 +196,11 @@ def _get_cgrf_hyperslab(day, var, start_hr, end_hr, result_filename):
     cgrf_filename = '{}_{}.nc'.format(day.format('YYYYMMDD00'), var)
     cmd = [
         'ncks',
-        '-4', '-L4', '-O',
-        '-d', 'time_counter,{},{}'.format(start_hr, end_hr),
+        '-4',
+        '-L4',
+        '-O',
+        '-d',
+        'time_counter,{},{}'.format(start_hr, end_hr),
         os.path.join(src_dir, cgrf_filename),
         result_filename,
     ]
@@ -191,18 +208,19 @@ def _get_cgrf_hyperslab(day, var, start_hr, end_hr, result_filename):
 
 
 def _merge_cgrf_hyperslabs(day, var, part1_filename, part2_filename):
-        nemo_filename = '{}_{}.nc'.format(var, day.strftime('y%Ym%md%d'))
-        cmd = [
-            'ncrcat',
-            '-O',
-            part1_filename,
-            part2_filename,
-            os.path.join(NEMO_ATMOS_DIR, nemo_filename),
-        ]
-        output = subprocess.check_output(
-            cmd, stderr=subprocess.STDOUT, universal_newlines=True)
-        if output.strip() and not output.startswith('ncrcat: INFO/WARNING'):
-            log.info(output)
+    nemo_filename = '{}_{}.nc'.format(var, day.strftime('y%Ym%md%d'))
+    cmd = [
+        'ncrcat',
+        '-O',
+        part1_filename,
+        part2_filename,
+        os.path.join(NEMO_ATMOS_DIR, nemo_filename),
+    ]
+    output = subprocess.check_output(
+        cmd, stderr=subprocess.STDOUT, universal_newlines=True
+    )
+    if output.strip() and not output.startswith('ncrcat: INFO/WARNING'):
+        log.info(output)
 
 
 def _improve_cgrf_file(var, description, day, tmp2_history):
@@ -212,21 +230,25 @@ def _improve_cgrf_file(var, description, day, tmp2_history):
         dataset,
         title=(
             'CGRF {} forcing dataset for {}'
-            .format(description, day.format('YYYY-MM-DD'))),
+            .format(description, day.format('YYYY-MM-DD'))
+        ),
         notebook_name='',
         nc_filepath='',
         comment=(
             'Processed from '
-            'goapp.ocean.dal.ca::canadian_GDPS_reforecasts_v1 files.'),
+            'goapp.ocean.dal.ca::canadian_GDPS_reforecasts_v1 files.'
+        ),
         quiet=True,
     )
     dataset.source = (
         'https://bitbucket.org/salishsea/tools/raw/tip/SalishSeaCmd/'
-        'salishsea_cmd/get_cgrf.py')
+        'salishsea_cmd/get_cgrf.py'
+    )
     dataset.references = os.path.join(NEMO_ATMOS_DIR, nemo_filename)
     time_counter = dataset.variables['time_counter']
     time_counter.units = (
-        'hours since {} 00:00:00'.format(day.format('YYYY-MM-DD')))
+        'hours since {} 00:00:00'.format(day.format('YYYY-MM-DD'))
+    )
     time_counter.time_origin = '{} 00:00:00'.format(day.format('YYYY-MMM-DD'))
     time_counter[:] = np.arange(24)
     time_counter.valid_range = np.array((0, 23))

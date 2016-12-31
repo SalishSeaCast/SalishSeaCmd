@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd command plug-in for run sub-command.
 
 Prepare for, execute, and gather the results of a run of the
@@ -35,9 +34,7 @@ from salishsea_cmd import (
     lib,
 )
 
-
 __all__ = ['Run', 'run', 'td2hms']
-
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +42,7 @@ log = logging.getLogger(__name__)
 class Run(cliff.command.Command):
     """Prepare, execute, and gather results from a Salish Sea NEMO model run.
     """
+
     def get_parser(self, prog_name):
         parser = super(Run, self).get_parser(prog_name)
         parser.description = '''
@@ -55,45 +53,65 @@ class Run(cliff.command.Command):
             If RESULTS_DIR does not exist it will be created.
         '''
         parser.add_argument(
-            'desc_file', metavar='DESC_FILE',
-            help='File path/name of run description YAML file')
+            'desc_file',
+            metavar='DESC_FILE',
+            help='File path/name of run description YAML file'
+        )
         parser.add_argument(
-            'results_dir', metavar='RESULTS_DIR',
-            help='directory to store results into')
+            'results_dir',
+            metavar='RESULTS_DIR',
+            help='directory to store results into'
+        )
         parser.add_argument(
-            '--nocheck-initial-conditions', dest='nocheck_init',
+            '--nocheck-initial-conditions',
+            dest='nocheck_init',
             action='store_true',
             help='''
             Suppress checking of the initial conditions link.
             Useful if you are submitting a job to wait on a
-            previous job''')
+            previous job'''
+        )
         parser.add_argument(
-            '--nemo3.4', dest='nemo34', action='store_true',
+            '--nemo3.4',
+            dest='nemo34',
+            action='store_true',
             help='''
             Do a NEMO-3.4 run;
-            the default is to do a NEMO-3.6 run''')
+            the default is to do a NEMO-3.6 run'''
+        )
         parser.add_argument(
-            '--waitjob', type=int,
+            '--waitjob',
+            type=int,
             default=0,
             help='''
             use -W waitjob in call to qsub, to make current job
             wait for on waitjob.  Waitjob is the queue job number
-            ''')
+            '''
+        )
         parser.add_argument(
-            '-q', '--quiet', action='store_true',
-            help="don't show the run directory path or job submission message")
+            '-q',
+            '--quiet',
+            action='store_true',
+            help="don't show the run directory path or job submission message"
+        )
         parser.add_argument(
-            '--compress', action='store_true',
-            help='compress results files')
+            '--compress', action='store_true', help='compress results files'
+        )
         parser.add_argument(
-            '--keep-proc-results', action='store_true',
-            help="don't delete per-processor results files")
+            '--keep-proc-results',
+            action='store_true',
+            help="don't delete per-processor results files"
+        )
         parser.add_argument(
-            '--compress-restart', action='store_true',
-            help="compress restart file(s)")
+            '--compress-restart',
+            action='store_true',
+            help="compress restart file(s)"
+        )
         parser.add_argument(
-            '--delete-restart', action='store_true',
-            help="delete restart file(s)")
+            '--delete-restart',
+            action='store_true',
+            help="delete restart file(s)"
+        )
         return parser
 
     def take_action(self, parsed_args):
@@ -106,17 +124,18 @@ class Run(cliff.command.Command):
         :type parsed_args: :class:`argparse.Namespace` instance
         """
         qsub_msg = run(
-            parsed_args.desc_file, parsed_args.results_dir,
-            parsed_args.nemo34, parsed_args.nocheck_init, parsed_args.waitjob,
-            parsed_args.quiet,
+            parsed_args.desc_file, parsed_args.results_dir, parsed_args.nemo34,
+            parsed_args.nocheck_init, parsed_args.waitjob, parsed_args.quiet,
             parsed_args.keep_proc_results, parsed_args.compress,
-            parsed_args.compress_restart, parsed_args.delete_restart)
+            parsed_args.compress_restart, parsed_args.delete_restart
+        )
         if not parsed_args.quiet:
             log.info(qsub_msg)
 
 
 def run(
-    desc_file, results_dir,
+    desc_file,
+    results_dir,
     nemo34=False,
     nocheck_init=False,
     waitjob=0,
@@ -201,10 +220,17 @@ def run(
         gather_opts = ' '.join((gather_opts, '--delete-restart'))
     system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
     batch_script = _build_batch_script(
-        run_desc, desc_file, nemo_processors, xios_processors, results_dir,
-        run_dir.as_posix(), gather_opts, system, nemo34,
+        run_desc,
+        desc_file,
+        nemo_processors,
+        xios_processors,
+        results_dir,
+        run_dir.as_posix(),
+        gather_opts,
+        system,
+        nemo34,
     )
-    batch_file = run_dir/'SalishSeaNEMO.sh'
+    batch_file = run_dir / 'SalishSeaNEMO.sh'
     with batch_file.open('wt') as f:
         f.write(batch_script)
     starting_dir = pathlib.Path.cwd()
@@ -259,27 +285,26 @@ def _build_batch_script(
         except KeyError:
             email = u'{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
         script = u'\n'.join((
-            script,
-            u'{pbs_common}'
-            u'{pbs_features}\n'
-            .format(
+            script, u'{pbs_common}'
+            u'{pbs_features}\n'.format(
                 pbs_common=api.pbs_common(
                     run_desc, nemo_processors + xios_processors, email,
-                    results_dir),
+                    results_dir
+                ),
                 pbs_features=_pbs_features(
-                    nemo_processors + xios_processors, system))
+                    nemo_processors + xios_processors, system
+                )
+            )
         ))
     script = u'\n'.join((
-        script,
-        u'{defns}\n'
+        script, u'{defns}\n'
         u'{modules}\n'
         u'{execute}\n'
         u'{fix_permissions}\n'
-        u'{cleanup}'
-        .format(
+        u'{cleanup}'.format(
             defns=_definitions(
-                run_desc, desc_file, run_dir, results_dir, gather_opts,
-                system),
+                run_desc, desc_file, run_dir, results_dir, gather_opts, system
+            ),
             modules=_modules(system, nemo34),
             execute=_execute(nemo_processors, xios_processors),
             fix_permissions=_fix_permissions(),
@@ -299,14 +324,17 @@ def _pbs_features(n_processors, system):
             u'#PBS -l nodes={}:ppn={}\n'.format(int(nodes), ppn)
         )
     elif system == 'orcinus':
-        pbs_features = (
-            u'#PBS -l partition=QDR\n'
-        )
+        pbs_features = (u'#PBS -l partition=QDR\n')
     return pbs_features
 
 
 def _definitions(
-    run_desc, run_desc_file, run_dir, results_dir, gather_opts, system,
+    run_desc,
+    run_desc_file,
+    run_dir,
+    results_dir,
+    gather_opts,
+    system,
 ):
     home = u'${HOME}' if system == 'salish' else u'${PBS_O_HOME}'
     defns = (
@@ -358,14 +386,16 @@ def _modules(system, nemo34):
 def _execute(nemo_processors, xios_processors):
     mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
     if xios_processors:
-        mpirun = u' '.join((
-            mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
+        mpirun = u' '.join(
+            (mpirun, ':', '-np', str(xios_processors), './xios_server.exe')
+        )
     script = (
         u'cd ${WORK_DIR}\n'
         u'echo "working dir: $(pwd)"\n'
         u'\n'
         u'echo "Starting run at $(date)"\n'
-        u'mkdir -p ${RESULTS_DIR}\n')
+        u'mkdir -p ${RESULTS_DIR}\n'
+    )
     script += u'{mpirun}\n'.format(mpirun=mpirun)
     script += (
         u'echo "Ended run at $(date)"\n'
@@ -387,8 +417,5 @@ def _fix_permissions():
 
 
 def _cleanup():
-    script = (
-        u'echo "Deleting run directory"\n'
-        u'rmdir $(pwd)\n'
-    )
+    script = (u'echo "Deleting run directory"\n' u'rmdir $(pwd)\n')
     return script

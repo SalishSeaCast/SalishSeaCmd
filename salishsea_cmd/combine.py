@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd command plug-in for combine sub-command.
 
 Combine per-processor files from an MPI Salish Sea NEMO run into single
@@ -30,9 +29,7 @@ import cliff.command
 
 from salishsea_cmd import lib
 
-
 __all__ = ['Combine']
-
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +37,7 @@ log = logging.getLogger(__name__)
 class Combine(cliff.command.Command):
     """Combine per-processor files from an MPI NEMO run into single files
     """
+
     def get_parser(self, prog_name):
         parser = super(Combine, self).get_parser(prog_name)
         parser.description = '''
@@ -69,7 +67,9 @@ class Combine(cliff.command.Command):
         name_roots = _get_results_files(parsed_args)
         if name_roots:
             rebuild_nemo_script = _find_rebuild_nemo_script(run_desc)
-            _combine_results_files(rebuild_nemo_script, name_roots, n_processors)
+            _combine_results_files(
+                rebuild_nemo_script, name_roots, n_processors
+            )
             os.remove('nam_rebuild')
         _netcdf4_deflate_results()
         if name_roots:
@@ -80,13 +80,16 @@ class Combine(cliff.command.Command):
 
 def _find_rebuild_nemo_script(run_desc):
     nemo_code_repo = os.path.abspath(
-        os.path.expandvars(os.path.expanduser(run_desc['paths']['NEMO-code'])))
+        os.path.expandvars(os.path.expanduser(run_desc['paths']['NEMO-code']))
+    )
     rebuild_nemo_exec = os.path.join(
-        nemo_code_repo, 'NEMOGCM', 'TOOLS', 'REBUILD_NEMO', 'rebuild_nemo.exe')
+        nemo_code_repo, 'NEMOGCM', 'TOOLS', 'REBUILD_NEMO', 'rebuild_nemo.exe'
+    )
     if not os.path.lexists(rebuild_nemo_exec):
         log.error(
             '{} not found - did you forget to build it?'
-            .format(rebuild_nemo_exec))
+            .format(rebuild_nemo_exec)
+        )
         sys.exit(2)
     rebuild_nemo_script = os.path.splitext(rebuild_nemo_exec)[0]
     return rebuild_nemo_script
@@ -101,8 +104,8 @@ def _get_results_files(args):
     name_roots = [fn[:-8] for fn in glob.glob(result_pattern)]
     if not name_roots:
         log.info(
-            'no files found that match the {} pattern'
-            .format(result_pattern))
+            'no files found that match the {} pattern'.format(result_pattern)
+        )
     return name_roots
 
 
@@ -118,14 +121,16 @@ def _combine_results_files(rebuild_nemo_script, name_roots, n_processors):
             result = subprocess.check_output(
                 [rebuild_nemo_script, fn, str(n_processors)],
                 stderr=subprocess.STDOUT,
-                universal_newlines=True)
+                universal_newlines=True
+            )
             log.info(result)
 
 
 def _netcdf4_deflate_results():
     log.info('Starting netCDF4 deflation...')
     patterns = (
-        '*_grid_[TUVW].nc', '*_ptrc_T.nc',
+        '*_grid_[TUVW].nc',
+        '*_ptrc_T.nc',
     )
     for pattern in patterns:
         for fn in glob.glob(pattern):

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd -- Salish Sea NEMO command processor
 """
 from setuptools import (
@@ -22,10 +21,10 @@ from setuptools import (
 
 from salishsea_cmd import __pkg_metadata__
 
-
 python_classifiers = [
     'Programming Language :: Python :: {0}'.format(py_version)
-    for py_version in ['2', '2.7', '3', '3.4', '3.5']]
+    for py_version in ['2', '2.7', '3', '3.4', '3.5']
+]
 other_classifiers = [
     'Development Status :: ' + __pkg_metadata__.DEV_STATUS,
     'License :: OSI Approved :: Apache Software License',
@@ -68,9 +67,7 @@ setup(
     packages=find_packages(),
     entry_points={
         # The salishsea command:
-        'console_scripts': [
-            'salishsea = salishsea_cmd.main:main',
-        ],
+        'console_scripts': ['salishsea = salishsea_cmd.main:main',],
         # Sub-command plug-ins:
         'salishsea.app': [
             'combine = salishsea_cmd.combine:Combine',
