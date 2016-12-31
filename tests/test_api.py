@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd combine sub-command plug-in unit tests
 """
 from io import StringIO
@@ -39,61 +38,85 @@ class TestCombine(object):
     @patch('salishsea_cmd.api._run_subcommand')
     def test_combine_default_args(self, m_run_subcommand):
         app, app_args = Mock(spec=cliff.app.App), []
-        salishsea_cmd.api.combine(app, app_args, 'run_desc_file', 'results_dir')
+        salishsea_cmd.api.combine(
+            app, app_args, 'run_desc_file', 'results_dir'
+        )
         m_run_subcommand.assert_called_once_with(
-            app, app_args, ['combine', 'run_desc_file', 'results_dir'])
+            app, app_args, ['combine', 'run_desc_file', 'results_dir']
+        )
 
     @patch('salishsea_cmd.api._run_subcommand')
     def test_combine_keep_proc_results_arg(self, m_run_subcommand):
         app, app_args = Mock(spec=cliff.app.App), []
         salishsea_cmd.api.combine(
-            app, app_args, 'run_desc_file', 'results_dir',
-            keep_proc_results=True)
+            app,
+            app_args,
+            'run_desc_file',
+            'results_dir',
+            keep_proc_results=True
+        )
         m_run_subcommand.assert_called_once_with(
             app, app_args,
-            ['combine', 'run_desc_file', 'results_dir', '--keep-proc-results'])
+            ['combine', 'run_desc_file', 'results_dir', '--keep-proc-results']
+        )
 
     @patch('salishsea_cmd.api._run_subcommand')
     def test_combine_no_compress_arg(self, m_run_subcommand):
         app, app_args = Mock(spec=cliff.app.App), []
         salishsea_cmd.api.combine(
-            app, app_args, 'run_desc_file', 'results_dir',
-            no_compress=True)
+            app, app_args, 'run_desc_file', 'results_dir', no_compress=True
+        )
         m_run_subcommand.assert_called_once_with(
             app, app_args,
-            ['combine', 'run_desc_file', 'results_dir', '--no-compress'])
+            ['combine', 'run_desc_file', 'results_dir', '--no-compress']
+        )
 
     @patch('salishsea_cmd.api._run_subcommand')
     def test_combine_compress_restart_arg(self, m_run_subcommand):
         app, app_args = Mock(spec=cliff.app.App), []
         salishsea_cmd.api.combine(
-            app, app_args, 'run_desc_file', 'results_dir',
-            compress_restart=True)
+            app,
+            app_args,
+            'run_desc_file',
+            'results_dir',
+            compress_restart=True
+        )
         m_run_subcommand.assert_called_once_with(
             app, app_args,
-            ['combine', 'run_desc_file', 'results_dir', '--compress-restart'])
+            ['combine', 'run_desc_file', 'results_dir', '--compress-restart']
+        )
 
     @patch('salishsea_cmd.api._run_subcommand')
     def test_combine_delete_restart_arg(self, m_run_subcommand):
         app, app_args = Mock(spec=cliff.app.App), []
         salishsea_cmd.api.combine(
-            app, app_args, 'run_desc_file', 'results_dir',
-            delete_restart=True)
+            app, app_args, 'run_desc_file', 'results_dir', delete_restart=True
+        )
         m_run_subcommand.assert_called_once_with(
             app, app_args,
-            ['combine', 'run_desc_file', 'results_dir', '--delete-restart'])
+            ['combine', 'run_desc_file', 'results_dir', '--delete-restart']
+        )
 
     @patch('salishsea_cmd.api._run_subcommand')
     def test_combine_all_args(self, m_run_subcommand):
         app, app_args = Mock(spec=cliff.app.App), []
         salishsea_cmd.api.combine(
-            app, app_args, 'run_desc_file', 'results_dir',
-            keep_proc_results=True, no_compress=True, compress_restart=True,
-            delete_restart=True)
+            app,
+            app_args,
+            'run_desc_file',
+            'results_dir',
+            keep_proc_results=True,
+            no_compress=True,
+            compress_restart=True,
+            delete_restart=True
+        )
         m_run_subcommand.assert_called_once_with(
-            app, app_args,
-            ['combine', 'run_desc_file', 'results_dir', '--keep-proc-results',
-             '--no-compress', '--compress-restart', '--delete-restart'])
+            app, app_args, [
+                'combine', 'run_desc_file', 'results_dir',
+                '--keep-proc-results', '--no-compress', '--compress-restart',
+                '--delete-restart'
+            ]
+        )
 
 
 class TestRunDescription(object):
@@ -116,7 +139,7 @@ class TestRunDescription(object):
             },
             'forcing': {
                 'atmospheric':
-                    '/results/forcing/atmospheric/GEM2.5/operational/',
+                '/results/forcing/atmospheric/GEM2.5/operational/',
                 'initial conditions': None,
                 'open boundaries': 'open_boundaries/',
                 'rivers': 'rivers/',
@@ -128,7 +151,7 @@ class TestRunDescription(object):
         if nemo34:
             expected['forcing'] = {
                 'atmospheric':
-                    '/results/forcing/atmospheric/GEM2.5/operational/',
+                '/results/forcing/atmospheric/GEM2.5/operational/',
                 'initial conditions': None,
                 'open boundaries': 'open_boundaries/',
                 'rivers': 'rivers/',
@@ -157,7 +180,8 @@ class TestRunDescription(object):
                     'namelist.dynamics',
                     'namelist.vertical',
                     'namelist.compute',
-                ]}
+                ]
+            }
             expected['output'] = {
                 'domain': 'domain_def.xml',
                 'fields': None,
@@ -212,7 +236,7 @@ class TestRunDescription(object):
             expected['output'] = {
                 'domain': 'domain_def.xml',
                 'fields':
-                    '../../NEMO-code/NEMOGCM/CONFIG/SHARED/field_def.xml',
+                '../../NEMO-code/NEMOGCM/CONFIG/SHARED/field_def.xml',
                 'separate XIOS server': True,
                 'XIOS servers': 1,
             }
@@ -261,17 +285,17 @@ class TestRunSubcommand(object):
 class TestPbsCommon:
     """Unit tests for `salishsea run` pbs_common() function.
     """
+
     def test_walltime_leading_zero(self):
         """Ensure correct handling of walltime w/ leading zero in YAML desc file
 
         re: issue#16
         """
-        desc_file = StringIO(
-            u'run_id: foo\n'
-            u'walltime: 01:02:03\n')
+        desc_file = StringIO(u'run_id: foo\n' u'walltime: 01:02:03\n')
         run_desc = yaml.load(desc_file)
         pbs_directives = salishsea_cmd.api.pbs_common(
-            run_desc, 42, 'me@example.com', 'foo/')
+            run_desc, 42, 'me@example.com', 'foo/'
+        )
         assert 'walltime=1:02:03' in pbs_directives
 
     def test_walltime_no_leading_zero(self):
@@ -279,10 +303,9 @@ class TestPbsCommon:
 
         re: issue#16
         """
-        desc_file = StringIO(
-            u'run_id: foo\n'
-            u'walltime: 1:02:03\n')
+        desc_file = StringIO(u'run_id: foo\n' u'walltime: 1:02:03\n')
         run_desc = yaml.load(desc_file)
         pbs_directives = salishsea_cmd.api.pbs_common(
-            run_desc, 42, 'me@example.com', 'foo/')
+            run_desc, 42, 'me@example.com', 'foo/'
+        )
         assert 'walltime=1:02:03' in pbs_directives

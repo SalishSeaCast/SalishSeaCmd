@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaCmd lib module unit tests.
 """
 import salishsea_cmd.lib
@@ -21,6 +20,7 @@ import salishsea_cmd.lib
 class TestGetNProcessors:
     """Unit tests for get_n_processors function.
     """
+
     def test_without_land_processor_elimination(self):
         run_desc = {
             'MPI decomposition': '8x18',

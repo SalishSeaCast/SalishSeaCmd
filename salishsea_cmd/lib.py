@@ -12,14 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Utility functions for use by SalishSeaCmd command plug-ins.
 """
 import os
 import subprocess
 
 import yaml
-
 
 __all__ = [
     'add_combine_gather_options',
@@ -46,23 +44,31 @@ def add_combine_gather_options(parser):
     """Add options that are common to combine and gather sub-commands.
     """
     parser.add_argument(
-        'desc_file', metavar='DESC_FILE',
-        help='file path/name of run description YAML file')
+        'desc_file',
+        metavar='DESC_FILE',
+        help='file path/name of run description YAML file'
+    )
     parser.add_argument(
-        'results_dir', metavar='RESULTS_DIR',
-        help='directory to store results into')
+        'results_dir',
+        metavar='RESULTS_DIR',
+        help='directory to store results into'
+    )
     parser.add_argument(
-        '--compress', action='store_true',
-        help="compress results files")
+        '--compress', action='store_true', help="compress results files"
+    )
     parser.add_argument(
-        '--keep-proc-results', action='store_true',
-        help="don't delete per-processor results files")
+        '--keep-proc-results',
+        action='store_true',
+        help="don't delete per-processor results files"
+    )
     parser.add_argument(
-        '--compress-restart', action='store_true',
-        help="compress restart file(s)")
+        '--compress-restart',
+        action='store_true',
+        help="compress restart file(s)"
+    )
     parser.add_argument(
-        '--delete-restart', action='store_true',
-        help="delete restart file(s)")
+        '--delete-restart', action='store_true', help="delete restart file(s)"
+    )
 
 
 def get_n_processors(run_desc):

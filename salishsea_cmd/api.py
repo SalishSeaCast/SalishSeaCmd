@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO command processor API
 
 Application programming interface for the Salish Sea NEMO command
@@ -31,13 +30,14 @@ import yaml
 
 from salishsea_cmd import prepare as prepare_plugin
 
-
 __all__ = [
-    'combine', 'prepare',
-    'run_description', 'run_in_subprocess',
-    'pbs_common', 'td2hms',
+    'combine',
+    'prepare',
+    'run_description',
+    'run_in_subprocess',
+    'pbs_common',
+    'td2hms',
 ]
-
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -242,7 +242,7 @@ def run_description(
         if forcing is None:
             run_description['forcing'] = {
                 'atmospheric':
-                    '/results/forcing/atmospheric/GEM2.5/operational/',
+                '/results/forcing/atmospheric/GEM2.5/operational/',
                 'initial conditions': init_conditions,
                 'open boundaries': 'open_boundaries/',
                 'rivers': 'rivers/',
@@ -277,7 +277,8 @@ def run_description(
                     'namelist.dynamics',
                     'namelist.vertical',
                     'namelist.compute',
-                ]}
+                ]
+            }
         else:
             run_description['namelists'] = namelists
         run_description['output'] = {
@@ -288,7 +289,8 @@ def run_description(
         }
         if NEMO_code is not None:
             run_description['output']['fields'] = os.path.join(
-                NEMO_code, 'NEMOGCM/CONFIG/SHARED/field_def.xml')
+                NEMO_code, 'NEMOGCM/CONFIG/SHARED/field_def.xml'
+            )
     return run_description
 
 
@@ -318,14 +320,17 @@ def run_in_subprocess(run_id, run_desc, results_dir, nemo34=False):
     cmd.extend([yaml_file, results_dir])
     try:
         output = subprocess.check_output(
-            cmd, stderr=subprocess.STDOUT, universal_newlines=True)
+            cmd, stderr=subprocess.STDOUT, universal_newlines=True
+        )
         for line in output.splitlines():
             if line:
                 log.info(line)
     except subprocess.CalledProcessError as e:
         log.error(
-            'subprocess {cmd} failed with return code {status}'
-            .format(cmd=cmd, status=e.returncode))
+            'subprocess {cmd} failed with return code {status}'.format(
+                cmd=cmd, status=e.returncode
+            )
+        )
         for line in e.output.splitlines():
             if line:
                 log.error(line)
@@ -348,7 +353,8 @@ def _run_subcommand(app, app_args, argv):
     :type argv: list
     """
     command_manager = cliff.commandmanager.CommandManager(
-        'salishsea.app', convert_underscores=False)
+        'salishsea.app', convert_underscores=False
+    )
     try:
         subcommand = command_manager.find_command(argv)
     except ValueError as err:
@@ -373,7 +379,11 @@ def _run_subcommand(app, app_args, argv):
 
 
 def pbs_common(
-    run_description, n_processors, email, results_dir, pmem='2000mb',
+    run_description,
+    n_processors,
+    email,
+    results_dir,
+    pmem='2000mb',
 ):
     """Return the common PBS directives used to run NEMO in a TORQUE/PBS
     multiple processor context.
@@ -403,9 +413,11 @@ def pbs_common(
         td = datetime.timedelta(seconds=run_description['walltime'])
     except TypeError:
         t = datetime.datetime.strptime(
-            run_description['walltime'], '%H:%M:%S').time()
+            run_description['walltime'], '%H:%M:%S'
+        ).time()
         td = datetime.timedelta(
-            hours=t.hour, minutes=t.minute, seconds=t.second)
+            hours=t.hour, minutes=t.minute, seconds=t.second
+        )
     walltime = td2hms(td)
     pbs_directives = (
         u'#PBS -N {run_id}\n'
@@ -444,7 +456,7 @@ def td2hms(timedelta):
     """
     seconds = int(timedelta.total_seconds())
     periods = (
-        ('hour', 60*60),
+        ('hour', 60 * 60),
         ('minute', 60),
         ('second', 1),
     )
