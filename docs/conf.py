@@ -19,9 +19,7 @@ import sys
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../SalishSeaNowcast'))
-sys.path.insert(0, os.path.abspath('../SalishSeaCmd'))
-sys.path.insert(0, os.path.abspath('../SalishSeaTools'))
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- General configuration ----------------------------------------------------
@@ -31,20 +29,19 @@ sys.path.insert(0, os.path.abspath('../SalishSeaTools'))
 # (named 'sphinx.ext.*')
 # or your custom ones.
 extensions = [
-    'nbsphinx',
-    'IPython.sphinxext.ipython_console_highlighting',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
 ]
 
 intersphinx_mapping = {
-    'docs':
+    'python':
+        ('https://docs.python.org/3/', None),
+    'salishseadocs':
         ('http://salishsea-meopar-docs.readthedocs.org/en/latest/', None),
-    'salishseanowcast':
-        ('http://salishsea-nowcast.readthedocs.io/en/nemo_nowcast/', None),
+    'nemocmd':
+        ('http://nemo-cmd.readthedocs.io/en/latest/', None),
 }
 
 todo_include_todos = True
@@ -70,15 +67,16 @@ copyright = (
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
+from salishsea_cmd import __pkg_metadata__
 #
 # The short X.Y version.
-version = ''
+version = __pkg_metadata__.VERSION
 # The full version, including alpha/beta/rc tags.
-release = ''
+release = version
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build', '**.ipynb_checkpoints']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -88,11 +86,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-if not on_rtd:
-    import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = 'sphinx_rtd_theme'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -109,25 +103,22 @@ html_static_path = ['_static']
 html_last_updated_fmt = '%b %d, %Y'
 
 # If false, no module index is generated.
-html_domain_indices = False
+html_domain_indices = True
 
 # If false, no index is generated.
-html_use_index = False
+html_use_index = True
+
+# If true, the index is split into individual pages for each letter.
+html_split_index = False
+
+# If true, links to the reST sources are added to the pages.
+html_show_sourcelink = True
+
+# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
+html_show_sphinx = True
+
+# If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
+html_show_copyright = True
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'SalishSea-MEOPAR-toolsdoc'
-
-
-# -- Options for LaTeX output -------------------------------------------------
-
-# Grouping the document tree into LaTeX files.
-# List of tuples
-# (source start file, target name, title,
-#  author, documentclass [howto/manual]).
-latex_documents = [(
-    'index',
-    'SalishSea-MEOPAR-toolsdoc.tex',
-    'Salish Sea MEOPAR Tools Documentation',
-    'Salish Sea MEOPAR Project Contributors',
-    'manual',
-)]
+htmlhelp_basename = 'SalishSeaCmddoc'
