@@ -16,15 +16,10 @@
 """
 from io import StringIO
 try:
-    from unittest.mock import (
-        Mock,
-        patch,
-    )
+    from unittest.mock import Mock, patch
 except ImportError:
-    from mock import (
-        Mock,
-        patch,
-    )
+    # Python 2.7
+    from mock import Mock, patch
 
 import cliff.app
 import cliff.command

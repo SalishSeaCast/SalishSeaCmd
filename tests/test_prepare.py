@@ -16,17 +16,10 @@
 """
 import os
 try:
-    from unittest.mock import (
-        call,
-        Mock,
-        patch,
-    )
+    from unittest.mock import call, Mock, patch
 except ImportError:
-    from mock import (
-        call,
-        Mock,
-        patch,
-    )
+    # Python 2.7
+    from mock import call, Mock, patch
 
 import cliff.app
 import pytest
