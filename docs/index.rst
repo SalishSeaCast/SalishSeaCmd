@@ -43,6 +43,13 @@ Contents
    development
 
 
+Indices and Tables
+------------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+
+
 License
 =======
 
