@@ -26,8 +26,6 @@ import cliff.commandmanager
 
 from salishsea_cmd import __pkg_metadata__
 
-__all__ = ['main', 'SalishSeaApp']
-
 
 class SalishSeaApp(cliff.app.App):
     CONSOLE_MESSAGE_FORMAT = '%(name)s %(levelname)s: %(message)s'

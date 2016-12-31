@@ -22,12 +22,7 @@ import shutil
 
 import cliff.command
 
-from salishsea_cmd import (
-    api,
-    lib,
-)
-
-__all__ = ['Gather']
+from salishsea_cmd import api, lib
 
 log = logging.getLogger(__name__)
 

@@ -17,6 +17,7 @@
 try:
     from unittest.mock import Mock
 except ImportError:
+    # Python 2.7
     from mock import Mock
 
 import cliff.app

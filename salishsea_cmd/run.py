@@ -28,12 +28,7 @@ import subprocess
 
 import cliff.command
 
-from salishsea_cmd import (
-    api,
-    lib,
-)
-
-__all__ = ['Run', 'run', 'td2hms']
+from salishsea_cmd import api, lib
 
 log = logging.getLogger(__name__)
 
