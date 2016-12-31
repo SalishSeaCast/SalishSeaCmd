@@ -197,3 +197,18 @@ class TestPbsFeatures:
     def test_orcinus(self, system, expected):
         pbs_features = salishsea_cmd.run._pbs_features(144, system)
         assert pbs_features == expected
+
+
+class TestCleanup:
+    """Unit test for _cleanup() function.
+    """
+
+    def test_cleanup(self):
+        script = salishsea_cmd.run._cleanup()
+        expected = '''echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+        rmdir $(pwd)
+        echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(script.splitlines()):
+            assert line.strip() == expected[i].strip()
