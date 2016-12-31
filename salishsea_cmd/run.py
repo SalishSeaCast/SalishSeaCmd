@@ -19,15 +19,14 @@ Salish Sea NEMO model.
 """
 from __future__ import division
 
-import datetime
 import logging
 import math
 import os
+import pathlib
 import socket
 import subprocess
 
 import cliff.command
-import pathlib
 
 from salishsea_cmd import (
     api,
