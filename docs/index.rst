@@ -23,10 +23,18 @@ Salish Sea NEMO Command Processor
 The Salish Sea NEMO command processor,
 :program:`salishsea`,
 is a command-line tool for doing various operations associated with the :ref:`SalishSeaNEMO` model.
-It is provided by the :kbd:`SalishSeaCmd` package in the :ref:`tools-repo` repository.
 
 The :kbd:`SalishSeaCmd` package is a Python 3 package.
 It is developed and tested under Python 3.5 and should work with that and later versions of Python.
+The package also runs under Python 2.7 for use on the Westgrid HPC platform.
+
+This an extensible tool built on the OpenStack ``cliff``
+(`Command Line Interface Formulation Framework`_)
+package.
+It is a NEMO domain-specific command processor tool for the :ref:`SalishSeaNEMO` that uses plug-ins from the `NEMO-Cmd`_ package.
+
+.. _Command Line Interface Formulation Framework: http://docs.openstack.org/developer/cliff/
+.. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
 
 
 Contents
