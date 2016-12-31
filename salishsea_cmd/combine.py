@@ -26,10 +26,9 @@ import subprocess
 import sys
 
 import cliff.command
+import nemo_cmd.api
 
 from salishsea_cmd import lib
-
-__all__ = ['Combine']
 
 log = logging.getLogger(__name__)
 
@@ -128,17 +127,9 @@ def _combine_results_files(rebuild_nemo_script, name_roots, n_processors):
 
 def _netcdf4_deflate_results():
     log.info('Starting netCDF4 deflation...')
-    patterns = (
-        '*_grid_[TUVW].nc',
-        '*_ptrc_T.nc',
-    )
-    for pattern in patterns:
-        for fn in glob.glob(pattern):
-            result = lib.netcdf4_deflate(fn)
-            if result:
-                log.info(result)
-            else:
-                log.info('netCDF4 deflated {}'.format(fn))
+    filenames = glob.glob('*_grid_[TUVW]*.nc')
+    filenames.extend(glob.glob('*_ptrc_T*.nc'))
+    nemo_cmd.api.deflate(filenames)
 
 
 def _move_results(name_roots, results_dir):
