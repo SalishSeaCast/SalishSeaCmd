@@ -20,7 +20,7 @@ from setuptools import (
     setup,
 )
 
-import __pkg_metadata__
+from salishsea_cmd import __pkg_metadata__
 
 
 python_classifiers = [
@@ -44,10 +44,12 @@ try:
 except IOError:
     long_description = ''
 install_requires = [
-    # see environment.yaml for versions most recently used in development
+    # see environment-dev.yaml for versions most recently used in development
     'arrow',
     'cliff',
+    'netcdf4',
     'PyYAML',
+    # 'NEMO-Cmd',  # use cd tools; pip install -e NEMO-Cmd
     # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools
 ]
 
@@ -58,9 +60,7 @@ setup(
     long_description=long_description,
     author='Doug Latornell',
     author_email='djl@douglatornell.ca',
-    url=(
-        'http://salishsea-meopar-tools.readthedocs.org/en/latest/'
-        'SalishSeaCmd/'),
+    url='http://salishsea-cmd.readthedocs.io/en/latest/',
     license='Apache License, Version 2.0',
     classifiers=python_classifiers + other_classifiers,
     platforms=['MacOS X', 'Linux'],
