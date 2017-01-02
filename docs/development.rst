@@ -37,17 +37,17 @@ Getting the Code
 
 Clone the :ref:`tools-repo` code and documentation `repository`_ from Bitbucket with:
 
-.. _repository: https://bitbucket.org/salishsea/tools/
+.. _repository: https://bitbucket.org/salishsea/salishseacmd/
 
 .. code-block:: bash
 
-    $ hg clone ssh://hg@bitbucket.org/salishsea/tools
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishsea SalishSeaCmd
 
 or
 
 .. code-block:: bash
 
-    $ hg clone https://<your_userid>@bitbucket.org/salishsea/tools
+    $ hg clone https://<your_userid>@bitbucket.org/salishsea/salishsea SalishSeaCmd
 
 if you don't have `ssh key authentication`_ set up on Bitbucket.
 
@@ -58,6 +58,11 @@ if you don't have `ssh key authentication`_ set up on Bitbucket.
 
 Development Environment
 =======================
+
+The :kbd:`SalishSeaCmd` package depends on the :kbd:`SalishSeaTools` and :kbd:`NEMO-Cmd` packages,
+so you need to clone their repos,
+:ref:`tools-repo` and :ref:`NEMO-Cmd-repo`,
+beside your clone of :ref:`SalishSeaCmd-repo`.
 
 Setting up an isolated development environment using `Conda`_ is recommended.
 Assuming that you have :ref:`AnacondaPythonDistro` or `Miniconda3`_ installed,
@@ -71,13 +76,16 @@ and building the documentation with the commands:
 
 .. code-block:: bash
 
-    $ cd tools
     $ conda env create -f SalishSeaCmd/environment.yaml
     $ source activate salishsea-cmd
-    (salishsea-cmd)$ pip install --editable SalishSeaTools
+    (salishsea-cmd)$ pip install --editable tools/SalishSeaTools
+    (salishsea-cmd)$ pip install --editable NEMO-Cmd
     (salishsea-cmd)$ pip install --editable SalishSeaCmd
 
-The :kbd:`--editable` option in the :command:`pip install` commands above installs the :kbd:`SalishSeaTools` and :kbd:`SalishSeaCmd` packaged from the :ref:`tools-repo` via symlinks so that :program:`salishsea` in the :kbd:`salishsea-cmd` environment will be automatically updated as the repo evolves.
+The :kbd:`--editable` option in the :command:`pip install` commands above installs the :kbd:`SalishSeaTools` package from the :ref:`tools-repo`,
+the :kbd:`NEMO-Cmd` package,
+and the :kbd:`SalishSeaCmd` package,
+via symlinks so that :program:`salishsea` in the :kbd:`salishsea-cmd` environment will be automatically updated as the repos evolve.
 
 To deactivate the environment use:
 
@@ -93,8 +101,7 @@ Building the Documentation
 
 The documentation for the :kbd:`SalishSeaCmd` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
 Creating a :ref:`SalishSeaCmdDevelopmentEnvironment` as described above includes the installation of Sphinx.
-The documentation is integrated into the :ref:`tools-repo` docs.
-Building the documentation is driven by :file:`tools/docs/Makefile`.
+Building the documentation is driven by :file:`docs/Makefile`.
 With your :kbd:`salishsea-cmd` development environment activated,
 use:
 
@@ -103,7 +110,6 @@ use:
 
 .. code-block:: bash
 
-    (salishsea-cmd)$ cd tools
     (salishsea-cmd)$ (cd docs && make clean html)
 
 to do a clean build of the documentation.
@@ -111,21 +117,24 @@ The output looks something like::
 
   rm -rf _build/*
   sphinx-build -b html -d _build/doctrees   . _build/html
-  Running Sphinx v1.3.1
+  Running Sphinx v1.5.1
   making output directory...
   loading pickled environment... not yet created
+  loading intersphinx inventory from https://docs.python.org/3/objects.inv...
   loading intersphinx inventory from http://salishsea-meopar-docs.readthedocs.org/en/latest/objects.inv...
+  intersphinx inventory has moved: http://salishsea-meopar-docs.readthedocs.org/en/latest/objects.inv -> http://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv
+  loading intersphinx inventory from http://nemo-cmd.readthedocs.io/en/latest/objects.inv...
   building [mo]: targets for 0 po files that are out of date
-  building [html]: targets for 36 source files that are out of date
-  updating environment: 36 added, 0 changed, 0 removed
-  reading sources... [100%] results_server/nowcast-green
+  building [html]: targets for 7 source files that are out of date
+  updating environment: 7 added, 0 changed, 0 removed
+  reading sources... [100%] subcommands
   looking for now-outdated files... none found
   pickling environment... done
   checking consistency... done
   preparing documents... done
-  writing output... [100%] results_server/nowcast-green
-  generating indices...
-  highlighting module code... [100%] salishsea_tools.tidetools
+  writing output... [100%] subcommands
+  generating indices... genindex
+  highlighting module code... [100%] salishsea_cmd.api
   writing additional pages... search
   copying static files... done
   copying extra files... done
@@ -135,10 +144,10 @@ The output looks something like::
 
   Build finished. The HTML pages are in _build/html.
 
-The HTML rendering of the docs ends up in :file:`tools/docs/_build/html/`.
-You can open the :file:`SalishSeaCmd/index.html` file in that directory tree in your browser to preview the results of the build before committing and pushing your changes to Bitbucket.
+The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
+You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build before committing and pushing your changes to Bitbucket.
 
-Whenever you push changes to the :ref:`tools-repo` on Bitbucket the documentation is automatically re-built and rendered at https://salishsea-meopar-tools.readthedocs.org/en/latest/SalishSeaCmd/.
+Whenever you push changes to the :ref:`SalishSeaCmd-repo` on Bitbucket the documentation is automatically re-built and rendered at https://salishseacmd.readthedocs.org/en/latest/.
 
 
 .. _SalishSeaCmdRuningTheUnitTests:
@@ -146,7 +155,7 @@ Whenever you push changes to the :ref:`tools-repo` on Bitbucket the documentatio
 Running the Unit Tests
 ======================
 
-The test suite for the :kbd:`SalishSeaCmd` package is in :file:`tools/SalishSeaCmd/tests/`.
+The test suite for the :kbd:`SalishSeaCmd` package is in :file:`SalishSeaCmd/tests/`.
 The `pytest`_ tools is used for test fixtures and as the test runner for the suite.
 
 .. _pytest: http://pytest.org/latest/
@@ -158,25 +167,26 @@ use:
 
 .. code-block:: bash
 
-    (salishsea-cmd)$ cd tools/SalishSeaCmd/
+    (salishsea-cmd)$ cd SalishSeaCmd/
     (salishsea-cmd)$ py.test
 
 to run the test suite.
 The output looks something like::
 
-  ============================ test session starts =============================
-  platform linux -- Python 3.5.1, pytest-2.8.1, py-1.4.30, pluggy-0.3.1
-  rootdir: /home/doug/Documents/MEOPAR/tools/SalishSeaCmd, inifile:
-  collected 116 items
+  ============================ test session starts ============================
+  platform linux -- Python 3.5.2, pytest-3.0.5, py-1.4.31, pluggy-0.4.0
+  rootdir: /media/doug/warehouse/MEOPAR/SalishSeaCmd, inifile:
+  collected 118 items
 
   tests/test_api.py ................
-  tests/test_combine.py .............
+  tests/test_combine.py ............
   tests/test_gather.py .
   tests/test_get_cgrf.py .............
+  tests/test_lib.py ..
   tests/test_prepare.py ......................................................
-  tests/test_run.py ...................
+  tests/test_run.py ....................
 
-  ========================= 116 passed in 1.37 seconds =========================
+  ======================== 118 passed in 2.93 seconds =========================
 
 You can monitor what lines of code the test suite exercises using the `coverage.py`_ tool with the command:
 
@@ -184,7 +194,7 @@ You can monitor what lines of code the test suite exercises using the `coverage.
 
 .. code-block:: bash
 
-    (salishsea-cmd)$ cd tools/SalishSeaCmd/
+    (salishsea-cmd)$ cd SalishSeaCmd/
     (salishsea-cmd)$ coverage run -m py.test
 
 and generate a test coverage report with:
@@ -200,7 +210,7 @@ or
 
     (salishsea-cmd)$ coverage html
 
-to produce an HTML report that you can view in your browser by opening :file:`tools/SalishSeaCmd/htmlcov/index.html`.
+to produce an HTML report that you can view in your browser by opening :file:`SalishSeaCmd/htmlcov/index.html`.
 
 The run the test suite under Python 2.7,
 create a Python 2.7 :ref:`SalishSeaCmdDevelopmentEnvironment`.
@@ -211,7 +221,7 @@ create a Python 2.7 :ref:`SalishSeaCmdDevelopmentEnvironment`.
 Version Control Repository
 ==========================
 
-The :kbd:`SalishSeaCmd` package code and documentation source files are available as part of the :ref:`tools-repo` `Mercurial`_ repository at https://bitbucket.org/salishsea/tools.
+The :kbd:`SalishSeaCmd` package code and documentation source files are available in the :ref:`SalishSeaCmd-repo` `Mercurial`_ repository at https://bitbucket.org/salishsea/salishseacmd.
 
 
 .. _SalishSeaCmdIssueTracker:
@@ -221,4 +231,4 @@ Issue Tracker
 
 Development tasks,
 bug reports,
-and enhancement ideas are recorded and managed in the issue tracker at https://bitbucket.org/salishsea/tools/issues using the component tag :kbd:`SalishSeaCmd`.
+and enhancement ideas are recorded and managed in the issue tracker at https://bitbucket.org/salishsea/salishseacmd/issues.
