@@ -24,7 +24,9 @@
 
 These instructions assume that:
 
-* You have an up to date clone of the :ref:`tools-repo` repo
+* You have up to date clones of the :ref:`SalishSeaCmd-repo`,
+  :ref:`NEMO-Cmd-repo`,
+  and :ref:`tools-repo` repositories
 * You have the Python 3 version of :ref:`AnacondaPythonDistro` or `Miniconda`_ installed
 * :file:`$HOME/anaconda3/bin` is included in your :envvar:`PATH` environment variable if your are using the :ref:`AnacondaPythonDistro`,
   or :file:`$HOME/miniconda3/bin` is included in your :envvar:`PATH` environment variable if your are using `Miniconda`_
@@ -35,11 +37,12 @@ To install the :kbd:`SalishSeaCmd` package in your :kbd:`root` Anaconda or Minic
 
 .. code-block:: bash
 
-    $ cd tools
-    $ pip install --editable SalishSeaTools
+    $ cd MEOPAR
+    $ pip install --editable tools/SalishSeaTools
+    $ pip install --editable NEMO-Cmd
     $ pip install --editable SalishSeaCmd
 
-The :kbd:`--editable` option in the :command:`pip install` commands installs the packages via symlinks so that :program:`salishsea` will be automatically updated as the repo evolves.
+The :kbd:`--editable` option in the :command:`pip install` commands installs the packages via symlinks so that :program:`salishsea` will be automatically updated as the repos evolve.
 
 The :kbd:`SalishSeaCmd` package can also be installed in an isolated :program:`conda` environment.
 The common use case for doing so it development,
