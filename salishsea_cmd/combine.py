@@ -20,6 +20,8 @@ files with the same name-root and move them to a specified directory.
 import glob
 import gzip
 import logging
+import math
+import multiprocessing
 import os
 import shutil
 import subprocess
@@ -129,7 +131,9 @@ def _netcdf4_deflate_results():
     log.info('Starting netCDF4 deflation...')
     filenames = glob.glob('*_grid_[TUVW]*.nc')
     filenames.extend(glob.glob('*_ptrc_T*.nc'))
-    nemo_cmd.api.deflate(filenames)
+    nemo_cmd.api.deflate(
+        filenames, math.floor(multiprocessing.cpu_count() / 2)
+    )
 
 
 def _move_results(name_roots, results_dir):
