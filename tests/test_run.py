@@ -14,7 +14,11 @@
 # limitations under the License.
 """SalishSeaCmd run sub-command plug-in unit tests
 """
-import pathlib
+try:
+    import pathlib
+except ImportError:
+    # Python 2.7
+    import pathlib2 as pathlib
 try:
     from unittest.mock import Mock, patch
 except ImportError:
