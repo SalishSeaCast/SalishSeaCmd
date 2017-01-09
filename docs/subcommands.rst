@@ -38,7 +38,7 @@ The command :kbd:`salishsea --help` produces a list of the available :program:`s
     combine        Combine per-processor files from an MPI NEMO run into single files
     complete       print bash completion command
     deflate        Deflate variables in netCDF files using Lempel-Ziv compression.
-    gather         Gather results from a NEMO run; includes combining MPI results files
+    gather         Gather results from a NEMO run.
     get_cgrf       Download and symlink CGRF atmospheric forcing files
     help           print detailed help for another command
     prepare        Prepare a Salish Sea NEMO run
@@ -87,7 +87,7 @@ You can check what version of :program:`salishsea` you have installed with:
 :kbd:`run` Sub-command
 ======================
 
-The :command:`salishsea run` command prepares,
+The :command:`run` sub-command prepares,
 executes,
 and gathers the results from the Salish Sea NEMO run described in the specifed run description and IOM server definitions files.
 The results are gathered in the specified results directory.
@@ -121,7 +121,7 @@ and the response from the job queue manager
 (typically a job number)
 are printed upon completion of the command.
 
-The :command:`salishsea run` command does the following:
+The :command:`run` sub-command does the following:
 
 #. Execute the :ref:`salishsea-prepare` via the :ref:`SalishSeaCmdAPI` to set up a temporary run directory from which to execute the Salish Sea NEMO run.
 #. Create a :file:`SalishSeaNEMO.sh` job script in the run directory.
@@ -132,7 +132,7 @@ The :command:`salishsea run` command does the following:
 
 See the :ref:`RunDescriptionFileStructure` section for details of the run description file.
 
-The :command:`salishsea run` command concludes by printing the path to the run directory and the response from the job queue manager.
+The :command:`run` sub-command concludes by printing the path to the run directory and the response from the job queue manager.
 Example:
 
 .. code-block:: bash
@@ -151,7 +151,7 @@ you can get a Python traceback containing more information about the error by re
 :kbd:`prepare` Sub-command
 ==========================
 
-The :command:`salishsea prepare` command sets up a run directory from which to execute the Salish Sea NEMO run described in the specifed run description,
+The :command:`prepare` sub-command sets up a run directory from which to execute the Salish Sea NEMO run described in the specifed run description,
 and IOM server definitions files::
 
   usage: salishsea prepare [-h] [--nemo3.4] [-q] DESC_FILE
@@ -170,7 +170,7 @@ and IOM server definitions files::
 
 See the :ref:`RunDescriptionFileStructure` section for details of the run description file.
 
-The :command:`salishsea prepare` command concludes by printing the path to the run directory it created.
+The :command:`prepare` sub-command concludes by printing the path to the run directory it created.
 Example:
 
 .. code-block:: bash
@@ -185,7 +185,7 @@ string because the directory is intended to be ephemerally used for a single run
 
 .. _Universally Unique Identifier: https://en.wikipedia.org/wiki/Universally_unique_identifier
 
-If the :command:`salishsea prepare` command prints an error message,
+If the :command:`prepare` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
 
 
@@ -299,7 +299,7 @@ The run directory also contains symbolic links to:
 :kbd:`deflate` Sub-command
 ==========================
 
-The :command:`salishsea deflate` command deflates the variables in netCDF files using the Lempel-Ziv compression algorithm to reduce the size of the file on disk.
+The :command:`deflate` sub-command deflates the variables in netCDF files using the Lempel-Ziv compression algorithm to reduce the size of the file on disk.
 It is provided by the `NEMO-Cmd`_ package.
 Please use:
 
@@ -312,36 +312,29 @@ and see :ref:`nemocmd:nemo-deflate` for more details.
 
 .. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
 
+If the :command:`deflate` sub-command prints an error message,
+you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+
 
 .. _salishsea-gather:
 
 :kbd:`gather` Sub-command
 =========================
 
-The :command:`salishsea gather` command gather results from a Salish Sea NEMO run into a results directory.
-Its operation includes running the :command:`salishsea combine` command to combine the pre-processor MPI results files::
+The :command:`gather` sub-command moves results from a NEMO run into a results directory.
+It is provided by the `NEMO-Cmd`_ package.
+Please use:
 
-  usage: salishsea gather [-h] [--compress] [--keep-proc-results]
-                          [--compress-restart] [--delete-restart]
-                          DESC_FILE RESULTS_DIR
+.. code-block:: bash
 
-  Gather the results files from a Salish Sea NEMO run described in DESC_FILE
-  into files in RESULTS_DIR. The gathering process includes combining the per-
-  processor results files, and deleting the per-processor files. If RESULTS_DIR
-  does not exist it will be created.
+    $ salishsea help gather
 
-  positional arguments:
-    DESC_FILE            file path/name of run description YAML file
-    RESULTS_DIR          directory to store results into
+to see its usage,
+and see :ref:`nemocmd:nemo-gather` for more details.
 
-  optional arguments:
-    -h, --help           show this help message and exit
-    --compress           compress results files
-    --keep-proc-results  don't delete per-processor results files
-    --compress-restart   compress restart file(s)
-    --delete-restart     delete restart file(s)
+.. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
 
-If the :command:`salishsea gather` command prints an error message,
+If the :command:`gather` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
 
 
@@ -350,7 +343,7 @@ you can get a Python traceback containing more information about the error by re
 :kbd:`get_cgrf` Sub-command
 ===========================
 
-The :command:`salishsea get_cgrf` command downloads CGRF products atmospheric forcing files from Dalhousie rsync repository and symlinks them with the file names that NEMO expects:
+The :command:`get_cgrf` sub-command downloads CGRF products atmospheric forcing files from Dalhousie rsync repository and symlinks them with the file names that NEMO expects:
 
 .. code-block:: bash
 
@@ -371,7 +364,7 @@ The :command:`salishsea get_cgrf` command downloads CGRF products atmospheric fo
 
 The command *must* be run in the :file:`/ocean/dlatorne/CGRF/` directory.
 
-If the :command:`salishsea get_cgrf` command prints an error message,
+If the :command:`get_cgrf` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
 
 
@@ -380,5 +373,5 @@ you can get a Python traceback containing more information about the error by re
 :kbd:`combine` Sub-command
 ==========================
 
-The :command:`salishsea combine` command is a legacy command that combines the per-processor results files from an MPI Salish Sea NEMO run.
-Its operation is included in the :command:`salishsea gather` command.
+The :command:`combine` sub-command is a legacy command that combines the per-processor results files from an MPI Salish Sea NEMO run.
+Its operation is included in the :command:`gather` sub-command.
