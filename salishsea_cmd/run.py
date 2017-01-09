@@ -22,7 +22,11 @@ from __future__ import division
 import logging
 import math
 import os
-import pathlib
+try:
+    import pathlib
+except ImportError:
+    # Python 2.7
+    import pathlib2 as pathlib
 import socket
 import subprocess
 
