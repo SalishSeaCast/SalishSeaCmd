@@ -28,6 +28,7 @@ import subprocess
 import cliff.commandmanager
 import yaml
 
+from nemo_cmd import combine as combine_plugin
 from nemo_cmd import deflate as deflate_plugin
 from nemo_cmd import gather as gather_plugin
 from salishsea_cmd import prepare as prepare_plugin
@@ -41,63 +42,17 @@ handler.setFormatter(formatter)
 log.addHandler(handler)
 
 
-def combine(
-    app,
-    app_args,
-    run_desc_file,
-    results_dir,
-    keep_proc_results=False,
-    no_compress=False,
-    compress_restart=False,
-    delete_restart=False,
-):
+def combine(run_desc_file):
     """Run the NEMO :program:`rebuild_nemo` tool for each set of
     per-processor results files.
 
     The output of :program:`rebuild_nemo` for each file set is logged
     at the INFO level.
-    The combined results files that :program:`rebuild_nemo` produces
-    are moved to the directory given by :py:obj:`results_dir`.
 
-    :arg app: Application instance invoking the command.
-    :type app: :py:class:`cliff.app.App`
-
-    :arg app_args: Application arguments.
-    :type app_args: :py:class:`argparse.Namespace`
-
-    :arg run_desc_file: File path/name of the run description YAML file.
-    :type run_desc_file: str
-
-    :arg results_dir: Directory to store results into.
-    :type results_dir: str
-
-    :arg keep_proc_results: Don't delete per-processor results files;
-                            defaults to :py:obj:`False`.
-    :type keep_proc_results: Boolean
-
-    :arg no_compress: Don't compress results files;
-                      defaults to :py:obj:`False`.
-    :type no_compress: Boolean
-
-    :arg compress_restart: Compress restart file(s);
-                           defaults to :py:obj:`False`.
-    :type compress_restart: Boolean
-
-    :arg delete_restart: Delete restart file(s);
-                         defaults to :py:obj:`False`.
-    :type delete_restart: Boolean
+    :param run_desc_file: File path/name of the run description YAML file.
+    :type results_dir: :py:class:`pathlib.Path`
     """
-    argv = ['combine', run_desc_file, results_dir]
-    if keep_proc_results:
-        argv.append('--keep-proc-results')
-    if no_compress:
-        argv.append('--no-compress')
-    if compress_restart:
-        argv.append('--compress-restart')
-    if delete_restart:
-        argv.append('--delete-restart')
-    result = _run_subcommand(app, app_args, argv)
-    return result
+    return combine_plugin.combine(run_desc_file)
 
 
 def deflate(filepaths, max_concurrent_jobs):

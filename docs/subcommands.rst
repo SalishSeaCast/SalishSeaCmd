@@ -294,6 +294,28 @@ The run directory also contains symbolic links to:
   the file name expected by NEMO.
 
 
+.. _salishsea-combine:
+
+:kbd:`combine` Sub-command
+==========================
+
+The :command:`combine` sub-command combines the per-processor results and/or restart files from an MPI NEMO run described in DESC_FILE using the the NEMO :command:`rebuild_nemo` tool.
+It is provided by the `NEMO-Cmd`_ package.
+Please use:
+
+.. code-block:: bash
+
+    $ salishsea help combine
+
+to see its usage,
+and see :ref:`nemocmd:nemo-combine` for more details.
+
+.. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
+
+If the :command:`combine` sub-command prints an error message,
+you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+
+
 .. _salishsea-deflate:
 
 :kbd:`deflate` Sub-command
@@ -366,12 +388,3 @@ The command *must* be run in the :file:`/ocean/dlatorne/CGRF/` directory.
 
 If the :command:`get_cgrf` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
-
-
-.. _salishsea-combine:
-
-:kbd:`combine` Sub-command
-==========================
-
-The :command:`combine` sub-command is a legacy command that combines the per-processor results files from an MPI Salish Sea NEMO run.
-Its operation is included in the :command:`gather` sub-command.
