@@ -14,6 +14,7 @@
 # limitations under the License.
 """SalishSeaCmd -- Salish Sea NEMO command processor
 """
+import sys
 from setuptools import (
     find_packages,
     setup,
@@ -51,6 +52,8 @@ install_requires = [
     # 'NEMO-Cmd',  # use cd tools; pip install -e NEMO-Cmd
     # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools
 ]
+if sys.version_info[0] == 2:
+    install_requires.append('pathlib2')
 
 setup(
     name=__pkg_metadata__.PROJECT,
