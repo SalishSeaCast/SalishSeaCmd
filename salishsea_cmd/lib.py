@@ -33,37 +33,6 @@ def load_run_desc(desc_file):
     return run_desc
 
 
-def add_combine_gather_options(parser):
-    """Add options that are common to combine and gather sub-commands.
-    """
-    parser.add_argument(
-        'desc_file',
-        metavar='DESC_FILE',
-        help='file path/name of run description YAML file'
-    )
-    parser.add_argument(
-        'results_dir',
-        metavar='RESULTS_DIR',
-        help='directory to store results into'
-    )
-    parser.add_argument(
-        '--compress', action='store_true', help="compress results files"
-    )
-    parser.add_argument(
-        '--keep-proc-results',
-        action='store_true',
-        help="don't delete per-processor results files"
-    )
-    parser.add_argument(
-        '--compress-restart',
-        action='store_true',
-        help="compress restart file(s)"
-    )
-    parser.add_argument(
-        '--delete-restart', action='store_true', help="delete restart file(s)"
-    )
-
-
 def get_n_processors(run_desc):
     """Return the total number of processors required for the run as
     specified by the MPI decomposition key in the run description.
