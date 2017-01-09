@@ -52,28 +52,31 @@ For example:
 
     $ salishsea help run
 
-    usage: salishsea run [-h] [--nemo3.4] [-q] [--compress] [--keep-proc-results]
-                         [--compress-restart] [--delete-restart]
-                         DESC_FILE IO_DEFS RESULTS_DIR
+::
+
+    usage: salishsea run [-h] [--nocheck-initial-conditions] [--nemo3.4]
+                         [--waitjob WAITJOB] [-q]
+                         DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
     described in DESC_FILE and IO_DEFS. The results files from the run are
     gathered in RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
 
     positional arguments:
-      DESC_FILE            File path/name of run description YAML file
-      IO_DEFS              File path/name of NEMO IOM server defs file for run
-      RESULTS_DIR          directory to store results into
+      DESC_FILE             File path/name of run description YAML file
+      RESULTS_DIR           directory to store results into
 
     optional arguments:
-      -h, --help           show this help message and exit
-      --nemo3.4            Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
-      -q, --quiet          don't show the run directory path or job submission
-                           message
-      --compress           compress results files
-      --keep-proc-results  don't delete per-processor results files
-      --compress-restart   compress restart file(s)
-      --delete-restart     delete restart file(s)
+      -h, --help            show this help message and exit
+      --nocheck-initial-conditions
+                            Suppress checking of the initial conditions link.
+                            Useful if you are submitting a job to wait on a
+                            previous job
+      --nemo3.4             Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
+      --waitjob WAITJOB     use -W waitjob in call to qsub, to make current job
+                            wait for on waitjob. Waitjob is the queue job number
+      -q, --quiet           don't show the run directory path or job submission
+                            message
 
 You can check what version of :program:`salishsea` you have installed with:
 
@@ -92,10 +95,10 @@ executes,
 and gathers the results from the Salish Sea NEMO run described in the specifed run description and IOM server definitions files.
 The results are gathered in the specified results directory.
 
-.. code-block:: bash
+::
 
-    usage: salishsea run [-h] [--nemo3.4] [-q] [--compress] [--keep-proc-results]
-                         [--compress-restart] [--delete-restart]
+    usage: salishsea run [-h] [--nocheck-initial-conditions] [--nemo3.4]
+                         [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
@@ -103,18 +106,20 @@ The results are gathered in the specified results directory.
     gathered in RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
 
     positional arguments:
-      DESC_FILE            File path/name of run description YAML file
-      RESULTS_DIR          directory to store results into
+      DESC_FILE             File path/name of run description YAML file
+      RESULTS_DIR           directory to store results into
 
     optional arguments:
-      -h, --help           show this help message and exit
-      --nemo3.4            Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
-      -q, --quiet          don't show the run directory path or job submission
-                           message
-      --compress           compress results files
-      --keep-proc-results  don't delete per-processor results files
-      --compress-restart   compress restart file(s)
-      --delete-restart     delete restart file(s)
+      -h, --help            show this help message and exit
+      --nocheck-initial-conditions
+                            Suppress checking of the initial conditions link.
+                            Useful if you are submitting a job to wait on a
+                            previous job
+      --nemo3.4             Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
+      --waitjob WAITJOB     use -W waitjob in call to qsub, to make current job
+                            wait for on waitjob. Waitjob is the queue job number
+      -q, --quiet           don't show the run directory path or job submission
+                            message
 
 The path to the run directory,
 and the response from the job queue manager
@@ -125,7 +130,13 @@ The :command:`run` sub-command does the following:
 
 #. Execute the :ref:`salishsea-prepare` via the :ref:`SalishSeaCmdAPI` to set up a temporary run directory from which to execute the Salish Sea NEMO run.
 #. Create a :file:`SalishSeaNEMO.sh` job script in the run directory.
-   The job script runs NEMO and executes the :ref:`salishsea-gather` via the :ref:`SalishSeaCmdAPI` to collect the run results files into the results directory.
+   The job script:
+
+   * runs NEMO
+   * executes the :ref:`salishsea-combine` to combine the per-processor results and/or restart files
+   * executes the :ref:`salishsea-deflate` to deflate the variables in the netCDF files using the Lempel-Ziv compression algorithm to reduce the size of the file on disk
+   * executes the :ref:`salishsea-gather` to collect the run results files into the results directory
+
 #. Submit the job script to the queue manager via :command:`qsub` on systems like :kbd:`salish.eos.ubc.ca`,
    :kbd:`jasper.westgrid.ca`,
    and :kbd:`orcinus.westgrid.ca` that use TORQUE/PBS schedulers.
@@ -142,7 +153,7 @@ Example:
     salishsea_cmd.run INFO: salishsea_cmd.prepare Created run directory ../../SalishSea/38e87e0c-472d-11e3-9c8e-0025909a8461
     salishsea_cmd.run INFO: 3330782.orca2.ibb
 
-If the :command:`salishsea run` command prints an error message,
+If the :command:`run` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
 
 
