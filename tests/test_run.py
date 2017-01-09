@@ -37,7 +37,7 @@ def run_cmd():
     return salishsea_cmd.run.Run(Mock(spec=cliff.app.App), [])
 
 
-class TestGetParser:
+class TestParser:
     """Unit tests for `salishsea run` sub-command command-line parser.
     """
 
@@ -52,21 +52,12 @@ class TestGetParser:
         assert parsed_args.results_dir == 'baz'
         assert not parsed_args.nemo34
         assert not parsed_args.quiet
-        assert not parsed_args.compress
-        assert not parsed_args.keep_proc_results
-        assert not parsed_args.compress_restart
-        assert not parsed_args.delete_restart
 
     @pytest.mark.parametrize(
         'flag, attr', [
             ('--nemo3.4', 'nemo34'),
             ('-q', 'quiet'),
             ('--quiet', 'quiet'),
-            ('--compress', 'compress'),
-            ('--compress', 'compress'),
-            ('--keep-proc-results', 'keep_proc_results'),
-            ('--compress-restart', 'compress_restart'),
-            ('--delete-restart', 'delete_restart'),
         ]
     )
     def test_parsed_args_flags(self, flag, attr, run_cmd):
@@ -89,15 +80,15 @@ class TestTakeAction:
             nocheck_init=False,
             waitjob=0,
             quiet=False,
-            keep_proc_results=False,
-            compress=False,
-            compress_restart=False,
-            delete_restart=False,
         )
         run_cmd.run(parsed_args)
         m_run.assert_called_once_with(
-            'desc file', 'results dir', False, False, 0, False, False, False,
-            False, False
+            'desc file',
+            'results dir',
+            False,
+            False,
+            0,
+            False,
         )
         m_log.info.assert_called_once_with('qsub message')
 
@@ -107,10 +98,6 @@ class TestTakeAction:
             results_dir='results dir',
             nemo34=False,
             quiet=True,
-            keep_proc_results=False,
-            compress=False,
-            compress_restart=False,
-            delete_restart=False,
         )
         run_cmd.run(parsed_args)
         assert not m_log.info.called
@@ -163,8 +150,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd())
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers,
-            pathlib.Path(str(p_results_dir)),
-            str(p_run_dir), '', 'orcinus', nemo34
+            pathlib.Path(str(p_results_dir)), str(p_run_dir), 'orcinus', nemo34
         )
         m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],
                                       universal_newlines=True)
