@@ -29,7 +29,6 @@ dependencies:
   - pyyaml
 
   # For SalishSeaTools package
-  - basemap
   - bottleneck
   - matplotlib
   - numpy
