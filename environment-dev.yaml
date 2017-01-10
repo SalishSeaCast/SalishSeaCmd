@@ -55,6 +55,3 @@ dependencies:
 
     # For coding style
     - yapf
-
-    # For unit and packaging testing under Python 2 and 3
-    - tox

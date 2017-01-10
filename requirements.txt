@@ -41,7 +41,5 @@ snowballstemmer==1.2.1
 Sphinx==1.5.1
 sphinx-rtd-theme==0.1.9
 stevedore==1.19.1
-tox==2.5.0
-virtualenv==15.1.0
 xarray==0.8.2
 
