@@ -98,6 +98,16 @@ The :kbd:`paths` section of the run description file is a collection of director
   You can use :kbd:`~` or :kbd:`$HOME` in the path,
   if you wish.
 
+:kbd:`NEMO code config`
+  The path to the :file:`CONFIG/` directory in the :ref:`NEMO-3.6-code-repo` clone
+  where the NEMO configuration directories are to be found;
+  e.g. :file:`$HOME/MEOPAR/NEMO-3.6-code/NEMOGCM/CONFIG/`.
+  An absolute path is required because the path is used in both the current directory and the temporary run directory created in the :kbd:`runs directory`.
+  You can use :kbd:`~` or :kbd:`$HOME` in the path,
+  if you wish.
+
+  This key may also be spelled :kbd:`NEMO-code-config` for backward compatibility.
+
 :kbd:`XIOS`
   The path to the :ref:`XIOS-repo` clone where the XIOS executable for the run is to be found.
   This path may be either absolute or relative.
@@ -376,6 +386,16 @@ The :kbd:`paths` section of the run description file is a collection of director
   An absolute path is required because the path is used in both the current  directory and the temporary run directory created in the :kbd:`runs directory`.
   You can use :kbd:`~` or :kbd:`$HOME` in the path,
   if you wish.
+
+:kbd:`NEMO code config`
+  The path to the :file:`CONFIG/` directory in the :ref:`NEMO-code-repo` clone
+  where the NEMO configuration directories are to be found;
+  e.g. :file:`$HOME/MEOPAR/NEMO-code/NEMOGCM/CONFIG/`.
+  An absolute path is required because the path is used in both the current directory and the temporary run directory created in the :kbd:`runs directory`.
+  You can use :kbd:`~` or :kbd:`$HOME` in the path,
+  if you wish.
+
+  This key may also be spelled :kbd:`NEMO-code-config` for backward compatibility.
 
 :kbd:`forcing`
   The path to the :ref:`NEMO-forcing-repo` clone where the netCDF files for the grid coordinates,
