@@ -10,7 +10,6 @@ channels:
   - defaults
 
 dependencies:
-- basemap
 - bottleneck
 - h5py
 - ipython
