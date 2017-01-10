@@ -20,6 +20,25 @@
 :kbd:`SalishSeaCmd` Changes That Break Backward Compatibility
 *************************************************************
 
+Version 3.0
+===========
+
+The following change that was introduced in version 3.0 of the :kbd:`SalishSeaCmd` package is incompatible with earlier versions:
+
+* The :kbd:`paths` section of the YAML run description file must now contain a :kbd:`NEMO code config` key,
+  the value of which is the path to the :file:`CONFIG/` directory in the NEMO code tree.
+  An absolute path is required because the path is used in both the current directory and the temporary run directory created in the :kbd:`runs directory`.
+  You can use :kbd:`~` or :kbd:`$HOME` in the path,
+  if you wish.
+  Examples:
+
+  .. code-block:: yaml
+
+      NEMO code config: $HOME/MEOPAR/NEMO-3.6-code/NEMOGCM/CONFIG
+
+      NEMO code config: /data/sallen/MEOPAR/NEMO-code/NEMOGCM/CONFIG
+
+
 Version 2.2
 ===========
 
