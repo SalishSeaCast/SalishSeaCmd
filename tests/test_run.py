@@ -76,6 +76,7 @@ class TestTakeAction:
         parsed_args = Mock(
             desc_file='desc file',
             results_dir='results dir',
+            max_deflate_jobs=4,
             nemo34=False,
             nocheck_init=False,
             waitjob=0,
@@ -85,6 +86,7 @@ class TestTakeAction:
         m_run.assert_called_once_with(
             'desc file',
             'results dir',
+            4,
             False,
             False,
             0,
@@ -143,13 +145,13 @@ class TestRun:
             }
         with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
             qsb_msg = salishsea_cmd.run.run(
-                'SalishSea.yaml', str(p_results_dir), nemo34
+                'SalishSea.yaml', str(p_results_dir), nemo34=nemo34
             )
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
         m_lrd.assert_called_once_with('SalishSea.yaml')
         m_gnp.assert_called_once_with(m_lrd())
         m_bbs.assert_called_once_with(
-            m_lrd(), 'SalishSea.yaml', 144, xios_servers,
+            m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
             pathlib.Path(str(p_results_dir)), str(p_run_dir), 'orcinus', nemo34
         )
         m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],

@@ -61,13 +61,13 @@ class Run(cliff.command.Command):
             help='directory to store results into'
         )
         parser.add_argument(
-            '--nocheck-initial-conditions',
-            dest='nocheck_init',
-            action='store_true',
+            '--max-deflate-jobs',
+            dest='max_deflate_jobs',
+            type=int,
+            default=4,
             help='''
-            Suppress checking of the initial conditions link.
-            Useful if you are submitting a job to wait on a
-            previous job'''
+            Maximum number of concurrent sub-processes to
+            use for netCDF deflating. Defaults to 4.'''
         )
         parser.add_argument(
             '--nemo3.4',
@@ -76,6 +76,15 @@ class Run(cliff.command.Command):
             help='''
             Do a NEMO-3.4 run;
             the default is to do a NEMO-3.6 run'''
+        )
+        parser.add_argument(
+            '--nocheck-initial-conditions',
+            dest='nocheck_init',
+            action='store_true',
+            help='''
+            Suppress checking of the initial conditions link.
+            Useful if you are submitting a job to wait on a
+            previous job'''
         )
         parser.add_argument(
             '--waitjob',
@@ -106,6 +115,7 @@ class Run(cliff.command.Command):
         qsub_msg = run(
             parsed_args.desc_file,
             parsed_args.results_dir,
+            parsed_args.max_deflate_jobs,
             parsed_args.nemo34,
             parsed_args.nocheck_init,
             parsed_args.waitjob,
@@ -118,6 +128,7 @@ class Run(cliff.command.Command):
 def run(
     desc_file,
     results_dir,
+    max_deflate_jobs=4,
     nemo34=False,
     nocheck_init=False,
     waitjob=0,
@@ -139,6 +150,9 @@ def run(
                       results;
                       it will be created if it does not exist.
     :type results_dir: str
+
+    :arg int max_deflate_jobs: Maximum number of concurrent sub-processes to
+                               use for netCDF deflating.
 
     :arg nemo34: Prepare a NEMO-3.4 run;
                  the default is to prepare a NEMO-3.6 run
@@ -177,6 +191,7 @@ def run(
         desc_file,
         nemo_processors,
         xios_processors,
+        max_deflate_jobs,
         results_dir,
         run_dir.as_posix(),
         system,
@@ -197,8 +212,8 @@ def run(
 
 
 def _build_batch_script(
-    run_desc, desc_file, nemo_processors, xios_processors, results_dir,
-    run_dir, system, nemo34
+    run_desc, desc_file, nemo_processors, xios_processors, max_deflate_jobs,
+    results_dir, run_dir, system, nemo34
 ):
     """Build the Bash script that will execute the run.
 
@@ -211,6 +226,9 @@ def _build_batch_script(
 
     :arg int xios_processors: Number of processors that XIOS will be executed
                               on.
+
+    :arg int max_deflate_jobs: Maximum number of concurrent sub-processes to
+                               use for netCDF deflating.
 
     :arg results_dir: Path of the directory in which to store the run
                       results;
@@ -260,7 +278,9 @@ def _build_batch_script(
                 system,
             ),
             modules=_modules(system, nemo34),
-            execute=_execute(nemo_processors, xios_processors),
+            execute=_execute(
+                nemo_processors, xios_processors, max_deflate_jobs
+            ),
             fix_permissions=_fix_permissions(),
             cleanup=_cleanup(),
         )
@@ -336,7 +356,7 @@ def _modules(system, nemo34):
     return modules
 
 
-def _execute(nemo_processors, xios_processors):
+def _execute(nemo_processors, xios_processors, max_deflate_jobs):
     mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
     if xios_processors:
         mpirun = u' '.join(
@@ -354,17 +374,18 @@ def _execute(nemo_processors, xios_processors):
         u'echo "Ended run at $(date)"\n'
         u'\n'
         u'echo "Results combining started at $(date)"\n'
-        u'${COMBINE} ${RUN_DESC} --debug\n'
+        u'${{COMBINE}} ${{RUN_DESC}} --debug\n'
         u'echo "Results combining ended at $(date)"\n'
         u'\n'
         u'echo "Results deflation started at $(date)"\n'
-        u'${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug\n'
+        u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc '
+        u'--jobs {max_deflate_jobs} --debug\n'
         u'echo "Results deflation ended at $(date)"\n'
         u'\n'
         u'echo "Results gathering started at $(date)"\n'
-        u'${GATHER} ${RESULTS_DIR} --debug\n'
+        u'${{GATHER}} ${{RESULTS_DIR}} --debug\n'
         u'echo "Results gathering ended at $(date)"\n'
-    )
+    ).format(max_deflate_jobs=max_deflate_jobs)
     return script
 
 
