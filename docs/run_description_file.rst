@@ -267,11 +267,11 @@ That mean that they are simply listed by name in the appropriate :kbd:`namelist*
 
 On the other hand,
 when you want to use a namelist section that contains the group's current consensus best values,
-list it as a relative path from the location of your run description file to the "standard" nameslist section files in :file:`SS-run-sets/SalishSea/nemo3.6/`:
+list it as a relative or absolute path from the location of your run description file to the "standard" nameslist section files in :file:`SS-run-sets/SalishSea/nemo3.6/`:
 
 .. code-block:: yaml
 
-    namlists:
+    namelists:
       namelist_cfg:
         - ../../nemo3.6/namelist.bottom
 
@@ -280,6 +280,17 @@ So,
 :file:`NEMOGCM/CONFIG/SHARED/namelist_ref` will always be symlinked and,
 if the :kbd:`namelist_top_cfg` key is present,
 the :file:`NEMOGCM/CONFIG/SHARED/namelist_top_ref` file will also be symlinked into the run directory.
+
+You can override the use of :file:`*_ref` namelists from :file:`CONFIG/SHARED/` by including a :file:`*_ref` namelist key.
+For example:
+
+.. code-block:: yaml
+
+    namelists:
+      namelist_ref:
+        - ../../NEMO-3.6-code/NEMOGCM/CONFIG/SOG/EXP00/namelist_ref
+
+will cause the :file:`namelist_ref` file in the :file:`../../NEMO-3.6-code/NEMOGCM/CONFIG/SMELT/EXP00/` directory to be symlinked into the temporary run directory instead of :file:`CONFIG/SHARED/namelist_ref`.
 
 
 .. _NEMO-3.6-Output:
