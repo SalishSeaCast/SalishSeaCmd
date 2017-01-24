@@ -304,6 +304,7 @@ def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
                     namelist.write('\n\n')
             except IOError as e:
                 log.error(e)
+                namelist.close()
                 _remove_run_dir(run_dir)
                 raise SystemExit(2)
         namelist.writelines(EMPTY_NAMELISTS)
@@ -342,6 +343,7 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
                         namelist.write('\n\n')
                 except IOError as e:
                     log.error(e)
+                    namelist.close()
                     _remove_run_dir(run_dir)
                     raise SystemExit(2)
         ref_namelist = namelist_filename.replace('_cfg', '_ref')
@@ -360,6 +362,7 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
             'No namelist_cfg key found in namelists section of run '
             'description'
         )
+        _remove_run_dir(run_dir)
         raise SystemExit(2)
 
 
