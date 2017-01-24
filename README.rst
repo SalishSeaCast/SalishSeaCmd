@@ -4,17 +4,17 @@ Salish Sea NEMO Command Processor
 
 The Salish Sea NEMO command processor, ``salishsea``, is a command line tool for doing various operations associated with the `Salish Sea NEMO model`_.
 
-.. _Salish Sea NEMO model: http://salishsea-meopar-docs.readthedocs.io/en/latest/
+.. _Salish Sea NEMO model: https://salishsea-meopar-docs.readthedocs.io/en/latest/
 
 Use ``salishsea --help`` to get a list of the sub-commands available for doing things with and related to Salish Sea NEMO.
 Use ``salishsea help <sub-command>`` to get a synopsis of what a sub-command does,
 what its required arguments are,
 and what options are available to control it.
 
-Documentation for the command processor is in the ``docs/`` directory and is rendered at http://salishseacmd.readthedocs.io/en/latest/.
+Documentation for the command processor is in the ``docs/`` directory and is rendered at https://salishseacmd.readthedocs.io/en/latest/.
 
 .. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
-    :target: http://salishseacmd.readthedocs.io/en/latest/?badge=latest
+    :target: https://salishseacmd.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
 This an extensible tool built on the OpenStack :kbd:`cliff`
@@ -32,5 +32,5 @@ License
 The Salish Sea NEMO command processor and documentation are copyright 2013-2016 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Please see the LICENSE file for details of the license.
