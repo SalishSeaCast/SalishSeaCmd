@@ -50,17 +50,23 @@ class TestParser:
         parsed_args = parser.parse_args(['foo', 'baz'])
         assert parsed_args.desc_file == 'foo'
         assert parsed_args.results_dir == 'baz'
+        assert parsed_args.max_deflate_jobs == 4
         assert not parsed_args.nemo34
+        assert not parsed_args.nocheck_init
+        assert not parsed_args.no_submit
+        assert parsed_args.waitjob == 0
         assert not parsed_args.quiet
 
     @pytest.mark.parametrize(
         'flag, attr', [
             ('--nemo3.4', 'nemo34'),
+            ('--nocheck-initial-conditions', 'nocheck_init'),
+            ('--no-submit', 'no_submit'),
             ('-q', 'quiet'),
             ('--quiet', 'quiet'),
         ]
     )
-    def test_parsed_args_flags(self, flag, attr, run_cmd):
+    def test_parsed_args_boolean_flags(self, flag, attr, run_cmd):
         parser = run_cmd.get_parser('salishsea run')
         parsed_args = parser.parse_args(['foo', 'baz', flag])
         assert getattr(parsed_args, attr)
@@ -79,6 +85,7 @@ class TestTakeAction:
             max_deflate_jobs=4,
             nemo34=False,
             nocheck_init=False,
+            no_submit=False,
             waitjob=0,
             quiet=False,
         )
@@ -87,6 +94,7 @@ class TestTakeAction:
             'desc file',
             'results dir',
             4,
+            False,
             False,
             False,
             0,
@@ -121,7 +129,7 @@ class TestRun:
             (False, True, 4),
         ]
     )
-    def test_run(
+    def test_run_submit(
         self,
         m_prepare,
         m_lrd,
@@ -157,6 +165,51 @@ class TestRun:
         m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],
                                       universal_newlines=True)
         assert qsb_msg == 'msg'
+
+
+    @pytest.mark.parametrize(
+        'nemo34, sep_xios_server, xios_servers', [
+            (True, None, 0),
+            (False, False, 0),
+            (False, True, 4),
+        ]
+    )
+    def test_run_no_submit(
+        self,
+        m_prepare,
+        m_lrd,
+        m_gnp,
+        m_bbs,
+        m_sco,
+        nemo34,
+        sep_xios_server,
+        xios_servers,
+        tmpdir,
+    ):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        m_prepare.return_value = str(p_run_dir)
+        p_results_dir = tmpdir.ensure_dir('results_dir')
+        if not nemo34:
+            m_lrd.return_value = {
+                'output': {
+                    'separate XIOS server': sep_xios_server,
+                    'XIOS servers': xios_servers,
+                }
+            }
+        with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
+            qsb_msg = salishsea_cmd.run.run(
+                'SalishSea.yaml', str(p_results_dir), nemo34=nemo34,
+                no_submit=True,
+            )
+        m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
+        m_lrd.assert_called_once_with('SalishSea.yaml')
+        m_gnp.assert_called_once_with(m_lrd())
+        m_bbs.assert_called_once_with(
+            m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
+            pathlib.Path(str(p_results_dir)), str(p_run_dir), 'orcinus', nemo34
+        )
+        assert not m_sco.called
+        assert qsb_msg is None
 
 
 class TestPbsFeatures:

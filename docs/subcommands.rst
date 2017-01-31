@@ -54,7 +54,8 @@ For example:
 
 ::
 
-    usage: salishsea run [-h] [--nocheck-initial-conditions] [--nemo3.4]
+    usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS] [--nemo3.4]
+                         [--nocheck-initial-conditions] [--no-submit]
                          [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
@@ -68,11 +69,19 @@ For example:
 
     optional arguments:
       -h, --help            show this help message and exit
+      --max-deflate-jobs MAX_DEFLATE_JOBS
+                            Maximum number of concurrent sub-processes to use for
+                            netCDF deflating. Defaults to 4.
+      --nemo3.4             Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
       --nocheck-initial-conditions
                             Suppress checking of the initial conditions link.
                             Useful if you are submitting a job to wait on a
                             previous job
-      --nemo3.4             Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
+      --no-submit           Prepare the temporary run directory, and the bash
+                            script to execute the NEMO run, but don't submit the
+                            run to the queue. This is useful during development
+                            runs when you want to hack on the bash script and/or
+                            use the same temporary run directory more than once.
       --waitjob WAITJOB     use -W waitjob in call to qsub, to make current job
                             wait for on waitjob. Waitjob is the queue job number
       -q, --quiet           don't show the run directory path or job submission
@@ -97,7 +106,8 @@ The results are gathered in the specified results directory.
 
 ::
 
-    usage: salishsea run [-h] [--nocheck-initial-conditions] [--nemo3.4]
+    usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS] [--nemo3.4]
+                         [--nocheck-initial-conditions] [--no-submit]
                          [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
@@ -111,11 +121,19 @@ The results are gathered in the specified results directory.
 
     optional arguments:
       -h, --help            show this help message and exit
+      --max-deflate-jobs MAX_DEFLATE_JOBS
+                            Maximum number of concurrent sub-processes to use for
+                            netCDF deflating. Defaults to 4.
+      --nemo3.4             Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
       --nocheck-initial-conditions
                             Suppress checking of the initial conditions link.
                             Useful if you are submitting a job to wait on a
                             previous job
-      --nemo3.4             Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
+      --no-submit           Prepare the temporary run directory, and the bash
+                            script to execute the NEMO run, but don't submit the
+                            run to the queue. This is useful during development
+                            runs when you want to hack on the bash script and/or
+                            use the same temporary run directory more than once.
       --waitjob WAITJOB     use -W waitjob in call to qsub, to make current job
                             wait for on waitjob. Waitjob is the queue job number
       -q, --quiet           don't show the run directory path or job submission
