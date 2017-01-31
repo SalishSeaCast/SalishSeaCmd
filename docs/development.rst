@@ -94,6 +94,28 @@ To deactivate the environment use:
     (salishsea-cmd)$ source deactivate
 
 
+.. _SalishSeaCmdCodingStyle
+
+Coding Style
+============
+
+The :kbd:`SalishSeaCmd` package uses the `yapf`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
+The project-specific differences from the :command:`yapf` implementation of PEP 8 are defined in the :file:`.style.yapf` in the repository root directory.
+
+.. _yapf: https://github.com/google/yapf
+.. _PEP 8: https://www.python.org/dev/peps/pep-0008/
+
+:command:`yapf` is installed as part of the :ref:`SalishSeaCmdDevelopmentEnvironment` setup.
+
+To run :command:`yapf` on the entire code-base use:
+
+.. code-block:: bash
+
+    $ yapf --parallel --in-place --recursive salishsea_cmd/ tests/ __pkg_metadata__.py setup.py
+
+in the repository root directory.
+
+
 .. _SalishSeaCmdBuildingTheDocumentation:
 
 Building the Documentation
