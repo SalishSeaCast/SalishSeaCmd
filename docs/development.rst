@@ -94,7 +94,7 @@ To deactivate the environment use:
     (salishsea-cmd)$ source deactivate
 
 
-.. _SalishSeaCmdCodingStyle
+.. _SalishSeaCmdCodingStyle:
 
 Coding Style
 ============
