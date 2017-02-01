@@ -205,7 +205,7 @@ def run(
         xios_processors,
         max_deflate_jobs,
         results_dir,
-        run_dir.as_posix(),
+        str(run_dir),
         system,
         nemo34,
     )
@@ -215,13 +215,13 @@ def run(
     if no_submit:
         return
     starting_dir = pathlib.Path.cwd()
-    os.chdir(run_dir.as_posix())
+    os.chdir(str(run_dir))
     if waitjob:
         cmd = 'qsub -W depend=afterok:{} SalishSeaNEMO.sh'.format(waitjob)
     else:
         cmd = 'qsub SalishSeaNEMO.sh'
     qsub_msg = subprocess.check_output(cmd.split(), universal_newlines=True)
-    os.chdir(starting_dir.as_posix())
+    os.chdir(str(starting_dir))
     return qsub_msg
 
 
