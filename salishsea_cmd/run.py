@@ -33,6 +33,7 @@ import subprocess
 import cliff.command
 
 from salishsea_cmd import api, lib
+from salishsea_cmd.fspath import fspath
 
 log = logging.getLogger(__name__)
 
@@ -205,7 +206,7 @@ def run(
         xios_processors,
         max_deflate_jobs,
         results_dir,
-        str(run_dir),
+        fspath(run_dir),
         system,
         nemo34,
     )
@@ -215,13 +216,13 @@ def run(
     if no_submit:
         return
     starting_dir = pathlib.Path.cwd()
-    os.chdir(str(run_dir))
+    os.chdir(fspath(run_dir))
     if waitjob:
         cmd = 'qsub -W depend=afterok:{} SalishSeaNEMO.sh'.format(waitjob)
     else:
         cmd = 'qsub SalishSeaNEMO.sh'
     qsub_msg = subprocess.check_output(cmd.split(), universal_newlines=True)
-    os.chdir(str(starting_dir))
+    os.chdir(fspath(starting_dir))
     return qsub_msg
 
 
