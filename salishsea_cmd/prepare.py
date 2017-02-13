@@ -19,6 +19,11 @@ in a specified directory and changes the pwd to that directory.
 """
 import logging
 import os
+try:
+    from pathlib import Path
+except ImportError:
+    # Python 2.7
+    from pathlib2 import Path
 import shutil
 import time
 import uuid
@@ -122,7 +127,7 @@ def prepare(desc_file, nemo34, nocheck_init):
     )
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
-    _make_namelists(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34)
+    _make_namelists(run_set_dir, run_desc, run_dir, nemo34)
     _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34)
     _make_executable_links(
         nemo_code_repo, nemo_bin_dir, run_dir, nemo34, xios_code_repo,
@@ -241,7 +246,7 @@ def _remove_run_dir(run_dir):
         pass
 
 
-def _make_namelists(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
+def _make_namelists(run_set_dir, run_desc, run_dir, nemo34):
     """Build the namelist file(s) for the run in run_dir by concatenating
     the list(s) of namelist section files provided in run_desc.
 
@@ -259,9 +264,6 @@ def _make_namelists(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
     :arg run_dir: Path of the temporary run directory.
     :type run_dir: str
 
-    :arg nemo_code_repo: Absolute path of NEMO code repo.
-    :type nemo_code_repo: str
-
     :arg nemo34: Prepare a NEMO-3.4 run;
                  the default is to prepare a NEMO-3.6 run
     :type nemo34: boolean
@@ -271,7 +273,7 @@ def _make_namelists(run_set_dir, run_desc, run_dir, nemo_code_repo, nemo34):
     if nemo34:
         _make_namelist_nemo34(run_set_dir, run_desc, run_dir)
     else:
-        _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo)
+        _make_namelists_nemo36(run_set_dir, run_desc, run_dir)
 
 
 def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
@@ -311,7 +313,7 @@ def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
     _set_mpi_decomposition(namelist_filename, run_desc, run_dir)
 
 
-def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
+def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
     """Build the namelist files for the NEMO-3.6 run in run_dir by
     concatenating the lists of namelist section files provided in run_desc.
 
@@ -329,11 +331,22 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
     :arg run_dir: Path of the temporary run directory.
     :type run_dir: str
 
-    :arg nemo_code_repo: Absolute path of NEMO code repo.
-    :type nemo_code_repo: str
-
     :raises: SystemExit
     """
+    try:
+        nemo_config_dir = Path(
+            os.path.expandvars(run_desc['paths']['NEMO code config'])
+        ).expanduser().resolve()
+    except KeyError:
+        # Alternate key spelling for backward compatibility
+        nemo_config_dir = Path(
+            os.path.expandvars(run_desc['paths']['NEMO-code-config'])
+        ).expanduser().resolve()
+    try:
+        config_name = run_desc['config name']
+    except KeyError:
+        # Alternate key spelling for backward compatibility
+        config_name = run_desc['config_name']
     for namelist_filename in run_desc['namelists']:
         with open(os.path.join(run_dir, namelist_filename), 'wt') as namelist:
             for nl in run_desc['namelists'][namelist_filename]:
@@ -348,13 +361,10 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, nemo_code_repo):
                     raise SystemExit(2)
         ref_namelist = namelist_filename.replace('_cfg', '_ref')
         if ref_namelist not in run_desc['namelists']:
-            ref_namelist_path = os.path.join(
-                nemo_code_repo, 'NEMOGCM', 'CONFIG', 'SHARED', ref_namelist
+            ref_namelist_target = (
+                nemo_config_dir / config_name / 'EXP00' / ref_namelist
             )
-            saved_cwd = os.getcwd()
-            os.chdir(run_dir)
-            os.symlink(ref_namelist_path, ref_namelist)
-            os.chdir(saved_cwd)
+            Path(run_dir, ref_namelist).symlink_to(ref_namelist_target)
     if 'namelist_cfg' in run_desc['namelists']:
         _set_mpi_decomposition('namelist_cfg', run_desc, run_dir)
     else:
