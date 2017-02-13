@@ -166,7 +166,6 @@ class TestRun:
                                       universal_newlines=True)
         assert qsb_msg == 'msg'
 
-
     @pytest.mark.parametrize(
         'nemo34, sep_xios_server, xios_servers', [
             (True, None, 0),
@@ -198,7 +197,9 @@ class TestRun:
             }
         with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
             qsb_msg = salishsea_cmd.run.run(
-                'SalishSea.yaml', str(p_results_dir), nemo34=nemo34,
+                'SalishSea.yaml',
+                str(p_results_dir),
+                nemo34=nemo34,
                 no_submit=True,
             )
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
