@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Define the :func:`fspath` function that returns the string representation
 of a file system path.
 This provides a uniform interface for working with :class:`Path` objects in
