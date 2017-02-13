@@ -275,22 +275,28 @@ list it as a relative or absolute path from the location of your run description
       namelist_cfg:
         - ../../nemo3.6/namelist.bottom
 
-For each :kbd:`namelist*_cfg` key a :file:`NEMOGCM/CONFIG/SHARED/namelist*_ref` file is symlinked into the run directory to provide default values that will be used for any namelist variables not included in the namelist section files listed in the :kbd:`namelists` section.
-So,
-:file:`NEMOGCM/CONFIG/SHARED/namelist_ref` will always be symlinked and,
-if the :kbd:`namelist_top_cfg` key is present,
-the :file:`NEMOGCM/CONFIG/SHARED/namelist_top_ref` file will also be symlinked into the run directory.
+For each :kbd:`namelist*_cfg` key a :file:`NEMOGCM/CONFIG/config_name/EXP00/namelist*_ref` file is symlinked into the run directory to provide default values that will be used for any namelist variables not included in the namelist section files listed in the :kbd:`namelists` section.
+:kbd:`config_name` is the value of the :kbd:`config name` key in the run description file.
 
-You can override the use of :file:`*_ref` namelists from :file:`CONFIG/SHARED/` by including a :file:`*_ref` namelist key.
+So,
+:file:`NEMOGCM/CONFIG/config_name/EXP00/namelist_ref` will always be symlinked and,
+if the :kbd:`namelist_top_cfg` key is present,
+the :file:`NEMOGCM/CONFIG/config_name/EXP00/namelist_top_ref` file will also be symlinked into the run directory.
+
+You can override the use of :file:`*_ref` namelists from :file:`CONFIG/config_name/EXP00/` by including a :file:`*_ref` namelist key.
 For example:
 
 .. code-block:: yaml
 
+    config name: SMELT
+
+    ...
+
     namelists:
       namelist_ref:
-        - ../../NEMO-3.6-code/NEMOGCM/CONFIG/SOG/EXP00/namelist_ref
+        - $HOME/MEOPAR/test-sponge/namelist_ref
 
-will cause the :file:`namelist_ref` file in the :file:`../../NEMO-3.6-code/NEMOGCM/CONFIG/SMELT/EXP00/` directory to be symlinked into the temporary run directory instead of :file:`CONFIG/SHARED/namelist_ref`.
+will cause the :file:`namelist_ref` file in the :file:`$HOME/MEOPAR/test-sponge/namelist_ref` directory to be symlinked into the temporary run directory instead of :file:`CONFIG/SMELT/EXP00/namelist_ref`.
 
 
 .. _NEMO-3.6-Output:
