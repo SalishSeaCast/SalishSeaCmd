@@ -1,4 +1,4 @@
-# Copyright 2013-2016 The Salish Sea MEOPAR Contributors
+# Copyright 2013-2017 The Salish Sea MEOPAR Contributors
 # and The University of British Columbia
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ log = logging.getLogger(__name__)
 
 
 class Prepare(cliff.command.Command):
-    """Prepare a Salish Sea NEMO run
+    """Prepare a Salish Sea NEMO run.
     """
 
     def get_parser(self, prog_name):
