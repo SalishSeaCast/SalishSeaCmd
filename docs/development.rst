@@ -1,4 +1,4 @@
-.. Copyright 2013-2016 The Salish Sea MEOPAR contributors
+.. Copyright 2013-2017 The Salish Sea MEOPAR contributors
 .. and The University of British Columbia
 ..
 .. Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,25 +29,27 @@ The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.5 or l
 However,
 the package must also run under `Python`_ 2.7 for use on the Westgrid HPC platform.
 
+.. _Python: https://www.python.org/
+
 
 .. _SalishSeaCmdGettingTheCode:
 
 Getting the Code
 ================
 
-Clone the :ref:`tools-repo` code and documentation `repository`_ from Bitbucket with:
+Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from Bitbucket with:
 
 .. _repository: https://bitbucket.org/salishsea/salishseacmd/
 
 .. code-block:: bash
 
-    $ hg clone ssh://hg@bitbucket.org/salishsea/salishsea SalishSeaCmd
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
 
 or
 
 .. code-block:: bash
 
-    $ hg clone https://<your_userid>@bitbucket.org/salishsea/salishsea SalishSeaCmd
+    $ hg clone https://<your_userid>@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
 
 if you don't have `ssh key authentication`_ set up on Bitbucket.
 
@@ -70,13 +72,12 @@ you can create and activate an environment called :kbd:`salishsea-cmd` that will
 testing,
 and building the documentation with the commands:
 
-.. _Python: https://www.python.org/
 .. _Conda: http://conda.pydata.org/docs/
 .. _Miniconda3: http://conda.pydata.org/docs/install/quick.html
 
 .. code-block:: bash
 
-    $ conda env create -f SalishSeaCmd/environment.yaml
+    $ conda env create -f SalishSeaCmd/environment-dev.yaml
     $ source activate salishsea-cmd
     (salishsea-cmd)$ pip install --editable tools/SalishSeaTools
     (salishsea-cmd)$ pip install --editable NEMO-Cmd
@@ -185,8 +186,6 @@ The `pytest`_ tools is used for test fixtures and as the test runner for the sui
 With your :kbd:`salishsea-cmd` development environment activated,
 use:
 
-.. _Mercurial: http://mercurial.selenic.com/
-
 .. code-block:: bash
 
     (salishsea-cmd)$ cd SalishSeaCmd/
@@ -244,6 +243,8 @@ Version Control Repository
 ==========================
 
 The :kbd:`SalishSeaCmd` package code and documentation source files are available in the :ref:`SalishSeaCmd-repo` `Mercurial`_ repository at https://bitbucket.org/salishsea/salishseacmd.
+
+.. _Mercurial: http://mercurial.selenic.com/
 
 
 .. _SalishSeaCmdIssueTracker:
