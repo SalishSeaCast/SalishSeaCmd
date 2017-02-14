@@ -23,7 +23,7 @@ dependencies:
 - paramiko
 - pillow
 - pip
-- python=3
+- python=3.5
 - pytz
 - pyyaml
 - pyzmq
