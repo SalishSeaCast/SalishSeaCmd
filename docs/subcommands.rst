@@ -60,7 +60,7 @@ For example:
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
-    described in DESC_FILE and IO_DEFS. The results files from the run are
+    described in DESC_FILE. The results files from the run are
     gathered in RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
 
     positional arguments:
@@ -101,7 +101,7 @@ You can check what version of :program:`salishsea` you have installed with:
 
 The :command:`run` sub-command prepares,
 executes,
-and gathers the results from the Salish Sea NEMO run described in the specifed run description and IOM server definitions files.
+and gathers the results from the Salish Sea NEMO run described in the specified run description file.
 The results are gathered in the specified results directory.
 
 ::
@@ -151,15 +151,13 @@ The :command:`run` sub-command does the following:
    The job script:
 
    * runs NEMO
-   * executes the :ref:`salishsea-combine` to combine the per-processor results and/or restart files
-   * executes the :ref:`salishsea-deflate` to deflate the variables in the netCDF files using the Lempel-Ziv compression algorithm to reduce the size of the file on disk
-   * executes the :ref:`salishsea-gather` to collect the run results files into the results directory
+   * executes the :ref:`salishsea-combine` to combine the per-processor restart and/or results files
+   * executes the :ref:`salishsea-deflate` to deflate the variables in the large netCDF results files using the Lempel-Ziv compression algorithm to reduce the size of the file on disk
+   * executes the :ref:`salishsea-gather` to collect the run description and results files into the results directory
 
-#. Submit the job script to the queue manager via :command:`qsub` on systems like :kbd:`salish.eos.ubc.ca`,
-   :kbd:`jasper.westgrid.ca`,
-   and :kbd:`orcinus.westgrid.ca` that use TORQUE/PBS schedulers.
+#. Submit the job script to the queue manager via the :command:`qsub` command.
 
-See the :ref:`RunDescriptionFileStructure` section for details of the run description file.
+See the :ref:`RunDescriptionFileStructure` section for details of the run description YAML file.
 
 The :command:`run` sub-command concludes by printing the path to the run directory and the response from the job queue manager.
 Example:
@@ -237,7 +235,7 @@ the run directory contains:
   file that is constructed by concatenating the namelist segments listed in the run description file
   (see :ref:`RunDescriptionFileStructure`).
 
-* A symlink to the :file:`NEMOGCM/CONFIG/SHARED/namelist_ref` file in the :kbd:`NEMO-code` directory specified in the :kbd:`paths` section of the run description file is also created to provide default values to be used for any namelist variables not included in the namelist segments listed in the run description file.
+* A symlink to the :file:`EXP00/namelist_ref` file in the directory of the NEMO configuration given by the :kbd:`config name` and :kbd:`NEMO code config` keys in the run description file is also created to provide default values to be used for any namelist variables not included in the namelist segments listed in the run description file.
 
 * A symlink called :file:`bathy_meter.nc`
   (the file name required by NEMO)

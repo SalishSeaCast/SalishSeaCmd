@@ -46,7 +46,7 @@ class Run(cliff.command.Command):
         parser = super(Run, self).get_parser(prog_name)
         parser.description = '''
             Prepare, execute, and gather the results from a Salish Sea NEMO-3.6
-            run described in DESC_FILE and IO_DEFS.
+            run described in DESC_FILE.
             The results files from the run are gathered in RESULTS_DIR.
 
             If RESULTS_DIR does not exist it will be created.
