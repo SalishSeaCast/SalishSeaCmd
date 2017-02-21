@@ -32,6 +32,7 @@ import xml.etree.ElementTree
 import arrow
 import cliff.command
 
+from nemo_cmd import fspath, resolved_path
 from nemo_cmd.namelist import namelist2dict
 import salishsea_tools.hg_commands as hg
 
@@ -161,9 +162,7 @@ def _check_nemo_exec(run_desc, nemo34):
 
     :raises: SystemExit
     """
-    nemo_code_repo = os.path.abspath(
-        os.path.expandvars(os.path.expanduser(run_desc['paths']['NEMO-code']))
-    )
+    nemo_code_repo = resolved_path(run_desc['paths']['NEMO-code'])
     config_dir = os.path.join(
         nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config_name']
     )
@@ -181,7 +180,7 @@ def _check_nemo_exec(run_desc, nemo34):
                 '{} not found - are you running without key_iomput?'
                 .format(iom_server_exec)
             )
-    return nemo_code_repo, nemo_bin_dir
+    return fspath(nemo_code_repo), nemo_bin_dir
 
 
 def _check_xios_exec(run_desc):
@@ -334,14 +333,10 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
     :raises: SystemExit
     """
     try:
-        nemo_config_dir = Path(
-            os.path.expandvars(run_desc['paths']['NEMO code config'])
-        ).expanduser().resolve()
+        nemo_config_dir = resolved_path(run_desc['paths']['NEMO code config'])
     except KeyError:
         # Alternate key spelling for backward compatibility
-        nemo_config_dir = Path(
-            os.path.expandvars(run_desc['paths']['NEMO-code-config'])
-        ).expanduser().resolve()
+        nemo_config_dir = resolved_path(run_desc['paths']['NEMO-code-config'])
     try:
         config_name = run_desc['config name']
     except KeyError:
