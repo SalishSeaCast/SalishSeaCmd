@@ -31,9 +31,9 @@ import socket
 import subprocess
 
 import cliff.command
+from nemo_cmd.fspath import fspath
 
 from salishsea_cmd import api, lib
-from salishsea_cmd.fspath import fspath
 
 log = logging.getLogger(__name__)
 
