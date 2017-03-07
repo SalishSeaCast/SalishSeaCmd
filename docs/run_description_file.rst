@@ -130,22 +130,37 @@ The :kbd:`paths` section of the run description file is a collection of director
 :kbd:`grid` Section
 -------------------
 
-The :kbd:`grid` section of the run description file contains 2 key-value pairs that provide the names of the coordinates and bathymetry files to use for the run.
-Those file are presumed to be in the :file:`grid/` directory of the :ref:`NEMO-forcing-repo` clone pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.6-Paths`.
+The :kbd:`grid` section of the run description file contains 2 key-value pairs that provide:
+
+* the names of the coordinates and bathymetry files to use for the run, or,
+* relative paths to the coordinates and bathymetry files to use for the run, or,
+* absolute paths to the coordinates and bathymetry files to use for the run
+
+If file names are provided,
+those files are presumed to be in the :file:`grid/` sub-directory of the directory tree pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.6-Paths`.
+
 If relative paths are given,
 they are appended to the :file:`grid/` directory of the :kbd:`forcing` path.
 
+If absolute paths are given,
+they may use :kbd:`~`,
+:kbd:`$HOME`,
+or :kbd:`$USER`,
+if you wish.
+
 :kbd:`coordinates`
-  The name of the coordinates file to use for the run.
+  The name of,
+  or path to,
+  the coordinates file to use for the run.
   It is symlinked in the run directory as :file:`coordinates.nc`
   (the file name required by NEMO).
-  The value is typically :file:`coordinates_seagrid_SalishSea.nc`.
 
 :kbd:`bathymetry`
-  The name of the bathymetry file to use for the run
+  The name of,
+  or path to,
+  the bathymetry file to use for the run
   It is symlinked in the run directory as :file:`bathy_meter.nc`
   (the file name required by NEMO).
-  The value is typically :file:`bathy_meter_SalishSea2.nc`.
 
 
 .. _NEMO-3.6-Forcing:
@@ -432,22 +447,37 @@ The :kbd:`paths` section of the run description file is a collection of director
 :kbd:`grid` Section
 -------------------
 
-The :kbd:`grid` section of the run description file contains 2 key-value pairs that provide the names of the coordinates and bathymetry files to use for the run.
-Those file are presumed to be in the :file:`grid/` directory of the :ref:`NEMO-forcing-repo` clone pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.4-Paths`.
+The :kbd:`grid` section of the run description file contains 2 key-value pairs that provide:
+
+* the names of the coordinates and bathymetry files to use for the run, or,
+* relative paths to the coordinates and bathymetry files to use for the run, or,
+* absolute paths to the coordinates and bathymetry files to use for the run
+
+If file names are provided,
+those files are presumed to be in the :file:`grid/` sub-directory of the directory tree pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.6-Paths`.
+
 If relative paths are given,
 they are appended to the :file:`grid/` directory of the :kbd:`forcing` path.
 
+If absolute paths are given,
+they may use :kbd:`~`,
+:kbd:`$HOME`,
+or :kbd:`$USER`,
+if you wish.
+
 :kbd:`coordinates`
-  The name of the coordinates file to use for the run.
+  The name of,
+  or path to,
+  the coordinates file to use for the run.
   It is symlinked in the run directory as :file:`coordinates.nc`
   (the file name required by NEMO).
-  The value is typically :file:`coordinates_seagrid_SalishSea.nc`.
 
 :kbd:`bathymetry`
-  The name of the bathymetry file to use for the run
+  The name of,
+  or path to,
+  the bathymetry file to use for the run
   It is symlinked in the run directory as :file:`bathy_meter.nc`
   (the file name required by NEMO).
-  The value is typically :file:`bathy_meter_SalishSea2.nc`.
 
 
 .. _NEMO-3.4-Forcing:
