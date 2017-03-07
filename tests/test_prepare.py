@@ -15,6 +15,7 @@
 """SalishSeaCmd prepare sub-command plug-in unit tests
 """
 import os
+from pathlib import Path
 try:
     from unittest.mock import call, Mock, patch
 except ImportError:
@@ -694,57 +695,141 @@ class TestMakeExecutableLinks:
 
 
 class TestMakeGridLinks:
+    """Unit tests for `nemo prepare` _make_grid_links() function.
+    """
+
+    @patch('salishsea_cmd.prepare._remove_run_dir')
     @patch('salishsea_cmd.prepare.log')
-    def test_no_forcing_dir(self, m_log):
-        run_desc = {'paths': {'forcing': 'foo',},}
-        salishsea_cmd.prepare._remove_run_dir = Mock()
-        p_exists = patch(
-            'salishsea_cmd.prepare.os.path.exists', return_value=False
+    def test_no_grid_coordinates_key(self, m_log, m_rm_run_dir):
+        run_desc = {}
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
+        assert m_log.error.call_args_list[0] == call(
+            'grid: coordinates key not found - '
+            'please check your run description YAML file'
         )
-        p_abspath = patch(
-            'salishsea_cmd.prepare.os.path.abspath',
-            side_effect=lambda path: path
+        m_rm_run_dir.assert_called_once_with('run_dir')
+
+    @patch('salishsea_cmd.prepare._remove_run_dir')
+    @patch('salishsea_cmd.prepare.log')
+    def test_no_grid_bathymetry_key(self, m_log, m_rm_run_dir):
+        run_desc = {'grid': {'coordinates': 'coords.nc'}}
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
+        assert m_log.error.call_args_list[0] == call(
+            'grid: bathymetry key not found - '
+            'please check your run description YAML file'
         )
-        with pytest.raises(SystemExit), p_exists, p_abspath:
+        m_rm_run_dir.assert_called_once_with('run_dir')
+
+    @patch('salishsea_cmd.prepare._remove_run_dir')
+    @patch('salishsea_cmd.prepare.log')
+    def test_no_forcing_key(self, m_log, m_rm_run_dir):
+        run_desc = {
+            'grid': {
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc'
+            }
+        }
+        with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
         m_log.error.assert_called_once_with(
-            'foo not found; cannot create symlinks - '
-            'please check the forcing path in your run description file'
+            'forcing key not found - '
+            'please check your run description YAML file'
         )
-        salishsea_cmd.prepare._remove_run_dir.assert_called_once_with(
-            'run_dir'
-        )
+        m_rm_run_dir.assert_called_once_with('run_dir')
 
+    @patch('salishsea_cmd.prepare._remove_run_dir')
     @patch('salishsea_cmd.prepare.log')
-    def test_no_link_path(self, m_log):
+    def test_no_forcing_dir(self, m_log, m_rm_run_dir):
         run_desc = {
             'paths': {
-                'forcing': 'foo',
+                'forcing': '/foo'
             },
             'grid': {
-                'coordinates': 'coordinates.nc',
-                'bathymetry': 'bathy.nc',
-            },
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc'
+            }
         }
-        salishsea_cmd.prepare._remove_run_dir = Mock()
         p_exists = patch(
-            'salishsea_cmd.prepare.os.path.exists', side_effect=[True, False]
+            'salishsea_cmd.prepare.Path.exists', return_value=False
         )
-        p_abspath = patch(
-            'salishsea_cmd.prepare.os.path.abspath',
-            side_effect=lambda path: path
-        )
-        p_chdir = patch('salishsea_cmd.prepare.os.chdir')
-        with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
+        with pytest.raises(SystemExit), p_exists:
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
         m_log.error.assert_called_once_with(
-            'foo/grid/coordinates.nc not found; cannot create symlink - '
+            '/foo not found; cannot create symlinks - '
+            'please check the forcing path in your run description file'
+        )
+        m_rm_run_dir.assert_called_once_with('run_dir')
+
+    @patch('salishsea_cmd.prepare._remove_run_dir')
+    @patch('salishsea_cmd.prepare.log')
+    def test_no_link_path_absolute_coords_bathy(self, m_log, m_rm_run_dir):
+        run_desc = {
+            'grid': {
+                'coordinates': '/coords.nc',
+                'bathymetry': '/bathy.nc'
+            },
+        }
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
+        m_log.error.assert_called_once_with(
+            '/coords.nc not found; cannot create symlink - '
             'please check the forcing path and grid file names '
             'in your run description file'
         )
-        salishsea_cmd.prepare._remove_run_dir.assert_called_once_with(
-            'run_dir'
+        m_rm_run_dir.assert_called_once_with('run_dir')
+
+    @patch('salishsea_cmd.prepare._remove_run_dir')
+    @patch('salishsea_cmd.prepare.log')
+    def test_no_link_path_relative_coords_bathy(
+        self, m_log, m_rm_run_dir, tmpdir
+    ):
+        forcing_dir = tmpdir.ensure_dir('foo')
+        grid_dir = forcing_dir.ensure_dir('grid')
+        run_dir = tmpdir.ensure_dir('runs')
+        run_desc = {
+            'paths': {
+                'forcing': str(forcing_dir)
+            },
+            'grid': {
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc'
+            },
+        }
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._make_grid_links(run_desc, str(run_dir))
+        m_log.error.assert_called_once_with(
+            '{}/coords.nc not found; cannot create symlink - '
+            'please check the forcing path and grid file names '
+            'in your run description file'.format(grid_dir)
         )
+        m_rm_run_dir.assert_called_once_with(run_dir)
+
+    @patch('salishsea_cmd.prepare._remove_run_dir')
+    @patch('salishsea_cmd.prepare.log')
+    def test_link_path(self, m_log, m_rm_run_dir, tmpdir):
+        forcing_dir = tmpdir.ensure_dir('foo')
+        grid_dir = forcing_dir.ensure_dir('grid')
+        grid_dir.ensure('coords.nc')
+        grid_dir.ensure('bathy.nc')
+        run_dir = tmpdir.ensure_dir('runs')
+        run_desc = {
+            'paths': {
+                'forcing': str(forcing_dir)
+            },
+            'grid': {
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc'
+            },
+        }
+        salishsea_cmd.prepare._make_grid_links(run_desc, str(run_dir))
+        assert Path(str(run_dir), 'coordinates.nc').is_symlink()
+        assert Path(str(run_dir), 'coordinates.nc'
+                    ).samefile(str(grid_dir.join('coords.nc')))
+        assert Path(str(run_dir), 'bathy_meter.nc').is_symlink()
+        assert Path(str(run_dir),
+                    'bathy_meter.nc').samefile(str(grid_dir.join('bathy.nc')))
 
 
 class TestMakeForcingLinks:
