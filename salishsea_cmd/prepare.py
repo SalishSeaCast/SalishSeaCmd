@@ -38,7 +38,7 @@ import salishsea_tools.hg_commands as hg
 
 from salishsea_cmd import lib
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Prepare(cliff.command.Command):
@@ -93,7 +93,7 @@ class Prepare(cliff.command.Command):
             parsed_args.desc_file, parsed_args.nemo34, parsed_args.nocheck_init
         )
         if not parsed_args.quiet:
-            log.info('Created run directory {}'.format(run_dir))
+            logger.info('Created run directory {}'.format(run_dir))
         return run_dir
 
 
@@ -169,14 +169,14 @@ def _check_nemo_exec(run_desc, nemo34):
     nemo_bin_dir = os.path.join(nemo_code_repo, config_dir, 'BLD', 'bin')
     nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
     if not os.path.exists(nemo_exec):
-        log.error(
+        logger.error(
             '{} not found - did you forget to build it?'.format(nemo_exec)
         )
         raise SystemExit(2)
     if nemo34:
         iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
         if not os.path.exists(iom_server_exec):
-            log.warn(
+            logger.warn(
                 '{} not found - are you running without key_iomput?'
                 .format(iom_server_exec)
             )
@@ -203,7 +203,7 @@ def _check_xios_exec(run_desc):
     xios_bin_dir = os.path.join(xios_code_repo, 'bin')
     xios_exec = os.path.join(xios_bin_dir, 'xios_server.exe')
     if not os.path.exists(xios_exec):
-        log.error(
+        logger.error(
             '{} not found - did you forget to build it?'.format(xios_exec)
         )
         raise SystemExit(2)
@@ -304,7 +304,7 @@ def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
                     namelist.writelines(f.readlines())
                     namelist.write('\n\n')
             except IOError as e:
-                log.error(e)
+                logger.error(e)
                 namelist.close()
                 _remove_run_dir(run_dir)
                 raise SystemExit(2)
@@ -350,7 +350,7 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
                         namelist.writelines(f.readlines())
                         namelist.write('\n\n')
                 except IOError as e:
-                    log.error(e)
+                    logger.error(e)
                     namelist.close()
                     _remove_run_dir(run_dir)
                     raise SystemExit(2)
@@ -363,7 +363,7 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
     if 'namelist_cfg' in run_desc['namelists']:
         _set_mpi_decomposition('namelist_cfg', run_desc, run_dir)
     else:
-        log.error(
+        logger.error(
             'No namelist_cfg key found in namelists section of run '
             'description'
         )
@@ -392,7 +392,7 @@ def _set_mpi_decomposition(namelist_filename, run_desc, run_dir):
     try:
         jpni, jpnj = run_desc['MPI decomposition'].split('x')
     except KeyError:
-        log.error(
+        logger.error(
             'MPI decomposition value not found in YAML run description file. '
             'Please add a line like:\n'
             '  MPI decomposition: 8x18\n'
@@ -507,7 +507,7 @@ def _set_xios_server_mode(run_desc, run_dir):
     try:
         sep_xios_server = run_desc['output']['separate XIOS server']
     except KeyError:
-        log.error(
+        logger.error(
             'separate XIOS server key/value not found in output section '
             'of YAML run description file. '
             'Please add lines like:\n'
@@ -600,7 +600,7 @@ def _make_grid_links(run_desc, run_dir):
     try:
         coords_path = expanded_path(run_desc['grid']['coordinates'])
     except KeyError:
-        log.error(
+        logger.error(
             'grid: coordinates key not found - '
             'please check your run description YAML file'
         )
@@ -609,7 +609,7 @@ def _make_grid_links(run_desc, run_dir):
     try:
         bathy_path = expanded_path(run_desc['grid']['bathymetry'])
     except KeyError:
-        log.error(
+        logger.error(
             'grid: bathymetry key not found - '
             'please check your run description YAML file'
         )
@@ -622,14 +622,14 @@ def _make_grid_links(run_desc, run_dir):
         try:
             nemo_forcing_dir = resolved_path(run_desc['paths']['forcing'])
         except KeyError:
-            log.error(
+            logger.error(
                 'forcing key not found - '
                 'please check your run description YAML file'
             )
             _remove_run_dir(run_dir)
             raise SystemExit(2)
         if not nemo_forcing_dir.exists():
-            log.error(
+            logger.error(
                 '{} not found; cannot create symlinks - '
                 'please check the forcing path in your run description file'
                 .format(nemo_forcing_dir)
@@ -644,7 +644,7 @@ def _make_grid_links(run_desc, run_dir):
     run_dir_path = Path(run_dir)
     for source, link_name in grid_paths:
         if not source.exists():
-            log.error(
+            logger.error(
                 '{} not found; cannot create symlink - '
                 'please check the forcing path and grid file names '
                 'in your run description file'.format(source)
@@ -679,7 +679,7 @@ def _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init):
     """
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     if not os.path.exists(nemo_forcing_dir):
-        log.error(
+        logger.error(
             '{} not found; cannot create symlinks - '
             'please check the forcing path in your run description file'
             .format(nemo_forcing_dir)
@@ -724,7 +724,7 @@ def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
         os.path.join(run_dir, 'open_boundaries')
     ), (run_desc['forcing']['rivers'], os.path.join(run_dir, 'rivers')))
     if not os.path.exists(ic_source) and not nocheck_init:
-        log.error(
+        logger.error(
             '{} not found; cannot create symlink - '
             'please check the forcing path and initial conditions file names '
             'in your run description file'.format(ic_source)
@@ -735,7 +735,7 @@ def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
     for source, link_name in forcing_dirs:
         link_path = os.path.join(nemo_forcing_dir, source)
         if not os.path.exists(link_path):
-            log.error(
+            logger.error(
                 '{} not found; cannot create symlink - '
                 'please check the forcing paths and file names '
                 'in your run description file'.format(link_path)
@@ -770,7 +770,7 @@ def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
             if link_name not in {
                 'restart.nc', 'restart_trc.nc'
             } or not nocheck_init:
-                log.error(
+                logger.error(
                     '{} not found; cannot create symlink - '
                     'please check the forcing paths and file names '
                     'in your run description file'.format(link_path)
@@ -789,7 +789,7 @@ def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
                 pass
             else:
                 if link_checker is not None:
-                    log.error(
+                    logger.error(
                         'unknown forcing link checker: {}'
                         .format(link_checker)
                     )
@@ -858,7 +858,7 @@ def _check_atmospheric_forcing_link(
                         v['dir'], '{basename}.nc'.format(basename=basename)
                     )
                 if not os.path.exists(os.path.join(run_dir, file_path)):
-                    log.error(
+                    logger.error(
                         '{file_path} not found; '
                         'please confirm that atmospheric forcing files '
                         'for {startm1} through '
@@ -941,7 +941,7 @@ def _check_atmos_files(run_desc, run_dir):
                         run_desc['paths']['forcing']
                     )
                     atmos_dir = run_desc['forcing']['atmospheric']
-                    log.error(
+                    logger.error(
                         '{file_path} not found; '
                         'please confirm that atmospheric forcing files '
                         'for {startm1} through '
