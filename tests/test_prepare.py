@@ -33,7 +33,7 @@ def prepare_cmd():
     return salishsea_cmd.prepare.Prepare(Mock(spec=cliff.app.App), [])
 
 
-class TestGetParser:
+class TestParser:
     """Unit tests for `salishsea prepare` sub-command command-line parser.
     """
 
@@ -85,20 +85,8 @@ class TestPrepare:
         ]
     )
     def test_prepare(
-        self,
-        m_mfl,
-        m_mgl,
-        m_mel,
-        m_crsf,
-        m_mnl,
-        m_mrd,
-        m_dirname,
-        m_cxe,
-        m_cne,
-        m_lrd,
-        nemo34,
-        m_cne_return,
-        m_cxe_return,
+        self, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd, m_dirname, m_cxe,
+        m_cne, m_lrd, nemo34, m_cne_return, m_cxe_return
     ):
         m_cne.return_value = m_cne_return
         m_cxe.return_value = m_cxe_return
@@ -174,8 +162,8 @@ class TestCheckNemoExec:
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=False)
 
-    @patch('salishsea_cmd.prepare.log')
-    def test_iom_server_exec_not_found(self, m_log, tmpdir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_iom_server_exec_not_found(self, m_logger, tmpdir):
         p_code = tmpdir.ensure_dir('NEMO-3.6-code')
         run_desc = {
             'config_name': 'SalishSea',
@@ -191,7 +179,7 @@ class TestCheckNemoExec:
         )
         with p_exists:
             salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=True)
-        m_log.warn.assert_called_once_with(
+        m_logger.warn.assert_called_once_with(
             '{}/server.exe not found - are you running without key_iomput?'
             .format(p_bin_dir)
         )
@@ -311,10 +299,7 @@ class TestMakeNamelistNEMO34:
                 str(p_run_set_dir), run_desc, str(p_run_dir)
             )
 
-    def test_namelist_ends_with_empty_namelists(
-        self,
-        tmpdir,
-    ):
+    def test_namelist_ends_with_empty_namelists(self, tmpdir):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
         run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time')),],}
@@ -458,11 +443,7 @@ class TestCopyRunSetFiles:
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    def test_nemo34_copy_run_set_files_no_path(
-        self,
-        m_sxsm,
-        m_copy,
-    ):
+    def test_nemo34_copy_run_set_files_no_path(self, m_sxsm, m_copy):
         """_copy_run_set_files creates correct symlink for source w/o path
         """
         run_desc = {'output': {'files': 'iodef.xml'}}
@@ -534,11 +515,7 @@ class TestCopyRunSetFiles:
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    def test_nemo36_copy_run_set_files_relative_path(
-        self,
-        m_sxsm,
-        m_copy,
-    ):
+    def test_nemo36_copy_run_set_files_relative_path(self, m_sxsm, m_copy):
         """_copy_run_set_files creates correct symlink for relative path source
         """
         run_desc = {
@@ -668,12 +645,7 @@ class TestMakeExecutableLinks:
             (False, 'xios_code_repo'),
         ]
     )
-    def test_xios_code_rev_file(
-        self,
-        nemo34,
-        xios_code_repo,
-        tmpdir,
-    ):
+    def test_xios_code_rev_file(self, nemo34, xios_code_repo, tmpdir):
         p_nemo_bin_dir = tmpdir.ensure_dir(
             'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin'
         )
@@ -699,32 +671,32 @@ class TestMakeGridLinks:
     """
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.log')
-    def test_no_grid_coordinates_key(self, m_log, m_rm_run_dir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_no_grid_coordinates_key(self, m_logger, m_rm_run_dir):
         run_desc = {}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        assert m_log.error.call_args_list[0] == call(
+        assert m_logger.error.call_args_list[0] == call(
             'grid: coordinates key not found - '
             'please check your run description YAML file'
         )
         m_rm_run_dir.assert_called_once_with('run_dir')
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.log')
-    def test_no_grid_bathymetry_key(self, m_log, m_rm_run_dir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_no_grid_bathymetry_key(self, m_logger, m_rm_run_dir):
         run_desc = {'grid': {'coordinates': 'coords.nc'}}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        assert m_log.error.call_args_list[0] == call(
+        assert m_logger.error.call_args_list[0] == call(
             'grid: bathymetry key not found - '
             'please check your run description YAML file'
         )
         m_rm_run_dir.assert_called_once_with('run_dir')
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.log')
-    def test_no_forcing_key(self, m_log, m_rm_run_dir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_no_forcing_key(self, m_logger, m_rm_run_dir):
         run_desc = {
             'grid': {
                 'coordinates': 'coords.nc',
@@ -733,15 +705,15 @@ class TestMakeGridLinks:
         }
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        m_log.error.assert_called_once_with(
+        m_logger.error.assert_called_once_with(
             'forcing key not found - '
             'please check your run description YAML file'
         )
         m_rm_run_dir.assert_called_once_with('run_dir')
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.log')
-    def test_no_forcing_dir(self, m_log, m_rm_run_dir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_no_forcing_dir(self, m_logger, m_rm_run_dir):
         run_desc = {
             'paths': {
                 'forcing': '/foo'
@@ -756,15 +728,15 @@ class TestMakeGridLinks:
         )
         with pytest.raises(SystemExit), p_exists:
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        m_log.error.assert_called_once_with(
+        m_logger.error.assert_called_once_with(
             '/foo not found; cannot create symlinks - '
             'please check the forcing path in your run description file'
         )
         m_rm_run_dir.assert_called_once_with('run_dir')
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.log')
-    def test_no_link_path_absolute_coords_bathy(self, m_log, m_rm_run_dir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_no_link_path_absolute_coords_bathy(self, m_logger, m_rm_run_dir):
         run_desc = {
             'grid': {
                 'coordinates': '/coords.nc',
@@ -773,7 +745,7 @@ class TestMakeGridLinks:
         }
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        m_log.error.assert_called_once_with(
+        m_logger.error.assert_called_once_with(
             '/coords.nc not found; cannot create symlink - '
             'please check the forcing path and grid file names '
             'in your run description file'
@@ -781,9 +753,9 @@ class TestMakeGridLinks:
         m_rm_run_dir.assert_called_once_with('run_dir')
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.log')
+    @patch('salishsea_cmd.prepare.logger')
     def test_no_link_path_relative_coords_bathy(
-        self, m_log, m_rm_run_dir, tmpdir
+        self, m_logger, m_rm_run_dir, tmpdir
     ):
         forcing_dir = tmpdir.ensure_dir('foo')
         grid_dir = forcing_dir.ensure_dir('grid')
@@ -799,7 +771,7 @@ class TestMakeGridLinks:
         }
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, str(run_dir))
-        m_log.error.assert_called_once_with(
+        m_logger.error.assert_called_once_with(
             '{}/coords.nc not found; cannot create symlink - '
             'please check the forcing path and grid file names '
             'in your run description file'.format(grid_dir)
@@ -807,8 +779,8 @@ class TestMakeGridLinks:
         m_rm_run_dir.assert_called_once_with(run_dir)
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.log')
-    def test_link_path(self, m_log, m_rm_run_dir, tmpdir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_link_path(self, m_logger, m_rm_run_dir, tmpdir):
         forcing_dir = tmpdir.ensure_dir('foo')
         grid_dir = forcing_dir.ensure_dir('grid')
         grid_dir.ensure('coords.nc')
@@ -865,13 +837,8 @@ class TestMakeForcingLinks:
         m_mfl36.assert_called_once_with(run_desc, str(p_run_dir), False)
 
     @pytest.mark.parametrize('nemo34', [True, False])
-    @patch('salishsea_cmd.prepare.log')
-    def test_make_forcing_links_no_forcing_dir(
-        self,
-        m_log,
-        nemo34,
-        tmpdir,
-    ):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_make_forcing_links_no_forcing_dir(self, m_logger, nemo34, tmpdir):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         run_desc = {'paths': {'forcing': 'foo',},}
         salishsea_cmd.prepare._remove_run_dir = Mock()
@@ -886,7 +853,7 @@ class TestMakeForcingLinks:
             salishsea_cmd.prepare._make_forcing_links(
                 run_desc, str(p_run_dir), nemo34, nocheck_init=False
             )
-        m_log.error.assert_called_once_with(
+        m_logger.error.assert_called_once_with(
             'foo not found; cannot create symlinks - '
             'please check the forcing path in your run description file'
         )
@@ -907,13 +874,9 @@ class TestMakeForcingLinksNEMO34:
         ],
     )
     @patch('salishsea_cmd.prepare._check_atmos_files')
-    @patch('salishsea_cmd.prepare.log')
+    @patch('salishsea_cmd.prepare.logger')
     def test_make_forcing_links_no_restart_path(
-        self,
-        m_log,
-        m_caf,
-        link_path,
-        expected,
+        self, m_logger, m_caf, link_path, expected
     ):
         run_desc = {
             'paths': {
@@ -939,7 +902,7 @@ class TestMakeForcingLinksNEMO34:
             salishsea_cmd.prepare._make_forcing_links_nemo34(
                 run_desc, 'run_dir', nocheck_init=False
             )
-        m_log.error.assert_called_once_with(
+        m_logger.error.assert_called_once_with(
             '{} not found; cannot create symlink - '
             'please check the forcing path and initial conditions file names '
             'in your run description file'.format(expected)
@@ -949,12 +912,8 @@ class TestMakeForcingLinksNEMO34:
         )
 
     @patch('salishsea_cmd.prepare._check_atmos_files')
-    @patch('salishsea_cmd.prepare.log')
-    def test_make_forcing_links_no_forcing_path(
-        self,
-        m_log,
-        m_caf,
-    ):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_make_forcing_links_no_forcing_path(self, m_logger, m_caf):
         run_desc = {
             'paths': {
                 'forcing': 'foo',
@@ -981,7 +940,7 @@ class TestMakeForcingLinksNEMO34:
                 salishsea_cmd.prepare._make_forcing_links_nemo34(
                     run_desc, 'run_dir', nocheck_init=False
                 )
-        m_log.error.assert_called_once_with(
+        m_logger.error.assert_called_once_with(
             'foo/bar not found; cannot create symlink - '
             'please check the forcing paths and file names '
             'in your run description file'
@@ -1039,8 +998,8 @@ class TestMakeForcingLinksNEMO36:
             p_nemo_forcing.join('rivers'), 'run_dir/rivers'
         )
 
-    @patch('salishsea_cmd.prepare.log')
-    def test_no_link_path(self, m_log, tmpdir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_no_link_path(self, m_logger, tmpdir):
         p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
         run_desc = {
             'paths': {
@@ -1057,7 +1016,7 @@ class TestMakeForcingLinksNEMO36:
             salishsea_cmd.prepare._make_forcing_links_nemo36(
                 run_desc, 'run_dir', nocheck_init=False
             )
-        m_log.error.assert_called_once_with(
+        m_logger.error.assert_called_once_with(
             '{} not found; cannot create symlink - '
             'please check the forcing paths and file names '
             'in your run description file'
