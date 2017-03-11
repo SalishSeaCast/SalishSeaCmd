@@ -24,6 +24,7 @@ dependencies:
 - pillow
 - pip
 - python=3.5
+- python-dateutil
 - pytz
 - pyyaml
 - pyzmq
@@ -39,5 +40,6 @@ dependencies:
   - driftwood
   - feedgen
   - nbsphinx
+  - python-hglib
   - retrying
   - sphinx-bootstrap-theme
