@@ -47,7 +47,9 @@ install_requires = [
     # see environment-dev.yaml for versions most recently used in development
     'arrow',
     'cliff',
+    'python-hglib',
     'netcdf4',
+    'python-dateutil'
     'PyYAML',
     # 'NEMO-Cmd',  # use cd tools; pip install -e NEMO-Cmd
     # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools

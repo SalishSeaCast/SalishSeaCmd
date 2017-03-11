@@ -26,6 +26,7 @@ dependencies:
   - netCDF4
   - pip
   - python=3.5
+  - python-dateutil
   - pyyaml
 
   # For SalishSeaTools package
@@ -48,6 +49,7 @@ dependencies:
   - pip:
     - arrow
     - cliff
+    - python-hglib
 
     # For SalishSeaTools package
     - angles
