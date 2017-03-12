@@ -28,8 +28,8 @@ The following change that was introduced in version 3.0 of the :kbd:`SalishSeaCm
 * The :kbd:`paths` section of the YAML run description file must now contain a :kbd:`NEMO code config` key,
   the value of which is the path to the :file:`CONFIG/` directory in the NEMO code tree.
   An absolute path is required because the path is used in both the current directory and the temporary run directory created in the :kbd:`runs directory`.
-  You can use :kbd:`~` or :kbd:`$HOME` in the path,
-  if you wish.
+  The path may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+  and :envvar:`$USER` as an alternative spelling of the user's userid.
   Examples:
 
   .. code-block:: yaml
