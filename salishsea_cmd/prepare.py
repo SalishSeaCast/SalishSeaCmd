@@ -31,10 +31,10 @@ import xml.etree.ElementTree
 
 import arrow
 import cliff.command
-
+from dateutil import tz
+import hglib
 from nemo_cmd import fspath, expanded_path, resolved_path
 from nemo_cmd.namelist import namelist2dict
-import salishsea_tools.hg_commands as hg
 
 from salishsea_cmd import lib
 
@@ -124,18 +124,16 @@ def prepare(desc_file, nemo34, nocheck_init):
     run_desc = lib.load_run_desc(desc_file)
     nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
     xios_code_repo, xios_bin_dir = (
-        _check_xios_exec(run_desc) if not nemo34 else (None, None)
+        _check_xios_exec(run_desc) if not nemo34 else ('', '')
     )
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
     _make_namelists(run_set_dir, run_desc, run_dir, nemo34)
     _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34)
-    _make_executable_links(
-        nemo_code_repo, nemo_bin_dir, run_dir, nemo34, xios_code_repo,
-        xios_bin_dir
-    )
+    _make_executable_links(nemo_bin_dir, run_dir, nemo34, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
     _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init)
+    _record_vcs_revisions(run_desc, run_dir, nemo_code_repo, xios_code_repo)
     return run_dir
 
 
@@ -535,14 +533,7 @@ def _set_xios_server_mode(run_desc, run_dir):
         f.writelines(lines)
 
 
-def _make_executable_links(
-    nemo_code_repo,
-    nemo_bin_dir,
-    run_dir,
-    nemo34,
-    xios_code_repo,
-    xios_bin_dir,
-):
+def _make_executable_links(nemo_bin_dir, run_dir, nemo34, xios_bin_dir):
     """Create symlinks in run_dir to the NEMO and I/O server executables
     and record the code repository revision(s) used for the run.
 
@@ -554,8 +545,6 @@ def _make_executable_links(
     :command:`hg parents` in the XIOS code repo.
     It is stored in the :file:`XIOS-code_rev.txt` file in run_dir.
 
-    :arg str nemo_code_repo: Absolute path of NEMO code repo.
-
     :arg str nemo_bin_dir: Absolute path of directory containing NEMO
                            executable.
 
@@ -565,8 +554,6 @@ def _make_executable_links(
                          if :py:obj:`True`,
                          otherwise make links for a NEMO-3.6 run.
 
-    :arg str xios_code_repo: Absolute path of XIOS code repo.
-
     :arg str xios_bin_dir: Absolute path of directory containing XIOS
                            executable.
     """
@@ -574,16 +561,12 @@ def _make_executable_links(
     saved_cwd = os.getcwd()
     os.chdir(run_dir)
     os.symlink(nemo_exec, 'nemo.exe')
-    with open('NEMO-code_rev.txt', 'wt') as f:
-        f.writelines(hg.parents(nemo_code_repo, verbose=True))
     iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
     if nemo34 and os.path.exists(iom_server_exec):
         os.symlink(iom_server_exec, 'server.exe')
     if not nemo34:
         xios_server_exec = os.path.join(xios_bin_dir, 'xios_server.exe')
         os.symlink(xios_server_exec, 'xios_server.exe')
-        with open('XIOS-code_rev.txt', 'wt') as f:
-            f.writelines(hg.parents(xios_code_repo, verbose=True))
     os.chdir(saved_cwd)
 
 
@@ -690,8 +673,6 @@ def _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init):
         _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init)
     else:
         _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init)
-    with open(os.path.join(run_dir, 'NEMO-forcing_rev.txt'), 'wt') as f:
-        f.writelines(hg.parents(nemo_forcing_dir, verbose=True))
 
 
 def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
@@ -957,6 +938,114 @@ def _check_atmos_files(run_desc, run_dir):
                     )
                     _remove_run_dir(run_dir)
                     raise SystemExit(2)
+
+
+def _record_vcs_revisions(run_desc, run_dir, nemo_code_repo, xios_code_repo):
+    """Record revision and status information from version control system
+    repositories in files in the temporary run directory.
+
+    :param dict run_desc: Run description dictionary.
+
+    :param str run_dir: Path of the temporary run directory.
+
+    :param str nemo_code_repo: Absolute path of NEMO code repository.
+
+    :param str xios_code_repo: Absolute path of XIOS code repository.
+    """
+    try:
+        forcing_repo = resolved_path(run_desc['paths']['forcing'])
+    except KeyError:
+        logger.error(
+            '"paths: forcing:" key not found - '
+            'please check your run description YAML file'
+        )
+        _remove_run_dir(run_dir)
+        raise SystemExit(2)
+    for repo in (nemo_code_repo, xios_code_repo, fspath(forcing_repo)):
+        _write_repo_rev_file(repo, run_dir, _get_hg_revision)
+    if 'vcs revisions' not in run_desc:
+        return
+    vcs_funcs = {'hg': _get_hg_revision}
+    for vcs_tool in run_desc['vcs revisions']:
+        for repo in run_desc['vcs revisions'][vcs_tool]:
+            _write_repo_rev_file(repo, run_dir, vcs_funcs[vcs_tool])
+
+
+def _write_repo_rev_file(repo, run_dir, vcs_func):
+    """Write revision and status infomration from a version control system
+    repository to a file in the temporary run directory.
+
+    The file name is the repository directory name with :kbd:`_rev.txt`
+    appended.
+
+    :param str repo: Path of Mercurial repository to get revision and status
+                     information from.
+
+    :param str run_dir: Path of the temporary run directory.
+
+    :param vcs_func: Function to call to gather revision and status information
+                     from repo.
+    """
+    repo_path = resolved_path(repo)
+    repo_rev_file_lines = vcs_func(repo)
+    rev_file = Path(run_dir) / '{repo.name}_rev.txt'.format(repo=repo_path)
+    with rev_file.open('wt') as f:
+        f.writelines('{}\n'.format(line) for line in repo_rev_file_lines)
+
+
+def _get_hg_revision(repo):
+    """Gather revision and status information from Mercurial repo.
+
+    Effectively record the output of :command:`hg parents -v` and
+    :command:`hg status -mardC`.
+
+    :param str repo: Path of Mercurial repository to get revision and status
+                     information from.
+
+    :returns: Mercurial repository revision and status information strings.
+    :rtype: list
+    """
+    with hglib.open(repo) as hg:
+        parents = hg.parents()
+        files = [f[1] for f in hg.status(change=[parents[0].rev])]
+        status = hg.status(
+            modified=True, added=True, removed=True, deleted=True, copies=True
+        )
+    revision = parents[0]
+    repo_rev_file_lines = [
+        'changset:   {rev}:{node}'.format(
+            rev=revision.rev.decode(), node=revision.node.decode()
+        )
+    ]
+    if revision.tags:
+        repo_rev_file_lines.append(
+            'tag:        {tags}'.format(tags=revision.tags.decode())
+        )
+    if len(parents) > 1:
+        repo_rev_file_lines.extend(
+            'parent:     {rev}:{node}'.format(
+                rev=parent.rev.decode(), node=parent.node.decode()
+            ) for parent in parents
+        )
+    date = arrow.get(revision.date).replace(tzinfo=tz.tzlocal())
+    repo_rev_file_lines.extend([
+        'user:       {}'.format(revision.author.decode()),
+        'date:       {}'.format(date.format('ddd MMM DD HH:mm:ss YYYY ZZ')),
+        'files:      {}'.format(' '.join(f.decode() for f in files)),
+        'description:',
+    ])
+    repo_rev_file_lines.extend(
+        line.decode() for line in revision.desc.splitlines()
+    )
+    if status:
+        logger.warning('There are uncommitted changes in {}'.format(repo))
+        repo_rev_file_lines.append('uncommitted changes:')
+        repo_rev_file_lines.extend(
+            '{code} {path}'.format(
+                code=s[0].decode(), path=s[1].decode()
+            ) for s in status
+        )
+    return repo_rev_file_lines
 
 
 # All of the namelists that NEMO-3.4 requires, but empty so that they result
