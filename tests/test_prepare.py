@@ -71,13 +71,14 @@ class TestParser:
 @patch('salishsea_cmd.prepare._make_executable_links')
 @patch('salishsea_cmd.prepare._make_grid_links')
 @patch('salishsea_cmd.prepare._make_forcing_links')
+@patch('salishsea_cmd.prepare._record_vcs_revisions')
 class TestPrepare:
     """Unit tests for `salishsea prepare` prepare() function.
     """
 
     @pytest.mark.parametrize(
         'nemo34, m_cne_return, m_cxe_return', [
-            (True, ('repo', 'bin_dir'), (None, None)),
+            (True, ('repo', 'bin_dir'), ('', '')),
             (
                 False, ('nemo_repo', 'nemo_bin_dir'),
                 ('xios_repo', 'xios_bin_dir')
@@ -85,8 +86,8 @@ class TestPrepare:
         ]
     )
     def test_prepare(
-        self, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd, m_dirname, m_cxe,
-        m_cne, m_lrd, nemo34, m_cne_return, m_cxe_return
+        self, m_rvr, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd, m_dirname,
+        m_cxe, m_cne, m_lrd, nemo34, m_cne_return, m_cxe_return
     ):
         m_cne.return_value = m_cne_return
         m_cxe.return_value = m_cxe_return
@@ -106,8 +107,7 @@ class TestPrepare:
             m_lrd(), 'SalishSea.yaml', m_dirname(), m_mrd(), nemo34
         )
         m_mel.assert_called_once_with(
-            m_cne_return[0], m_cne_return[1],
-            m_mrd(), nemo34, m_cxe_return[0], m_cxe_return[1]
+            m_cne_return[1], m_mrd(), nemo34, m_cxe_return[1]
         )
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd(), nemo34, False)
@@ -558,12 +558,9 @@ class TestMakeExecutableLinks:
         p_nemo_bin_dir.ensure('nemo.exe')
         p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
         p_run_dir = tmpdir.ensure_dir('run_dir')
-        with patch('salishsea_cmd.prepare.hg.parents'):
-            salishsea_cmd.prepare._make_executable_links(
-                'nemo_code_repo',
-                str(p_nemo_bin_dir),
-                str(p_run_dir), nemo34, 'xios_code_repo', str(p_xios_bin_dir)
-            )
+        salishsea_cmd.prepare._make_executable_links(
+            str(p_nemo_bin_dir), str(p_run_dir), nemo34, str(p_xios_bin_dir)
+        )
         assert p_run_dir.join('nemo.exe').check(file=True, link=True)
 
     @pytest.mark.parametrize('nemo34', [True, False])
@@ -576,13 +573,9 @@ class TestMakeExecutableLinks:
         if nemo34:
             p_nemo_bin_dir.ensure('server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
-        with patch('salishsea_cmd.prepare.hg.parents'):
-            salishsea_cmd.prepare._make_executable_links(
-                'nemo_code_repo',
-                str(p_nemo_bin_dir),
-                str(p_run_dir), nemo34, 'xios_code_repo', str(p_xios_bin_dir)
-            )
-        assert p_run_dir.join('nemo.exe').check(file=True, link=True)
+        salishsea_cmd.prepare._make_executable_links(
+            str(p_nemo_bin_dir), str(p_run_dir), nemo34, str(p_xios_bin_dir)
+        )
         if nemo34:
             assert p_run_dir.join('server.exe').check(file=True, link=True)
         else:
@@ -608,12 +601,9 @@ class TestMakeExecutableLinks:
         if not nemo34:
             p_xios_bin_dir.ensure('xios_server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
-        with patch('salishsea_cmd.prepare.hg.parents'):
-            salishsea_cmd.prepare._make_executable_links(
-                'nemo_code_repo',
-                str(p_nemo_bin_dir),
-                str(p_run_dir), nemo34, xios_code_repo, str(p_xios_bin_dir)
-            )
+        salishsea_cmd.prepare._make_executable_links(
+            str(p_nemo_bin_dir), str(p_run_dir), nemo34, str(p_xios_bin_dir)
+        )
         if nemo34:
             assert not p_run_dir.join('xios_server.exe').check(
                 file=True, link=True
@@ -622,48 +612,6 @@ class TestMakeExecutableLinks:
             assert p_run_dir.join('xios_server.exe').check(
                 file=True, link=True
             )
-
-    @pytest.mark.parametrize('nemo34', [True, False])
-    def test_nemo_code_rev_file(self, nemo34, tmpdir):
-        p_nemo_bin_dir = tmpdir.ensure_dir(
-            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin'
-        )
-        p_nemo_bin_dir.ensure('nemo.exe')
-        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        with patch('salishsea_cmd.prepare.hg.parents'):
-            salishsea_cmd.prepare._make_executable_links(
-                'nemo_code_repo',
-                str(p_nemo_bin_dir),
-                str(p_run_dir), nemo34, 'xios_code_repo', str(p_xios_bin_dir)
-            )
-        assert p_run_dir.join('NEMO-code_rev.txt').check(file=True)
-
-    @pytest.mark.parametrize(
-        'nemo34, xios_code_repo', [
-            (True, None),
-            (False, 'xios_code_repo'),
-        ]
-    )
-    def test_xios_code_rev_file(self, nemo34, xios_code_repo, tmpdir):
-        p_nemo_bin_dir = tmpdir.ensure_dir(
-            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin'
-        )
-        p_nemo_bin_dir.ensure('nemo.exe')
-        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
-        if not nemo34:
-            p_xios_bin_dir.ensure('xios_server.exe')
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        with patch('salishsea_cmd.prepare.hg.parents'):
-            salishsea_cmd.prepare._make_executable_links(
-                'nemo_code_repo',
-                str(p_nemo_bin_dir),
-                str(p_run_dir), nemo34, xios_code_repo, str(p_xios_bin_dir)
-            )
-        if nemo34:
-            assert not p_run_dir.join('XIOS-code_rev.txt').check(file=True)
-        else:
-            assert p_run_dir.join('XIOS-code_rev.txt').check(file=True)
 
 
 class TestMakeGridLinks:
@@ -815,8 +763,7 @@ class TestMakeForcingLinks:
             'salishsea_cmd.prepare.os.path.exists', return_value=True
         )
         patch_mfl34 = patch('salishsea_cmd.prepare._make_forcing_links_nemo34')
-        patch_hgp = patch('salishsea_cmd.prepare.hg.parents')
-        with patch_exists, patch_hgp, patch_mfl34 as m_mfl34:
+        with patch_exists, patch_mfl34 as m_mfl34:
             salishsea_cmd.prepare._make_forcing_links(
                 run_desc, str(p_run_dir), nemo34=True, nocheck_init=False
             )
@@ -829,8 +776,7 @@ class TestMakeForcingLinks:
             'salishsea_cmd.prepare.os.path.exists', return_value=True
         )
         patch_mfl36 = patch('salishsea_cmd.prepare._make_forcing_links_nemo36')
-        patch_hgp = patch('salishsea_cmd.prepare.hg.parents')
-        with patch_exists, patch_hgp, patch_mfl36 as m_mfl36:
+        with patch_exists, patch_mfl36 as m_mfl36:
             salishsea_cmd.prepare._make_forcing_links(
                 run_desc, str(p_run_dir), nemo34=False, nocheck_init=False
             )
@@ -1024,4 +970,65 @@ class TestMakeForcingLinksNEMO36:
         )
         salishsea_cmd.prepare._remove_run_dir.assert_called_once_with(
             'run_dir'
+        )
+
+
+@patch('salishsea_cmd.prepare.logger')
+class TestRecordVCSRevisions:
+    """Unit tests for `salishsea prepare` _record_vcs_revisions() function.
+    """
+
+    def test_no_paths_forcing_key(self, m_logger):
+        run_desc = {}
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._record_vcs_revisions(
+                run_desc, 'run_dir', 'nemo_code_repo', 'xios_code_repo'
+            )
+        m_logger.error.assert_called_once_with(
+            '"paths: forcing:" key not found - '
+            'please check your run description YAML file'
+        )
+
+    @patch('salishsea_cmd.prepare._write_repo_rev_file')
+    def test_write_repo_rev_file_default_calls(
+        self, m_write, m_logger, tmpdir
+    ):
+        nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
+        run_desc = {'paths': {'forcing': str(nemo_forcing)}}
+        salishsea_cmd.prepare._record_vcs_revisions(
+            run_desc, 'run_dir', 'nemo_code_repo', 'xios_code_repo'
+        )
+        assert m_write.call_args_list == [
+            call(
+                'nemo_code_repo', 'run_dir',
+                salishsea_cmd.prepare._get_hg_revision
+            ),
+            call(
+                'xios_code_repo', 'run_dir',
+                salishsea_cmd.prepare._get_hg_revision
+            ),
+            call(
+                str(nemo_forcing), 'run_dir',
+                salishsea_cmd.prepare._get_hg_revision
+            ),
+        ]
+
+    @patch('salishsea_cmd.prepare._write_repo_rev_file')
+    def test_write_repo_rev_file_vcs_revisions_hg_call(
+        self, m_write, m_logger, tmpdir
+    ):
+        ss_run_sets = tmpdir.ensure_dir('SS-run-sets')
+        run_desc = {
+            'paths': {
+                'forcing': 'NEO-forcing/'
+            },
+            'vcs revisions': {
+                'hg': [str(ss_run_sets)]
+            }
+        }
+        salishsea_cmd.prepare._record_vcs_revisions(
+            run_desc, 'run_dir', 'nemo_code_repo', 'xios_code_repo'
+        )
+        assert m_write.call_args_list[-1] == call(
+            str(ss_run_sets), 'run_dir', salishsea_cmd.prepare._get_hg_revision
         )
