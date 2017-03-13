@@ -14,7 +14,7 @@
 # limitations under the License.
 """SalishSeaCmd command plug-in for prepare sub-command.
 
-Sets up the necesaary symbolic links for a Salish Sea NEMO run
+Sets up the necessary symbolic links for a Salish Sea NEMO run
 in a specified directory and changes the pwd to that directory.
 """
 import logging
@@ -33,8 +33,8 @@ import arrow
 import cliff.command
 from dateutil import tz
 import hglib
-from nemo_cmd import fspath, expanded_path, resolved_path
-from nemo_cmd.namelist import namelist2dict
+import nemo_cmd
+import nemo_cmd.utils
 
 from salishsea_cmd import lib
 
@@ -160,10 +160,15 @@ def _check_nemo_exec(run_desc, nemo34):
 
     :raises: SystemExit
     """
-    nemo_code_repo = resolved_path(run_desc['paths']['NEMO-code'])
-    config_dir = os.path.join(
-        nemo_code_repo, 'NEMOGCM', 'CONFIG', run_desc['config_name']
+    nemo_code_repo = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('paths', 'NEMO-code'), resolve_path=True
     )
+    try:
+        config_name = run_desc['config name']
+    except KeyError:
+        # Alternate key spelling for backward compatibility
+        config_name = run_desc['config_name']
+    config_dir = os.path.join(nemo_code_repo, 'NEMOGCM', 'CONFIG', config_name)
     nemo_bin_dir = os.path.join(nemo_code_repo, config_dir, 'BLD', 'bin')
     nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
     if not os.path.exists(nemo_exec):
@@ -178,7 +183,7 @@ def _check_nemo_exec(run_desc, nemo34):
                 '{} not found - are you running without key_iomput?'
                 .format(iom_server_exec)
             )
-    return fspath(nemo_code_repo), nemo_bin_dir
+    return nemo_cmd.fspath(nemo_code_repo), nemo_bin_dir
 
 
 def _check_xios_exec(run_desc):
@@ -197,7 +202,9 @@ def _check_xios_exec(run_desc):
 
     :raises: SystemExit
     """
-    xios_code_repo = os.path.abspath(run_desc['paths']['XIOS'])
+    xios_code_repo = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('paths', 'XIOS'), resolve_path=True
+    )
     xios_bin_dir = os.path.join(xios_code_repo, 'bin')
     xios_exec = os.path.join(xios_bin_dir, 'xios_server.exe')
     if not os.path.exists(xios_exec):
@@ -205,7 +212,7 @@ def _check_xios_exec(run_desc):
             '{} not found - did you forget to build it?'.format(xios_exec)
         )
         raise SystemExit(2)
-    return xios_code_repo, xios_bin_dir
+    return nemo_cmd.fspath(xios_code_repo), xios_bin_dir
 
 
 def _make_run_dir(run_desc):
@@ -331,15 +338,28 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
     :raises: SystemExit
     """
     try:
-        nemo_config_dir = resolved_path(run_desc['paths']['NEMO code config'])
+        nemo_config_dir = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('paths', 'NEMO code config'),
+            resolve_path=True,
+            run_dir=run_dir,
+            fatal=False
+        )
     except KeyError:
         # Alternate key spelling for backward compatibility
-        nemo_config_dir = resolved_path(run_desc['paths']['NEMO-code-config'])
+        nemo_config_dir = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('paths', 'NEMO-code-config'),
+            resolve_path=True,
+            run_dir=run_dir
+        )
     try:
-        config_name = run_desc['config name']
+        config_name = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('config name',), run_dir=run_dir, fatal=False
+        )
     except KeyError:
         # Alternate key spelling for backward compatibility
-        config_name = run_desc['config_name']
+        config_name = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('config_name',), run_dir=run_dir
+        )
     for namelist_filename in run_desc['namelists']:
         with open(os.path.join(run_dir, namelist_filename), 'wt') as namelist:
             for nl in run_desc['namelists'][namelist_filename]:
@@ -580,37 +600,19 @@ def _make_grid_links(run_desc, run_dir):
 
     :raises: SystemExit
     """
-    try:
-        coords_path = expanded_path(run_desc['grid']['coordinates'])
-    except KeyError:
-        logger.error(
-            'grid: coordinates key not found - '
-            'please check your run description YAML file'
-        )
-        _remove_run_dir(run_dir)
-        raise SystemExit(2)
-    try:
-        bathy_path = expanded_path(run_desc['grid']['bathymetry'])
-    except KeyError:
-        logger.error(
-            'grid: bathymetry key not found - '
-            'please check your run description YAML file'
-        )
-        _remove_run_dir(run_dir)
-        raise SystemExit(2)
+    coords_path = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('grid', 'coordinates'), expand_path=True, run_dir=run_dir
+    )
+    bathy_path = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('grid', 'bathymetry'), expand_path=True, run_dir=run_dir
+    )
     if coords_path.is_absolute() and bathy_path.is_absolute():
         grid_paths = ((coords_path, 'coordinates.nc'),
                       (bathy_path, 'bathy_meter.nc'))
     else:
-        try:
-            nemo_forcing_dir = resolved_path(run_desc['paths']['forcing'])
-        except KeyError:
-            logger.error(
-                'forcing key not found - '
-                'please check your run description YAML file'
-            )
-            _remove_run_dir(run_dir)
-            raise SystemExit(2)
+        nemo_forcing_dir = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('paths', 'forcing'), resolve_path=True, run_dir=run_dir
+        )
         if not nemo_forcing_dir.exists():
             logger.error(
                 '{} not found; cannot create symlinks - '
@@ -790,7 +792,9 @@ def _check_atmospheric_forcing_link(
     Sections of the namelist file are parsed to determine
     the necessary files, and the date ranges required for the run.
     """
-    namelist = namelist2dict(os.path.join(run_dir, namelist_filename))
+    namelist = nemo_cmd.namelist.namelist2dict(
+        os.path.join(run_dir, namelist_filename)
+    )
     if not namelist['namsbc'][0]['ln_blk_core']:
         return
     start_date = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
@@ -868,7 +872,9 @@ def _check_atmos_files(run_desc, run_dir):
 
     :raises: SystemExit
     """
-    namelist = namelist2dict(os.path.join(run_dir, 'namelist'))
+    namelist = nemo_cmd.namelist.namelist2dict(
+        os.path.join(run_dir, 'namelist')
+    )
     if not namelist['namsbc'][0]['ln_blk_core']:
         return
     date0 = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
@@ -952,16 +958,12 @@ def _record_vcs_revisions(run_desc, run_dir, nemo_code_repo, xios_code_repo):
 
     :param str xios_code_repo: Absolute path of XIOS code repository.
     """
-    try:
-        forcing_repo = resolved_path(run_desc['paths']['forcing'])
-    except KeyError:
-        logger.error(
-            '"paths: forcing:" key not found - '
-            'please check your run description YAML file'
-        )
-        _remove_run_dir(run_dir)
-        raise SystemExit(2)
-    for repo in (nemo_code_repo, xios_code_repo, fspath(forcing_repo)):
+    forcing_repo = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('paths', 'forcing'), run_dir, resolve_path=True
+    )
+    for repo in (
+        nemo_code_repo, xios_code_repo, nemo_cmd.fspath(forcing_repo)
+    ):
         _write_repo_rev_file(repo, run_dir, _get_hg_revision)
     if 'vcs revisions' not in run_desc:
         return
@@ -986,7 +988,7 @@ def _write_repo_rev_file(repo, run_dir, vcs_func):
     :param vcs_func: Function to call to gather revision and status information
                      from repo.
     """
-    repo_path = resolved_path(repo)
+    repo_path = nemo_cmd.resolved_path(repo)
     repo_rev_file_lines = vcs_func(repo)
     rev_file = Path(run_dir) / '{repo.name}_rev.txt'.format(repo=repo_path)
     with rev_file.open('wt') as f:
