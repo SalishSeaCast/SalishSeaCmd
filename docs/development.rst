@@ -25,7 +25,7 @@
 Python Versions
 ===============
 
-The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.5 or later.
+The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.6 or later.
 However,
 the package must also run under `Python`_ 2.7 for use on the Westgrid HPC platform.
 
@@ -195,16 +195,14 @@ to run the test suite.
 The output looks something like::
 
   ============================ test session starts ============================
-  platform linux -- Python 3.5.2, pytest-3.0.5, py-1.4.31, pluggy-0.4.0
+  platform linux -- Python 3.6.0, pytest-3.0.6, py-1.4.32, pluggy-0.4.0
   rootdir: /media/doug/warehouse/MEOPAR/SalishSeaCmd, inifile:
-  collected 118 items
+  collected 108 items
 
-  tests/test_api.py ................
-  tests/test_combine.py ............
-  tests/test_gather.py .
+  tests/test_api.py ..........
   tests/test_get_cgrf.py .............
   tests/test_lib.py ..
-  tests/test_prepare.py ......................................................
+  tests/test_prepare.py ...............................................................
   tests/test_run.py ....................
 
   ======================== 118 passed in 2.93 seconds =========================
