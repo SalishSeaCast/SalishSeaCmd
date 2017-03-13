@@ -111,8 +111,8 @@ def prepare(desc_file, nemo34, nocheck_init):
     for the NEMO-code and NEMO-forcing repos that the symlinks point to.
     The path to the run directory is returned.
 
-    :arg desc_file: File path/name of the YAML run description file.
-    :type desc_file: str
+    :param desc_file: File path/name of the YAML run description file.
+    :type desc_file: :py:class:`pathlib.Path`
 
     :arg nemo34: Prepare a NEMO-3.4 run;
                  the default is to prepare a NEMO-3.6 run
@@ -128,7 +128,7 @@ def prepare(desc_file, nemo34, nocheck_init):
     run_desc = lib.load_run_desc(nemo_cmd.fspath(desc_file))
     nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
     xios_bin_dir = _check_xios_exec(run_desc) if not nemo34 else ('', '')
-    run_set_dir = os.path.dirname(os.path.abspath(desc_file))
+    run_set_dir = nemo_cmd.resolved_path(desc_file).parent
     run_dir = _make_run_dir(run_desc)
     _make_namelists(run_set_dir, run_desc, run_dir, nemo34)
     _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34)
@@ -264,20 +264,17 @@ def _make_namelists(run_set_dir, run_desc, run_dir, nemo34):
     If any of the required namelist section files are missing,
     delete the run directory and raise a SystemExit exception.
 
-    :arg run_set_dir: Directory containing the run description file,
-                      from which relative paths for the namelist section
-                      files start.
-    :type run_set_dir: str
+    :param run_set_dir: Directory containing the run description file,
+                        from which relative paths for the namelist section
+                        files start.
+    :type run_set_dir: :py:class:`pathlib.Path`
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :param dict run_desc: Run description dictionary.
 
-    :arg run_dir: Path of the temporary run directory.
-    :type run_dir: str
+    :param str run_dir: Path of the temporary run directory.
 
-    :arg nemo34: Prepare a NEMO-3.4 run;
-                 the default is to prepare a NEMO-3.6 run
-    :type nemo34: boolean
+    :param boolean nemo34: Prepare a NEMO-3.4 run;
+                           the default is to prepare a NEMO-3.6 run
 
     :raises: SystemExit
     """
@@ -294,16 +291,14 @@ def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
     If any of the required namelist section files are missing,
     delete the run directory and raise a SystemExit exception.
 
-    :arg run_set_dir: Directory containing the run description file,
-                      from which relative paths for the namelist section
-                      files start.
-    :type run_set_dir: str
+    :param run_set_dir: Directory containing the run description file,
+                        from which relative paths for the namelist section
+                        files start.
+    :type run_set_dir: :py:class:`pathlib.Path`
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :param dict run_desc: Run description dictionary.
 
-    :arg run_dir: Path of the temporary run directory.
-    :type run_dir: str
+    :param str run_dir: Path of the temporary run directory.
 
     :raises: SystemExit
     """
@@ -312,7 +307,7 @@ def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
     with open(os.path.join(run_dir, namelist_filename), 'wt') as namelist:
         for nl in namelists:
             try:
-                with open(os.path.join(run_set_dir, nl), 'rt') as f:
+                with (run_set_dir / nl).open('rt') as f:
                     namelist.writelines(f.readlines())
                     namelist.write('\n\n')
             except IOError as e:
@@ -331,16 +326,14 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
     If any of the required namelist section files are missing,
     delete the run directory and raise a SystemExit exception.
 
-    :arg run_set_dir: Directory containing the run description file,
+    :param run_set_dir: Directory containing the run description file,
                       from which relative paths for the namelist section
                       files start.
-    :type run_set_dir: str
+    :type run_set_dir: :py:class:`pathlib.Path`
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :param dict run_desc: Run description dictionary.
 
-    :arg run_dir: Path of the temporary run directory.
-    :type run_dir: str
+    :param str run_dir: Path of the temporary run directory.
 
     :raises: SystemExit
     """
@@ -371,7 +364,7 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
         with open(os.path.join(run_dir, namelist_filename), 'wt') as namelist:
             for nl in run_desc['namelists'][namelist_filename]:
                 try:
-                    with open(os.path.join(run_set_dir, nl), 'rt') as f:
+                    with (run_set_dir / nl).open('rt') as f:
                         namelist.writelines(f.readlines())
                         namelist.write('\n\n')
                 except IOError as e:
@@ -477,45 +470,50 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
     They are copied to :file:`domain_def.xml` and :file:`field_def.xml`,
     repectively, because those are the file names that XIOS expects.
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :param dict run_desc: Run description dictionary.
 
-    :arg desc_file: File path/name of the YAML run description file.
-    :type desc_file: str
+    :param desc_file: File path/name of the YAML run description file.
+    :type desc_file: :py:class:`pathlib.Path`
 
-    :arg run_set_dir: Directory containing the run description file,
-                      from which relative paths for the namelist section
-                      files start.
-    :type run_set_dir: str
+    :param run_set_dir: Directory containing the run description file,
+                        from which relative paths for the namelist section
+                        files start.
+    :type run_set_dir: :py:class:`pathlib.Path`
 
-    :arg run_dir: Path of the temporary run directory.
-    :type run_dir: str
+    :param str run_dir: Path of the temporary run directory.
 
-    :arg nemo34: Prepare a NEMO-3.4 run;
-                 the default is to prepare a NEMO-3.6 run
-    :type nemo34: boolean
+    :param boolean nemo34: Prepare a NEMO-3.4 run;
+                           the default is to prepare a NEMO-3.6 run
     """
+    iodef = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('output', 'files'), resolve_path=True, run_dir=run_dir
+    )
     run_set_files = [
-        (os.path.abspath(run_desc['output']['files']), 'iodef.xml'),
-        (os.path.join(run_set_dir, desc_file), os.path.basename(desc_file)),
+        (iodef, 'iodef.xml'),
+        (run_set_dir / desc_file.name, desc_file.name),
     ]
     if nemo34:
-        run_set_files.append((
-            os.path.join(run_set_dir, 'xmlio_server.def'), 'xmlio_server.def'
-        ))
+        run_set_files.append(
+            (run_set_dir / 'xmlio_server.def', 'xmlio_server.def')
+        )
     else:
+        domain_def = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('output', 'domain'), resolve_path=True, run_dir=run_dir
+        )
+        fields_def = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('output', 'fields'), resolve_path=True, run_dir=run_dir
+        )
         run_set_files.extend([
-            (os.path.abspath(run_desc['output']['domain']), 'domain_def.xml'),
-            (os.path.abspath(run_desc['output']['fields']), 'field_def.xml'),
+            (domain_def, 'domain_def.xml'),
+            (fields_def, 'field_def.xml'),
         ])
-    saved_cwd = os.getcwd()
-    os.chdir(run_dir)
     for source, dest_name in run_set_files:
-        source_path = os.path.normpath(source)
-        shutil.copy2(source_path, dest_name)
+        shutil.copy2(
+            nemo_cmd.fspath(source),
+            nemo_cmd.fspath(Path(run_dir) / dest_name)
+        )
     if not nemo34:
         _set_xios_server_mode(run_desc, run_dir)
-    os.chdir(saved_cwd)
 
 
 def _set_xios_server_mode(run_desc, run_dir):
