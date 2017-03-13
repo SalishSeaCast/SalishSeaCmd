@@ -169,16 +169,11 @@ def _get_cgrf(day, userid, passwd_file):
 
 def _rebase_cgrf_time(day):
     log.info('Rebasing {} dataset'.format(day.format('YYYY-MM-DD')))
-    vars = (
-        ('precip', 'liquid precipitation'),
-        ('q2', '2m specific humidity'),
-        ('qlw', 'long-wave radiation'),
-        ('qsw', 'short-wave radiation'),
-        ('slp', 'sea-level atmospheric pressure'),
-        ('t2', '2m temperature'),
-        ('u10', 'u-component 10m wind'),
-        ('v10', 'v-component 10m wind'),
-    )
+    vars = (('precip', 'liquid precipitation'), ('q2', '2m specific humidity'),
+            ('qlw', 'long-wave radiation'), ('qsw', 'short-wave radiation'),
+            ('slp', 'sea-level atmospheric pressure'),
+            ('t2', '2m temperature'), ('u10', 'u-component 10m wind'),
+            ('v10', 'v-component 10m wind'),)
     prev_day = day.replace(days=-1)
     for var, description in vars:
         log.info('Gathering {} values'.format(var))

@@ -256,16 +256,11 @@ def test_rebase_cgrf_time_calls_improve_cgrf_file(
     """_rebase_cgrf_time calls _improve_cgrf_file with expected args
     """
     day = arrow.get(2014, 1, 8)
-    vars = (
-        ('precip', 'liquid precipitation'),
-        ('q2', '2m specific humidity'),
-        ('qlw', 'long-wave radiation'),
-        ('qsw', 'short-wave radiation'),
-        ('slp', 'sea-level atmospheric pressure'),
-        ('t2', '2m temperature'),
-        ('u10', 'u-component 10m wind'),
-        ('v10', 'v-component 10m wind'),
-    )
+    vars = (('precip', 'liquid precipitation'), ('q2', '2m specific humidity'),
+            ('qlw', 'long-wave radiation'), ('qsw', 'short-wave radiation'),
+            ('slp', 'sea-level atmospheric pressure'),
+            ('t2', '2m temperature'), ('u10', 'u-component 10m wind'),
+            ('v10', 'v-component 10m wind'),)
     expected = [
         call(var, descr, day, m_nc.Dataset('tmp2.nc').history)
         for var, descr in vars

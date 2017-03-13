@@ -747,7 +747,9 @@ def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
 
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
     """
-    link_checkers = {'atmospheric': _check_atmospheric_forcing_link,}
+    link_checkers = {
+        'atmospheric': _check_atmospheric_forcing_link,
+    }
     nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
     for link_name in run_desc['forcing']:
         link_path = run_desc['forcing'][link_name]['link to']
@@ -835,12 +837,9 @@ def _check_atmospheric_forcing_link(
             for basename, period in v['params']:
                 if period == 'daily':
                     file_path = os.path.join(
-                        v['dir'],
-                        '{basename}_'
+                        v['dir'], '{basename}_'
                         'y{date.year}m{date.month:02d}d{date.day:02d}.nc'
-                        .format(
-                            basename=basename, date=r
-                        )
+                        .format(basename=basename, date=r)
                     )
                 elif period == 'yearly':
                     file_path = os.path.join(
@@ -916,12 +915,9 @@ def _check_atmos_files(run_desc, run_dir):
             for basename, period in v['params']:
                 if period == 'daily':
                     file_path = os.path.join(
-                        v['dir'],
-                        '{basename}_'
+                        v['dir'], '{basename}_'
                         'y{date.year}m{date.month:02d}d{date.day:02d}.nc'
-                        .format(
-                            basename=basename, date=r
-                        )
+                        .format(basename=basename, date=r)
                     )
                 elif period == 'yearly':
                     file_path = os.path.join(
