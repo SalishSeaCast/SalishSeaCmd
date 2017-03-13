@@ -618,33 +618,22 @@ class TestMakeGridLinks:
     """Unit tests for `nemo prepare` _make_grid_links() function.
     """
 
-    @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.logger')
-    def test_no_grid_coordinates_key(self, m_logger, m_rm_run_dir):
+    @patch('nemo_cmd.prepare.remove_run_dir')
+    def test_no_grid_coordinates_key(self, m_rm_run_dir):
         run_desc = {}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        assert m_logger.error.call_args_list[0] == call(
-            'grid: coordinates key not found - '
-            'please check your run description YAML file'
-        )
         m_rm_run_dir.assert_called_once_with('run_dir')
 
-    @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.logger')
-    def test_no_grid_bathymetry_key(self, m_logger, m_rm_run_dir):
+    @patch('nemo_cmd.prepare.remove_run_dir')
+    def test_no_grid_bathymetry_key(self, m_rm_run_dir):
         run_desc = {'grid': {'coordinates': 'coords.nc'}}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        assert m_logger.error.call_args_list[0] == call(
-            'grid: bathymetry key not found - '
-            'please check your run description YAML file'
-        )
         m_rm_run_dir.assert_called_once_with('run_dir')
 
-    @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.logger')
-    def test_no_forcing_key(self, m_logger, m_rm_run_dir):
+    @patch('nemo_cmd.prepare.remove_run_dir')
+    def test_no_forcing_key(self, m_rm_run_dir):
         run_desc = {
             'grid': {
                 'coordinates': 'coords.nc',
@@ -653,10 +642,6 @@ class TestMakeGridLinks:
         }
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        m_logger.error.assert_called_once_with(
-            'forcing key not found - '
-            'please check your run description YAML file'
-        )
         m_rm_run_dir.assert_called_once_with('run_dir')
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
@@ -973,26 +958,19 @@ class TestMakeForcingLinksNEMO36:
         )
 
 
-@patch('salishsea_cmd.prepare.logger')
 class TestRecordVCSRevisions:
     """Unit tests for `salishsea prepare` _record_vcs_revisions() function.
     """
 
-    def test_no_paths_forcing_key(self, m_logger):
+    def test_no_paths_forcing_key(self):
         run_desc = {}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._record_vcs_revisions(
                 run_desc, 'run_dir', 'nemo_code_repo', 'xios_code_repo'
             )
-        m_logger.error.assert_called_once_with(
-            '"paths: forcing:" key not found - '
-            'please check your run description YAML file'
-        )
 
     @patch('salishsea_cmd.prepare._write_repo_rev_file')
-    def test_write_repo_rev_file_default_calls(
-        self, m_write, m_logger, tmpdir
-    ):
+    def test_write_repo_rev_file_default_calls(self, m_write, tmpdir):
         nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
         run_desc = {'paths': {'forcing': str(nemo_forcing)}}
         salishsea_cmd.prepare._record_vcs_revisions(
@@ -1014,9 +992,7 @@ class TestRecordVCSRevisions:
         ]
 
     @patch('salishsea_cmd.prepare._write_repo_rev_file')
-    def test_write_repo_rev_file_vcs_revisions_hg_call(
-        self, m_write, m_logger, tmpdir
-    ):
+    def test_write_repo_rev_file_vcs_revisions_hg_call(self, m_write, tmpdir):
         ss_run_sets = tmpdir.ensure_dir('SS-run-sets')
         run_desc = {
             'paths': {
