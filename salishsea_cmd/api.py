@@ -305,9 +305,8 @@ def run_in_subprocess(run_id, run_desc, results_dir, nemo34=False):
                 log.info(line)
     except subprocess.CalledProcessError as e:
         log.error(
-            'subprocess {cmd} failed with return code {status}'.format(
-                cmd=cmd, status=e.returncode
-            )
+            'subprocess {cmd} failed with return code {status}'.
+            format(cmd=cmd, status=e.returncode)
         )
         for line in e.output.splitlines():
             if line:
@@ -433,11 +432,7 @@ def td2hms(timedelta):
     :rtype: unicode
     """
     seconds = int(timedelta.total_seconds())
-    periods = (
-        ('hour', 60 * 60),
-        ('minute', 60),
-        ('second', 1),
-    )
+    periods = (('hour', 60 * 60), ('minute', 60), ('second', 1),)
     hms = []
     for period_name, period_seconds in periods:
         period_value, seconds = divmod(seconds, period_seconds)

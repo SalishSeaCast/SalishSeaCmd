@@ -225,7 +225,11 @@ class TestCheckXiosExec:
 
     def test_xios_exec_not_found(self, m_logger, tmpdir):
         p_xios = tmpdir.ensure_dir('XIOS')
-        run_desc = {'paths': {'XIOS': str(p_xios)},}
+        run_desc = {
+            'paths': {
+                'XIOS': str(p_xios)
+            },
+        }
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._check_xios_exec(run_desc)
 
@@ -239,7 +243,11 @@ class TestMakeRunDir:
         """_make_run_dir() creates directory w/ UUID v1 name
         """
         p_runs_dir = tmpdir.ensure_dir('SalishSea')
-        run_desc = {'paths': {'runs directory': str(p_runs_dir)},}
+        run_desc = {
+            'paths': {
+                'runs directory': str(p_runs_dir)
+            },
+        }
         run_dir = salishsea_cmd.prepare._make_run_dir(run_desc)
         assert run_dir == os.path.join(str(p_runs_dir), m_uuid1())
 
@@ -418,8 +426,12 @@ class TestMakeNamelistNEMO36:
                 'NEMO code config': str(p_nemo_config_dir),
             },
             'namelists': {
-                'namelist_cfg': [str(p_run_set_dir.join('namelist.time')),],
-                'namelist_top_cfg': [str(p_run_set_dir.join('namelist_top')),],
+                'namelist_cfg': [
+                    str(p_run_set_dir.join('namelist.time')),
+                ],
+                'namelist_top_cfg': [
+                    str(p_run_set_dir.join('namelist_top')),
+                ],
             }
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
@@ -440,7 +452,9 @@ class TestMakeNamelistNEMO36:
                 'NEMO code config': str(p_nemo_config_dir),
             },
             'namelists': {
-                'namelist_top_cfg': [str(p_run_set_dir.join('namelist_top')),],
+                'namelist_top_cfg': [
+                    str(p_run_set_dir.join('namelist_top')),
+                ],
             }
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
@@ -572,8 +586,8 @@ class TestMakeExecutableLinks:
         p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)), str(p_run_dir), nemo34,
-            Path(str(p_xios_bin_dir))
+            Path(str(p_nemo_bin_dir)),
+            str(p_run_dir), nemo34, Path(str(p_xios_bin_dir))
         )
         assert p_run_dir.join('nemo.exe').check(file=True, link=True)
 
@@ -588,8 +602,8 @@ class TestMakeExecutableLinks:
             p_nemo_bin_dir.ensure('server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)), str(p_run_dir), nemo34,
-            Path(str(p_xios_bin_dir))
+            Path(str(p_nemo_bin_dir)),
+            str(p_run_dir), nemo34, Path(str(p_xios_bin_dir))
         )
         if nemo34:
             assert p_run_dir.join('server.exe').check(file=True, link=True)
@@ -617,8 +631,8 @@ class TestMakeExecutableLinks:
             p_xios_bin_dir.ensure('xios_server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)), str(p_run_dir), nemo34,
-            Path(str(p_xios_bin_dir))
+            Path(str(p_nemo_bin_dir)),
+            str(p_run_dir), nemo34, Path(str(p_xios_bin_dir))
         )
         if nemo34:
             assert not p_run_dir.join('xios_server.exe').check(
@@ -787,7 +801,11 @@ class TestMakeForcingLinks:
     @patch('salishsea_cmd.prepare.logger')
     def test_make_forcing_links_no_forcing_dir(self, m_logger, nemo34, tmpdir):
         p_run_dir = tmpdir.ensure_dir('run_dir')
-        run_desc = {'paths': {'forcing': 'foo',},}
+        run_desc = {
+            'paths': {
+                'forcing': 'foo',
+            },
+        }
         salishsea_cmd.prepare._remove_run_dir = Mock()
         p_exists = patch(
             'salishsea_cmd.prepare.os.path.exists', return_value=False
