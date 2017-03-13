@@ -138,7 +138,7 @@ class TestCheckNemoExec:
         nemo_bin_dir = salishsea_cmd.prepare._check_nemo_exec(
             run_desc, nemo34=False
         )
-        assert nemo_bin_dir == p_bin_dir
+        assert nemo_bin_dir == Path(str(p_bin_dir))
 
     @pytest.mark.parametrize(
         'config_name_key, nemo_code_config_key', [
@@ -221,7 +221,7 @@ class TestCheckXiosExec:
         p_bin_dir = p_xios.ensure_dir('bin')
         p_bin_dir.ensure('xios_server.exe')
         xios_bin_dir = salishsea_cmd.prepare._check_xios_exec(run_desc)
-        assert xios_bin_dir == p_bin_dir
+        assert xios_bin_dir == Path(str(p_bin_dir))
 
     def test_xios_exec_not_found(self, m_logger, tmpdir):
         p_xios = tmpdir.ensure_dir('XIOS')
@@ -572,7 +572,8 @@ class TestMakeExecutableLinks:
         p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            str(p_nemo_bin_dir), str(p_run_dir), nemo34, str(p_xios_bin_dir)
+            Path(str(p_nemo_bin_dir)), str(p_run_dir), nemo34,
+            Path(str(p_xios_bin_dir))
         )
         assert p_run_dir.join('nemo.exe').check(file=True, link=True)
 
@@ -587,7 +588,8 @@ class TestMakeExecutableLinks:
             p_nemo_bin_dir.ensure('server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            str(p_nemo_bin_dir), str(p_run_dir), nemo34, str(p_xios_bin_dir)
+            Path(str(p_nemo_bin_dir)), str(p_run_dir), nemo34,
+            Path(str(p_xios_bin_dir))
         )
         if nemo34:
             assert p_run_dir.join('server.exe').check(file=True, link=True)
@@ -615,7 +617,8 @@ class TestMakeExecutableLinks:
             p_xios_bin_dir.ensure('xios_server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            str(p_nemo_bin_dir), str(p_run_dir), nemo34, str(p_xios_bin_dir)
+            Path(str(p_nemo_bin_dir)), str(p_run_dir), nemo34,
+            Path(str(p_xios_bin_dir))
         )
         if nemo34:
             assert not p_run_dir.join('xios_server.exe').check(
