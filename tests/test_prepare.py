@@ -45,7 +45,7 @@ class TestParser:
     def test_parsed_args_defaults(self, prepare_cmd):
         parser = prepare_cmd.get_parser('salishsea prepare')
         parsed_args = parser.parse_args(['foo'])
-        assert parsed_args.desc_file == 'foo'
+        assert parsed_args.desc_file == Path('foo')
         assert not parsed_args.nemo34
         assert not parsed_args.quiet
 
