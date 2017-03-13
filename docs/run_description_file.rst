@@ -92,25 +92,21 @@ If you have a reason to not use land processor elimination you can disable it wi
 
 The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`salishsea` uses to find files in other repos that it needs.
 
-:kbd:`NEMO-code`
-  The path to the :ref:`NEMO-3.6-code-repo` clone where the NEMO executable for the run is to be found.
-  An absolute path is required because the path is used in both the current  directory and the temporary run directory created in the :kbd:`runs directory`.
-  You can use :kbd:`~` or :kbd:`$HOME` in the path,
-  if you wish.
-
 :kbd:`NEMO code config`
   The path to the :file:`CONFIG/` directory in the :ref:`NEMO-3.6-code-repo` clone
   where the NEMO configuration directories are to be found;
   e.g. :file:`$HOME/MEOPAR/NEMO-3.6-code/NEMOGCM/CONFIG/`.
   An absolute path is required because the path is used in both the current directory and the temporary run directory created in the :kbd:`runs directory`.
-  You can use :kbd:`~` or :kbd:`$HOME` in the path,
-  if you wish.
+  The path may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+  and :envvar:`$USER` as an alternative spelling of the user's userid.
 
   This key may also be spelled :kbd:`NEMO-code-config` for backward compatibility.
 
 :kbd:`XIOS`
   The path to the :ref:`XIOS-repo` clone where the XIOS executable for the run is to be found.
   This path may be either absolute or relative.
+  The path may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+  and :envvar:`$USER` as an alternative spelling of the user's userid.
 
 :kbd:`forcing`
   The path to the :ref:`NEMO-forcing-repo` clone where the netCDF files for the grid coordinates,
@@ -477,19 +473,13 @@ The meanings of the key-value pairs are:
 
 The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`salishsea` uses to find files in other repos that it needs.
 
-:kbd:`NEMO-code`
-  The path to the :ref:`NEMO-code-repo` clone where the NEMO executable for the run is to be found.
-  An absolute path is required because the path is used in both the current  directory and the temporary run directory created in the :kbd:`runs directory`.
-  You can use :kbd:`~` or :kbd:`$HOME` in the path,
-  if you wish.
-
 :kbd:`NEMO code config`
   The path to the :file:`CONFIG/` directory in the :ref:`NEMO-code-repo` clone
   where the NEMO configuration directories are to be found;
   e.g. :file:`$HOME/MEOPAR/NEMO-code/NEMOGCM/CONFIG/`.
   An absolute path is required because the path is used in both the current directory and the temporary run directory created in the :kbd:`runs directory`.
-  You can use :kbd:`~` or :kbd:`$HOME` in the path,
-  if you wish.
+  The path may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+  and :envvar:`$USER` as an alternative spelling of the user's userid.
 
   This key may also be spelled :kbd:`NEMO-code-config` for backward compatibility.
 
