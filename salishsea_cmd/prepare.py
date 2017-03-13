@@ -17,6 +17,7 @@
 Sets up the necessary symbolic links for a Salish Sea NEMO run
 in a specified directory and changes the pwd to that directory.
 """
+from copy import copy
 import logging
 import os
 try:
@@ -31,6 +32,7 @@ import xml.etree.ElementTree
 
 import arrow
 import cliff.command
+import hglib
 import nemo_cmd
 import nemo_cmd.prepare
 import nemo_cmd.utils
@@ -51,7 +53,9 @@ class Prepare(cliff.command.Command):
             and print the path to the run directory.
         '''
         parser.add_argument(
-            'desc_file', metavar='DESC_FILE', type=Path,
+            'desc_file',
+            metavar='DESC_FILE',
+            type=Path,
             help='run description YAML file'
         )
         parser.add_argument(
@@ -122,10 +126,8 @@ def prepare(desc_file, nemo34, nocheck_init):
     :rtype: str
     """
     run_desc = lib.load_run_desc(nemo_cmd.fspath(desc_file))
-    nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
-    xios_code_repo, xios_bin_dir = (
-        _check_xios_exec(run_desc) if not nemo34 else ('', '')
-    )
+    nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
+    xios_bin_dir = (_check_xios_exec(run_desc) if not nemo34 else ('', ''))
     run_set_dir = os.path.dirname(os.path.abspath(desc_file))
     run_dir = _make_run_dir(run_desc)
     _make_namelists(run_set_dir, run_desc, run_dir, nemo34)
@@ -133,13 +135,12 @@ def prepare(desc_file, nemo34, nocheck_init):
     _make_executable_links(nemo_bin_dir, run_dir, nemo34, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
     _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init)
-    _record_vcs_revisions(run_desc, run_dir, nemo_code_repo, xios_code_repo)
+    _record_vcs_revisions(run_desc, run_dir)
     return run_dir
 
 
 def _check_nemo_exec(run_desc, nemo34):
-    """Calculate absolute paths of NEMO code repo & NEMO executable's
-    directory.
+    """Calculate absolute paths of NEMO executable's directory.
 
     Confirm that the NEMO executable exists, raising a SystemExit
     exception if it does not.
@@ -147,72 +148,78 @@ def _check_nemo_exec(run_desc, nemo34):
     For NEMO-3.4 runs, confirm check that the IOM server executable
     exists, issuing a warning if it does not.
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :param dict run_desc: Run description dictionary.
 
-    :arg nemo34: Prepare a NEMO-3.4 run;
+    :param boolean nemo34: Prepare a NEMO-3.4 run;
                  the default is to prepare a NEMO-3.6 run
-    :type nemo34: boolean
 
-    :returns: Absolute paths of NEMO code repo & NEMO executable's
-              directory.
-    :rtype: 2-tuple
+    :returns: Absolute path of NEMO executable's directory.
+    :rtype: str
 
     :raises: SystemExit
     """
-    nemo_code_repo = nemo_cmd.utils.get_run_desc_value(
-        run_desc, ('paths', 'NEMO-code'), resolve_path=True
-    )
     try:
-        config_name = run_desc['config name']
+        nemo_config_dir = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('paths', 'NEMO code config'),
+            resolve_path=True,
+            fatal=False
+        )
     except KeyError:
         # Alternate key spelling for backward compatibility
-        config_name = run_desc['config_name']
-    config_dir = os.path.join(nemo_code_repo, 'NEMOGCM', 'CONFIG', config_name)
-    nemo_bin_dir = os.path.join(nemo_code_repo, config_dir, 'BLD', 'bin')
-    nemo_exec = os.path.join(nemo_bin_dir, 'nemo.exe')
-    if not os.path.exists(nemo_exec):
+        nemo_config_dir = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('paths', 'NEMO-code-config'), resolve_path=True
+        )
+    try:
+        config_name = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('config name',), fatal=False
+        )
+    except KeyError:
+        # Alternate key spelling for backward compatibility
+        config_name = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('config_name',)
+        )
+    config_dir = nemo_config_dir / config_name
+    nemo_bin_dir = config_dir / 'BLD' / 'bin'
+    nemo_exec = nemo_bin_dir / 'nemo.exe'
+    if not nemo_exec.exists():
         logger.error(
             '{} not found - did you forget to build it?'.format(nemo_exec)
         )
         raise SystemExit(2)
     if nemo34:
-        iom_server_exec = os.path.join(nemo_bin_dir, 'server.exe')
-        if not os.path.exists(iom_server_exec):
-            logger.warn(
+        iom_server_exec = nemo_bin_dir / 'server.exe'
+        if not iom_server_exec.exists():
+            logger.warning(
                 '{} not found - are you running without key_iomput?'
                 .format(iom_server_exec)
             )
-    return nemo_cmd.fspath(nemo_code_repo), nemo_bin_dir
+    return nemo_cmd.fspath(nemo_bin_dir)
 
 
 def _check_xios_exec(run_desc):
-    """Calculate absolute path of XIOS code repo & XIOS executable's
-    directory.
+    """Calculate absolute path of XIOS executable's directory.
 
     Confirm that the XIOS executable exists, raising a SystemExit
     exception if it does not.
 
-    :arg run_desc: Run description dictionary.
-    :type run_desc: dict
+    :param dict run_desc: Run description dictionary.
 
-    :returns: Absolute paths of XIO code repo & XIOS executable's
-              directory.
-    :rtype: 2-tuple
+    :returns: Absolute path of XIOS executable's directory.
+    :rtype: str
 
     :raises: SystemExit
     """
     xios_code_repo = nemo_cmd.utils.get_run_desc_value(
         run_desc, ('paths', 'XIOS'), resolve_path=True
     )
-    xios_bin_dir = os.path.join(xios_code_repo, 'bin')
-    xios_exec = os.path.join(xios_bin_dir, 'xios_server.exe')
-    if not os.path.exists(xios_exec):
+    xios_bin_dir = xios_code_repo / 'bin'
+    xios_exec = xios_bin_dir / 'xios_server.exe'
+    if not xios_exec.exists():
         logger.error(
             '{} not found - did you forget to build it?'.format(xios_exec)
         )
         raise SystemExit(2)
-    return nemo_cmd.fspath(xios_code_repo), xios_bin_dir
+    return nemo_cmd.fspath(xios_bin_dir)
 
 
 def _make_run_dir(run_desc):
@@ -946,33 +953,54 @@ def _check_atmos_files(run_desc, run_dir):
                     raise SystemExit(2)
 
 
-def _record_vcs_revisions(run_desc, run_dir, nemo_code_repo, xios_code_repo):
+def _record_vcs_revisions(run_desc, run_dir):
     """Record revision and status information from version control system
     repositories in files in the temporary run directory.
 
     :param dict run_desc: Run description dictionary.
 
     :param str run_dir: Path of the temporary run directory.
-
-    :param str nemo_code_repo: Absolute path of NEMO code repository.
-
-    :param str xios_code_repo: Absolute path of XIOS code repository.
     """
+    try:
+        nemo_code_config = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('paths', 'NEMO code config'),
+            resolve_path=True,
+            fatal=False
+        )
+    except KeyError:
+        # Alternate key spelling for backward compatibility
+        nemo_code_config = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('paths', 'NEMO-code-config'), resolve_path=True
+        )
+    xios_code_repo = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('paths', 'XIOS'), run_dir, resolve_path=True
+    )
     forcing_repo = nemo_cmd.utils.get_run_desc_value(
         run_desc, ('paths', 'forcing'), run_dir, resolve_path=True
     )
-    for repo in (
-        nemo_code_repo, xios_code_repo, nemo_cmd.fspath(forcing_repo)
-    ):
-        nemo_cmd.prepare.write_repo_rev_file(
-            repo, run_dir, nemo_cmd.prepare.get_hg_revision)
+    for repo in (nemo_code_config, xios_code_repo, forcing_repo):
+        repo_path = copy(repo)
+        try:
+            nemo_cmd.prepare.write_repo_rev_file(
+                repo, run_dir, nemo_cmd.prepare.get_hg_revision
+            )
+        except hglib.error.ServerError:
+            repo = repo.parent
+            if repo == Path.root:
+                logger.error(
+                    'unable to find Mercurial repo root in or above '
+                    '{repo_path}'.format(repo_path=repo_path)
+                )
+                _remove_run_dir(run_dir)
+                raise SystemExit(2)
     if 'vcs revisions' not in run_desc:
         return
     vcs_funcs = {'hg': nemo_cmd.prepare.get_hg_revision}
     for vcs_tool in run_desc['vcs revisions']:
         for repo in run_desc['vcs revisions'][vcs_tool]:
             nemo_cmd.prepare.write_repo_rev_file(
-                repo, run_dir, vcs_funcs[vcs_tool])
+                repo, run_dir, vcs_funcs[vcs_tool]
+            )
 
 
 # All of the namelists that NEMO-3.4 requires, but empty so that they result

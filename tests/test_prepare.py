@@ -79,11 +79,8 @@ class TestPrepare:
 
     @pytest.mark.parametrize(
         'nemo34, m_cne_return, m_cxe_return', [
-            (True, ('repo', 'bin_dir'), ('', '')),
-            (
-                False, ('nemo_repo', 'nemo_bin_dir'),
-                ('xios_repo', 'xios_bin_dir')
-            ),
+            (True, 'bin_dir', ('', '')),
+            (False, 'nemo_bin_dir', 'xios_bin_dir'),
         ]
     )
     def test_prepare(
@@ -108,10 +105,11 @@ class TestPrepare:
             m_lrd(), 'SalishSea.yaml', m_dirname(), m_mrd(), nemo34
         )
         m_mel.assert_called_once_with(
-            m_cne_return[1], m_mrd(), nemo34, m_cxe_return[1]
+            m_cne_return, m_mrd(), nemo34, m_cxe_return
         )
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd(), nemo34, False)
+        m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
 
 
@@ -119,82 +117,94 @@ class TestCheckNemoExec:
     """Unit tests for `salishsea prepare` _check_nemo_exec() function.
     """
 
-    def test_nemo_code_repo_path(self, tmpdir):
-        p_code = tmpdir.ensure_dir('NEMO-3.6-code')
-        p_code.ensure(
-            'NEMOGCM', 'CONFIG', 'SalishSea', 'BLD', 'bin', 'nemo.exe'
-        )
+    @pytest.mark.parametrize(
+        'config_name_key, nemo_code_config_key', [
+            ('config name', 'NEMO code config'),
+            ('config_name', 'NEMO-code-config'),
+        ]
+    )
+    def test_nemo_bin_dir_path(
+        self, config_name_key, nemo_code_config_key, tmpdir
+    ):
+        p_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
         run_desc = {
-            'config_name': 'SalishSea',
+            config_name_key: 'SalishSea',
             'paths': {
-                'NEMO-code': str(p_code)
+                nemo_code_config_key: str(p_config)
             },
         }
-        nemo_code_repo, nemo_bin_dir = salishsea_cmd.prepare._check_nemo_exec(
-            run_desc, nemo34=False
-        )
-        assert nemo_code_repo == p_code
-
-    def test_nemo_bin_dir_path(self, tmpdir):
-        p_code = tmpdir.ensure_dir('NEMO-3.6-code')
-        run_desc = {
-            'config_name': 'SalishSea',
-            'paths': {
-                'NEMO-code': str(p_code)
-            },
-        }
-        p_bin_dir = p_code.ensure_dir(
-            'NEMOGCM', 'CONFIG', 'SalishSea', 'BLD', 'bin'
-        )
+        p_bin_dir = p_config.ensure_dir('SalishSea', 'BLD', 'bin')
         p_bin_dir.ensure('nemo.exe')
-        nemo_code_repo, nemo_bin_dir = salishsea_cmd.prepare._check_nemo_exec(
+        nemo_bin_dir = salishsea_cmd.prepare._check_nemo_exec(
             run_desc, nemo34=False
         )
         assert nemo_bin_dir == p_bin_dir
 
-    def test_nemo_exec_not_found(self, tmpdir):
+    @pytest.mark.parametrize(
+        'config_name_key, nemo_code_config_key', [
+            ('config name', 'NEMO code config'),
+            ('config_name', 'NEMO-code-config'),
+        ]
+    )
+    def test_nemo_exec_not_found(
+        self, config_name_key, nemo_code_config_key, tmpdir
+    ):
         p_code = tmpdir.ensure_dir('NEMO-3.6-code')
         run_desc = {
-            'config_name': 'SalishSea',
+            config_name_key: 'SalishSea',
             'paths': {
-                'NEMO-code': str(p_code)
+                nemo_code_config_key: str(p_code)
             },
         }
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=False)
 
+    @pytest.mark.parametrize(
+        'config_name_key, nemo_code_config_key', [
+            ('config name', 'NEMO code config'),
+            ('config_name', 'NEMO-code-config'),
+        ]
+    )
     @patch('salishsea_cmd.prepare.logger')
-    def test_iom_server_exec_not_found(self, m_logger, tmpdir):
-        p_code = tmpdir.ensure_dir('NEMO-3.6-code')
+    def test_iom_server_exec_not_found(
+        self, m_logger, config_name_key, nemo_code_config_key, tmpdir
+    ):
+        p_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
         run_desc = {
-            'config_name': 'SalishSea',
+            config_name_key: 'SalishSea',
             'paths': {
-                'NEMO-code': str(p_code)
+                nemo_code_config_key: str(p_config)
             },
         }
-        p_bin_dir = p_code.ensure_dir(
-            'NEMOGCM', 'CONFIG', 'SalishSea', 'BLD', 'bin'
-        )
+        p_bin_dir = p_config.ensure_dir('SalishSea', 'BLD', 'bin')
         p_exists = patch(
-            'salishsea_cmd.prepare.os.path.exists', side_effect=[True, False]
+            'salishsea_cmd.prepare.Path.exists', side_effect=[True, False]
         )
         with p_exists:
             salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=True)
-        m_logger.warn.assert_called_once_with(
+        m_logger.warning.assert_called_once_with(
             '{}/server.exe not found - are you running without key_iomput?'
             .format(p_bin_dir)
         )
 
-    def test_nemo36_no_iom_server_check(self, tmpdir):
-        p_code = tmpdir.ensure_dir('NEMO-3.6-code')
+    @pytest.mark.parametrize(
+        'config_name_key, nemo_code_config_key', [
+            ('config name', 'NEMO code config'),
+            ('config_name', 'NEMO-code-config'),
+        ]
+    )
+    def test_nemo36_no_iom_server_check(
+        self, config_name_key, nemo_code_config_key, tmpdir
+    ):
+        p_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
         run_desc = {
-            'config_name': 'SalishSea',
+            config_name_key: 'SalishSea',
             'paths': {
-                'NEMO-code': str(p_code)
+                nemo_code_config_key: str(p_config)
             },
         }
-        p_code.ensure_dir('NEMOGCM', 'CONFIG', 'SalishSea', 'BLD', 'bin')
-        with patch('salishsea_cmd.prepare.os.path.exists') as m_exists:
+        p_config.ensure_dir('SalishSea', 'BLD', 'bin')
+        with patch('salishsea_cmd.prepare.Path.exists') as m_exists:
             salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=False)
         assert m_exists.call_count == 1
 
@@ -205,13 +215,10 @@ class TestCheckXiosExec:
 
     def test_xios_bin_dir_path(self, tmpdir):
         p_xios = tmpdir.ensure_dir('XIOS')
-        run_desc = {'paths': {'XIOS': str(p_xios)},}
+        run_desc = {'paths': {'XIOS': str(p_xios)}}
         p_bin_dir = p_xios.ensure_dir('bin')
         p_bin_dir.ensure('xios_server.exe')
-        xios_code_repo, xios_bin_dir = salishsea_cmd.prepare._check_xios_exec(
-            run_desc
-        )
-        assert xios_code_repo == p_xios
+        xios_bin_dir = salishsea_cmd.prepare._check_xios_exec(run_desc)
         assert xios_bin_dir == p_bin_dir
 
     def test_xios_exec_not_found(self, tmpdir):
@@ -966,46 +973,71 @@ class TestRecordVCSRevisions:
     def test_no_paths_forcing_key(self):
         run_desc = {}
         with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._record_vcs_revisions(
-                run_desc, 'run_dir', 'nemo_code_repo', 'xios_code_repo'
-            )
+            salishsea_cmd.prepare._record_vcs_revisions(run_desc, 'run_dir')
 
+    @pytest.mark.parametrize(
+        'config_name_key, nemo_code_config_key', [
+            ('config name', 'NEMO code config'),
+            ('config_name', 'NEMO-code-config'),
+        ]
+    )
     @patch('nemo_cmd.prepare.write_repo_rev_file')
-    def test_write_repo_rev_file_default_calls(self, m_write, tmpdir):
+    def test_write_repo_rev_file_default_calls(
+        self, m_write, config_name_key, nemo_code_config_key, tmpdir
+    ):
+        nemo_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
+        xios_code_repo = tmpdir.ensure_dir('XIOS')
         nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
-        run_desc = {'paths': {'forcing': str(nemo_forcing)}}
-        salishsea_cmd.prepare._record_vcs_revisions(
-            run_desc, 'run_dir', 'nemo_code_repo', 'xios_code_repo'
-        )
+        run_desc = {
+            config_name_key: 'SalishSea',
+            'paths': {
+                nemo_code_config_key: str(nemo_config),
+                'XIOS': str(xios_code_repo),
+                'forcing': str(nemo_forcing)
+            }
+        }
+        salishsea_cmd.prepare._record_vcs_revisions(run_desc, 'run_dir')
         assert m_write.call_args_list == [
             call(
-                'nemo_code_repo', 'run_dir',
+                Path(str(nemo_config)), 'run_dir',
                 nemo_cmd.prepare.get_hg_revision
             ),
             call(
-                'xios_code_repo', 'run_dir',
+                Path(str(xios_code_repo)), 'run_dir',
                 nemo_cmd.prepare.get_hg_revision
             ),
             call(
-                str(nemo_forcing), 'run_dir',
+                Path(str(nemo_forcing)), 'run_dir',
                 nemo_cmd.prepare.get_hg_revision
             ),
         ]
 
+    @pytest.mark.parametrize(
+        'config_name_key, nemo_code_config_key', [
+            ('config name', 'NEMO code config'),
+            ('config_name', 'NEMO-code-config'),
+        ]
+    )
     @patch('nemo_cmd.prepare.write_repo_rev_file')
-    def test_write_repo_rev_file_vcs_revisions_hg_call(self, m_write, tmpdir):
+    def test_write_repo_rev_file_vcs_revisions_hg_call(
+        self, m_write, config_name_key, nemo_code_config_key, tmpdir
+    ):
+        nemo_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
+        xios_code_repo = tmpdir.ensure_dir('XIOS')
+        nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
         ss_run_sets = tmpdir.ensure_dir('SS-run-sets')
         run_desc = {
+            config_name_key: 'SalishSea',
             'paths': {
-                'forcing': 'NEO-forcing/'
+                nemo_code_config_key: str(nemo_config),
+                'XIOS': str(xios_code_repo),
+                'forcing': str(nemo_forcing)
             },
             'vcs revisions': {
                 'hg': [str(ss_run_sets)]
             }
         }
-        salishsea_cmd.prepare._record_vcs_revisions(
-            run_desc, 'run_dir', 'nemo_code_repo', 'xios_code_repo'
-        )
+        salishsea_cmd.prepare._record_vcs_revisions(run_desc, 'run_dir')
         assert m_write.call_args_list[-1] == call(
             str(ss_run_sets), 'run_dir', nemo_cmd.prepare.get_hg_revision
         )
