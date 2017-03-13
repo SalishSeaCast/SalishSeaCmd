@@ -23,6 +23,7 @@ except ImportError:
     from mock import call, Mock, patch
 
 import cliff.app
+import nemo_cmd.prepare
 import pytest
 
 import salishsea_cmd.prepare
@@ -969,7 +970,7 @@ class TestRecordVCSRevisions:
                 run_desc, 'run_dir', 'nemo_code_repo', 'xios_code_repo'
             )
 
-    @patch('salishsea_cmd.prepare._write_repo_rev_file')
+    @patch('nemo_cmd.prepare.write_repo_rev_file')
     def test_write_repo_rev_file_default_calls(self, m_write, tmpdir):
         nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
         run_desc = {'paths': {'forcing': str(nemo_forcing)}}
@@ -979,19 +980,19 @@ class TestRecordVCSRevisions:
         assert m_write.call_args_list == [
             call(
                 'nemo_code_repo', 'run_dir',
-                salishsea_cmd.prepare._get_hg_revision
+                nemo_cmd.prepare.get_hg_revision
             ),
             call(
                 'xios_code_repo', 'run_dir',
-                salishsea_cmd.prepare._get_hg_revision
+                nemo_cmd.prepare.get_hg_revision
             ),
             call(
                 str(nemo_forcing), 'run_dir',
-                salishsea_cmd.prepare._get_hg_revision
+                nemo_cmd.prepare.get_hg_revision
             ),
         ]
 
-    @patch('salishsea_cmd.prepare._write_repo_rev_file')
+    @patch('nemo_cmd.prepare.write_repo_rev_file')
     def test_write_repo_rev_file_vcs_revisions_hg_call(self, m_write, tmpdir):
         ss_run_sets = tmpdir.ensure_dir('SS-run-sets')
         run_desc = {
@@ -1006,5 +1007,5 @@ class TestRecordVCSRevisions:
             run_desc, 'run_dir', 'nemo_code_repo', 'xios_code_repo'
         )
         assert m_write.call_args_list[-1] == call(
-            str(ss_run_sets), 'run_dir', salishsea_cmd.prepare._get_hg_revision
+            str(ss_run_sets), 'run_dir', nemo_cmd.prepare.get_hg_revision
         )

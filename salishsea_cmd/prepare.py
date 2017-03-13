@@ -34,6 +34,7 @@ import cliff.command
 from dateutil import tz
 import hglib
 import nemo_cmd
+import nemo_cmd.prepare
 import nemo_cmd.utils
 
 from salishsea_cmd import lib
@@ -964,90 +965,15 @@ def _record_vcs_revisions(run_desc, run_dir, nemo_code_repo, xios_code_repo):
     for repo in (
         nemo_code_repo, xios_code_repo, nemo_cmd.fspath(forcing_repo)
     ):
-        _write_repo_rev_file(repo, run_dir, _get_hg_revision)
+        nemo_cmd.prepare.write_repo_rev_file(
+            repo, run_dir, nemo_cmd.prepare.get_hg_revision)
     if 'vcs revisions' not in run_desc:
         return
-    vcs_funcs = {'hg': _get_hg_revision}
+    vcs_funcs = {'hg': nemo_cmd.prepare.get_hg_revision}
     for vcs_tool in run_desc['vcs revisions']:
         for repo in run_desc['vcs revisions'][vcs_tool]:
-            _write_repo_rev_file(repo, run_dir, vcs_funcs[vcs_tool])
-
-
-def _write_repo_rev_file(repo, run_dir, vcs_func):
-    """Write revision and status infomration from a version control system
-    repository to a file in the temporary run directory.
-
-    The file name is the repository directory name with :kbd:`_rev.txt`
-    appended.
-
-    :param str repo: Path of Mercurial repository to get revision and status
-                     information from.
-
-    :param str run_dir: Path of the temporary run directory.
-
-    :param vcs_func: Function to call to gather revision and status information
-                     from repo.
-    """
-    repo_path = nemo_cmd.resolved_path(repo)
-    repo_rev_file_lines = vcs_func(repo)
-    rev_file = Path(run_dir) / '{repo.name}_rev.txt'.format(repo=repo_path)
-    with rev_file.open('wt') as f:
-        f.writelines('{}\n'.format(line) for line in repo_rev_file_lines)
-
-
-def _get_hg_revision(repo):
-    """Gather revision and status information from Mercurial repo.
-
-    Effectively record the output of :command:`hg parents -v` and
-    :command:`hg status -mardC`.
-
-    :param str repo: Path of Mercurial repository to get revision and status
-                     information from.
-
-    :returns: Mercurial repository revision and status information strings.
-    :rtype: list
-    """
-    with hglib.open(repo) as hg:
-        parents = hg.parents()
-        files = [f[1] for f in hg.status(change=[parents[0].rev])]
-        status = hg.status(
-            modified=True, added=True, removed=True, deleted=True, copies=True
-        )
-    revision = parents[0]
-    repo_rev_file_lines = [
-        'changset:   {rev}:{node}'.format(
-            rev=revision.rev.decode(), node=revision.node.decode()
-        )
-    ]
-    if revision.tags:
-        repo_rev_file_lines.append(
-            'tag:        {tags}'.format(tags=revision.tags.decode())
-        )
-    if len(parents) > 1:
-        repo_rev_file_lines.extend(
-            'parent:     {rev}:{node}'.format(
-                rev=parent.rev.decode(), node=parent.node.decode()
-            ) for parent in parents
-        )
-    date = arrow.get(revision.date).replace(tzinfo=tz.tzlocal())
-    repo_rev_file_lines.extend([
-        'user:       {}'.format(revision.author.decode()),
-        'date:       {}'.format(date.format('ddd MMM DD HH:mm:ss YYYY ZZ')),
-        'files:      {}'.format(' '.join(f.decode() for f in files)),
-        'description:',
-    ])
-    repo_rev_file_lines.extend(
-        line.decode() for line in revision.desc.splitlines()
-    )
-    if status:
-        logger.warning('There are uncommitted changes in {}'.format(repo))
-        repo_rev_file_lines.append('uncommitted changes:')
-        repo_rev_file_lines.extend(
-            '{code} {path}'.format(
-                code=s[0].decode(), path=s[1].decode()
-            ) for s in status
-        )
-    return repo_rev_file_lines
+            nemo_cmd.prepare.write_repo_rev_file(
+                repo, run_dir, vcs_funcs[vcs_tool])
 
 
 # All of the namelists that NEMO-3.4 requires, but empty so that they result
