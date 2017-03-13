@@ -15,7 +15,11 @@
 """SalishSeaCmd prepare sub-command plug-in unit tests
 """
 import os
-from pathlib import Path
+try:
+    from pathlib import Path
+except ImportError:
+    # Python 2.7
+    from pathlib2 import Path
 try:
     from unittest.mock import call, Mock, patch
 except ImportError:
