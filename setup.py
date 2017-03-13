@@ -72,7 +72,9 @@ setup(
     packages=find_packages(),
     entry_points={
         # The salishsea command:
-        'console_scripts': ['salishsea = salishsea_cmd.main:main',],
+        'console_scripts': [
+            'salishsea = salishsea_cmd.main:main',
+        ],
         # Sub-command plug-ins:
         'salishsea.app': [
             'combine = nemo_cmd.combine:Combine',
