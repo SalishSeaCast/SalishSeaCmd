@@ -31,8 +31,6 @@ import xml.etree.ElementTree
 
 import arrow
 import cliff.command
-from dateutil import tz
-import hglib
 import nemo_cmd
 import nemo_cmd.prepare
 import nemo_cmd.utils
@@ -53,7 +51,8 @@ class Prepare(cliff.command.Command):
             and print the path to the run directory.
         '''
         parser.add_argument(
-            'desc_file', metavar='DESC_FILE', help='run description YAML file'
+            'desc_file', metavar='DESC_FILE', type=Path,
+            help='run description YAML file'
         )
         parser.add_argument(
             '--nocheck-initial-conditions',
@@ -122,7 +121,7 @@ def prepare(desc_file, nemo34, nocheck_init):
     :returns: Path of the temporary run directory
     :rtype: str
     """
-    run_desc = lib.load_run_desc(desc_file)
+    run_desc = lib.load_run_desc(nemo_cmd.fspath(desc_file))
     nemo_code_repo, nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
     xios_code_repo, xios_bin_dir = (
         _check_xios_exec(run_desc) if not nemo34 else ('', '')
