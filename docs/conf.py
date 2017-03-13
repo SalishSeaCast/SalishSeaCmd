@@ -46,6 +46,17 @@ intersphinx_mapping = {
 
 todo_include_todos = True
 
+autodoc_mock_imports = [
+    'arrow',
+    'cliff.command',
+    'cliff.commandmanager',
+    'hglib',
+    'nemo_cmd',
+    'nemo_cmd.prepare',
+    'nemo_cmd.utils',
+    'yaml',
+]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

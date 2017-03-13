@@ -10,36 +10,4 @@ channels:
   - defaults
 
 dependencies:
-- bottleneck
-- h5py
-- ipython
-- jupyter_client
-- lxml
-- mako
-- matplotlib
-- netCDF4
-- numpy
-- pandas
-- paramiko
-- pillow
-- pip
-- python=3.5
-- python-dateutil
-- pytz
-- pyyaml
-- pyzmq
-- requests
-- scipy
-- sphinx
-- xarray
-- pip:
-  - angles
-  - arrow
-  - BeautifulSoup4
-  - cliff
-  - driftwood
-  - feedgen
-  - nbsphinx
-  - python-hglib
-  - retrying
-  - sphinx-bootstrap-theme
+  - python=3.5
