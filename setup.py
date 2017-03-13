@@ -49,7 +49,7 @@ install_requires = [
     'cliff',
     'python-hglib',
     'netcdf4',
-    'python-dateutil'
+    'python-dateutil',
     'PyYAML',
     # 'NEMO-Cmd',  # use cd tools; pip install -e NEMO-Cmd
     # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools
