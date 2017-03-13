@@ -146,8 +146,9 @@ class TestCheckNemoExec:
             ('config_name', 'NEMO-code-config'),
         ]
     )
+    @patch('salishsea_cmd.prepare.logger')
     def test_nemo_exec_not_found(
-        self, config_name_key, nemo_code_config_key, tmpdir
+        self, m_logger, config_name_key, nemo_code_config_key, tmpdir
     ):
         p_code = tmpdir.ensure_dir('NEMO-3.6-code')
         run_desc = {
@@ -209,11 +210,12 @@ class TestCheckNemoExec:
         assert m_exists.call_count == 1
 
 
+@patch('salishsea_cmd.prepare.logger')
 class TestCheckXiosExec:
     """Unit tests for `salishsea prepare` _check_xios_exec() function.
     """
 
-    def test_xios_bin_dir_path(self, tmpdir):
+    def test_xios_bin_dir_path(self, m_logger, tmpdir):
         p_xios = tmpdir.ensure_dir('XIOS')
         run_desc = {'paths': {'XIOS': str(p_xios)}}
         p_bin_dir = p_xios.ensure_dir('bin')
@@ -221,7 +223,7 @@ class TestCheckXiosExec:
         xios_bin_dir = salishsea_cmd.prepare._check_xios_exec(run_desc)
         assert xios_bin_dir == p_bin_dir
 
-    def test_xios_exec_not_found(self, tmpdir):
+    def test_xios_exec_not_found(self, m_logger, tmpdir):
         p_xios = tmpdir.ensure_dir('XIOS')
         run_desc = {'paths': {'XIOS': str(p_xios)},}
         with pytest.raises(SystemExit):
@@ -290,7 +292,7 @@ class TestMakeNamelistNEMO34:
     def test_make_namelist_nemo34(self, tmpdir):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
-        run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time')),],}
+        run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time'))]}
         p_run_dir = tmpdir.ensure_dir('run_dir')
         with patch('salishsea_cmd.prepare._set_mpi_decomposition'):
             salishsea_cmd.prepare._make_namelist_nemo34(
@@ -298,9 +300,10 @@ class TestMakeNamelistNEMO34:
             )
         assert p_run_dir.join('namelist').check()
 
-    def test_make_file_not_found_error(self, tmpdir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_namelist_file_not_found_error(self, m_logger, tmpdir):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
-        run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time')),],}
+        run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time'))]}
         p_run_dir = tmpdir.ensure_dir('run_dir')
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_namelist_nemo34(
@@ -310,7 +313,7 @@ class TestMakeNamelistNEMO34:
     def test_namelist_ends_with_empty_namelists(self, tmpdir):
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
-        run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time')),],}
+        run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time'))]}
         p_run_dir = tmpdir.ensure_dir('run_dir')
         with patch('salishsea_cmd.prepare._set_mpi_decomposition'):
             salishsea_cmd.prepare._make_namelist_nemo34(
@@ -352,7 +355,8 @@ class TestMakeNamelistNEMO36:
         assert p_run_dir.join('namelist_top_cfg').check()
         assert p_run_dir.join('namelist_pisces_cfg').check()
 
-    def test_file_not_found_error(self, tmpdir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_namelist_file_not_found_error(self, m_logger, tmpdir):
         p_nemo_config_dir = tmpdir.ensure_dir('NEMO-3.6/NEMOGCM/CONFIG')
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         run_desc = {
@@ -425,7 +429,8 @@ class TestMakeNamelistNEMO36:
             )
         m_smd.assert_called_once_with('namelist_cfg', run_desc, str(p_run_dir))
 
-    def test_no_namelist_cfg_error(self, tmpdir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_no_namelist_cfg_error(self, m_logger, tmpdir):
         p_nemo_config_dir = tmpdir.ensure_dir('NEMO-3.6/NEMOGCM/CONFIG')
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist_top').write('&namtrc\n&end\n')
