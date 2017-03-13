@@ -318,7 +318,9 @@ will cause the :file:`namelist_ref` file in the :file:`$HOME/MEOPAR/test-sponge/
 The :kbd:`output` section of the run description file contains key-value pairs that provide the names of the files that define the output files,
 domains,
 and fields to be used by the XIOS server for the run.
-The paths may be either absolute or relative.
+The paths may be relative or absolute,
+and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+and :envvar:`$USER` as an alternative spelling of the user's userid.
 If relative paths are given,
 they are appended to the directory containing the run description file.
 
@@ -617,7 +619,9 @@ The blob of empty namelist instances is defined as a constant in the :py:mod:`Sa
 
 The :kbd:`output` section of the run description file contains a single key-value pair that provides the name of the file that defines the output files
 to be used by the XIOS server for the run.
-The path may be either absolute or relative.
+The path may be relative or absolute,
+and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+and :envvar:`$USER` as an alternative spelling of the user's userid.
 If relative a path is given,
 it is appended to the directory containing the run description file.
 
