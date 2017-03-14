@@ -83,7 +83,7 @@ class TestPrepare:
 
     @pytest.mark.parametrize(
         'nemo34, m_cne_return, m_cxe_return', [
-            (True, 'bin_dir', ('', '')),
+            (True, 'bin_dir', ''),
             (False, 'nemo_bin_dir', 'xios_bin_dir'),
         ]
     )
