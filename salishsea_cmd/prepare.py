@@ -208,10 +208,10 @@ def _check_xios_exec(run_desc):
 
     :raises: SystemExit
     """
-    xios_code_repo = nemo_cmd.utils.get_run_desc_value(
+    xios_code_path = nemo_cmd.utils.get_run_desc_value(
         run_desc, ('paths', 'XIOS'), resolve_path=True
     )
-    xios_bin_dir = xios_code_repo / 'bin'
+    xios_bin_dir = xios_code_path / 'bin'
     xios_exec = xios_bin_dir / 'xios_server.exe'
     if not xios_exec.exists():
         logger.error(
