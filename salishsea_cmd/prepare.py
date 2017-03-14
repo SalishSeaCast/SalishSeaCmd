@@ -32,7 +32,6 @@ import xml.etree.ElementTree
 
 import arrow
 import cliff.command
-import hglib
 import nemo_cmd
 import nemo_cmd.prepare
 import nemo_cmd.utils
@@ -970,27 +969,16 @@ def _record_vcs_revisions(run_desc, run_dir):
         run_desc, ('paths', 'forcing'), run_dir, resolve_path=True
     )
     for repo in (nemo_code_config, xios_code_repo, forcing_repo):
-        repo_path = copy(repo)
-        try:
-            nemo_cmd.prepare.write_repo_rev_file(
-                repo, run_dir, nemo_cmd.prepare.get_hg_revision
-            )
-        except hglib.error.ServerError:
-            repo = repo.parent
-            if repo == Path.root:
-                logger.error(
-                    'unable to find Mercurial repo root in or above '
-                    '{repo_path}'.format(repo_path=repo_path)
-                )
-                _remove_run_dir(run_dir)
-                raise SystemExit(2)
+        nemo_cmd.prepare.write_repo_rev_file(
+            repo, run_dir, nemo_cmd.prepare.get_hg_revision
+        )
     if 'vcs revisions' not in run_desc:
         return
     vcs_funcs = {'hg': nemo_cmd.prepare.get_hg_revision}
     for vcs_tool in run_desc['vcs revisions']:
         for repo in run_desc['vcs revisions'][vcs_tool]:
             nemo_cmd.prepare.write_repo_rev_file(
-                repo, run_dir, vcs_funcs[vcs_tool]
+                Path(repo), run_dir, vcs_funcs[vcs_tool]
             )
 
 
