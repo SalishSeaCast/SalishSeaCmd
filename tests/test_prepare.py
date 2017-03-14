@@ -497,11 +497,7 @@ class TestCopyRunSetFiles:
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    def test_nemo36_copy_run_set_files_no_path(
-        self,
-        m_sxsm,
-        m_copy,
-    ):
+    def test_nemo36_copy_run_set_files_no_path(self, m_sxsm, m_copy):
         run_desc = {
             'output': {
                 'files': 'iodef.xml',
@@ -530,11 +526,7 @@ class TestCopyRunSetFiles:
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    def test_nemo34_copy_run_set_files_relative_path(
-        self,
-        m_sxsm,
-        m_copy,
-    ):
+    def test_nemo34_copy_run_set_files_relative_path(self, m_sxsm, m_copy):
         run_desc = {'output': {'files': '../iodef.xml'}}
         desc_file = Path('foo.yaml')
         pwd = Path.cwd()
