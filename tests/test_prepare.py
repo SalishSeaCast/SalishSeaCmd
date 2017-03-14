@@ -1079,5 +1079,5 @@ class TestRecordVCSRevisions:
         }
         salishsea_cmd.prepare._record_vcs_revisions(run_desc, 'run_dir')
         assert m_write.call_args_list[-1] == call(
-            str(ss_run_sets), 'run_dir', nemo_cmd.prepare.get_hg_revision
+            Path(str(ss_run_sets)), 'run_dir', nemo_cmd.prepare.get_hg_revision
         )
