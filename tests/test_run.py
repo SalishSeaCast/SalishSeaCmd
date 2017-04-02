@@ -48,7 +48,7 @@ class TestParser:
     def test_parsed_args_defaults(self, run_cmd):
         parser = run_cmd.get_parser('salishsea run')
         parsed_args = parser.parse_args(['foo', 'baz'])
-        assert parsed_args.desc_file == 'foo'
+        assert parsed_args.desc_file == pathlib.Path('foo')
         assert parsed_args.results_dir == 'baz'
         assert parsed_args.max_deflate_jobs == 4
         assert not parsed_args.nemo34

@@ -54,7 +54,8 @@ class Run(cliff.command.Command):
         parser.add_argument(
             'desc_file',
             metavar='DESC_FILE',
-            help='File path/name of run description YAML file'
+            type=pathlib.Path,
+            help='run description YAML file'
         )
         parser.add_argument(
             'results_dir',
@@ -158,7 +159,8 @@ def run(
     in the run directory.
     That script is submitted to the queue manager in a subprocess.
 
-    :arg str desc_file: File path/name of the YAML run description file.
+    :param desc_file: File path/name of the YAML run description file.
+    :type desc_file: :py:class:`pathlib.Path`
 
     :arg str results_dir: Path of the directory in which to store the run
                           results;
@@ -201,7 +203,7 @@ def run(
     system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
     batch_script = _build_batch_script(
         run_desc,
-        desc_file,
+        fspath(desc_file),
         nemo_processors,
         xios_processors,
         max_deflate_jobs,
