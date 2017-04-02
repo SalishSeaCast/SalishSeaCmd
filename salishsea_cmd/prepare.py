@@ -590,20 +590,20 @@ def _set_xios_server_mode(run_desc, run_dir):
         )
         _remove_run_dir(run_dir)
         raise SystemExit(2)
-    tree = xml.etree.ElementTree.parse('iodef.xml')
+    tree = xml.etree.ElementTree.parse(os.path.join(run_dir, 'iodef.xml'))
     root = tree.getroot()
     using_server = root.find(
         'context[@id="xios"]//variable[@id="using_server"]'
     )
     using_server.text = 'true' if sep_xios_server else 'false'
     using_server_line = xml.etree.ElementTree.tostring(using_server).decode()
-    with open('iodef.xml', 'rt') as f:
+    with open(os.path.join(run_dir, 'iodef.xml'), 'rt') as f:
         lines = f.readlines()
     for i, line in enumerate(lines):
         if 'using_server' in line:
             lines[i] = using_server_line
             break
-    with open('iodef.xml', 'wt') as f:
+    with open(os.path.join(run_dir, 'iodef.xml'), 'wt') as f:
         f.writelines(lines)
 
 
