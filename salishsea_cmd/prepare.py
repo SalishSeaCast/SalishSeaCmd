@@ -455,8 +455,11 @@ def _get_namelist_value(key, lines):
 def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
     """Copy the run-set files given into run_dir.
 
-    For all versions of NEMO the YAML run description file and the
-    IO defs files (both from the command-line) are copied.
+    For all versions of NEMO the YAML run description file 
+    (from the command-line) is copied.
+    The IO defs file is also copied.
+    The file path/name of the IO defs file is taken from the :kbd:`output`
+    stanza of the YAML run description file.
     The IO defs file is copied as :file:`iodef.xml` because that is the
     name that NEMO-3.4 or XIOS expects.
 
@@ -468,6 +471,10 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
     stanza of the YAML run description file.
     They are copied to :file:`domain_def.xml` and :file:`field_def.xml`,
     repectively, because those are the file names that XIOS expects.
+    Optionally, the file defs file used by XIOS-2 is also copied.
+    Its file path/name is also taken from the :kbd:`output` stanza.
+    It is copied to :file:`file_def.xml` because that is the file name that
+    XIOS-2 expects.
 
     :param dict run_desc: Run description dictionary.
 
@@ -484,11 +491,20 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
     :param boolean nemo34: Prepare a NEMO-3.4 run;
                            the default is to prepare a NEMO-3.6 run
     """
-    iodef = nemo_cmd.utils.get_run_desc_value(
-        run_desc, ('output', 'files'), resolve_path=True, run_dir=run_dir
-    )
+    try:
+        iodefs = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('output', 'iodefs'),
+            resolve_path=True,
+            run_dir=run_dir,
+            fatal=False
+        )
+    except:
+        # Alternate key spelling for backward compatibility
+        iodefs = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('output', 'files'), resolve_path=True, run_dir=run_dir
+        )
     run_set_files = [
-        (iodef, 'iodef.xml'),
+        (iodefs, 'iodef.xml'),
         (run_set_dir / desc_file.name, desc_file.name),
     ]
     if nemo34:
@@ -496,16 +512,50 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
             (run_set_dir / 'xmlio_server.def', 'xmlio_server.def')
         )
     else:
-        domain_def = nemo_cmd.utils.get_run_desc_value(
-            run_desc, ('output', 'domain'), resolve_path=True, run_dir=run_dir
-        )
-        fields_def = nemo_cmd.utils.get_run_desc_value(
-            run_desc, ('output', 'fields'), resolve_path=True, run_dir=run_dir
-        )
+        try:
+            domains_def = nemo_cmd.utils.get_run_desc_value(
+                run_desc,
+                ('output', 'domaindefs'),
+                resolve_path=True,
+                run_dir=run_dir,
+                fatal=False,
+            )
+        except KeyError:
+            # Alternate key spelling for backward compatibility
+            domains_def = nemo_cmd.utils.get_run_desc_value(
+                run_desc, ('output', 'domain'),
+                resolve_path=True,
+                run_dir=run_dir
+            )
+        try:
+            fields_def = nemo_cmd.utils.get_run_desc_value(
+                run_desc, ('output', 'fielddefs'),
+                resolve_path=True,
+                run_dir=run_dir,
+                fatal=False
+            )
+        except:
+            # Alternate key spelling for backward compatibility
+            fields_def = nemo_cmd.utils.get_run_desc_value(
+                run_desc, ('output', 'fields'),
+                resolve_path=True,
+                run_dir=run_dir
+            )
         run_set_files.extend([
-            (domain_def, 'domain_def.xml'),
+            (domains_def, 'domain_def.xml'),
             (fields_def, 'field_def.xml'),
         ])
+        try:
+            files_def = nemo_cmd.utils.get_run_desc_value(
+                run_desc, ('output', 'filedefs'),
+                resolve_path=True,
+                run_dir=run_dir,
+                fatal=False
+            )
+            run_set_files.append((files_def, 'file_def.xml'))
+        except KeyError:
+            # `files` key is optional and only used with XIOS-2
+            pass
     for source, dest_name in run_set_files:
         shutil.copy2(
             nemo_cmd.fspath(source),

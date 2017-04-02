@@ -324,16 +324,18 @@ and :envvar:`$USER` as an alternative spelling of the user's userid.
 If relative paths are given,
 they are appended to the directory containing the run description file.
 
-:kbd:`files`
+:kbd:`iodefs`
   The path and name of the :file:`iodef.xml` output files definitions file to use for the run.
   It is copied into the run directory as :file:`iodef.xml`
   (the file name required by XIOS).
   The value is typically either:
 
-  * a relative or absolute path to :file:`SS-run-sets/SalishSea/nemo3.6/iodef.xml`
   * a relative or absolute run-specific output files definitions file
+  * a relative or absolute path to :file:`SS-run-sets/SalishSea/nemo3.6/iodef.xml`
 
-:kbd:`domain`
+  This key may also be spelled :kbd:`files` for backward compatibility.
+
+:kbd:`domaindefs`
   The path and name of the :file:`domain_def.xml` output domains definitions file to use for the run.
   It is copied into the run directory as :file:`domain_def.xml`
   (the file name required by XIOS).
@@ -342,11 +344,26 @@ they are appended to the directory containing the run description file.
   * a relative or absolute path to :file:`SS-run-sets/SalishSea/nemo3.6/domain_def.xml`
   * a relative or absolute run-specific output domains definitions file
 
-:kbd:`fields`
+  This key may also be spelled :kbd:`domain` for backward compatibility.
+
+:kbd:`fielddefs`
   The path and name of the :file:`field_def.xml` output fields definitions file to use for the run.
   It is copied into the run directory as :file:`field_def.xml`
   (the file name required by XIOS).
   The value is typically a relative or absolute path to :file:`NEMO-3.6-code/NEMOGCM/CONFIG/SHARED/field_def.xml`.
+
+  This key may also be spelled :kbd:`fields` for backward compatibility.
+
+:kbd:`filedefs` (optional)
+  The path and name of the :file:`file_def.xml` output domains definitions file to use for the run.
+  This item is optional because it is only used by XIOS-2
+  (but it is required by XIOS-2).
+  It is copied into the run directory as :file:`file_def.xml`
+  (the file name required by XIOS-2).
+  The value is typically either:
+
+  * a relative or absolute run-specific output domains definitions file
+  * a relative or absolute path to :file:`SS-run-sets/SalishSea/nemo3.6/file_def.xml`
 
 The :kbd:`output` section also contains key-value pairs that control how the XIOS server is run and,
 in the case where it is run as a separate server,
@@ -625,14 +642,16 @@ and :envvar:`$USER` as an alternative spelling of the user's userid.
 If relative a path is given,
 it is appended to the directory containing the run description file.
 
-:kbd:`files`
+:kbd:`iodefs`
   The path and name of the :file:`iodef.xml` output files definitions file to use for the run.
   It is copied into the run directory as :file:`iodef.xml`
   (the file name required by XIOS).
   The value is typically either:
 
-  * a relative or absolute path to :file:`SS-run-sets/SalishSea/nemo3.6/iodef.xml`
   * a relative or absolute run-specific output files definitions file
+  * a relative or absolute path to :file:`SS-run-sets/SalishSea/iodef.xml`
+
+  This key may also be spelled :kbd:`files` for backward compatibility.
 
 
 .. _NEMO-3.4-VCS-Revisions:
