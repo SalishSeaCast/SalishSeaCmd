@@ -97,7 +97,7 @@ class TestPrepare:
         run_dir = salishsea_cmd.prepare.prepare(
             Path('SalishSea.yaml'), nemo34, nocheck_init=False
         )
-        m_lrd.assert_called_once_with('SalishSea.yaml')
+        m_lrd.assert_called_once_with(Path('SalishSea.yaml'))
         m_cne.assert_called_once_with(m_lrd(), nemo34)
         if nemo34:
             assert not m_cxe.called

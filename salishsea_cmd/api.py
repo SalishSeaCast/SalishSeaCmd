@@ -95,8 +95,8 @@ def prepare(run_desc_file, nemo34=False, nocheck_init=False):
     for the NEMO-code and NEMO-forcing repos that the symlinks point to.
     The path to the run directory is returned.
 
-    :arg str run_desc_file: File path/name of the run description YAML
-                            file.
+    :param run_desc_file: File path/name of the YAML run description file.
+    :type run_desc_file: :py:class:`pathlib.Path`
 
     :arg boolean nemo34: Prepare a NEMO-3.4 run;
                          the default is to prepare a NEMO-3.6 run

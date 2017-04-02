@@ -124,7 +124,7 @@ def prepare(desc_file, nemo34, nocheck_init):
     :returns: Path of the temporary run directory
     :rtype: str
     """
-    run_desc = lib.load_run_desc(nemo_cmd.fspath(desc_file))
+    run_desc = lib.load_run_desc(desc_file)
     nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
     xios_bin_dir = _check_xios_exec(run_desc) if not nemo34 else ''
     run_set_dir = nemo_cmd.resolved_path(desc_file).parent
