@@ -100,8 +100,13 @@ namelists:
 
 output:
   # If relative, paths are taken from current directory
-  files: iodef.xml
-  domain: ../domain_def.xml
-  fields: field_def.xml
+  iodefs: iodef.xml
+  filedefs: file_def.xml
+  domaindefs: ../domain_def.xml
+  fielddefs: field_def.xml
   separate XIOS server: True
   XIOS servers: 1
+
+vcs revisions:
+  hg:
+    - $HOME/MEOPAR/SS-run-sets
