@@ -476,10 +476,16 @@ class TestCopyRunSetFiles:
     """Unit tests for `salishsea prepare` _copy_run_set_files() function.
     """
 
+    @pytest.mark.parametrize('iodefs_key', [
+        'iodefs',
+        'files',
+    ])
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    def test_nemo34_copy_run_set_files_no_path(self, m_sxsm, m_copy):
-        run_desc = {'output': {'iodefs': 'iodef.xml'}}
+    def test_nemo34_copy_run_set_files_no_path(
+        self, m_sxsm, m_copy, iodefs_key
+    ):
+        run_desc = {'output': {iodefs_key: 'iodef.xml'}}
         desc_file = Path('foo.yaml')
         pwd = Path.cwd()
         salishsea_cmd.prepare._copy_run_set_files(
@@ -532,10 +538,16 @@ class TestCopyRunSetFiles:
         ]
         assert m_copy.call_args_list == expected
 
+    @pytest.mark.parametrize('iodefs_key', [
+        'iodefs',
+        'files',
+    ])
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    def test_nemo34_copy_run_set_files_relative_path(self, m_sxsm, m_copy):
-        run_desc = {'output': {'iodefs': '../iodef.xml'}}
+    def test_nemo34_copy_run_set_files_relative_path(
+        self, m_sxsm, m_copy, iodefs_key
+    ):
+        run_desc = {'output': {iodefs_key: '../iodef.xml'}}
         desc_file = Path('foo.yaml')
         pwd = Path.cwd()
         salishsea_cmd.prepare._copy_run_set_files(
@@ -596,7 +608,7 @@ class TestCopyRunSetFiles:
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    def test_nemo36_files_Def(self, m_sxsm, m_copy):
+    def test_nemo36_files_def(self, m_sxsm, m_copy):
         run_desc = {
             'output': {
                 'iodefs': '../iodef.xml',
