@@ -175,8 +175,9 @@ class TestCheckNemoExec:
         ]
     )
     @patch('salishsea_cmd.prepare.logger')
+    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
     def test_iom_server_exec_not_found(
-        self, m_logger, config_name_key, nemo_code_config_key, tmpdir
+        self, m_get_run_desc_value, m_logger, config_name_key, nemo_code_config_key, tmpdir
     ):
         p_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
         run_desc = {
@@ -186,6 +187,7 @@ class TestCheckNemoExec:
             },
         }
         p_bin_dir = p_config.ensure_dir('SalishSea', 'BLD', 'bin')
+        m_get_run_desc_value.side_effect = (Path(p_config), 'SalishSea')
         p_exists = patch(
             'salishsea_cmd.prepare.Path.exists', side_effect=[True, False]
         )
@@ -202,8 +204,9 @@ class TestCheckNemoExec:
             ('config_name', 'NEMO-code-config'),
         ]
     )
+    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
     def test_nemo36_no_iom_server_check(
-        self, config_name_key, nemo_code_config_key, tmpdir
+        self, m_get_run_desc_value, config_name_key, nemo_code_config_key, tmpdir
     ):
         p_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
         run_desc = {
@@ -213,6 +216,7 @@ class TestCheckNemoExec:
             },
         }
         p_config.ensure_dir('SalishSea', 'BLD', 'bin')
+        m_get_run_desc_value.side_effect = (Path(p_config), 'SalishSea')
         with patch('salishsea_cmd.prepare.Path.exists') as m_exists:
             salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=False)
         assert m_exists.call_count == 1
@@ -477,17 +481,19 @@ class TestCopyRunSetFiles:
     """
 
     @pytest.mark.parametrize('iodefs_key', [
-        'iodefs',
-        'files',
+        'iodefs',  # recommended
+        'files',  # backward compatibility
     ])
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
+    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
     def test_nemo34_copy_run_set_files_no_path(
-        self, m_sxsm, m_copy, iodefs_key
+        self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key
     ):
         run_desc = {'output': {iodefs_key: 'iodef.xml'}}
         desc_file = Path('foo.yaml')
         pwd = Path.cwd()
+        m_get_run_desc_value.return_value = pwd / 'iodef.xml'
         salishsea_cmd.prepare._copy_run_set_files(
             run_desc, desc_file, pwd, 'run_dir', nemo34=True
         )
@@ -503,14 +509,15 @@ class TestCopyRunSetFiles:
 
     @pytest.mark.parametrize(
         'iodefs_key, domains_key, fields_key', [
-            ('iodefs', 'domaindefs', 'fielddefs'),
-            ('files', 'domain', 'fields'),
+            ('iodefs', 'domaindefs', 'fielddefs'),  # recommended
+            ('files', 'domain', 'fields'),  # backward compatibility
         ]
     )
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
+    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
     def test_nemo36_copy_run_set_files_no_path(
-        self, m_sxsm, m_copy, iodefs_key, domains_key, fields_key
+        self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key, fields_key
     ):
         run_desc = {
             'output': {
@@ -521,6 +528,10 @@ class TestCopyRunSetFiles:
         }
         desc_file = Path('foo.yaml')
         pwd = Path.cwd()
+        m_get_run_desc_value.side_effect = (
+            pwd / 'iodef.xml', pwd / 'domain_def.xml', pwd / 'field_def.xml',
+            KeyError
+        )
         salishsea_cmd.prepare._copy_run_set_files(
             run_desc, desc_file, pwd, 'run_dir', nemo34=False
         )
@@ -539,17 +550,19 @@ class TestCopyRunSetFiles:
         assert m_copy.call_args_list == expected
 
     @pytest.mark.parametrize('iodefs_key', [
-        'iodefs',
-        'files',
+        'iodefs',  # recommended
+        'files',  # backward compatibility
     ])
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
+    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
     def test_nemo34_copy_run_set_files_relative_path(
-        self, m_sxsm, m_copy, iodefs_key
+        self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key
     ):
         run_desc = {'output': {iodefs_key: '../iodef.xml'}}
         desc_file = Path('foo.yaml')
         pwd = Path.cwd()
+        m_get_run_desc_value.return_value = (pwd / '../iodef.xml').resolve()
         salishsea_cmd.prepare._copy_run_set_files(
             run_desc, desc_file, pwd, 'run_dir', nemo34=True
         )
@@ -568,14 +581,15 @@ class TestCopyRunSetFiles:
 
     @pytest.mark.parametrize(
         'iodefs_key, domains_key, fields_key', [
-            ('iodefs', 'domaindefs', 'fielddefs'),
-            ('files', 'domain', 'fields'),
+            ('iodefs', 'domaindefs', 'fielddefs'),  # recommended
+            ('files', 'domain', 'fields'),  # backward compatibility
         ]
     )
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
+    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
     def test_nemo36_copy_run_set_files_relative_path(
-        self, m_sxsm, m_copy, iodefs_key, domains_key, fields_key
+        self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key, fields_key
     ):
         run_desc = {
             'output': {
@@ -586,6 +600,11 @@ class TestCopyRunSetFiles:
         }
         desc_file = Path('foo.yaml')
         pwd = Path.cwd()
+        m_get_run_desc_value.side_effect = (
+            (pwd / '../iodef.xml').resolve(),
+            (pwd / '../domain_def.xml').resolve(),
+            (pwd / '../field_def.xml').resolve(), KeyError
+        )
         salishsea_cmd.prepare._copy_run_set_files(
             run_desc, desc_file, pwd, 'run_dir', nemo34=False
         )
@@ -608,7 +627,8 @@ class TestCopyRunSetFiles:
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    def test_nemo36_files_def(self, m_sxsm, m_copy):
+    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    def test_nemo36_files_def(self, m_get_run_desc_value, m_sxsm, m_copy):
         run_desc = {
             'output': {
                 'iodefs': '../iodef.xml',
@@ -619,6 +639,12 @@ class TestCopyRunSetFiles:
         }
         desc_file = Path('foo.yaml')
         pwd = Path.cwd()
+        m_get_run_desc_value.side_effect = (
+            (pwd / '../iodef.xml').resolve(),
+            (pwd / '../domain_def.xml').resolve(),
+            (pwd / '../field_def.xml').resolve(),
+            (pwd / '../file_def.xml').resolve()
+        )
         salishsea_cmd.prepare._copy_run_set_files(
             run_desc, desc_file, pwd, 'run_dir', nemo34=False
         )
@@ -727,29 +753,6 @@ class TestMakeGridLinks:
         }
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        m_rm_run_dir.assert_called_once_with('run_dir')
-
-    @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.logger')
-    def test_no_forcing_dir(self, m_logger, m_rm_run_dir):
-        run_desc = {
-            'paths': {
-                'forcing': '/foo'
-            },
-            'grid': {
-                'coordinates': 'coords.nc',
-                'bathymetry': 'bathy.nc'
-            }
-        }
-        p_exists = patch(
-            'salishsea_cmd.prepare.Path.exists', return_value=False
-        )
-        with pytest.raises(SystemExit), p_exists:
-            salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
-        m_logger.error.assert_called_once_with(
-            '/foo not found; cannot create symlinks - '
-            'please check the forcing path in your run description file'
-        )
         m_rm_run_dir.assert_called_once_with('run_dir')
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
