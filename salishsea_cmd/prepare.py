@@ -177,8 +177,7 @@ def _check_nemo_exec(run_desc, nemo34):
         config_name = nemo_cmd.utils.get_run_desc_value(
             run_desc, ('config_name',)
         )
-    config_dir = nemo_config_dir / config_name
-    nemo_bin_dir = config_dir / 'BLD' / 'bin'
+    nemo_bin_dir = nemo_config_dir / config_name / 'BLD' / 'bin'
     nemo_exec = nemo_bin_dir / 'nemo.exe'
     if not nemo_exec.exists():
         logger.error(
@@ -498,7 +497,7 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
             run_dir=run_dir,
             fatal=False
         )
-    except:
+    except KeyError:
         # Alternate key spelling for backward compatibility
         iodefs = nemo_cmd.utils.get_run_desc_value(
             run_desc, ('output', 'files'), resolve_path=True, run_dir=run_dir
@@ -534,7 +533,7 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
                 run_dir=run_dir,
                 fatal=False
             )
-        except:
+        except KeyError:
             # Alternate key spelling for backward compatibility
             fields_def = nemo_cmd.utils.get_run_desc_value(
                 run_desc, ('output', 'fields'),
@@ -664,14 +663,6 @@ def _make_grid_links(run_desc, run_dir):
         nemo_forcing_dir = nemo_cmd.utils.get_run_desc_value(
             run_desc, ('paths', 'forcing'), resolve_path=True, run_dir=run_dir
         )
-        if not nemo_forcing_dir.exists():
-            logger.error(
-                '{} not found; cannot create symlinks - '
-                'please check the forcing path in your run description file'
-                .format(nemo_forcing_dir)
-            )
-            _remove_run_dir(run_dir)
-            raise SystemExit(2)
         grid_dir = nemo_forcing_dir / 'grid'
         grid_paths = (
             (grid_dir / run_desc['grid']['coordinates'], 'coordinates.nc'),
