@@ -1052,7 +1052,8 @@ class TestRecordVCSRevisions:
     def test_write_repo_rev_file_default_calls(
         self, m_write, config_name_key, nemo_code_config_key, tmpdir
     ):
-        nemo_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
+        nemo_code_repo = tmpdir.ensure_dir('NEMO-3.6-code')
+        nemo_config = nemo_code_repo.ensure_dir('NEMOGCM', 'CONFIG')
         xios_code_repo = tmpdir.ensure_dir('XIOS')
         nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
         run_desc = {
@@ -1066,7 +1067,7 @@ class TestRecordVCSRevisions:
         salishsea_cmd.prepare._record_vcs_revisions(run_desc, 'run_dir')
         assert m_write.call_args_list == [
             call(
-                Path(str(nemo_config)), 'run_dir',
+                Path(str(nemo_code_repo)), 'run_dir',
                 nemo_cmd.prepare.get_hg_revision
             ),
             call(
