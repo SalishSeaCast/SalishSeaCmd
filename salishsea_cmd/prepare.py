@@ -17,7 +17,6 @@
 Sets up the necessary symbolic links for a Salish Sea NEMO run
 in a specified directory and changes the pwd to that directory.
 """
-from copy import copy
 import logging
 import os
 try:
@@ -300,7 +299,9 @@ def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
 
     :raises: SystemExit
     """
-    namelists = run_desc['namelists']
+    namelists = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('namelists',), run_dir=run_dir
+    )
     namelist_filename = 'namelist'
     with open(os.path.join(run_dir, namelist_filename), 'wt') as namelist:
         for nl in namelists:
@@ -325,8 +326,8 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
     delete the run directory and raise a SystemExit exception.
 
     :param run_set_dir: Directory containing the run description file,
-                      from which relative paths for the namelist section
-                      files start.
+                        from which relative paths for the namelist section
+                        files start.
     :type run_set_dir: :py:class:`pathlib.Path`
 
     :param dict run_desc: Run description dictionary.
@@ -358,9 +359,15 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
         config_name = nemo_cmd.utils.get_run_desc_value(
             run_desc, ('config_name',), run_dir=run_dir
         )
-    for namelist_filename in run_desc['namelists']:
+    namelists = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('namelists',), run_dir=run_dir
+    )
+    for namelist_filename in namelists:
         with open(os.path.join(run_dir, namelist_filename), 'wt') as namelist:
-            for nl in run_desc['namelists'][namelist_filename]:
+            namelist_files = nemo_cmd.utils.get_run_desc_value(
+                run_desc, ('namelists', namelist_filename), run_dir=run_dir
+            )
+            for nl in namelist_files:
                 try:
                     with (run_set_dir / nl).open('rt') as f:
                         namelist.writelines(f.readlines())
@@ -371,12 +378,12 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
                     _remove_run_dir(run_dir)
                     raise SystemExit(2)
         ref_namelist = namelist_filename.replace('_cfg', '_ref')
-        if ref_namelist not in run_desc['namelists']:
+        if ref_namelist not in namelists:
             ref_namelist_target = (
                 nemo_config_dir / config_name / 'EXP00' / ref_namelist
             )
             Path(run_dir, ref_namelist).symlink_to(ref_namelist_target)
-    if 'namelist_cfg' in run_desc['namelists']:
+    if 'namelist_cfg' in namelists:
         _set_mpi_decomposition('namelist_cfg', run_desc, run_dir)
     else:
         logger.error(
@@ -394,19 +401,21 @@ def _set_mpi_decomposition(namelist_filename, run_desc, run_dir):
     A SystemExit exeception is raise if there is no MPI decomposition
     specified in the run description.
 
-    :arg namelist_filename: The name of the namelist file.
+    :param namelist_filename: The name of the namelist file.
     :type namelist_filename: str
 
-    :arg run_desc: Run description dictionary.
+    :param run_desc: Run description dictionary.
     :type run_desc: dict
 
-    :arg run_dir: Path of the temporary run directory.
+    :param run_dir: Path of the temporary run directory.
     :type run_dir: str
 
     :raises: SystemExit
     """
     try:
-        jpni, jpnj = run_desc['MPI decomposition'].split('x')
+        jpni, jpnj = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('MPI decomposition',), fatal=False
+        ).split('x')
     except KeyError:
         logger.error(
             'MPI decomposition value not found in YAML run description file. '
@@ -569,14 +578,16 @@ def _set_xios_server_mode(run_desc, run_dir):
     variable text with the :kbd:`separate XIOS server` value from the
     run description.
 
-    :arg dict run_desc: Run description dictionary.
+    :param dict run_desc: Run description dictionary.
 
-    :arg str run_dir: Path of the temporary run directory.
+    :param str run_dir: Path of the temporary run directory.
 
     :raises: SystemExit
     """
     try:
-        sep_xios_server = run_desc['output']['separate XIOS server']
+        sep_xios_server = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('output', 'separate XIOS server'), fatal=False
+        )
     except KeyError:
         logger.error(
             'separate XIOS server key/value not found in output section '
