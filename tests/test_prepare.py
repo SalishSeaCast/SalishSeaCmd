@@ -844,11 +844,8 @@ class TestMakeForcingLinks:
     def test_nemo34(self, tmpdir):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         run_desc = {'paths': {'forcing': 'nemo_forcing_dir'}}
-        patch_exists = patch(
-            'salishsea_cmd.prepare.os.path.exists', return_value=True
-        )
         patch_mfl34 = patch('salishsea_cmd.prepare._make_forcing_links_nemo34')
-        with patch_exists, patch_mfl34 as m_mfl34:
+        with patch_mfl34 as m_mfl34:
             salishsea_cmd.prepare._make_forcing_links(
                 run_desc, str(p_run_dir), nemo34=True, nocheck_init=False
             )
@@ -857,11 +854,8 @@ class TestMakeForcingLinks:
     def test_nemo36(self, tmpdir):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         run_desc = {'paths': {'forcing': 'nemo_forcing_dir'}}
-        patch_exists = patch(
-            'salishsea_cmd.prepare.os.path.exists', return_value=True
-        )
         patch_mfl36 = patch('salishsea_cmd.prepare._make_forcing_links_nemo36')
-        with patch_exists, patch_mfl36 as m_mfl36:
+        with patch_mfl36 as m_mfl36:
             salishsea_cmd.prepare._make_forcing_links(
                 run_desc, str(p_run_dir), nemo34=False, nocheck_init=False
             )
@@ -876,17 +870,18 @@ class TestMakeForcingLinksNEMO34:
         'link_path, expected',
         [
             ('SalishSea_00475200_restart.nc', 'SalishSea_00475200_restart.nc'),
-            ('initial_strat/', 'foo/initial_strat/'),
+            ('initial_strat/', 'initial_strat/'),
         ],
     )
     @patch('salishsea_cmd.prepare._check_atmos_files')
     @patch('salishsea_cmd.prepare.logger')
     def test_make_forcing_links_no_restart_path(
-        self, m_logger, m_caf, link_path, expected
+        self, m_logger, m_caf, link_path, expected, tmpdir
     ):
+        forcing_dir = tmpdir.ensure_dir('foo')
         run_desc = {
             'paths': {
-                'forcing': 'foo',
+                'forcing': str(forcing_dir),
             },
             'forcing': {
                 'atmospheric': 'bar',
@@ -896,22 +891,14 @@ class TestMakeForcingLinksNEMO34:
             },
         }
         salishsea_cmd.prepare._remove_run_dir = Mock()
-        p_exists = patch(
-            'salishsea_cmd.prepare.os.path.exists', return_value=False
-        )
-        p_abspath = patch(
-            'salishsea_cmd.prepare.os.path.abspath',
-            side_effect=lambda path: path
-        )
-        p_chdir = patch('salishsea_cmd.prepare.os.chdir')
-        with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
+        with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_forcing_links_nemo34(
                 run_desc, 'run_dir', nocheck_init=False
             )
         m_logger.error.assert_called_once_with(
             '{} not found; cannot create symlink - '
             'please check the forcing path and initial conditions file names '
-            'in your run description file'.format(expected)
+            'in your run description file'.format(forcing_dir.join(expected))
         )
         salishsea_cmd.prepare._remove_run_dir.assert_called_once_with(
             'run_dir'
@@ -931,29 +918,30 @@ class TestMakeForcingLinksNEMO34:
                 'rivers': 'rivers/',
             },
         }
-        salishsea_cmd.prepare._remove_run_dir = Mock()
-        p_exists = patch(
-            'salishsea_cmd.prepare.os.path.exists', side_effect=[True, False]
-        )
-        p_abspath = patch(
-            'salishsea_cmd.prepare.os.path.abspath',
-            side_effect=lambda path: path
-        )
-        p_chdir = patch('salishsea_cmd.prepare.os.chdir')
-        p_symlink = patch('salishsea_cmd.prepare.os.symlink')
-        with pytest.raises(SystemExit), p_exists, p_abspath, p_chdir:
-            with p_symlink:
-                salishsea_cmd.prepare._make_forcing_links_nemo34(
-                    run_desc, 'run_dir', nocheck_init=False
-                )
-        m_logger.error.assert_called_once_with(
-            'foo/bar not found; cannot create symlink - '
-            'please check the forcing paths and file names '
-            'in your run description file'
-        )
-        salishsea_cmd.prepare._remove_run_dir.assert_called_once_with(
-            'run_dir'
-        )
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._make_forcing_links_nemo34(
+                run_desc, 'run_dir', nocheck_init=False
+            )
+
+
+class TestResolveForcingPath:
+    """Unit tests for `salishsea prepare` _resolve_forcing_path() function.
+    """
+    def test_absolute_path(self):
+        run_desc = {'forcing': {'atmospheric': '/foo'}}
+        path = salishsea_cmd.prepare._resolve_forcing_path(
+            run_desc, 'atmospheric', 'run_dir')
+        assert path == Path('/foo')
+
+    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    def test_relative_path(self, m_get_run_desc_value):
+        run_desc = {
+            'paths': {'forcing': '/foo'},
+            'forcing': {'atmospheric': 'bar'}}
+        m_get_run_desc_value.side_effect = (Path('bar'), Path('/foo'))
+        path = salishsea_cmd.prepare._resolve_forcing_path(
+            run_desc, 'atmospheric', 'run_dir')
+        assert path == Path('/foo/bar')
 
 
 class TestMakeForcingLinksNEMO36:
