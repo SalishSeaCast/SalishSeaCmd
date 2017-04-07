@@ -927,20 +927,34 @@ class TestMakeForcingLinksNEMO34:
 class TestResolveForcingPath:
     """Unit tests for `salishsea prepare` _resolve_forcing_path() function.
     """
-    def test_absolute_path(self):
-        run_desc = {'forcing': {'atmospheric': '/foo'}}
+
+    @pytest.mark.parametrize('keys, forcing_dict', [
+        (('atmospheric',), {'atmospheric': '/foo'}),
+        (('atmospheric', 'link to'), {'atmospheric': {'link to': '/foo'}}),
+    ])
+    def test_absolute_path(self, keys, forcing_dict):
+        run_desc = {'forcing': forcing_dict}
         path = salishsea_cmd.prepare._resolve_forcing_path(
-            run_desc, 'atmospheric', 'run_dir')
+            run_desc, keys, 'run_dir'
+        )
         assert path == Path('/foo')
 
+    @pytest.mark.parametrize('keys, forcing_dict', [
+        (('atmospheric',), {'atmospheric': 'foo'}),
+        (('atmospheric', 'link to'), {'atmospheric': {'link to': 'foo'}}),
+    ])
     @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
-    def test_relative_path(self, m_get_run_desc_value):
+    def test_relative_path(self, m_get_run_desc_value, keys, forcing_dict):
         run_desc = {
-            'paths': {'forcing': '/foo'},
-            'forcing': {'atmospheric': 'bar'}}
+            'paths': {
+                'forcing': '/foo'
+            },
+            'forcing': forcing_dict
+        }
         m_get_run_desc_value.side_effect = (Path('bar'), Path('/foo'))
         path = salishsea_cmd.prepare._resolve_forcing_path(
-            run_desc, 'atmospheric', 'run_dir')
+            run_desc, keys, 'run_dir'
+        )
         assert path == Path('/foo/bar')
 
 
