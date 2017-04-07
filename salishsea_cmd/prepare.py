@@ -727,17 +727,20 @@ def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
 
     :param str run_dir: Path of the temporary run directory.
 
-    :param nocheck_init: Suppress initial condition link check
-                         the default is to check
-    :type nocheck_init: boolean
+    :param boolean nocheck_init: Suppress initial condition link check
+                                 the default is to check
 
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
     """
     symlinks = []
     run_dir_path = Path(run_dir)
-    init_conditions = _resolve_forcing_path(run_desc, 'initial conditions', run_dir)
+    init_conditions = _resolve_forcing_path(
+        run_desc, ('initial conditions',), run_dir
+    )
     link_name = (
-        'restart.nc' if 'restart' in nemo_cmd.fspath(init_conditions) else 'initial_strat')
+        'restart.nc'
+        if 'restart' in nemo_cmd.fspath(init_conditions) else 'initial_strat'
+    )
     if not init_conditions.exists() and not nocheck_init:
         logger.error(
             '{} not found; cannot create symlink - '
@@ -747,9 +750,11 @@ def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
         _remove_run_dir(run_dir)
         raise SystemExit(2)
     symlinks.append((init_conditions, link_name))
-    atmospheric = _resolve_forcing_path(run_desc, 'atmospheric', run_dir)
-    open_boundaries = _resolve_forcing_path(run_desc, 'open boundaries', run_dir)
-    rivers = _resolve_forcing_path(run_desc, 'rivers', run_dir)
+    atmospheric = _resolve_forcing_path(run_desc, ('atmospheric',), run_dir)
+    open_boundaries = _resolve_forcing_path(
+        run_desc, ('open boundaries',), run_dir
+    )
+    rivers = _resolve_forcing_path(run_desc, ('rivers',), run_dir)
     forcing_dirs = ((atmospheric, 'NEMO-atmos'),
                     (open_boundaries, 'open_boundaries'), (rivers, 'rivers'))
     for source, link_name in forcing_dirs:
@@ -765,7 +770,7 @@ def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
     _check_atmos_files(run_desc, run_dir)
 
 
-def _resolve_forcing_path(run_desc, key, run_dir):
+def _resolve_forcing_path(run_desc, keys, run_dir):
     """Calculate a resolved path for a forcing path.
     
     If the path in the run description is absolute, resolve any symbolic links,
@@ -776,8 +781,8 @@ def _resolve_forcing_path(run_desc, key, run_dir):
     
     :param dict run_desc: Run description dictionary.
 
-    :param str key: Key in the :kbd:`forcing` section of the run description
-                    for which the resolved path calculated.
+    :param tuple keys: Key in the :kbd:`forcing` section of the run description
+                       for which the resolved path calculated.
                     
     :param str run_dir: Path of the temporary run directory.
 
@@ -787,7 +792,8 @@ def _resolve_forcing_path(run_desc, key, run_dir):
     :raises: :py:exc:`SystemExit` if the NEMO-forcing repo path does not exist
     """
     path = nemo_cmd.utils.get_run_desc_value(
-        run_desc, ('forcing', key), expand_path=True, fatal=False)
+        run_desc, (('forcing',) + keys), expand_path=True, fatal=False
+    )
     if path.is_absolute():
         return path.resolve()
     nemo_forcing_dir = nemo_cmd.utils.get_run_desc_value(
