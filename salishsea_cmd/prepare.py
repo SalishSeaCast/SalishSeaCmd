@@ -1058,10 +1058,10 @@ def _record_vcs_revisions(run_desc, run_dir):
             run_desc, ('paths', 'NEMO-code-config'), resolve_path=True
         )
     xios_code_repo = nemo_cmd.utils.get_run_desc_value(
-        run_desc, ('paths', 'XIOS'), run_dir, resolve_path=True
+        run_desc, ('paths', 'XIOS'), resolve_path=True, run_dir=run_dir
     )
     forcing_repo = nemo_cmd.utils.get_run_desc_value(
-        run_desc, ('paths', 'forcing'), run_dir, resolve_path=True
+        run_desc, ('paths', 'forcing'), resolve_path=True, run_dir=run_dir
     )
     for repo in (nemo_code_config.parent.parent, xios_code_repo, forcing_repo):
         nemo_cmd.prepare.write_repo_rev_file(
@@ -1070,8 +1070,14 @@ def _record_vcs_revisions(run_desc, run_dir):
     if 'vcs revisions' not in run_desc:
         return
     vcs_funcs = {'hg': nemo_cmd.prepare.get_hg_revision}
-    for vcs_tool in run_desc['vcs revisions']:
-        for repo in run_desc['vcs revisions'][vcs_tool]:
+    vcs_tools = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('vcs revisions',), run_dir=run_dir
+    )
+    for vcs_tool in vcs_tools:
+        repos = nemo_cmd.utils.get_run_desc_value(
+            run_desc, ('vcs revisions', vcs_tool), run_dir=run_dir
+        )
+        for repo in repos:
             nemo_cmd.prepare.write_repo_rev_file(
                 Path(repo), run_dir, vcs_funcs[vcs_tool]
             )
