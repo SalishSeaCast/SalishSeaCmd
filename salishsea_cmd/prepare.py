@@ -727,7 +727,7 @@ def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
 
     :param str run_dir: Path of the temporary run directory.
 
-    :param boolean nocheck_init: Suppress initial condition link check
+    :param boolean nocheck_init: Suppress initial condition link check;
                                  the default is to check
 
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
@@ -806,43 +806,49 @@ def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
     """For a NEMO-3.6 run, create symlinks in run_dir to the forcing
     directory/file names given in the run description forcing section.
 
-    :arg dict run_desc: Run description dictionary.
+    :param dict run_desc: Run description dictionary.
 
-    :arg str run_dir: Path of the temporary run directory.
+    :param str run_dir: Path of the temporary run directory.
 
-    :arg nocheck_init: Suppress initial condition link check
-                       the default is to check
-    :type nocheck_init: boolean
+    :param boolean nocheck_init: Suppress initial condition link check;
+                                 the default is to check
 
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
     """
+    run_dir_path = Path(run_dir)
     link_checkers = {
         'atmospheric': _check_atmospheric_forcing_link,
     }
-    nemo_forcing_dir = os.path.abspath(run_desc['paths']['forcing'])
-    for link_name in run_desc['forcing']:
-        link_path = run_desc['forcing'][link_name]['link to']
-        if not os.path.isabs(link_path):
-            link_path = os.path.join(nemo_forcing_dir, link_path)
-        if not os.path.exists(link_path):
-            if link_name not in {
+    link_names = nemo_cmd.utils.get_run_desc_value(
+        run_desc, ('forcing',), run_dir=run_dir
+    )
+    for link_name in link_names:
+        source = _resolve_forcing_path(
+            run_desc, (link_name, 'link to'), run_dir
+        )
+        if not source.exists():
+            if link_name not in (
                 'restart.nc', 'restart_trc.nc'
-            } or not nocheck_init:
+            ) or not nocheck_init:
                 logger.error(
                     '{} not found; cannot create symlink - '
                     'please check the forcing paths and file names '
-                    'in your run description file'.format(link_path)
+                    'in your run description file'.format(source)
                 )
                 _remove_run_dir(run_dir)
                 raise SystemExit(2)
-        os.symlink(link_path, os.path.join(run_dir, link_name))
+        (run_dir_path / link_name).symlink_to(source)
         try:
-            link_checker = run_desc['forcing'][link_name]['check link']
+            link_checker = nemo_cmd.utils.get_run_desc_value(
+                run_desc, ('forcing', link_name, 'check link'),
+                run_dir=run_dir,
+                fatal=False
+            )
             link_checkers[link_checker['type']](
-                run_desc, run_dir, link_path, link_checker['namelist filename']
+                run_desc, run_dir, source, link_checker['namelist filename']
             )
         except KeyError:
-            if 'check link' not in run_desc['forcing'][link_name]:
+            if 'check link' not in link_names[link_name]:
                 # No forcing link checker specified
                 pass
             else:
@@ -856,16 +862,27 @@ def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
 
 
 def _check_atmospheric_forcing_link(
-    run_desc,
-    run_dir,
-    link_path,
-    namelist_filename,
+    run_desc, run_dir, link_path, namelist_filename
 ):
     """Confirm that the atmospheric forcing files necessary for the run
     are present.
 
     Sections of the namelist file are parsed to determine
     the necessary files, and the date ranges required for the run.
+    
+    This is the atmospheric forcing link check function used for NEMO-3.6 runs.
+
+    :param dict run_desc: Run description dictionary.
+
+    :param str run_dir: Path of the temporary run directory.
+    
+    :param :py:class:`pathlib.Path` link_path: Path of the atmospheric forcing
+                                               files collection.
+    
+    :param str namelist_filename: File name of the namelist to parse for
+                                  atmospheric file names and date ranges.
+
+    :raises: :py:exc:`SystemExit` if an atmospheric forcing file does not exist
     """
     namelist = nemo_cmd.namelist.namelist2dict(
         os.path.join(run_dir, namelist_filename)
@@ -938,9 +955,11 @@ def _check_atmos_files(run_desc, run_dir):
     are present. Sections of the namelist file are parsed to determine
     the necessary files, and the date ranges required for the run.
 
-    :arg dict run_desc: Run description dictionary.
+    This is the atmospheric forcing link check function used for NEMO-3.4 runs.
+    
+    :param dict run_desc: Run description dictionary.
 
-    :arg str run_dir: Path of the temporary run directory.
+    :param str run_dir: Path of the temporary run directory.
 
     :raises: SystemExit
     """
@@ -993,10 +1012,14 @@ def _check_atmos_files(run_desc, run_dir):
                         v['dir'], '{basename}.nc'.format(basename=basename)
                     )
                 if not os.path.exists(os.path.join(run_dir, file_path)):
-                    nemo_forcing_dir = os.path.abspath(
-                        run_desc['paths']['forcing']
+                    nemo_forcing_dir = nemo_cmd.utils.get_run_desc_value(
+                        run_desc, ('paths', 'forcing'),
+                        resolve_path=True,
+                        run_dir=run_dir
                     )
-                    atmos_dir = run_desc['forcing']['atmospheric']
+                    atmos_dir = _resolve_forcing_path(
+                        run_desc, ('atmospheric',), run_dir
+                    )
                     logger.error(
                         '{file_path} not found; '
                         'please confirm that atmospheric forcing files '
@@ -1008,7 +1031,7 @@ def _check_atmos_files(run_desc, run_dir):
                             file_path=file_path,
                             startm1=startm1.format('YYYY-MM-DD'),
                             end=end_date.format('YYYY-MM-DD'),
-                            dir=os.path.join(nemo_forcing_dir, atmos_dir),
+                            dir=nemo_forcing_dir / atmos_dir,
                         )
                     )
                     _remove_run_dir(run_dir)
