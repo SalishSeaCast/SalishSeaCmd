@@ -175,7 +175,7 @@ class TestCheckNemoExec:
         ]
     )
     @patch('salishsea_cmd.prepare.logger')
-    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
     def test_iom_server_exec_not_found(
         self, m_get_run_desc_value, m_logger, config_name_key,
         nemo_code_config_key, tmpdir
@@ -205,7 +205,7 @@ class TestCheckNemoExec:
             ('config_name', 'NEMO-code-config'),
         ]
     )
-    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
     def test_nemo36_no_iom_server_check(
         self, m_get_run_desc_value, config_name_key, nemo_code_config_key,
         tmpdir
@@ -491,7 +491,7 @@ class TestCopyRunSetFiles:
     )
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
     def test_nemo34_copy_run_set_files_no_path(
         self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key
     ):
@@ -521,7 +521,7 @@ class TestCopyRunSetFiles:
     )
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
     def test_nemo36_copy_run_set_files_no_path(
         self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key,
         fields_key
@@ -565,7 +565,7 @@ class TestCopyRunSetFiles:
     )
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
     def test_nemo34_copy_run_set_files_relative_path(
         self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key
     ):
@@ -598,7 +598,7 @@ class TestCopyRunSetFiles:
     )
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
     def test_nemo36_copy_run_set_files_relative_path(
         self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key,
         fields_key
@@ -639,7 +639,7 @@ class TestCopyRunSetFiles:
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
     def test_nemo36_files_def(self, m_get_run_desc_value, m_sxsm, m_copy):
         run_desc = {
             'output': {
@@ -959,7 +959,7 @@ class TestResolveForcingPath:
             }),
         ]
     )
-    @patch('salishsea_cmd.prepare.nemo_cmd.utils.get_run_desc_value')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
     def test_relative_path(self, m_get_run_desc_value, keys, forcing_dict):
         run_desc = {'paths': {'forcing': '/foo'}, 'forcing': forcing_dict}
         m_get_run_desc_value.side_effect = (Path('bar'), Path('/foo'))
