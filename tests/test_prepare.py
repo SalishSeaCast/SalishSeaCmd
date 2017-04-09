@@ -1095,7 +1095,8 @@ class TestMakeForcingLinksNEMO36:
             run_desc, 'run_dir', Path(p_atmos_ops), 'namelist_cfg'
         )
 
-    def test_unknown_link_checker(self, tmpdir):
+    @patch('salishsea_cmd.prepare.logger')
+    def test_unknown_link_checker(self, m_logger, tmpdir):
         p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
         p_atmos_ops = tmpdir.ensure_dir(
             'results/forcing/atmospheric/GEM2.5/operational'
