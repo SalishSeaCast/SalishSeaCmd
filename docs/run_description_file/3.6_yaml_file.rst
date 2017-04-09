@@ -82,6 +82,7 @@ The :kbd:`paths` section of the run description file is a collection of director
   The path to the :file:`CONFIG/` directory in the :ref:`NEMO-3.6-code-repo` clone
   where the NEMO configuration directories are to be found;
   e.g. :file:`$HOME/MEOPAR/NEMO-3.6-code/NEMOGCM/CONFIG/`.
+
   An absolute path is required because the path is used in both the current directory and the temporary run directory created in the :kbd:`runs directory`.
   The path may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
   and :envvar:`$USER` as an alternative spelling of the user's userid.
@@ -90,6 +91,7 @@ The :kbd:`paths` section of the run description file is a collection of director
 
 :kbd:`XIOS`
   The path to the :ref:`XIOS-repo` clone where the XIOS executable for the run is to be found.
+
   This path may be either absolute or relative.
   The path may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
   and :envvar:`$USER` as an alternative spelling of the user's userid.
@@ -100,7 +102,10 @@ The :kbd:`paths` section of the run description file is a collection of director
   initial conditions,
   open boundary conditions,
   etc. are to be found.
-  This path may be either absolute or relative.
+
+  This path may be relative or absolute,
+  and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+  and :envvar:`$USER` as an alternative spelling of the user's userid.
 
 :kbd:`runs directory`
   The path to the directory where run directories will be created by the :command:`salishsea run` (or :command:`salishsea prepare`) sub-command.
@@ -124,11 +129,8 @@ those files are presumed to be in the :file:`grid/` sub-directory of the directo
 If relative paths are given,
 they are appended to the :file:`grid/` directory of the :kbd:`forcing` path.
 
-If absolute paths are given,
-they may use :kbd:`~`,
-:kbd:`$HOME`,
-or :kbd:`$USER`,
-if you wish.
+Relative or absolute paths may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+and :envvar:`$USER` as an alternative spelling of the user's userid.
 
 :kbd:`coordinates`
   The name of,
@@ -150,7 +152,7 @@ if you wish.
 :kbd:`forcing` Section
 ----------------------
 
-The :kbd:`forcing` section of the run description file contains sub-sections that provide the names of directories and file that are to be symlinked in the run directory for NEMO to use to read initial conditions and forcing values from.
+The :kbd:`forcing` section of the run description file contains sub-sections that provide the names of directories and files that are to be symlinked in the run directory for NEMO to use to read initial conditions and forcing values from.
 
 An example :kbd:`forcing` section:
 
@@ -167,9 +169,13 @@ The sub-section keys
 are the names of the symlinks that will be created in the run directory.
 Those names are expected to appear in the appropriate places in the namelists.
 The values associated with the :kbd:`link to` keys are the targets of the symlinks that will be created in the run directory.
-The paths may be either absolute or relative.
-If relative,
-the paths are appended to the :kbd:`forcing` path given in the :ref:`NEMO-3.6-Paths`.
+
+The paths may be relative or absolute,
+and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+and :envvar:`$USER` as an alternative spelling of the user's userid.
+
+If relative paths are given,
+they are appended to the :kbd:`forcing` path given in the :ref:`NEMO-3.6-Paths`.
 
 To provide a restart file for a run to use for initialization,
 include a sub-section like:
@@ -225,7 +231,11 @@ or by setting the value associated with the :kbd:`type` key to :py:obj:`None`.
 The :kbd:`namelists` section of the run description file contains a dict of lists of NEMO namelist section files that will be concatenated to construct :file:`namelist*_cfg` files
 (the file names required by NEMO)
 file for the run.
-The paths may be either absolute or relative.
+
+The paths may be relative or absolute,
+and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+and :envvar:`$USER` as an alternative spelling of the user's userid.
+
 If relative paths are given,
 they are appended to the directory containing the run description file.
 
@@ -304,9 +314,11 @@ will cause the :file:`namelist_ref` file in the :file:`$HOME/MEOPAR/test-sponge/
 The :kbd:`output` section of the run description file contains key-value pairs that provide the names of the files that define the output files,
 domains,
 and fields to be used by the XIOS server for the run.
+
 The paths may be relative or absolute,
 and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
 and :envvar:`$USER` as an alternative spelling of the user's userid.
+
 If relative paths are given,
 they are appended to the directory containing the run description file.
 
@@ -394,9 +406,11 @@ At present only Mercurial
 is supported.
 
 The paths listed under the version control tool key are the repositories of which the revision and status will be recorded.
+
 The repository paths may be relative or absolute,
 and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
 and :envvar:`$USER` as an alternative spelling of the user's userid.
+
 For each repository,
 a file will be created in the temporary run directory.
 The file names are the repository directory names with :kbd:`_rev.txt` appended.
