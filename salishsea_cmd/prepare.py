@@ -133,6 +133,8 @@ def prepare(desc_file, nemo34, nocheck_init):
     _make_executable_links(nemo_bin_dir, run_dir, nemo34, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
     _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init)
+    if not nemo34:
+        _make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
     return run_dir
 
@@ -710,7 +712,7 @@ def _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init):
     if nemo34:
         _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init)
     else:
-        _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init)
+        _make_forcing_links_nemo36(run_desc, run_dir)
 
 
 def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
@@ -796,16 +798,13 @@ def _resolve_forcing_path(run_desc, keys, run_dir):
     return nemo_forcing_dir / path
 
 
-def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
+def _make_forcing_links_nemo36(run_desc, run_dir):
     """For a NEMO-3.6 run, create symlinks in run_dir to the forcing
     directory/file names given in the run description forcing section.
 
     :param dict run_desc: Run description dictionary.
 
     :param str run_dir: Path of the temporary run directory.
-
-    :param boolean nocheck_init: Suppress initial condition link check;
-                                 the default is to check
 
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
     """
@@ -819,16 +818,13 @@ def _make_forcing_links_nemo36(run_desc, run_dir, nocheck_init):
             run_desc, (link_name, 'link to'), run_dir
         )
         if not source.exists():
-            if link_name not in (
-                'restart.nc', 'restart_trc.nc'
-            ) or not nocheck_init:
-                logger.error(
-                    '{} not found; cannot create symlink - '
-                    'please check the forcing paths and file names '
-                    'in your run description file'.format(source)
-                )
-                _remove_run_dir(run_dir)
-                raise SystemExit(2)
+            logger.error(
+                '{} not found; cannot create symlink - '
+                'please check the forcing paths and file names '
+                'in your run description file'.format(source)
+            )
+            _remove_run_dir(run_dir)
+            raise SystemExit(2)
         (run_dir_path / link_name).symlink_to(source)
         try:
             link_checker = get_run_desc_value(
@@ -1028,6 +1024,49 @@ def _check_atmos_files(run_desc, run_dir):
                     )
                     _remove_run_dir(run_dir)
                     raise SystemExit(2)
+
+
+def _make_restart_links(run_desc, run_dir, nocheck_init):
+    """For a NEMO-3.6 run, create symlinks in run_dir to the restart
+    files given in the run description restart section.
+
+    :param dict run_desc: Run description dictionary.
+
+    :param str run_dir: Path of the temporary run directory.
+
+    :param boolean nocheck_init: Suppress restart file existence check;
+                                 the default is to check
+
+    :raises: :py:exc:`SystemExit` if a symlink target does not exist
+    """
+    run_dir_path = Path(run_dir)
+    try:
+        link_names = get_run_desc_value(
+            run_desc, ('restart',), run_dir=run_dir, fatal=False
+        )
+    except KeyError:
+        logger.warning(
+            'No restart section found in run description YAML file, '
+            'so proceeding on the assumption that initial conditions '
+            'have been provided'
+        )
+        link_names = {}
+    for link_name in link_names:
+        source = get_run_desc_value(
+            run_desc, ('restart', link_name), expand_path=True
+        )
+        if not source.exists() and not nocheck_init:
+            logger.error(
+                '{} not found; cannot create symlink - '
+                'please check the restart file paths and file names '
+                'in your run description file'.format(source)
+            )
+            _remove_run_dir(run_dir)
+            raise SystemExit(2)
+        if nocheck_init:
+            (run_dir_path / link_name).symlink_to(source)
+        else:
+            (run_dir_path / link_name).symlink_to(source.resolve())
 
 
 def _record_vcs_revisions(run_desc, run_dir):

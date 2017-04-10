@@ -76,6 +76,7 @@ class TestParser:
 @patch('salishsea_cmd.prepare._make_executable_links')
 @patch('salishsea_cmd.prepare._make_grid_links')
 @patch('salishsea_cmd.prepare._make_forcing_links')
+@patch('salishsea_cmd.prepare._make_restart_links')
 @patch('salishsea_cmd.prepare._record_vcs_revisions')
 class TestPrepare:
     """Unit tests for `salishsea prepare` prepare() function.
@@ -88,7 +89,7 @@ class TestPrepare:
         ]
     )
     def test_prepare(
-        self, m_rvr, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd,
+        self, m_rvr, m_mrl, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd,
         m_resolved_path, m_cxe, m_cne, m_lrd, nemo34, m_cne_return,
         m_cxe_return
     ):
@@ -117,6 +118,10 @@ class TestPrepare:
         )
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
         m_mfl.assert_called_once_with(m_lrd(), m_mrd(), nemo34, False)
+        if nemo34:
+            assert not m_mrl.called
+        else:
+            m_mrl.assert_called_once_with(m_lrd(), m_mrd(), False)
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
 
@@ -859,7 +864,7 @@ class TestMakeForcingLinks:
             salishsea_cmd.prepare._make_forcing_links(
                 run_desc, str(p_run_dir), nemo34=False, nocheck_init=False
             )
-        m_mfl36.assert_called_once_with(run_desc, str(p_run_dir), False)
+        m_mfl36.assert_called_once_with(run_desc, str(p_run_dir))
 
 
 class TestMakeForcingLinksNEMO34:
@@ -991,7 +996,7 @@ class TestMakeForcingLinksNEMO36:
         patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
         with patch_symlink_to as m_symlink_to:
             salishsea_cmd.prepare._make_forcing_links_nemo36(
-                run_desc, 'run_dir', nocheck_init=False
+                run_desc, 'run_dir'
             )
         m_symlink_to.assert_called_once_with(Path(p_atmos_ops))
 
@@ -1011,7 +1016,7 @@ class TestMakeForcingLinksNEMO36:
         patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
         with patch_symlink_to as m_symlink_to:
             salishsea_cmd.prepare._make_forcing_links_nemo36(
-                run_desc, 'run_dir', nocheck_init=False
+                run_desc, 'run_dir'
             )
         m_symlink_to.assert_called_once_with(
             Path(p_nemo_forcing.join('rivers'))
@@ -1033,7 +1038,7 @@ class TestMakeForcingLinksNEMO36:
         salishsea_cmd.prepare._remove_run_dir = Mock()
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_forcing_links_nemo36(
-                run_desc, 'run_dir', nocheck_init=False
+                run_desc, 'run_dir'
             )
         m_logger.error.assert_called_once_with(
             '{} not found; cannot create symlink - '
@@ -1043,27 +1048,6 @@ class TestMakeForcingLinksNEMO36:
         )
         salishsea_cmd.prepare._remove_run_dir.assert_called_once_with(
             'run_dir'
-        )
-
-    def test_no_checkinit(self, tmpdir):
-        p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
-        run_desc = {
-            'paths': {
-                'forcing': str(p_nemo_forcing),
-            },
-            'forcing': {
-                'restart.nc': {
-                    'link to': 'restart.nc',
-                }
-            }
-        }
-        patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
-        with patch_symlink_to as m_symlink_to:
-            salishsea_cmd.prepare._make_forcing_links_nemo36(
-                run_desc, 'run_dir', nocheck_init=True
-            )
-        m_symlink_to.assert_called_once_with(
-            Path(p_nemo_forcing.join('restart.nc'))
         )
 
     @patch('salishsea_cmd.prepare._check_atmospheric_forcing_link')
@@ -1089,7 +1073,7 @@ class TestMakeForcingLinksNEMO36:
         patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
         with patch_symlink_to as m_symlink_to:
             salishsea_cmd.prepare._make_forcing_links_nemo36(
-                run_desc, 'run_dir', nocheck_init=False
+                run_desc, 'run_dir'
             )
         m_chk_atmos_frc_link.assert_called_once_with(
             run_desc, 'run_dir', Path(p_atmos_ops), 'namelist_cfg'
@@ -1120,8 +1104,74 @@ class TestMakeForcingLinksNEMO36:
         with patch_symlink_to as m_symlink_to:
             with pytest.raises(SystemExit):
                 salishsea_cmd.prepare._make_forcing_links_nemo36(
-                    run_desc, 'run_dir', nocheck_init=False
+                    run_desc, 'run_dir'
                 )
+
+
+class TestMakeRestartLinks:
+    """Unit tests for `salishsea prepare` _make_restart_links() function.
+    """
+
+    @patch('salishsea_cmd.prepare.logger')
+    def test_no_restart_key(self, m_logger):
+        run_desc = {}
+        salishsea_cmd.prepare._make_restart_links(
+            run_desc, 'run_dir', nocheck_init=False
+        )
+        m_logger.warning.assert_called_once_with(
+            'No restart section found in run description YAML file, '
+            'so proceeding on the assumption that initial conditions '
+            'have been provided'
+        )
+
+    def test_link(self, tmpdir):
+        p_results = tmpdir.ensure(
+            'results/SalishSea/nowcast/SalishSea_00475200_restart.nc'
+        )
+        run_desc = {'restart': {'restart.nc': str(p_results)}}
+        patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
+        with patch_symlink_to as m_symlink_to:
+            salishsea_cmd.prepare._make_restart_links(
+                run_desc, 'run_dir', nocheck_init=False
+            )
+        m_symlink_to.assert_called_once_with(Path(p_results))
+
+    @patch('salishsea_cmd.prepare.logger')
+    def test_no_link_path(self, m_logger, tmpdir):
+        run_desc = {
+            'restart': {
+                'restart.nc': 'SalishSea/nowcast/SalishSea_00475200_restart.nc'
+            }
+        }
+        salishsea_cmd.prepare._remove_run_dir = Mock()
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._make_restart_links(
+                run_desc, 'run_dir', nocheck_init=False
+            )
+        m_logger.error.assert_called_once_with(
+            '{} not found; cannot create symlink - '
+            'please check the restart file paths and file names '
+            'in your run description file'
+            .format('SalishSea/nowcast/SalishSea_00475200_restart.nc')
+        )
+        salishsea_cmd.prepare._remove_run_dir.assert_called_once_with(
+            'run_dir'
+        )
+
+    def test_nocheck_init(self, tmpdir):
+        run_desc = {
+            'restart': {
+                'restart.nc': 'SalishSea/nowcast/SalishSea_00475200_restart.nc'
+            }
+        }
+        patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
+        with patch_symlink_to as m_symlink_to:
+            salishsea_cmd.prepare._make_restart_links(
+                run_desc, 'run_dir', nocheck_init=True
+            )
+        m_symlink_to.assert_called_once_with(
+            Path('SalishSea/nowcast/SalishSea_00475200_restart.nc')
+        )
 
 
 class TestRecordVCSRevisions:
