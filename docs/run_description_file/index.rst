@@ -28,7 +28,7 @@ They contain key-value pairs that define the names and locations of files and di
 Run description files are typically stored in a sub-directory of your clone of the :ref:`SS-run-sets-repo`.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    3.6_yaml_file
    3.4_yaml_file
