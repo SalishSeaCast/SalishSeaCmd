@@ -14,20 +14,35 @@
 .. limitations under the License.
 
 
+.. _NEMO-3.6-NEMO-3.6-RunDescriptionFile:
+
+*****************************
 NEMO-3.6 Run Description File
-=============================
+*****************************
 
 .. warning::
     Versions 2.1 and later of the :kbd:`SalishSeaCmd` package introduced changes in the run description file structure that are not backward compatible.
     Older run description files for NEMO-3.6 runs need to be updated before they can be successfully used with the :command:`salishsea run` command.
     Please see :ref:`SalishSeaCmdChangesThatBreakBackwardCompatibility` for details.
 
+
+.. _NEMO-3.6-ExampleRunDescriptionYAML-File:
+
+Example Run Description YAML File
+=================================
+
 Example (from :file:`SS-run-sets/SalishSea/nemo3.6/SalishSea.yaml`):
 
 .. literalinclude:: SalishSea.yaml.example-NEMO-3.6
    :language: yaml
 
-The meanings of the key-value pairs are:
+
+.. _NEMO-3.6-BasicRunConfiguration:
+
+Basic Run Configuration
+=======================
+
+The following key-value pairs provide the basic configuration for the run:
 
 :kbd:`config_name`
   The name of the NEMO configuration to use for runs.
@@ -74,7 +89,7 @@ If you have a reason to not use land processor elimination you can disable it wi
 .. _NEMO-3.6-Paths:
 
 :kbd:`paths` Section
---------------------
+====================
 
 The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`salishsea` uses to find files in other repos that it needs.
 
@@ -115,7 +130,7 @@ The :kbd:`paths` section of the run description file is a collection of director
 .. _NEMO-3.6-Grid:
 
 :kbd:`grid` Section
--------------------
+===================
 
 The :kbd:`grid` section of the run description file contains 2 key-value pairs that provide:
 
@@ -150,7 +165,7 @@ and :envvar:`$USER` as an alternative spelling of the user's userid.
 .. _NEMO-3.6-Forcing:
 
 :kbd:`forcing` Section
-----------------------
+======================
 
 The :kbd:`forcing` section of the run description file contains sub-sections that provide the names of directories and files that are to be symlinked in the run directory for NEMO to use to read initial conditions and forcing values from.
 
@@ -161,11 +176,15 @@ An example :kbd:`forcing` section:
     forcing:
       NEMO-atmos:
         link to: /results/forcing/atmospheric/GEM2.5/operational/
+      open_boundaries:
+        link to: open_boundaries/
       rivers:
         link to: rivers/
 
 The sub-section keys
-(:kbd:`NEMO-atmos` and :kbd:`rivers` above)
+(:kbd:`NEMO-atmos`,
+:kbd:`open_boundaries`,
+and :kbd:`rivers` above)
 are the names of the symlinks that will be created in the run directory.
 Those names are expected to appear in the appropriate places in the namelists.
 The values associated with the :kbd:`link to` keys are the targets of the symlinks that will be created in the run directory.
@@ -177,22 +196,19 @@ and :envvar:`$USER` as an alternative spelling of the user's userid.
 If relative paths are given,
 they are appended to the :kbd:`forcing` path given in the :ref:`NEMO-3.6-Paths`.
 
-To provide a restart file for a run to use for initialization,
+To provide links to directories containing initial fields for a run to use,
 include a sub-section like:
 
 .. code-block:: yaml
 
     forcing:
       ...
-      restart.nc:
-        link to: /results/SalishSea/spin-up/8sep17sep/SalishSea_02825280_restart.nc
+      initial_strat:
+        link to: initial_strat/
+      initial_green:
+        link to: initial_green/
 
-NEMO requires that the name of the restart file be :kbd:`restart.nc`,
-so that is the key that you must use.
-For a tracers restart file the required file name (key) is :kbd:`restart_trc.nc`.
-
-Apart from the restart file keys,
-you are free to use any keys that you wish with the understanding that the key will be the name of the symlink that will be created in the run directory,
+You are free to use any keys that you wish with the understanding that the key will be the name of the symlink that will be created in the run directory,
 and that name will also need to appear as a directory name in the appropriate namelist.
 
 The :command:`salishsea run` and :command:`salishsea prepare` commands and the :py:func:`salishsea_cmd.api.prepare` API function confirm that the targets of the symlinks exist,
@@ -200,7 +216,7 @@ and exit with an error message if not.
 
 
 Atmospheric Forcing File Checks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------
 
 Additional checking can be performed on the files in the atmospheric forcing directory.
 That checking confirms the existence of all of the atmospheric forcing files for the date range of the run.
@@ -223,10 +239,42 @@ Link checking can be disabled by excluding the :kbd:`check link` section,
 or by setting the value associated with the :kbd:`type` key to :py:obj:`None`.
 
 
+.. _NEMO-3.6-Restart:
+
+:kbd:`restart` Section
+======================
+
+The optional :kbd:`restart` section of the run description file contains key-value pairs that provide paths and file names of restart files to be used to initialize the run.
+
+The paths may be relative or absolute,
+and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+and :envvar:`$USER` as an alternative spelling of the user's userid.
+
+If relative paths are given,
+they are appended to the directory containing the run description file.
+
+Here is an example :kbd:`restart` section:
+
+.. code-block:: yaml
+
+    restart:
+      restart.nc: /results/SalishSea/nowcast/SalishSea_00475200_restart.nc
+      restart_trc.nc: /results/SalishSea/nowcast-green/06dec15/SalishSea_00004320_restart_trc.nc
+
+NEMO requires that the name of the model restart file be :kbd:`restart.nc`,
+so that is the key that you must use.
+For an (optional) tracers restart file the required file name (key) is :kbd:`restart_trc.nc`.
+
+The restart section is optional because it is not required for runs that are initialized with fields provided in a directory linked in the :ref:`NEMO-3.6-Forcing`.
+
+The :command:`salishsea run` and :command:`salishsea prepare` commands and the :py:func:`salishsea_cmd.api.prepare` API function confirm that the targets of the symlinks exist,
+and exit with an error message if not.
+
+
 .. _NEMO-3.6-Namelists:
 
 :kbd:`namelists` Section
-------------------------
+========================
 
 The :kbd:`namelists` section of the run description file contains a dict of lists of NEMO namelist section files that will be concatenated to construct :file:`namelist*_cfg` files
 (the file names required by NEMO)
@@ -309,7 +357,7 @@ will cause the :file:`namelist_ref` file in the :file:`$HOME/MEOPAR/test-sponge/
 .. _NEMO-3.6-Output:
 
 :kbd:`output` Section
----------------------
+=====================
 
 The :kbd:`output` section of the run description file contains key-value pairs that provide the names of the files that define the output files,
 domains,
@@ -380,7 +428,7 @@ the number of XIOS servers to run.
 .. _NEMO-3.6-VCS-Revisions:
 
 :kbd:`vcs revisions` Section
-----------------------------
+============================
 
 The optional :kbd:`vcs revisions` section of the run description file contains lists of version control system repositories of which the revision and status will be recorded in the temporary run and run results directories.
 
