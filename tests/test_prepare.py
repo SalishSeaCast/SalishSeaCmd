@@ -746,21 +746,21 @@ class TestMakeGridLinks:
     """Unit tests for `nemo prepare` _make_grid_links() function.
     """
 
-    @patch('nemo_cmd.prepare.remove_run_dir')
+    @patch('nemo_cmd.prepare._remove_run_dir')
     def test_no_grid_coordinates_key(self, m_rm_run_dir):
         run_desc = {}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
         m_rm_run_dir.assert_called_once_with('run_dir')
 
-    @patch('nemo_cmd.prepare.remove_run_dir')
+    @patch('nemo_cmd.prepare._remove_run_dir')
     def test_no_grid_bathymetry_key(self, m_rm_run_dir):
         run_desc = {'grid': {'coordinates': 'coords.nc'}}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, 'run_dir')
         m_rm_run_dir.assert_called_once_with('run_dir')
 
-    @patch('nemo_cmd.prepare.remove_run_dir')
+    @patch('nemo_cmd.prepare._remove_run_dir')
     def test_no_forcing_key(self, m_rm_run_dir):
         run_desc = {
             'grid': {
