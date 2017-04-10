@@ -87,18 +87,11 @@ class TestTakeAction:
             nocheck_init=False,
             no_submit=False,
             waitjob=0,
-            quiet=False,
+            quiet=False
         )
         run_cmd.run(parsed_args)
         m_run.assert_called_once_with(
-            'desc file',
-            'results dir',
-            4,
-            False,
-            False,
-            False,
-            0,
-            False,
+            'desc file', 'results dir', 4, False, False, False, 0, False
         )
         m_log.info.assert_called_once_with('qsub message')
 
@@ -130,16 +123,8 @@ class TestRun:
         ]
     )
     def test_run_submit(
-        self,
-        m_prepare,
-        m_lrd,
-        m_gnp,
-        m_bbs,
-        m_sco,
-        nemo34,
-        sep_xios_server,
-        xios_servers,
-        tmpdir,
+        self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco, nemo34, sep_xios_server,
+        xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = str(p_run_dir)
@@ -174,16 +159,8 @@ class TestRun:
         ]
     )
     def test_run_no_submit(
-        self,
-        m_prepare,
-        m_lrd,
-        m_gnp,
-        m_bbs,
-        m_sco,
-        nemo34,
-        sep_xios_server,
-        xios_servers,
-        tmpdir,
+        self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco, nemo34, sep_xios_server,
+        xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = str(p_run_dir)
@@ -249,6 +226,7 @@ class TestCleanup:
         expected = '''echo "Deleting run directory" >>${RESULTS_DIR}/stdout
         rmdir $(pwd)
         echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+        exit ${MPIRUN_EXIT_CODE}
         '''
         expected = expected.splitlines()
         for i, line in enumerate(script.splitlines()):
