@@ -128,14 +128,10 @@ class Run(cliff.command.Command):
         :type parsed_args: :class:`argparse.Namespace` instance
         """
         qsub_msg = run(
-            parsed_args.desc_file,
-            parsed_args.results_dir,
-            parsed_args.max_deflate_jobs,
-            parsed_args.nemo34,
-            parsed_args.nocheck_init,
-            parsed_args.no_submit,
-            parsed_args.waitjob,
-            parsed_args.quiet,
+            parsed_args.desc_file, parsed_args.results_dir,
+            parsed_args.max_deflate_jobs, parsed_args.nemo34,
+            parsed_args.nocheck_init, parsed_args.no_submit,
+            parsed_args.waitjob, parsed_args.quiet
         )
         if not parsed_args.quiet:
             log.info(qsub_msg)
@@ -149,7 +145,7 @@ def run(
     nocheck_init=False,
     no_submit=False,
     waitjob=0,
-    quiet=False,
+    quiet=False
 ):
     """Create and populate a temporary run directory, and a run script,
     and submit the run to the queue manager.
@@ -209,14 +205,8 @@ def run(
     system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
     batch_script = _build_batch_script(
         run_desc,
-        fspath(desc_file),
-        nemo_processors,
-        xios_processors,
-        max_deflate_jobs,
-        results_dir,
-        fspath(run_dir),
-        system,
-        nemo34,
+        fspath(desc_file), nemo_processors, xios_processors, max_deflate_jobs,
+        results_dir, fspath(run_dir), system, nemo34
     )
     batch_file = run_dir / 'SalishSeaNEMO.sh'
     with batch_file.open('wt') as f:
@@ -294,11 +284,7 @@ def _build_batch_script(
         u'{fix_permissions}\n'
         u'{cleanup}'.format(
             defns=_definitions(
-                run_desc,
-                desc_file,
-                run_dir,
-                results_dir,
-                system,
+                run_desc, desc_file, run_dir, results_dir, system
             ),
             modules=_modules(system, nemo34),
             execute=_execute(
@@ -325,13 +311,7 @@ def _pbs_features(n_processors, system):
     return pbs_features
 
 
-def _definitions(
-    run_desc,
-    run_desc_file,
-    run_dir,
-    results_dir,
-    system,
-):
+def _definitions(run_desc, run_desc_file, run_dir, results_dir, system):
     home = u'${HOME}' if system == 'salish' else u'${PBS_O_HOME}'
     defns = (
         u'RUN_ID="{run_id}"\n'
@@ -394,6 +374,7 @@ def _execute(nemo_processors, xios_processors, max_deflate_jobs):
     )
     script += u'{mpirun}\n'.format(mpirun=mpirun)
     script += (
+        u'MPIRUN_EXIT_CODE=$?\n'
         u'echo "Ended run at $(date)"\n'
         u'\n'
         u'echo "Results combining started at $(date)"\n'
@@ -423,8 +404,9 @@ def _fix_permissions():
 
 def _cleanup():
     script = (
-        'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-        'rmdir $(pwd)\n'
-        'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+        u'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+        u'rmdir $(pwd)\n'
+        u'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+        u'exit ${MPIRUN_EXIT_CODE}\n'
     )
     return script
