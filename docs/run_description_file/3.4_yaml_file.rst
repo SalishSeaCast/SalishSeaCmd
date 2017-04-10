@@ -14,20 +14,35 @@
 .. limitations under the License.
 
 
+.. _NEMO-3.4-NEMO-3.6-RunDescriptionFile:
+
+*****************************
 NEMO-3.4 Run Description File
-=============================
+*****************************
 
 .. warning::
     Versions 2.0 and later of the :kbd:`SalishSeaCmd` package introduced changes in the run description file structure that are not backward compatible.
     Older run description files for NEMO-3.4 runs need to be updated before they can be successfully used with the :command:`salishsea run --nemo3.4` command.
     Please see :ref:`SalishSeaCmdChangesThatBreakBackwardCompatibility` for details.
 
+
+.. _NEMO-3.4-ExampleRunDescriptionYAML-File:
+
+Example Run Description YAML File
+=================================
+
 Example (from :file:`SS-run-sets/SalishSea/SalishSea.yaml`):
 
 .. literalinclude:: SalishSea.yaml.example-NEMO-3.4
    :language: yaml
 
-The meanings of the key-value pairs are:
+
+.. _NEMO-3.4-BasicRunConfiguration:
+
+Basic Run Configuration
+=======================
+
+The following key-value pairs provide the basic configuration for the run:
 
 :kbd:`config_name`
   The name of the NEMO configuration to use for runs.
@@ -59,7 +74,7 @@ The meanings of the key-value pairs are:
 .. _NEMO-3.4-Paths:
 
 :kbd:`paths` Section
---------------------
+====================
 
 The :kbd:`paths` section of the run description file is a collection of directory paths that :program:`salishsea` uses to find files in other repos that it needs.
 
@@ -93,7 +108,7 @@ The :kbd:`paths` section of the run description file is a collection of director
 .. _NEMO-3.4-Grid:
 
 :kbd:`grid` Section
--------------------
+===================
 
 The :kbd:`grid` section of the run description file contains 2 key-value pairs that provide:
 
@@ -128,7 +143,7 @@ and :envvar:`$USER` as an alternative spelling of the user's userid.
 .. _NEMO-3.4-Forcing:
 
 :kbd:`forcing` Section
-----------------------
+======================
 
 The :kbd:`forcing` section of the run description file contains key-value pairss that provide the names of directories in the :ref:`NEMO-forcing-repo` pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.4-Paths` where initial conditions and forcing files are found.
 Those directory names are expected to appear in the appropriate places in the namelists.
@@ -175,7 +190,7 @@ they are appended to the :kbd:`forcing` path given in the :ref:`NEMO-3.4-Paths`.
 .. _NEMO-3.4-Namelists:
 
 :kbd:`namelists` Section
-------------------------
+========================
 
 The :kbd:`namelists` section of the run description file contains a list of NEMO namelist section files that will be concatenated to construct the :file:`namelist`
 (the file name required by NEMO)
@@ -212,7 +227,7 @@ The blob of empty namelist instances is defined as a constant in the :py:mod:`Sa
 .. _NEMO-3.4-Output:
 
 :kbd:`output` Section
----------------------
+=====================
 
 The :kbd:`output` section of the run description file contains a single key-value pair that provides the name of the file that defines the output files
 to be used by the XIOS server for the run.
@@ -239,7 +254,7 @@ it is appended to the directory containing the run description file.
 .. _NEMO-3.4-VCS-Revisions:
 
 :kbd:`vcs revisions` Section
-----------------------------
+============================
 
 The optional :kbd:`vcs revisions` section of the run description file contains lists of version control system repositories of which the revision and status will be recorded in the temporary run and run results directories.
 

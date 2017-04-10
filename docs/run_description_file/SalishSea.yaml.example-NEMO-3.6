@@ -1,17 +1,4 @@
 # salishsea command processor run description example for NEMO-3.6
-#
-# Salish Sea full domain with:
-#   Smoothed JdF mouth bathymetry
-#   S4-1 uniform initial T and S, depth corrected
-#   Open, unstructured western boundary across Strait of Juan de Fuca
-#     Tidal forcing at mouth of JdF
-#     Masson, depth corrected, open boundaries
-#   Open, unstructured northern boundary across Johnstone Strait
-#     Tidal forcing just north of Port Nelson
-#     Seasonal T and S forcing based on Thomson (1982)
-#  Rivers run-off forcing
-#  Atmospheric forcing with operational GEM2.5 model products
-#    Constrained to no solid precipitation
 
 config_name: SalishSea
 
@@ -59,20 +46,28 @@ forcing:
     check link:
       type: atmospheric
       namelist filename: namelist_cfg
-  initial_strat:
-    link to: initial_strat/
-  initial_green:
-    link to: initial_green/
-  # Typically, you would use either 1 or more initial conditions directories
-  # (above), or 1 or more restart files (below), but not both
-  restart.nc:
-    link to: /results/SalishSea/nowcast/05may15/SalishSea_02056320_restart.nc
-  restart_trc.nc:
-    link to: /results/SalishSea/nowcast-green/06dec15/SalishSea_00004320_restart_trc.nc
   open_boundaries:
     link to: open_boundaries/
   rivers:
     link to: rivers/
+  initial_strat:
+    link to: initial_strat/
+  initial_green:
+    link to: initial_green/
+
+restart:
+  # The keys below are the names of symlinks that will be created.
+  # The targets of those symlinks will be the paths/filenames associated
+  # with the keys;
+  # e.g. a symlink named restart.nc will be created to
+  # /results/SalishSea/nowcast/05may15/SalishSea_02056320_restart.nc
+  #
+  # You only need to include keys for the types of restart files
+  # that are used in your run.
+  #
+  # If relative, paths are taken from current directory
+  restart.nc: /results/SalishSea/nowcast/05may15/SalishSea_02056320_restart.nc
+  restart_trc.nc: /results/SalishSea/nowcast-green/06dec15/SalishSea_00004320_restart_trc.nc
 
 namelists:
   # The namelist section files in the lists below will be concatenated

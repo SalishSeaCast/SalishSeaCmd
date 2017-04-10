@@ -20,6 +20,16 @@
 :kbd:`SalishSeaCmd` Changes That Break Backward Compatibility
 *************************************************************
 
+Version 3.1
+===========
+
+The following change that was introduced in version 3.1 of the :kbd:`SalishSeaCmd` package is incompatible with earlier versions:
+
+* For NEMO-3.6 only,
+  restart file paths/filenames are now specified in a new :kbd:`restart` section instead of in the :kbd:`forcing` section;
+  see :ref:`NEMO-3.6-Restart` for details.
+
+
 Version 3.0
 ===========
 
