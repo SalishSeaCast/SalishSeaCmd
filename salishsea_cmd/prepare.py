@@ -33,7 +33,7 @@ import arrow
 import cliff.command
 import nemo_cmd
 import nemo_cmd.prepare
-from nemo_cmd.utils import get_run_desc_value
+from nemo_cmd.prepare import get_run_desc_value
 
 from salishsea_cmd import lib
 

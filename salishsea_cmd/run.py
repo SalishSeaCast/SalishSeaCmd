@@ -32,7 +32,7 @@ import subprocess
 
 import cliff.command
 from nemo_cmd.fspath import fspath
-from nemo_cmd.utils import get_run_desc_value
+from nemo_cmd.prepare import get_run_desc_value
 
 from salishsea_cmd import api, lib
 
