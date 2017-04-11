@@ -193,7 +193,7 @@ class TestCheckNemoExec:
             },
         }
         p_bin_dir = p_config.ensure_dir('SalishSea', 'BLD', 'bin')
-        m_get_run_desc_value.side_effect = (Path(p_config), 'SalishSea')
+        m_get_run_desc_value.side_effect = (Path(str(p_config)), 'SalishSea')
         p_exists = patch(
             'salishsea_cmd.prepare.Path.exists', side_effect=[True, False]
         )
@@ -223,7 +223,7 @@ class TestCheckNemoExec:
             },
         }
         p_config.ensure_dir('SalishSea', 'BLD', 'bin')
-        m_get_run_desc_value.side_effect = (Path(p_config), 'SalishSea')
+        m_get_run_desc_value.side_effect = (Path(str(p_config)), 'SalishSea')
         with patch('salishsea_cmd.prepare.Path.exists') as m_exists:
             salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=False)
         assert m_exists.call_count == 1
@@ -998,7 +998,7 @@ class TestMakeForcingLinksNEMO36:
             salishsea_cmd.prepare._make_forcing_links_nemo36(
                 run_desc, 'run_dir'
             )
-        m_symlink_to.assert_called_once_with(Path(p_atmos_ops))
+        m_symlink_to.assert_called_once_with(Path(str(p_atmos_ops)))
 
     def test_rel_path_link(self, tmpdir):
         p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
@@ -1019,7 +1019,7 @@ class TestMakeForcingLinksNEMO36:
                 run_desc, 'run_dir'
             )
         m_symlink_to.assert_called_once_with(
-            Path(p_nemo_forcing.join('rivers'))
+            Path(str(p_nemo_forcing.join('rivers')))
         )
 
     @patch('salishsea_cmd.prepare.logger')
@@ -1076,7 +1076,7 @@ class TestMakeForcingLinksNEMO36:
                 run_desc, 'run_dir'
             )
         m_chk_atmos_frc_link.assert_called_once_with(
-            run_desc, 'run_dir', Path(p_atmos_ops), 'namelist_cfg'
+            run_desc, 'run_dir', Path(str(p_atmos_ops)), 'namelist_cfg'
         )
 
     @patch('salishsea_cmd.prepare.logger')
@@ -1134,7 +1134,7 @@ class TestMakeRestartLinks:
             salishsea_cmd.prepare._make_restart_links(
                 run_desc, 'run_dir', nocheck_init=False
             )
-        m_symlink_to.assert_called_once_with(Path(p_results))
+        m_symlink_to.assert_called_once_with(Path(str(p_results)))
 
     @patch('salishsea_cmd.prepare.logger')
     def test_no_link_path(self, m_logger, tmpdir):
