@@ -14,7 +14,7 @@
 .. limitations under the License.
 
 
-.. _NEMO-3.6-NEMO-3.6-RunDescriptionFile:
+.. _NEMO-3.6-RunDescriptionFile:
 
 *****************************
 NEMO-3.6 Run Description File
