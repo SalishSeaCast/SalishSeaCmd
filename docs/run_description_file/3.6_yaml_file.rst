@@ -70,21 +70,6 @@ The following key-value pairs provide the basic configuration for the run:
   as well as notification of abnormal abort messages.
   The email key is only required if the address is different than would be constructed by combining your user id on the machine that the job runs on with :kbd:`@eos.ubc.ca`.
 
-An optional key,
-:kbd:`Land processor elimination`,
-is available to control whether or not NEMO-3.6 runs are configured to perform calculations over the entire domain,
-or only on the MPI subdomains that contain water.
-Please see :ref:`LandProcessorElimination` for a detailed explanation,
-and use the :ref:`Preferred-MPI-LPE-Decompositions` table to guide your choice of value for :kbd:`MPI decomposition`.
-The :ref:`SalishSeaCmdProcessor` takes care of setting the correct number of processors based on your chosen :kbd:`MPI decomposition`.
-Land processor elimination is enabled by default,
-even if the :kbd:`Land processor elimination` key is not included in the run description file.
-If you have a reason to not use land processor elimination you can disable it with:
-
-.. code-block:: yaml
-
-    Land processor elimination: False
-
 
 .. _NEMO-3.6-Paths:
 
@@ -132,13 +117,22 @@ The :kbd:`paths` section of the run description file is a collection of director
 :kbd:`grid` Section
 ===================
 
-The :kbd:`grid` section of the run description file contains 2 key-value pairs that provide:
+The :kbd:`grid` section of the run description file contains 3 key-value pairs that provide the paths/filenames of the grid files to use for the run:
 
-* the names of the coordinates and bathymetry files to use for the run, or,
-* relative paths to the coordinates and bathymetry files to use for the run, or,
-* absolute paths to the coordinates and bathymetry files to use for the run
+* coordinates
+* bathymetry
+* land processor elimination configuration
 
-If file names are provided,
+An example :kbd:`grid` section:
+
+.. code-block:: yaml
+
+    grid:
+      coordinates: coordinates_seagrid_SalishSea201702.nc
+      bathymetry: bathymetry_201702.nc
+      land processor elimination: bathymetry_201702.csv
+
+If simple file names are provided,
 those files are presumed to be in the :file:`grid/` sub-directory of the directory tree pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.6-Paths`.
 
 If relative paths are given,
@@ -157,9 +151,25 @@ and :envvar:`$USER` as an alternative spelling of the user's userid.
 :kbd:`bathymetry`
   The name of,
   or path to,
-  the bathymetry file to use for the run
+  the bathymetry file to use for the run.
   It is symlinked in the run directory as :file:`bathy_meter.nc`
   (the file name required by NEMO).
+
+:kbd:`land processor elimination`
+  The name of,
+  or path to,
+  the MPI-LPE mapping CSV file that corresponds to the bathymetry to use for the run.
+  That file contains the information necessary to configure NEMO-3.6 to perform calculations only on the MPI subdomains that contain water.
+  Please see :ref:`LandProcessorElimination` for a detailed explanation,
+  and use the :ref:`Preferred-MPI-LPE-Decompositions` table to guide your choice of value for :kbd:`MPI decomposition`.
+  The :ref:`SalishSeaCmdProcessor` takes care of setting the correct number of processors based on your chosen :kbd:`MPI decomposition`.
+
+  A value of :py:obj:`False` disables :ref:`LandProcessorElimination`
+
+  If the :kbd:`land processor elimination` key is missing,
+  a warning message is printed to let you know that the run is proceeding on the assumption that you want to run without land processor elimination.
+
+  This key may also be spelled :kbd:`Land processor elimination` for backward compatibility.
 
 
 .. _NEMO-3.6-Forcing:
