@@ -1,5 +1,7 @@
 # salishsea command processor run description example for NEMO-3.4
 
+# Name of the NEMO-3.4 configuration to use for the run;
+# i.e. your NEMO-code/NEMOGCM/CONFIG/ configuration directory
 config_name: SalishSea
 
 # How is the domain to be distributed over the processors in the
@@ -9,18 +11,30 @@ config_name: SalishSea
 MPI decomposition: 8x18
 
 # For runs on systems that use qsub/PBS/TORQUE
+#
+# The run_id value appears in the list of jobs display by the showq command
 run_id: example
+# Maximum run time requested/allowed for job
+# Too low and you job will be terminated before it finishes
+# Too high and you will have to wait longer on the queue for your job to start
+# You have to experiment to find the "just right" value
 walltime: 10:00:00
+# Email address to send job begin, end, and abort notifications to
 # If missing, email address is set to ${USER}@eos.ubc.ca
-email: dlatornell@example.com
+email: you@example.com
 
 paths:
   # Absolute path to NEMO CONFIG/ diectory.
   # You can use ~, $USER, $HOME if you wish.
   NEMO code config: $HOME/MEOPAR/NEMO-code/NEMOGCM/CONFIG/
   # If relative, paths below are taken from current directory
-  # You CANNOT use $HOME here
+  # You can use ~, $USER, $HOME if you wish.
+  #
+  # Directory to use as base for relative paths in grid: and forcing: sections
+  # below
   forcing: ../../NEMO-forcing/
+  # Directory in which to create temporary run directories
+  # Typically NOT inside a version control repository
   runs directory: ../../SalishSea/
 
 grid:
