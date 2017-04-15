@@ -27,8 +27,13 @@ paths:
 grid:
   # If relative, paths are taken from the grid/ directory in the forcing
   # path above
-  coordinates: coordinates_seagrid_SalishSea.nc
-  bathymetry: bathy_meter_SalishSea2.nc
+  coordinates: coordinates_seagrid_SalishSea201702.nc
+  bathymetry: bathymetry_201702.nc
+  # Optional path/filename for land processor elimination MPI-LPE mapping
+  # file that matches bathymetry;
+  # If "land processor elimination:" key is absent or has the value "False",
+  # land processor elimination is disabled
+  land processor elimination: bathymetry_201702.csv
 
 forcing:
   # The keys below are the names of symlinks that will be created.
