@@ -23,7 +23,20 @@
 Version 3.1
 ===========
 
-The following change that was introduced in version 3.1 of the :kbd:`SalishSeaCmd` package is incompatible with earlier versions:
+The following changes that were introduced in version 3.1 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
+
+* For NEMO-3.6 only,
+  :ref:`LandProcessorElimination` configuration must now be done explicitly,
+  in contrast to being automatic in version 3.0.
+  This change is necessary to accommodate the fact that the MPI-LPE mapping changes with bathymetry,
+  so it is necessary to specify the MPI-LPE mapping CSV file that corresponds to the bathymetry you are using in the run description YAML file.
+
+  The :kbd:`land processor elimination` key has moved from the top level of the YAML file
+  (where it was previously only used with a value of :py:obj:`False` to disable land processor elimination)
+  to the :kbd:`grid` section.
+  The value associated with the :kbd:`land processor elimination` key is the path/filename of the MPI-LPE mapping CSV file to be used for the run.
+
+  Please see the YAML file :ref:`NEMO-3.6-Grid` docs for details.
 
 * For NEMO-3.6 only,
   restart file paths/filenames are now specified in a new :kbd:`restart` section instead of in the :kbd:`forcing` section;

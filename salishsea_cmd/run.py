@@ -191,7 +191,7 @@ def run(
         log.info('Created run directory {}'.format(run_dir_name))
     run_dir = pathlib.Path(run_dir_name).resolve()
     run_desc = lib.load_run_desc(desc_file)
-    nemo_processors = lib.get_n_processors(run_desc)
+    nemo_processors = lib.get_n_processors(run_desc, run_dir)
     separate_xios_server = get_run_desc_value(
         run_desc, ('output', 'separate XIOS server')
     )

@@ -142,7 +142,7 @@ class TestRun:
             )
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
         m_lrd.assert_called_once_with('SalishSea.yaml')
-        m_gnp.assert_called_once_with(m_lrd())
+        m_gnp.assert_called_once_with(m_lrd(), pathlib.Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
             pathlib.Path(str(p_results_dir)), str(p_run_dir), 'orcinus', nemo34
@@ -181,7 +181,7 @@ class TestRun:
             )
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
         m_lrd.assert_called_once_with('SalishSea.yaml')
-        m_gnp.assert_called_once_with(m_lrd())
+        m_gnp.assert_called_once_with(m_lrd(), pathlib.Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
             pathlib.Path(str(p_results_dir)), str(p_run_dir), 'orcinus', nemo34
