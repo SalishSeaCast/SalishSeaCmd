@@ -15,10 +15,10 @@
 """SalishSeaCmd run sub-command plug-in unit tests
 """
 try:
-    import pathlib
+    from pathlib import Path
 except ImportError:
     # Python 2.7
-    import pathlib2 as pathlib
+    from pathlib2 import Path
 try:
     from unittest.mock import Mock, patch
 except ImportError:
@@ -48,7 +48,7 @@ class TestParser:
     def test_parsed_args_defaults(self, run_cmd):
         parser = run_cmd.get_parser('salishsea run')
         parsed_args = parser.parse_args(['foo', 'baz'])
-        assert parsed_args.desc_file == pathlib.Path('foo')
+        assert parsed_args.desc_file == Path('foo')
         assert parsed_args.results_dir == 'baz'
         assert parsed_args.max_deflate_jobs == 4
         assert not parsed_args.nemo34
@@ -127,7 +127,7 @@ class TestRun:
         xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
-        m_prepare.return_value = str(p_run_dir)
+        m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir('results_dir')
         if not nemo34:
             m_lrd.return_value = {
@@ -142,10 +142,10 @@ class TestRun:
             )
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
         m_lrd.assert_called_once_with('SalishSea.yaml')
-        m_gnp.assert_called_once_with(m_lrd(), pathlib.Path(m_prepare()))
+        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            pathlib.Path(str(p_results_dir)), str(p_run_dir), 'orcinus', nemo34
+            Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', nemo34
         )
         m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],
                                       universal_newlines=True)
@@ -163,7 +163,7 @@ class TestRun:
         xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
-        m_prepare.return_value = str(p_run_dir)
+        m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir('results_dir')
         if not nemo34:
             m_lrd.return_value = {
@@ -177,14 +177,14 @@ class TestRun:
                 'SalishSea.yaml',
                 str(p_results_dir),
                 nemo34=nemo34,
-                no_submit=True,
+                no_submit=True
             )
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
         m_lrd.assert_called_once_with('SalishSea.yaml')
-        m_gnp.assert_called_once_with(m_lrd(), pathlib.Path(m_prepare()))
+        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            pathlib.Path(str(p_results_dir)), str(p_run_dir), 'orcinus', nemo34
+            Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', nemo34
         )
         assert not m_sco.called
         assert qsb_msg is None
