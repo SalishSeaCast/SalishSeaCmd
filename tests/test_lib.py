@@ -44,7 +44,9 @@ class TestGetNProcessors:
     )
     def test_without_land_processor_elimination(self, m_logger, lpe_key):
         run_desc = {'MPI decomposition': '8x18', 'grid': {lpe_key: False}}
-        n_processors = salishsea_cmd.lib.get_n_processors(run_desc, 'run_dir')
+        n_processors = salishsea_cmd.lib.get_n_processors(
+            run_desc, Path('run_dir')
+        )
         assert not m_logger.warning.called
         assert n_processors == 144
 
@@ -52,7 +54,9 @@ class TestGetNProcessors:
         run_desc = {
             'MPI decomposition': '8x18',
         }
-        n_processors = salishsea_cmd.lib.get_n_processors(run_desc, 'run_dir')
+        n_processors = salishsea_cmd.lib.get_n_processors(
+            run_desc, Path('run_dir')
+        )
         assert m_logger.warning.called
         assert n_processors == 144
 
@@ -74,7 +78,9 @@ class TestGetNProcessors:
                 lpe_key: str(lpe_mpi_mapping)
             }
         }
-        n_processors = salishsea_cmd.lib.get_n_processors(run_desc, 'run_dir')
+        n_processors = salishsea_cmd.lib.get_n_processors(
+            run_desc, Path('run_dir')
+        )
         m_lookup.assert_called_once_with(Path(str(lpe_mpi_mapping)), 8, 18)
         assert n_processors == 88
 
@@ -99,7 +105,9 @@ class TestGetNProcessors:
                 lpe_key: 'bathymetry_201702.csv'
             }
         }
-        n_processors = salishsea_cmd.lib.get_n_processors(run_desc, 'run_dir')
+        n_processors = salishsea_cmd.lib.get_n_processors(
+            run_desc, Path('run_dir')
+        )
         m_lookup.assert_called_once_with(
             Path(str(p_forcing.join('grid', 'bathymetry_201702.csv'))), 8, 18
         )
@@ -125,5 +133,5 @@ class TestGetNProcessors:
             }
         }
         with pytest.raises(ValueError):
-            salishsea_cmd.lib.get_n_processors(run_desc, 'run_dir')
+            salishsea_cmd.lib.get_n_processors(run_desc, Path('run_dir'))
         assert m_logger.error.called

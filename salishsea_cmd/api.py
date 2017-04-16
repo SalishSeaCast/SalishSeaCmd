@@ -106,7 +106,7 @@ def prepare(run_desc_file, nemo34=False, nocheck_init=False):
     :type nocheck_init: boolean
 
     :returns: Path of the temporary run directory
-    :rtype: str
+    :rtype: :py:class:`pathlib.Path`
     """
     return prepare_plugin.prepare(run_desc_file, nemo34, nocheck_init)
 
@@ -123,7 +123,7 @@ def run_description(
     forcing=None,
     init_conditions=None,
     namelists=None,
-    nemo34=False,
+    nemo34=False
 ):
     """Return a Salish Sea NEMO run description dict template.
 

@@ -15,7 +15,6 @@
 """Utility functions for use by SalishSeaCmd command plug-ins.
 """
 import logging
-import os
 
 import yaml
 from nemo_cmd import fspath
@@ -42,11 +41,10 @@ def get_n_processors(run_desc, run_dir):
     """Return the total number of processors required for the run as
     specified by the MPI decomposition key in the run description.
 
-    :param run_dir: 
     :param dict run_desc: Run description dictionary.
 
     :param run_dir: Path of the temporary run directory.
-    :type run_dir: str
+    :type run_dir: :py:class:`pathlib.Path`
 
     :returns: Number of processors required for the run.
     :rtype: int
