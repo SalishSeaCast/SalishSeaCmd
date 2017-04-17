@@ -109,7 +109,10 @@ The :kbd:`paths` section of the run description file is a collection of director
 
 :kbd:`runs directory`
   The path to the directory where run directories will be created by the :command:`salishsea run` (or :command:`salishsea prepare`) sub-command.
-  This path may be either absolute or relative.
+
+  This path may be relative or absolute,
+  and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+  and :envvar:`$USER` as an alternative spelling of the user's userid.
 
 
 .. _NEMO-3.6-Grid:
