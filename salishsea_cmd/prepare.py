@@ -225,7 +225,7 @@ def _make_run_dir(run_desc):
     The location is the directory comes from the run description,
     and its name is a hostname- and time-based UUID.
 
-    :arg run_desc: Run description dictionary.
+    :param run_desc: Run description dictionary.
     :type run_desc: dict
     
     :returns: Path of the temporary run directory
@@ -250,11 +250,10 @@ def _remove_run_dir(run_dir):
     """
     # Allow time for the OS to flush file buffers to disk
     time.sleep(0.1)
-    run_dir_path = Path(run_dir)
     try:
-        for p in run_dir_path.iterdir():
+        for p in run_dir.iterdir():
             p.unlink()
-        run_dir_path.rmdir()
+        run_dir.rmdir()
     except OSError:
         pass
 
