@@ -785,8 +785,8 @@ def _resolve_forcing_path(run_desc, keys, run_dir):
     
     :param dict run_desc: Run description dictionary.
 
-    :param tuple keys: Key in the :kbd:`forcing` section of the run description
-                       for which the resolved path calculated.
+    :param tuple keys: Key sequence in the :kbd:`forcing` section of the 
+                       run description for which the resolved path calculated.
                     
     :param run_dir: Path of the temporary run directory.
     :type run_dir: :py:class:`pathlib.Path`
@@ -960,7 +960,7 @@ def _check_atmos_files(run_desc, run_dir):
     :param run_dir: Path of the temporary run directory.
     :type run_dir: :py:class:`pathlib.Path`
 
-    :raises: SystemExit
+    :raises: :py:exc:`SystemExit` if an atmospheric forcing file does not exist
     """
     namelist = nemo_cmd.namelist.namelist2dict(
         nemo_cmd.fspath(run_dir / 'namelist')
