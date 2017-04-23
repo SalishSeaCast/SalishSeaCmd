@@ -32,6 +32,7 @@ import xml.etree.ElementTree
 import arrow
 import cliff.command
 import nemo_cmd
+import nemo_cmd.api
 import nemo_cmd.prepare
 from nemo_cmd.prepare import get_run_desc_value
 
@@ -126,6 +127,7 @@ def prepare(desc_file, nemo34, nocheck_init):
     run_desc = lib.load_run_desc(desc_file)
     nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
     xios_bin_dir = _check_xios_exec(run_desc) if not nemo34 else ''
+    nemo_cmd.api.find_rebuild_nemo_script(run_desc)
     run_set_dir = nemo_cmd.resolved_path(desc_file).parent
     run_dir = _make_run_dir(run_desc)
     _make_namelists(run_set_dir, run_desc, run_dir, nemo34)
