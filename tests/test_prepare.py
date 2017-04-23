@@ -68,6 +68,7 @@ class TestParser:
 @patch('salishsea_cmd.prepare.lib.load_run_desc')
 @patch('salishsea_cmd.prepare._check_nemo_exec')
 @patch('salishsea_cmd.prepare._check_xios_exec')
+@patch('nemo_cmd.api.find_rebuild_nemo_script')
 @patch('nemo_cmd.resolved_path')
 @patch('salishsea_cmd.prepare._make_run_dir')
 @patch('salishsea_cmd.prepare._make_namelists')
@@ -89,7 +90,7 @@ class TestPrepare:
     )
     def test_prepare(
         self, m_rvr, m_mrl, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd,
-        m_resolved_path, m_cxe, m_cne, m_lrd, nemo34, m_cne_return,
+        m_resolved_path, m_frns, m_cxe, m_cne, m_lrd, nemo34, m_cne_return,
         m_cxe_return
     ):
         m_cne.return_value = m_cne_return
@@ -103,6 +104,7 @@ class TestPrepare:
             assert not m_cxe.called
         else:
             m_cne.assert_called_once_with(m_lrd(), nemo34)
+        m_frns.assert_called_once_with(m_lrd())
         m_resolved_path.assert_called_once_with(Path('SalishSea.yaml'))
         m_mrd.assert_called_once_with(m_lrd())
         m_mnl.assert_called_once_with(
