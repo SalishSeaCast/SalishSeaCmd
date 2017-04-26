@@ -217,6 +217,40 @@ class TestPbsFeatures:
         assert pbs_features == expected
 
 
+class TestExecute:
+    """Unit test for _execute function.
+    """
+
+    def test_execute(self):
+        script = salishsea_cmd.run._execute(
+            nemo_processors=42, xios_processors=1, max_deflate_jobs=4
+        )
+        expected = '''mkdir -p ${RESULTS_DIR}
+        cd ${WORK_DIR}
+        echo "working dir: $(pwd)"
+
+        echo "Starting run at $(date)"
+        mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+        MPIRUN_EXIT_CODE=$?
+        echo "Ended run at $(date)"
+
+        echo "Results combining started at $(date)"
+        ${COMBINE} ${RUN_DESC} --debug
+        echo "Results combining ended at $(date)"
+        
+        echo "Results deflation started at $(date)"
+        ${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc --jobs 4 --debug
+        echo "Results deflation ended at $(date)"
+        
+        echo "Results gathering started at $(date)"
+        ${GATHER} ${RESULTS_DIR} --debug
+        echo "Results gathering ended at $(date)"
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(script.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+
 class TestCleanup:
     """Unit test for _cleanup() function.
     """

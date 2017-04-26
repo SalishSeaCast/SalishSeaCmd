@@ -382,7 +382,7 @@ def _execute(nemo_processors, xios_processors, max_deflate_jobs):
         u'echo "Results combining ended at $(date)"\n'
         u'\n'
         u'echo "Results deflation started at $(date)"\n'
-        u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc '
+        u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
         u'--jobs {max_deflate_jobs} --debug\n'
         u'echo "Results deflation ended at $(date)"\n'
         u'\n'
