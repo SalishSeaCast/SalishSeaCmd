@@ -14,7 +14,6 @@
 # limitations under the License.
 """SalishSeaCmd combine sub-command plug-in unit tests
 """
-from io import StringIO
 try:
     from unittest.mock import Mock, patch
 except ImportError:
@@ -24,7 +23,6 @@ except ImportError:
 import cliff.app
 import cliff.command
 import pytest
-import yaml
 
 import salishsea_cmd.api
 
@@ -190,32 +188,3 @@ class TestRunSubcommand(object):
         m_cmd_mgr().find_command.return_value = (cmd_factory, 'bar', 'baz')
         salishsea_cmd.api._run_subcommand(app, app_args, ['foo'])
         assert m_log.called
-
-
-class TestPbsCommon:
-    """Unit tests for `salishsea run` pbs_common() function.
-    """
-
-    def test_walltime_leading_zero(self):
-        """Ensure correct handling of walltime w/ leading zero in YAML desc file
-
-        re: issue#16
-        """
-        desc_file = StringIO(u'run_id: foo\n' u'walltime: 01:02:03\n')
-        run_desc = yaml.load(desc_file)
-        pbs_directives = salishsea_cmd.api.pbs_common(
-            run_desc, 42, 'me@example.com', 'foo/'
-        )
-        assert 'walltime=1:02:03' in pbs_directives
-
-    def test_walltime_no_leading_zero(self):
-        """Ensure correct handling of walltime w/o leading zero in YAML desc file
-
-        re: issue#16
-        """
-        desc_file = StringIO(u'run_id: foo\n' u'walltime: 1:02:03\n')
-        run_desc = yaml.load(desc_file)
-        pbs_directives = salishsea_cmd.api.pbs_common(
-            run_desc, 42, 'me@example.com', 'foo/'
-        )
-        assert 'walltime=1:02:03' in pbs_directives
