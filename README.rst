@@ -17,7 +17,7 @@ Documentation for the command processor is in the ``docs/`` directory and is ren
     :target: https://salishseacmd.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-This an extensible tool built on the OpenStack :kbd:``cliff``
+This an extensible tool built on the OpenStack ``cliff``
 (`Command Line Interface Formulation Framework`_)
 package.
 It is a NEMO domain-specific command processor tool for the `Salish Sea NEMO model`_ that uses plug-ins from the `NEMO-Cmd`_ package.
