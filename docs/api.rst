@@ -35,5 +35,3 @@ and by other software.
 .. autofunction:: salishsea_cmd.api.run_description
 
 .. autofunction:: salishsea_cmd.api.run_in_subprocess
-
-.. autofunction:: salishsea_cmd.api.pbs_common
