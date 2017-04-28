@@ -56,6 +56,7 @@ class TestParser:
         assert not parsed_args.nemo34
         assert not parsed_args.nocheck_init
         assert not parsed_args.no_submit
+        assert not parsed_args.separate_deflate
         assert parsed_args.waitjob == 0
         assert not parsed_args.quiet
 
@@ -64,6 +65,7 @@ class TestParser:
             ('--nemo3.4', 'nemo34'),
             ('--nocheck-initial-conditions', 'nocheck_init'),
             ('--no-submit', 'no_submit'),
+            ('--separate-deflate', 'separate_deflate'),
             ('-q', 'quiet'),
             ('--quiet', 'quiet'),
         ]
@@ -88,12 +90,13 @@ class TestTakeAction:
             nemo34=False,
             nocheck_init=False,
             no_submit=False,
+            separate_deflate=False,
             waitjob=0,
             quiet=False
         )
         run_cmd.run(parsed_args)
         m_run.assert_called_once_with(
-            'desc file', 'results dir', 4, False, False, False, 0, False
+            'desc file', 'results dir', 4, False, False, False, False, 0, False
         )
         m_log.info.assert_called_once_with('qsub message')
 
@@ -118,51 +121,18 @@ class TestRun:
     """
 
     @pytest.mark.parametrize(
-        'nemo34, sep_xios_server, xios_servers', [
-            (True, None, 0),
-            (False, False, 0),
-            (False, True, 4),
+        'nemo34, sep_xios_server, xios_servers, sep_deflate', [
+            (True, None, 0, True),
+            (True, None, 0, False),
+            (False, False, 0, True),
+            (False, False, 0, False),
+            (False, True, 4, True),
+            (False, True, 4, False),
         ]
     )
     def test_run_submit(
         self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco, nemo34, sep_xios_server,
-        xios_servers, tmpdir
-    ):
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        m_prepare.return_value = Path(str(p_run_dir))
-        p_results_dir = tmpdir.ensure_dir('results_dir')
-        if not nemo34:
-            m_lrd.return_value = {
-                'output': {
-                    'separate XIOS server': sep_xios_server,
-                    'XIOS servers': xios_servers,
-                }
-            }
-        with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
-            qsb_msg = salishsea_cmd.run.run(
-                'SalishSea.yaml', str(p_results_dir), nemo34=nemo34
-            )
-        m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
-        m_lrd.assert_called_once_with('SalishSea.yaml')
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', nemo34
-        )
-        m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],
-                                      universal_newlines=True)
-        assert qsb_msg == 'msg'
-
-    @pytest.mark.parametrize(
-        'nemo34, sep_xios_server, xios_servers', [
-            (True, None, 0),
-            (False, False, 0),
-            (False, True, 4),
-        ]
-    )
-    def test_run_no_submit(
-        self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco, nemo34, sep_xios_server,
-        xios_servers, tmpdir
+        xios_servers, sep_deflate, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = Path(str(p_run_dir))
@@ -179,6 +149,50 @@ class TestRun:
                 'SalishSea.yaml',
                 str(p_results_dir),
                 nemo34=nemo34,
+                separate_deflate=sep_deflate
+            )
+        m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
+        m_lrd.assert_called_once_with('SalishSea.yaml')
+        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
+        m_bbs.assert_called_once_with(
+            m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
+            Path(str(p_results_dir)),
+            Path(str(p_run_dir)), 'orcinus', nemo34, sep_deflate
+        )
+        m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],
+                                      universal_newlines=True)
+        assert qsb_msg == 'msg'
+
+    @pytest.mark.parametrize(
+        'nemo34, sep_xios_server, xios_servers, sep_deflate', [
+            (True, None, 0, True),
+            (True, None, 0, False),
+            (False, False, 0, True),
+            (False, False, 0, False),
+            (False, True, 4, True),
+            (False, True, 4, False),
+        ]
+    )
+    def test_run_no_submit(
+        self, m_prepare, m_lrd, m_gnp, m_bbs, m_sco, nemo34, sep_xios_server,
+        xios_servers, sep_deflate, tmpdir
+    ):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        m_prepare.return_value = Path(str(p_run_dir))
+        p_results_dir = tmpdir.ensure_dir('results_dir')
+        if not nemo34:
+            m_lrd.return_value = {
+                'output': {
+                    'separate XIOS server': sep_xios_server,
+                    'XIOS servers': xios_servers,
+                }
+            }
+        with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
+            qsb_msg = salishsea_cmd.run.run(
+                'SalishSea.yaml',
+                str(p_results_dir),
+                nemo34=nemo34,
+                separate_deflate=sep_deflate,
                 no_submit=True
             )
         m_prepare.assert_called_once_with('SalishSea.yaml', nemo34, False)
@@ -186,7 +200,8 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', nemo34
+            Path(str(p_results_dir)),
+            Path(str(p_run_dir)), 'orcinus', nemo34, sep_deflate
         )
         assert not m_sco.called
         assert qsb_msg is None
@@ -252,9 +267,12 @@ class TestExecute:
     """Unit test for _execute function.
     """
 
-    def test_execute(self):
+    def test_execute_with_deflate(self):
         script = salishsea_cmd.run._execute(
-            nemo_processors=42, xios_processors=1, max_deflate_jobs=4
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            separate_deflate=False
         )
         expected = '''mkdir -p ${RESULTS_DIR}
         cd ${WORK_DIR}
@@ -272,6 +290,34 @@ class TestExecute:
         echo "Results deflation started at $(date)"
         ${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc --jobs 4 --debug
         echo "Results deflation ended at $(date)"
+        
+        echo "Results gathering started at $(date)"
+        ${GATHER} ${RESULTS_DIR} --debug
+        echo "Results gathering ended at $(date)"
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(script.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+    def test_execute_without_deflate(self):
+        script = salishsea_cmd.run._execute(
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            separate_deflate=True
+        )
+        expected = '''mkdir -p ${RESULTS_DIR}
+        cd ${WORK_DIR}
+        echo "working dir: $(pwd)"
+
+        echo "Starting run at $(date)"
+        mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+        MPIRUN_EXIT_CODE=$?
+        echo "Ended run at $(date)"
+
+        echo "Results combining started at $(date)"
+        ${COMBINE} ${RUN_DESC} --debug
+        echo "Results combining ended at $(date)"
         
         echo "Results gathering started at $(date)"
         ${GATHER} ${RESULTS_DIR} --debug
