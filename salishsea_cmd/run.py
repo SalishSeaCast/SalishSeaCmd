@@ -19,6 +19,7 @@ Salish Sea NEMO model.
 """
 from __future__ import division
 
+import datetime
 import logging
 import math
 import os
@@ -268,7 +269,7 @@ def _build_batch_script(
         script = u'\n'.join((
             script, u'{pbs_common}'
             u'{pbs_features}\n'.format(
-                pbs_common=api.pbs_common(
+                pbs_common=_pbs_common(
                     run_desc, nemo_processors + xios_processors, email,
                     fspath(results_dir)
                 ),
@@ -295,6 +296,87 @@ def _build_batch_script(
         )
     ))
     return script
+
+
+def _pbs_common(
+    run_description, n_processors, email, results_dir, pmem='2000mb'
+):
+    """Return the common PBS directives used to run NEMO in a TORQUE/PBS
+    multiple processor context.
+
+    The string that is returned is intended for inclusion in a bash script
+    that will be to the TORQUE/PBS queue manager via the :command:`qsub`
+    command.
+
+    :arg dict run_description: Run description data structure.
+
+    :arg int n_processors: Number of processors that the run will be
+                           executed on.
+                           For NEMO-3.6 runs this is the sum of NMEO and
+                           XIOS processors.
+
+    :arg str email: Email address to send job begin, end & abort
+                    notifications to.
+
+    :arg str results_dir: Directory to store results into.
+
+    :arg str pmem: Memory per processor.
+
+    :returns: PBS directives for run script.
+    :rtype: Unicode str
+    """
+    try:
+        td = datetime.timedelta(seconds=run_description['walltime'])
+    except TypeError:
+        t = datetime.datetime.strptime(
+            run_description['walltime'], '%H:%M:%S'
+        ).time()
+        td = datetime.timedelta(
+            hours=t.hour, minutes=t.minute, seconds=t.second
+        )
+    walltime = _td2hms(td)
+    pbs_directives = (
+        u'#PBS -N {run_id}\n'
+        u'#PBS -S /bin/bash\n'
+        u'#PBS -l procs={procs}\n'
+        u'# memory per processor\n'
+        u'#PBS -l pmem={pmem}\n'
+        u'#PBS -l walltime={walltime}\n'
+        u'# email when the job [b]egins and [e]nds, or is [a]borted\n'
+        u'#PBS -m bea\n'
+        u'#PBS -M {email}\n'
+        u'# stdout and stderr file paths/names\n'
+        u'#PBS -o {results_dir}/stdout\n'
+        u'#PBS -e {results_dir}/stderr\n'
+    ).format(
+        run_id=run_description['run_id'],
+        procs=n_processors,
+        pmem=pmem,
+        walltime=walltime,
+        email=email,
+        results_dir=results_dir,
+    )
+    return pbs_directives
+
+
+def _td2hms(timedelta):
+    """Return a string that is the timedelta value formated as H:M:S
+    with leading zeros on the minutes and seconds values.
+
+    :arg timedelta: Time interval to format.
+    :type timedelta: :py:obj:datetime.timedelta
+
+    :returns: H:M:S string with leading zeros on the minutes and seconds
+              values.
+    :rtype: unicode
+    """
+    seconds = int(timedelta.total_seconds())
+    periods = (('hour', 60 * 60), ('minute', 60), ('second', 1),)
+    hms = []
+    for period_name, period_seconds in periods:
+        period_value, seconds = divmod(seconds, period_seconds)
+        hms.append(period_value)
+    return u'{0[0]}:{0[1]:02d}:{0[2]:02d}'.format(hms)
 
 
 def _pbs_features(n_processors, system):
