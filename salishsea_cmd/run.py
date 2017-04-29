@@ -230,6 +230,16 @@ def run(
         f.write(batch_script)
     if no_submit:
         return
+    if separate_deflate:
+        patterns = ('*_grid_[TUVW]*.nc', '*_ptrc_T*.nc', '*_dia[12]_T*.nc')
+        result_types = ('grid', 'ptrc', 'dia')
+        for pattern, result_type in zip(patterns, result_types):
+            deflate_script = _build_deflate_script(
+                run_desc, pattern, result_type, results_dir, system, nemo34
+            )
+            script_file = run_dir / 'deflate_{}.sh'.format(result_type)
+            with script_file.open('wt') as f:
+                f.write(deflate_script)
     starting_dir = Path.cwd()
     os.chdir(fspath(run_dir))
     if waitjob:
@@ -239,6 +249,49 @@ def run(
     qsub_msg = subprocess.check_output(cmd.split(), universal_newlines=True)
     os.chdir(fspath(starting_dir))
     return qsub_msg
+
+
+def _build_deflate_script(
+    run_desc, pattern, result_type, results_dir, system, nemo34
+):
+    script = u'#!/bin/bash\n'
+    try:
+        email = get_run_desc_value(run_desc, ('email',))
+    except KeyError:
+        email = u'{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
+    script = u'\n'.join((
+        script, u'{pbs_common}\n'.format(
+            pbs_common=_pbs_common(
+                run_desc,
+                1,
+                email,
+                fspath(results_dir),
+                deflate=True,
+                result_type=result_type
+            ),
+        )
+    ))
+    script += (
+        u'RESULTS_DIR="{results_dir}"\n'
+        u'DEFLATE="${{PBS_O_HOME}}/.local/bin/salishsea deflate"\n'
+        u'\n'
+        u'{modules}\n'
+        u'cd ${{RESULTS_DIR}}\n'
+        u'echo "Results deflation started at $(date)"\n'
+        u'${{DEFLATE}} {pattern} --jobs 1 --debug\n'
+        u'DEFLATE_EXIT_CODE=$?\n'
+        u'echo "Results deflation ended at $(date)"\n'
+        u'\n'
+        u'chmod g+rw ${{RESULTS_DIR}}/*\n'
+        u'chmod o+r ${{RESULTS_DIR}}/*\n'
+        u'\n'
+        u'exit ${{DEFLATE_EXIT_CODE}}\n'
+    ).format(
+        results_dir=results_dir,
+        modules=_modules(system, nemo34),
+        pattern=pattern
+    )
+    return script
 
 
 def _build_batch_script(
@@ -282,23 +335,22 @@ def _build_batch_script(
     :rtype: str
     """
     script = u'#!/bin/bash\n'
-    if system != u'nowcast0':
-        try:
-            email = get_run_desc_value(run_desc, ('email',))
-        except KeyError:
-            email = u'{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
-        script = u'\n'.join((
-            script, u'{pbs_common}'
-            u'{pbs_features}\n'.format(
-                pbs_common=_pbs_common(
-                    run_desc, nemo_processors + xios_processors, email,
-                    fspath(results_dir)
-                ),
-                pbs_features=_pbs_features(
-                    nemo_processors + xios_processors, system
-                )
+    try:
+        email = get_run_desc_value(run_desc, ('email',))
+    except KeyError:
+        email = u'{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
+    script = u'\n'.join((
+        script, u'{pbs_common}'
+        u'{pbs_features}\n'.format(
+            pbs_common=_pbs_common(
+                run_desc, nemo_processors + xios_processors, email,
+                fspath(results_dir)
+            ),
+            pbs_features=_pbs_features(
+                nemo_processors + xios_processors, system
             )
-        ))
+        )
+    ))
     script = u'\n'.join((
         script, u'{defns}\n'
         u'{modules}\n'
@@ -321,7 +373,13 @@ def _build_batch_script(
 
 
 def _pbs_common(
-    run_description, n_processors, email, results_dir, pmem='2000mb'
+    run_desc,
+    n_processors,
+    email,
+    results_dir,
+    pmem='2000mb',
+    deflate=False,
+    result_type=''
 ):
     """Return the common PBS directives used to run NEMO in a TORQUE/PBS
     multiple processor context.
@@ -330,28 +388,41 @@ def _pbs_common(
     that will be to the TORQUE/PBS queue manager via the :command:`qsub`
     command.
 
-    :arg dict run_description: Run description data structure.
+    :param dict run_desc: Run description dictionary.
 
-    :arg int n_processors: Number of processors that the run will be
-                           executed on.
-                           For NEMO-3.6 runs this is the sum of NMEO and
-                           XIOS processors.
+    :param int n_processors: Number of processors that the run will be
+                             executed on.
+                             For NEMO-3.6 runs this is the sum of NMEO and
+                             XIOS processors.
 
-    :arg str email: Email address to send job begin, end & abort
+    :param str email: Email address to send job begin, end & abort
                     notifications to.
 
-    :arg str results_dir: Directory to store results into.
+    :param str results_dir: Directory to store results into.
 
-    :arg str pmem: Memory per processor.
+    :param str pmem: Memory per processor.
+
+    :param boolean deflate: Return directives for a run results deflation job
+                            when :py:obj:`True`.
+
+    :param str result_type: Run result type ('grid', 'ptrc', or 'dia') for
+                            deflation job.
 
     :returns: PBS directives for run script.
     :rtype: Unicode str
     """
+    run_id = get_run_desc_value(run_desc, ('run_id',))
+    if deflate:
+        run_id = 'deflate_{run_id}_{result_type}'.format(
+            run_id=run_id, result_type=result_type
+        )
     try:
-        td = datetime.timedelta(seconds=run_description['walltime'])
+        td = datetime.timedelta(
+            seconds=get_run_desc_value(run_desc, ('walltime',))
+        )
     except TypeError:
         t = datetime.datetime.strptime(
-            run_description['walltime'], '%H:%M:%S'
+            get_run_desc_value(run_desc, ('walltime',)), '%H:%M:%S'
         ).time()
         td = datetime.timedelta(
             hours=t.hour, minutes=t.minute, seconds=t.second
@@ -368,15 +439,26 @@ def _pbs_common(
         u'#PBS -m bea\n'
         u'#PBS -M {email}\n'
         u'# stdout and stderr file paths/names\n'
-        u'#PBS -o {results_dir}/stdout\n'
-        u'#PBS -e {results_dir}/stderr\n'
     ).format(
-        run_id=run_description['run_id'],
+        run_id=run_id,
         procs=n_processors,
         pmem=pmem,
         walltime=walltime,
         email=email,
-        results_dir=results_dir,
+    )
+    stdout = (
+        'stdout_deflate_{result_type}'.format(result_type=result_type)
+        if deflate else 'stdout'
+    )
+    stderr = (
+        'stderr_deflate_{result_type}'.format(result_type=result_type)
+        if deflate else 'stderr'
+    )
+    pbs_directives += (
+        u'#PBS -o {results_dir}/{stdout}\n'
+        u'#PBS -e {results_dir}/{stderr}\n'
+    ).format(
+        results_dir=results_dir, stdout=stdout, stderr=stderr
     )
     return pbs_directives
 
@@ -385,8 +467,7 @@ def _td2hms(timedelta):
     """Return a string that is the timedelta value formated as H:M:S
     with leading zeros on the minutes and seconds values.
 
-    :arg timedelta: Time interval to format.
-    :type timedelta: :py:obj:datetime.timedelta
+    :param :py:obj:datetime.timedelta timedelta: Time interval to format.
 
     :returns: H:M:S string with leading zeros on the minutes and seconds
               values.
