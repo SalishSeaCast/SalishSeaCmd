@@ -408,17 +408,19 @@ class TestCleanup:
 
 
 @pytest.mark.parametrize(
-    'pattern, result_type', [
-        ('*_grid_[TUVW]*.nc', 'grid'),
-        ('*_ptrc_T*.nc', 'ptrc'),
-        ('*_dia[12]_T.nc', 'dia'),
+    'pattern, result_type, pmem', [
+        ('*_grid_[TUVW]*.nc', 'grid', '2000mb'),
+        ('*_ptrc_T*.nc', 'ptrc', '2500mb'),
+        ('*_dia[12]_T.nc', 'dia', '2000mb'),
     ]
 )
 class TestBuildDeflateScript:
     """Unit test for _build_deflate_script() function.
     """
 
-    def test_build_deflate_script_orcinus(self, pattern, result_type, tmpdir):
+    def test_build_deflate_script_orcinus(
+        self, pattern, result_type, pmem, tmpdir
+    ):
         run_desc = {
             'run_id': '19sep14_hindcast',
             'walltime': '3:00:00',
@@ -439,7 +441,7 @@ class TestBuildDeflateScript:
         #PBS -S /bin/bash
         #PBS -l procs=1
         # memory per processor
-        #PBS -l pmem=2000mb
+        #PBS -l pmem={pmem}
         #PBS -l walltime=3:00:00
         # email when the job [b]egins and [e]nds, or is [a]borted
         #PBS -m bea
@@ -471,13 +473,16 @@ class TestBuildDeflateScript:
         '''.format(
             result_type=result_type,
             results_dir=str(p_results_dir),
-            pattern=pattern
+            pattern=pattern,
+            pmem=pmem
         )
         expected = expected.splitlines()
         for i, line in enumerate(script.splitlines()):
             assert line.strip() == expected[i].strip()
 
-    def test_build_deflate_script_jasper(self, pattern, result_type, tmpdir):
+    def test_build_deflate_script_jasper(
+        self, pattern, result_type, pmem, tmpdir
+    ):
         run_desc = {
             'run_id': '19sep14_hindcast',
             'walltime': '3:00:00',
@@ -498,7 +503,7 @@ class TestBuildDeflateScript:
         #PBS -S /bin/bash
         #PBS -l procs=1
         # memory per processor
-        #PBS -l pmem=2000mb
+        #PBS -l pmem={pmem}
         #PBS -l walltime=3:00:00
         # email when the job [b]egins and [e]nds, or is [a]borted
         #PBS -m bea
@@ -528,8 +533,31 @@ class TestBuildDeflateScript:
         '''.format(
             result_type=result_type,
             results_dir=str(p_results_dir),
-            pattern=pattern
+            pattern=pattern,
+            pmem=pmem
         )
         expected = expected.splitlines()
         for i, line in enumerate(script.splitlines()):
             assert line.strip() == expected[i].strip()
+
+    def test_build_deflate_script_pmem(
+        self, pattern, result_type, pmem, tmpdir
+    ):
+        run_desc = {
+            'run_id': '19sep14_hindcast',
+            'walltime': '3:00:00',
+            'email': 'test@example.com',
+        }
+        p_results_dir = tmpdir.ensure_dir('results_dir')
+        script = salishsea_cmd.run._build_deflate_script(
+            run_desc,
+            pattern,
+            result_type,
+            Path(str(p_results_dir)),
+            'jasper',
+            nemo34=False
+        )
+        if result_type == 'ptrc':
+            assert '#PBS -l pmem=2500mb' in script
+        else:
+            assert '#PBS -l pmem=2000mb' in script
