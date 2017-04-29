@@ -435,7 +435,7 @@ class TestBuildDeflateScript:
         )
         expected = '''#!/bin/bash
         
-        #PBS -N deflate_19sep14_hindcast_{result_type}
+        #PBS -N {result_type}_19sep14_hindcast_deflate
         #PBS -S /bin/bash
         #PBS -l procs=1
         # memory per processor
@@ -494,7 +494,7 @@ class TestBuildDeflateScript:
         )
         expected = '''#!/bin/bash
         
-        #PBS -N deflate_19sep14_hindcast_{result_type}
+        #PBS -N {result_type}_19sep14_hindcast_deflate
         #PBS -S /bin/bash
         #PBS -l procs=1
         # memory per processor

@@ -413,7 +413,7 @@ def _pbs_common(
     """
     run_id = get_run_desc_value(run_desc, ('run_id',))
     if deflate:
-        run_id = 'deflate_{run_id}_{result_type}'.format(
+        run_id = '{result_type}_{run_id}_deflate'.format(
             run_id=run_id, result_type=result_type
         )
     try:
