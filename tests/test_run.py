@@ -111,7 +111,9 @@ class TestTakeAction:
         assert not m_log.info.called
 
 
-@patch('salishsea_cmd.run.subprocess.check_output', return_value='msg')
+@patch(
+    'salishsea_cmd.run.subprocess.check_output', return_value='43.orca2.ibb'
+)
 @patch(
     'salishsea_cmd.run._build_deflate_script', return_value=u'deflate script'
 )
@@ -124,18 +126,15 @@ class TestRun:
     """
 
     @pytest.mark.parametrize(
-        'nemo34, sep_xios_server, xios_servers, sep_deflate', [
-            (True, None, 0, True),
-            (True, None, 0, False),
-            (False, False, 0, True),
-            (False, False, 0, False),
-            (False, True, 4, True),
-            (False, True, 4, False),
+        'nemo34, sep_xios_server, xios_servers', [
+            (True, None, 0),
+            (False, False, 0),
+            (False, True, 4),
         ]
     )
     def test_run_submit(
         self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, nemo34,
-        sep_xios_server, xios_servers, sep_deflate, tmpdir
+        sep_xios_server, xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = Path(str(p_run_dir))
@@ -149,10 +148,7 @@ class TestRun:
             }
         with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
             qsb_msg = salishsea_cmd.run.run(
-                Path('SalishSea.yaml'),
-                str(p_results_dir),
-                nemo34=nemo34,
-                separate_deflate=sep_deflate
+                Path('SalishSea.yaml'), str(p_results_dir), nemo34=nemo34
             )
         m_prepare.assert_called_once_with(
             Path('SalishSea.yaml'), nemo34, False
@@ -162,26 +158,23 @@ class TestRun:
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
             Path(str(p_results_dir)),
-            Path(str(p_run_dir)), 'orcinus', nemo34, sep_deflate
+            Path(str(p_run_dir)), 'orcinus', nemo34, False
         )
         m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],
                                       universal_newlines=True)
         assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
-        assert qsb_msg == 'msg'
+        assert qsb_msg == '43.orca2.ibb'
 
     @pytest.mark.parametrize(
-        'nemo34, sep_xios_server, xios_servers, sep_deflate', [
-            (True, None, 0, True),
-            (True, None, 0, False),
-            (False, False, 0, True),
-            (False, False, 0, False),
-            (False, True, 4, True),
-            (False, True, 4, False),
+        'nemo34, sep_xios_server, xios_servers', [
+            (True, None, 0),
+            (False, False, 0),
+            (False, True, 4),
         ]
     )
-    def test_run_no_submit(
+    def test_run_submit_waitjob(
         self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, nemo34,
-        sep_xios_server, xios_servers, sep_deflate, tmpdir
+        sep_xios_server, xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         m_prepare.return_value = Path(str(p_run_dir))
@@ -198,7 +191,51 @@ class TestRun:
                 Path('SalishSea.yaml'),
                 str(p_results_dir),
                 nemo34=nemo34,
-                separate_deflate=sep_deflate,
+                waitjob=42
+            )
+        m_prepare.assert_called_once_with(
+            Path('SalishSea.yaml'), nemo34, False
+        )
+        m_lrd.assert_called_once_with(Path('SalishSea.yaml'))
+        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
+        m_bbs.assert_called_once_with(
+            m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
+            Path(str(p_results_dir)),
+            Path(str(p_run_dir)), 'orcinus', nemo34, False
+        )
+        m_sco.assert_called_once_with(
+            ['qsub', '-W', 'depend=afterok:42', 'SalishSeaNEMO.sh'],
+            universal_newlines=True
+        )
+        assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
+        assert qsb_msg == '43.orca2.ibb'
+
+    @pytest.mark.parametrize(
+        'nemo34, sep_xios_server, xios_servers', [
+            (True, None, 0),
+            (False, False, 0),
+            (False, True, 4),
+        ]
+    )
+    def test_run_no_submit(
+        self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, nemo34,
+        sep_xios_server, xios_servers, tmpdir
+    ):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        m_prepare.return_value = Path(str(p_run_dir))
+        p_results_dir = tmpdir.ensure_dir('results_dir')
+        if not nemo34:
+            m_lrd.return_value = {
+                'output': {
+                    'separate XIOS server': sep_xios_server,
+                    'XIOS servers': xios_servers,
+                }
+            }
+        with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
+            qsb_msg = salishsea_cmd.run.run(
+                Path('SalishSea.yaml'),
+                str(p_results_dir),
+                nemo34=nemo34,
                 no_submit=True
             )
         m_prepare.assert_called_once_with(
@@ -209,7 +246,7 @@ class TestRun:
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
             Path(str(p_results_dir)),
-            Path(str(p_run_dir)), 'orcinus', nemo34, sep_deflate
+            Path(str(p_run_dir)), 'orcinus', nemo34, False
         )
         assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
         assert not m_sco.called
@@ -264,10 +301,19 @@ class TestRun:
                 Path(str(p_results_dir)), 'orcinus', nemo34
             ),
         ]
-        assert p_run_dir.join('SalishSeaNEMO.sh').check()
-        assert p_run_dir.join('deflate_grid.sh').check()
-        assert p_run_dir.join('deflate_ptrc.sh').check()
-        assert p_run_dir.join('deflate_dia.sh').check()
+        assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
+        assert p_run_dir.join('deflate_grid.sh').check(file=True)
+        assert p_run_dir.join('deflate_ptrc.sh').check(file=True)
+        assert p_run_dir.join('deflate_dia.sh').check(file=True)
+        assert m_sco.call_args_list == [
+            call(['qsub', 'SalishSeaNEMO.sh'], universal_newlines=True),
+            call(['qsub', '-W', 'depend=afterok:43', 'deflate_grid.sh'],
+                 universal_newlines=True),
+            call(['qsub', '-W', 'depend=afterok:43', 'deflate_ptrc.sh'],
+                 universal_newlines=True),
+            call(['qsub', '-W', 'depend=afterok:43', 'deflate_dia.sh'],
+                 universal_newlines=True),
+        ]
 
 
 class TestPbsCommon:

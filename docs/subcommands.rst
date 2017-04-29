@@ -56,15 +56,15 @@ For example:
 
     usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS] [--nemo3.4]
                          [--nocheck-initial-conditions] [--no-submit]
-                         [--waitjob WAITJOB] [-q]
+                         [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
-    described in DESC_FILE. The results files from the run are
-    gathered in RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
+    described in DESC_FILE. The results files from the run are gathered in
+    RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
 
     positional arguments:
-      DESC_FILE             File path/name of run description YAML file
+      DESC_FILE             run description YAML file
       RESULTS_DIR           directory to store results into
 
     optional arguments:
@@ -82,10 +82,14 @@ For example:
                             run to the queue. This is useful during development
                             runs when you want to hack on the bash script and/or
                             use the same temporary run directory more than once.
-      --waitjob WAITJOB     use -W waitjob in call to qsub, to make current job
-                            wait for on waitjob. Waitjob is the queue job number
-      -q, --quiet           don't show the run directory path or job submission
-                            message
+      --separate-deflate    Produce separate bash scripts to deflate the run
+                            results and qsub them to run as serial jobs after the
+                            NEMO run finishes via the `qsub -W depend=afterok`
+                            feature.
+      --waitjob WAITJOB     Use -W waitjob in call to qsub, to make current job
+                            wait for on waitjob. WAITJOB is the queue job number.
+      -q, --quiet           Don't show the run directory path or job submission
+                            message.
 
 You can check what version of :program:`salishsea` you have installed with:
 
@@ -108,15 +112,15 @@ The results are gathered in the specified results directory.
 
     usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS] [--nemo3.4]
                          [--nocheck-initial-conditions] [--no-submit]
-                         [--waitjob WAITJOB] [-q]
+                         [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
-    described in DESC_FILE and IO_DEFS. The results files from the run are
-    gathered in RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
+    described in DESC_FILE. The results files from the run are gathered in
+    RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
 
     positional arguments:
-      DESC_FILE             File path/name of run description YAML file
+      DESC_FILE             run description YAML file
       RESULTS_DIR           directory to store results into
 
     optional arguments:
@@ -134,10 +138,14 @@ The results are gathered in the specified results directory.
                             run to the queue. This is useful during development
                             runs when you want to hack on the bash script and/or
                             use the same temporary run directory more than once.
-      --waitjob WAITJOB     use -W waitjob in call to qsub, to make current job
-                            wait for on waitjob. Waitjob is the queue job number
-      -q, --quiet           don't show the run directory path or job submission
-                            message
+      --separate-deflate    Produce separate bash scripts to deflate the run
+                            results and qsub them to run as serial jobs after the
+                            NEMO run finishes via the `qsub -W depend=afterok`
+                            feature.
+      --waitjob WAITJOB     Use -W waitjob in call to qsub, to make current job
+                            wait for on waitjob. WAITJOB is the queue job number.
+      -q, --quiet           Don't show the run directory path or job submission
+                            message.
 
 The path to the run directory,
 and the response from the job queue manager
@@ -171,6 +179,34 @@ Example:
 
 If the :command:`run` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+
+
+:kbd:`--separate-deflate` Option
+--------------------------------
+
+The :kbd:`--separate-deflate` command-line option is provided to facilitate runs that produce very large results files;
+for example the :kbd:`ptrc` files produced by 10-day long runs of the SMELT configuration.
+Deflation of such files is both time-consuming and memory-hungry.
+The memory demand can cause jobs to fail during deflation with memory allocation (malloc) errors.
+This option addresses the memory demand problem by producing separate bash scripts to deflate the run results and submitting them to the queue manager to run as serial jobs after the NEMO run finishes via the :command:`qsub -W depend=afterok` feature.
+
+Deflation of the results files is separated into 3 serial jobs by results file type:
+:kbd:`grid_[TUVW]`,
+:kbd:`ptrc_T`,
+and :kbd:`dia[12]_T`.
+
+The output of a :command:`run --separate-deflate` sub-command includes information from the job queue manager about the NEMO job and the 3 deflate jobs.
+Example:
+
+.. code-block:: bash
+
+    $ salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
+
+    salishsea_cmd.run INFO: salishsea_cmd.prepare Created run directory ../../SalishSea/38e87e0c-472d-11e3-9c8e-0025909a8461
+    salishsea_cmd.run INFO: SalishSeaNEMO.sh queued as 3330782.orca2.ibb
+    salishsea_cmd.run INFO: deflate_grid.sh queued after 3330782.orca2.ibb as 3330783.orca2.ibb
+    salishsea_cmd.run INFO: deflate_ptrc.sh queued after 3330782.orca2.ibb as 3330784.orca2.ibb
+    salishsea_cmd.run INFO: deflate_dia.sh queued after 3330782.orca2.ibb as 3330785.orca2.ibb
 
 
 .. _salishsea-prepare:
