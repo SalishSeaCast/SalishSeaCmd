@@ -251,49 +251,6 @@ def run(
     return qsub_msg
 
 
-def _build_deflate_script(
-    run_desc, pattern, result_type, results_dir, system, nemo34
-):
-    script = u'#!/bin/bash\n'
-    try:
-        email = get_run_desc_value(run_desc, ('email',))
-    except KeyError:
-        email = u'{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
-    script = u'\n'.join((
-        script, u'{pbs_common}\n'.format(
-            pbs_common=_pbs_common(
-                run_desc,
-                1,
-                email,
-                fspath(results_dir),
-                deflate=True,
-                result_type=result_type
-            ),
-        )
-    ))
-    script += (
-        u'RESULTS_DIR="{results_dir}"\n'
-        u'DEFLATE="${{PBS_O_HOME}}/.local/bin/salishsea deflate"\n'
-        u'\n'
-        u'{modules}\n'
-        u'cd ${{RESULTS_DIR}}\n'
-        u'echo "Results deflation started at $(date)"\n'
-        u'${{DEFLATE}} {pattern} --jobs 1 --debug\n'
-        u'DEFLATE_EXIT_CODE=$?\n'
-        u'echo "Results deflation ended at $(date)"\n'
-        u'\n'
-        u'chmod g+rw ${{RESULTS_DIR}}/*\n'
-        u'chmod o+r ${{RESULTS_DIR}}/*\n'
-        u'\n'
-        u'exit ${{DEFLATE_EXIT_CODE}}\n'
-    ).format(
-        results_dir=results_dir,
-        modules=_modules(system, nemo34),
-        pattern=pattern
-    )
-    return script
-
-
 def _build_batch_script(
     run_desc, desc_file, nemo_processors, xios_processors, max_deflate_jobs,
     results_dir, run_dir, system, nemo34, separate_deflate
@@ -600,5 +557,50 @@ def _cleanup():
         u'rmdir $(pwd)\n'
         u'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
         u'exit ${MPIRUN_EXIT_CODE}\n'
+    )
+    return script
+
+
+def _build_deflate_script(
+    run_desc, pattern, result_type, results_dir, system, nemo34
+):
+    script = u'#!/bin/bash\n'
+    try:
+        email = get_run_desc_value(run_desc, ('email',))
+    except KeyError:
+        email = u'{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
+    pmem = '2500mb' if result_type == 'ptrc' else '2000mb'
+    script = u'\n'.join((
+        script, u'{pbs_common}\n'.format(
+            pbs_common=_pbs_common(
+                run_desc,
+                1,
+                email,
+                fspath(results_dir),
+                pmem=pmem,
+                deflate=True,
+                result_type=result_type
+            ),
+        )
+    ))
+    script += (
+        u'RESULTS_DIR="{results_dir}"\n'
+        u'DEFLATE="${{PBS_O_HOME}}/.local/bin/salishsea deflate"\n'
+        u'\n'
+        u'{modules}\n'
+        u'cd ${{RESULTS_DIR}}\n'
+        u'echo "Results deflation started at $(date)"\n'
+        u'${{DEFLATE}} {pattern} --jobs 1 --debug\n'
+        u'DEFLATE_EXIT_CODE=$?\n'
+        u'echo "Results deflation ended at $(date)"\n'
+        u'\n'
+        u'chmod g+rw ${{RESULTS_DIR}}/*\n'
+        u'chmod o+r ${{RESULTS_DIR}}/*\n'
+        u'\n'
+        u'exit ${{DEFLATE_EXIT_CODE}}\n'
+    ).format(
+        results_dir=results_dir,
+        modules=_modules(system, nemo34),
+        pattern=pattern
     )
     return script
