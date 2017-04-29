@@ -28,6 +28,7 @@ try:
 except ImportError:
     # Python 2.7
     from pathlib2 import Path
+import shlex
 import socket
 import subprocess
 
@@ -145,7 +146,7 @@ class Run(cliff.command.Command):
             parsed_args.separate_deflate, parsed_args.waitjob,
             parsed_args.quiet
         )
-        if not parsed_args.quiet:
+        if not parsed_args.quiet and not parsed_args.separate_deflate:
             log.info(qsub_msg)
 
 
@@ -243,10 +244,39 @@ def run(
     starting_dir = Path.cwd()
     os.chdir(fspath(run_dir))
     if waitjob:
-        cmd = 'qsub -W depend=afterok:{} SalishSeaNEMO.sh'.format(waitjob)
+        cmd = (
+            'qsub -W depend=afterok:{waitjob} SalishSeaNEMO.sh'.format(
+                waitjob=waitjob
+            )
+        )
     else:
         cmd = 'qsub SalishSeaNEMO.sh'
-    qsub_msg = subprocess.check_output(cmd.split(), universal_newlines=True)
+    qsub_msg = subprocess.check_output(
+        shlex.split(cmd), universal_newlines=True
+    )
+    if separate_deflate:
+        log.info(
+            'SalishSeaNEMO.sh queued as {qsub_msg}'.format(qsub_msg=qsub_msg)
+        )
+        nemo_job_no = int(qsub_msg.split('.')[0])
+        for result_type in result_types:
+            deflate_script = 'deflate_{result_type}.sh'.format(
+                result_type=result_type
+            )
+            cmd = ((
+                'qsub -W depend=afterok:{nemo_job_no} ' + deflate_script
+            ).format(nemo_job_no=nemo_job_no, deflate_script=deflate_script))
+            deflate_qsub_msg = subprocess.check_output(
+                shlex.split(cmd), universal_newlines=True
+            )
+            log.info(
+                '{deflate_script} queued after {qsub_msg} as '
+                '{deflate_qsub_msg}'.format(
+                    deflate_script=deflate_script,
+                    qsub_msg=qsub_msg,
+                    deflate_qsub_msg=deflate_qsub_msg
+                )
+            )
     os.chdir(fspath(starting_dir))
     return qsub_msg
 
