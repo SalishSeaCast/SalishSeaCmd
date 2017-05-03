@@ -5,7 +5,7 @@
 .. you may not use this file except in compliance with the License.
 .. You may obtain a copy of the License at
 ..
-..    http://www.apache.org/licenses/LICENSE-2.0
+..    https://www.apache.org/licenses/LICENSE-2.0
 ..
 .. Unless required by applicable law or agreed to in writing, software
 .. distributed under the License is distributed on an "AS IS" BASIS,
@@ -181,7 +181,7 @@ Running the Unit Tests
 The test suite for the :kbd:`SalishSeaCmd` package is in :file:`SalishSeaCmd/tests/`.
 The `pytest`_ tools is used for test fixtures and as the test runner for the suite.
 
-.. _pytest: http://pytest.org/latest/
+.. _pytest: https://docs.pytest.org/en/latest/
 
 With your :kbd:`salishsea-cmd` development environment activated,
 use:
@@ -242,7 +242,7 @@ Version Control Repository
 
 The :kbd:`SalishSeaCmd` package code and documentation source files are available in the :ref:`SalishSeaCmd-repo` `Mercurial`_ repository at https://bitbucket.org/salishsea/salishseacmd.
 
-.. _Mercurial: http://mercurial.selenic.com/
+.. _Mercurial: https://www.mercurial-scm.org/
 
 
 .. _SalishSeaCmdIssueTracker:
