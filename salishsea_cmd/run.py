@@ -313,9 +313,9 @@ def _build_batch_script(
 
     :param boolean nemo34: Build batch script for a NEMO-3.4 run;
                            the default is to do so for a NEMO-3.6 run.
-                              
-    :param boolean separate_deflate: Produce separate bash scripts to deflate 
-                                     the run results and qsub them to run as 
+
+    :param boolean separate_deflate: Produce separate bash scripts to deflate
+                                     the run results and qsub them to run as
                                      serial jobs after the NEMO run finishes.
 
     :returns: Bash script to execute the run.
@@ -527,6 +527,11 @@ def _modules(system, nemo34):
                 u'module load intel/14.0/hdf5-1.8.15p1_mpi\n'
                 u'module load intel/14.0/nco-4.5.2\n'
                 u'module load python\n'
+            )
+    elif system == 'bugaboo':
+        modules = (
+            u'module load python\n'
+            u'module load intel/15.0.2\n'
             )
     return modules
 
