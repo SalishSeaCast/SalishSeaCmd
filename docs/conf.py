@@ -39,7 +39,7 @@ intersphinx_mapping = {
     'python':
         ('https://docs.python.org/3/', None),
     'salishseadocs':
-        ('http://salishsea-meopar-docs.readthedocs.org/en/latest/', None),
+        ('http://salishsea-meopar-docs.readthedocs.io/en/latest/', None),
     'nemocmd':
         ('http://nemo-cmd.readthedocs.io/en/latest/', None),
 }
