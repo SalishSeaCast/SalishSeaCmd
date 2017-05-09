@@ -52,6 +52,7 @@ autodoc_mock_imports = [
     'cliff.commandmanager',
     'hglib',
     'nemo_cmd',
+    'nemo_cmd.api',
     'nemo_cmd.prepare',
     'nemo_cmd.utils',
     'yaml',
