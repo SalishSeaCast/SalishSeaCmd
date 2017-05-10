@@ -844,7 +844,7 @@ def _make_forcing_links_nemo36(run_desc, run_dir):
                 fatal=False
             )
             link_checkers[link_checker['type']](
-                run_desc, run_dir, source, link_checker['namelist filename']
+                run_dir, source, link_checker['namelist filename']
             )
         except KeyError:
             if 'check link' not in link_names[link_name]:
@@ -860,9 +860,7 @@ def _make_forcing_links_nemo36(run_desc, run_dir):
                     raise SystemExit(2)
 
 
-def _check_atmospheric_forcing_link(
-    run_desc, run_dir, link_path, namelist_filename
-):
+def _check_atmospheric_forcing_link(run_dir, link_path, namelist_filename):
     """Confirm that the atmospheric forcing files necessary for the run
     are present.
 
@@ -870,8 +868,6 @@ def _check_atmospheric_forcing_link(
     the necessary files, and the date ranges required for the run.
     
     This is the atmospheric forcing link check function used for NEMO-3.6 runs.
-
-    :param dict run_desc: Run description dictionary.
 
     :param run_dir: Path of the temporary run directory.
     :type run_dir: :py:class:`pathlib.Path`
