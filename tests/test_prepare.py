@@ -1087,7 +1087,7 @@ class TestMakeForcingLinksNEMO36:
                 run_desc, Path('run_dir')
             )
         m_chk_atmos_frc_link.assert_called_once_with(
-            run_desc, Path('run_dir'), Path(str(p_atmos_ops)), 'namelist_cfg'
+            Path('run_dir'), Path(str(p_atmos_ops)), 'namelist_cfg'
         )
 
     @patch('salishsea_cmd.prepare.logger')
