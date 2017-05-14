@@ -116,7 +116,7 @@ def run_description(
     run_id=None,
     walltime=None,
     mpi_decomposition='8x18',
-    NEMO_code=None,
+    NEMO_code_config=None,
     XIOS_code=None,
     forcing_path=None,
     runs_dir=None,
@@ -149,10 +149,8 @@ def run_description(
 
     :arg str mpi_decomposition: MPI decomposition to use for the run.
 
-    :arg str NEMO_code: Path to the :file:`NEMO-code/` directory where the
-                        NEMO executable, etc. for the run are to be found.
-                        If a relative path is used it will start from the
-                        current directory.
+    :arg str NEMO_code_config: Absolute path to the :file:`CONFIG/` directory
+                        where the NEMO configurations are to be found.
 
     :arg str XIOS_code: Path to the :file:`XIOS/` directory where the
                         XIOS executable for the run are to be found.
@@ -204,7 +202,7 @@ def run_description(
         'run_id': run_id,
         'walltime': walltime,
         'paths': {
-            'NEMO-code': NEMO_code,
+            'NEMO code config': NEMO_code_config,
             'forcing': forcing_path,
             'runs directory': runs_dir,
         },
@@ -265,9 +263,9 @@ def run_description(
             'separate XIOS server': True,
             'XIOS servers': 1,
         }
-        if NEMO_code is not None:
+        if NEMO_code_config is not None:
             run_description['output']['fields'] = os.path.join(
-                NEMO_code, 'NEMOGCM/CONFIG/SHARED/field_def.xml'
+                NEMO_code_config, 'SHARED/field_def.xml'
             )
     return run_description
 
