@@ -37,7 +37,7 @@ class TestRunDescription(object):
             'walltime': None,
             'MPI decomposition': '8x18',
             'paths': {
-                'NEMO-code': None,
+                'NEMO code config': None,
                 'forcing': None,
                 'runs directory': None,
             },
@@ -109,14 +109,14 @@ class TestRunDescription(object):
             run_id='foo',
             walltime='1:00:00',
             mpi_decomposition='6x14',
-            NEMO_code='../../NEMO-code/',
+            NEMO_code_config='$HOME/NEMO-code/NEMOGCM/CONFIG',
             XIOS_code=XIOS_code,
             forcing_path='../../NEMO-forcing/',
             runs_dir='../../SalishSea/',
-            init_conditions='../../22-25Sep/SalishSea_00019008_restart.nc',
             forcing={},
+            init_conditions='../../22-25Sep/SalishSea_00019008_restart.nc',
             namelists=namelists,
-            nemo34=nemo34,
+            nemo34=nemo34
         )
         expected = {
             'config_name': 'SOG',
@@ -124,7 +124,7 @@ class TestRunDescription(object):
             'walltime': '1:00:00',
             'MPI decomposition': '6x14',
             'paths': {
-                'NEMO-code': '../../NEMO-code/',
+                'NEMO code config': '$HOME/NEMO-code/NEMOGCM/CONFIG',
                 'forcing': '../../NEMO-forcing/',
                 'runs directory': '../../SalishSea/',
             },
@@ -144,7 +144,7 @@ class TestRunDescription(object):
             expected['output'] = {
                 'domain': 'domain_def.xml',
                 'fields':
-                '../../NEMO-code/NEMOGCM/CONFIG/SHARED/field_def.xml',
+                '$HOME/NEMO-code/NEMOGCM/CONFIG/SHARED/field_def.xml',
                 'separate XIOS server': True,
                 'XIOS servers': 1,
             }
