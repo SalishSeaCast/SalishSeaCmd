@@ -355,58 +355,11 @@ class TestMakeNamelistNEMO34:
         assert namelist.endswith(salishsea_cmd.prepare.EMPTY_NAMELISTS)
 
 
-class TestMakeNamelistNEMO36:
-    """Unit tests for `salishsea prepare` _make_namelist_nemo36() function.
+class TestMakeNamelistsNEMO36:
+    """Unit tests for `salishsea prepare` _make_namelists_nemo36() function.
     """
 
     def test_make_namelists_nemo36(self, tmpdir):
-        p_nemo_config_dir = tmpdir.ensure_dir('NEMO-3.6/NEMOGCM/CONFIG')
-        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
-        p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
-        p_run_set_dir.join('namelist_top').write('&namtrc\n&end\n')
-        p_run_set_dir.join('namelist_pisces').write('&nampisbio\n&end\n')
-        run_desc = {
-            'config name': 'SalishSea',
-            'paths': {
-                'NEMO code config': str(p_nemo_config_dir),
-            },
-            'namelists': {
-                'namelist_cfg': [str(p_run_set_dir.join('namelist.time'))],
-                'namelist_top_cfg': [str(p_run_set_dir.join('namelist_top'))],
-                'namelist_pisces_cfg': [
-                    str(p_run_set_dir.join('namelist_pisces')),
-                ],
-            }
-        }
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        with patch('salishsea_cmd.prepare._set_mpi_decomposition'):
-            salishsea_cmd.prepare._make_namelists_nemo36(
-                Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
-            )
-        assert p_run_dir.join('namelist_cfg').check()
-        assert p_run_dir.join('namelist_top_cfg').check()
-        assert p_run_dir.join('namelist_pisces_cfg').check()
-
-    @patch('salishsea_cmd.prepare.logger')
-    def test_namelist_file_not_found_error(self, m_logger, tmpdir):
-        p_nemo_config_dir = tmpdir.ensure_dir('NEMO-3.6/NEMOGCM/CONFIG')
-        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
-        run_desc = {
-            'config name': 'SalishSea',
-            'paths': {
-                'NEMO code config': str(p_nemo_config_dir),
-            },
-            'namelists': {
-                'namelist_cfg': [str(p_run_set_dir.join('namelist.time'))],
-            }
-        }
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_namelists_nemo36(
-                Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
-            )
-
-    def test_namelist_ref_symlinks(self, tmpdir):
         p_nemo_config_dir = tmpdir.ensure_dir('NEMO-3.6/NEMOGCM/CONFIG')
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
@@ -433,10 +386,73 @@ class TestMakeNamelistNEMO36:
             salishsea_cmd.prepare._make_namelists_nemo36(
                 Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
             )
-        assert p_run_dir.join('namelist_ref').check(file=True, link=True)
-        assert p_run_dir.join('namelist_top_ref').check(file=True, link=True)
+        assert p_run_dir.join('namelist_cfg').check(file=True, link=False)
+        assert p_run_dir.join('namelist_top_cfg').check(file=True, link=False)
+        assert p_run_dir.join('namelist_pisces_cfg').check(
+            file=True, link=False
+        )
+        assert p_run_dir.join('namelist_ref').check(file=True, link=False)
+        assert p_run_dir.join('namelist_top_ref').check(file=True, link=False)
         assert p_run_dir.join('namelist_pisces_ref').check(
-            file=True, link=True
+            file=True, link=False
+        )
+
+    @patch('salishsea_cmd.prepare.logger')
+    def test_namelist_file_not_found_error(self, m_logger, tmpdir):
+        p_nemo_config_dir = tmpdir.ensure_dir('NEMO-3.6/NEMOGCM/CONFIG')
+        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
+        run_desc = {
+            'config name': 'SalishSea',
+            'paths': {
+                'NEMO code config': str(p_nemo_config_dir),
+            },
+            'namelists': {
+                'namelist_cfg': [str(p_run_set_dir.join('namelist.time'))],
+            }
+        }
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._make_namelists_nemo36(
+                Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
+            )
+
+    def test_namelist_ref_not_shared(self, tmpdir):
+        p_nemo_config_dir = tmpdir.ensure_dir('NEMO-3.6/NEMOGCM/CONFIG')
+        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
+        p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
+        p_run_set_dir.join('namelist_top').write('&namtrc\n&end\n')
+        p_run_set_dir.join('namelist_pisces').write('&nampisbio\n&end\n')
+        p_run_set_dir.join('namelist_ref').write('&namrun\n&end\n')
+        p_run_set_dir.join('namelist_top_ref').write('&namtrc\n&end\n')
+        p_run_set_dir.join('namelist_pisces_ref').write('&nampisbio\n&end\n')
+        run_desc = {
+            'config name': 'SalishSea',
+            'paths': {
+                'NEMO code config': str(p_nemo_config_dir),
+            },
+            'namelists': {
+                'namelist_cfg': [str(p_run_set_dir.join('namelist.time'))],
+                'namelist_top_cfg': [str(p_run_set_dir.join('namelist_top'))],
+                'namelist_pisces_cfg': [
+                    str(p_run_set_dir.join('namelist_pisces')),
+                ],
+                'namelist_ref': [str(p_run_set_dir.join('namelist_ref'))],
+                'namelist_top_ref':
+                [str(p_run_set_dir.join('namelist_top_ref'))],
+                'namelist_pisces_ref': [
+                    str(p_run_set_dir.join('namelist_pisces_ref')),
+                ],
+            }
+        }
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        with patch('salishsea_cmd.prepare._set_mpi_decomposition'):
+            salishsea_cmd.prepare._make_namelists_nemo36(
+                Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
+            )
+        assert p_run_dir.join('namelist_ref').check(file=True, link=False)
+        assert p_run_dir.join('namelist_top_ref').check(file=True, link=False)
+        assert p_run_dir.join('namelist_pisces_ref').check(
+            file=True, link=False
         )
 
     def test_namelist_cfg_set_mpi_decomposition(self, tmpdir):
@@ -459,6 +475,9 @@ class TestMakeNamelistNEMO36:
             }
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
+        p_nemo_config_dir.ensure('SalishSea/EXP00/namelist_ref')
+        p_nemo_config_dir.ensure('SalishSea/EXP00/namelist_top_ref')
+        p_nemo_config_dir.ensure('SalishSea/EXP00/namelist_pisces_ref')
         with patch('salishsea_cmd.prepare._set_mpi_decomposition') as m_smd:
             salishsea_cmd.prepare._make_namelists_nemo36(
                 Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
@@ -484,6 +503,9 @@ class TestMakeNamelistNEMO36:
             }
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
+        p_nemo_config_dir.ensure('SalishSea/EXP00/namelist_ref')
+        p_nemo_config_dir.ensure('SalishSea/EXP00/namelist_top_ref')
+        p_nemo_config_dir.ensure('SalishSea/EXP00/namelist_pisces_ref')
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_namelists_nemo36(
                 Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
