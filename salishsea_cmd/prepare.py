@@ -384,10 +384,13 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
                     raise SystemExit(2)
         ref_namelist = namelist_filename.replace('_cfg', '_ref')
         if ref_namelist not in namelists:
-            ref_namelist_target = (
+            ref_namelist_source = (
                 nemo_config_dir / config_name / 'EXP00' / ref_namelist
             )
-            (run_dir / ref_namelist).symlink_to(ref_namelist_target)
+            shutil.copy2(
+                nemo_cmd.fspath(ref_namelist_source),
+                nemo_cmd.fspath(run_dir / ref_namelist)
+            )
     if 'namelist_cfg' in namelists:
         _set_mpi_decomposition('namelist_cfg', run_desc, run_dir)
     else:
