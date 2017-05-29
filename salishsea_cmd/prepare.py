@@ -33,6 +33,7 @@ import arrow
 import cliff.command
 import nemo_cmd
 import nemo_cmd.api
+from nemo_cmd.fspath import expanded_path
 import nemo_cmd.prepare
 from nemo_cmd.prepare import get_run_desc_value
 
@@ -373,8 +374,11 @@ def _make_namelists_nemo36(run_set_dir, run_desc, run_dir):
                 run_desc, ('namelists', namelist_filename), run_dir=run_dir
             )
             for nl in namelist_files:
+                nl_path = expanded_path(nl)
+                if not nl_path.is_absolute():
+                    nl_path = run_set_dir / nl_path
                 try:
-                    with (run_set_dir / nl).open('rt') as f:
+                    with nl_path.open('rt') as f:
                         namelist.writelines(f.readlines())
                         namelist.write(u'\n\n')
                 except IOError as e:
