@@ -852,7 +852,7 @@ class TestMakeGridLinks:
 
     @patch('salishsea_cmd.prepare._remove_run_dir')
     @patch('salishsea_cmd.prepare.logger')
-    def test_link_path(self, m_logger, m_rm_run_dir, tmpdir):
+    def test_link_paths(self, m_logger, m_rm_run_dir, tmpdir):
         forcing_dir = tmpdir.ensure_dir('foo')
         grid_dir = forcing_dir.ensure_dir('grid')
         grid_dir.ensure('coords.nc')
@@ -874,6 +874,35 @@ class TestMakeGridLinks:
         assert Path(str(run_dir), 'bathy_meter.nc').is_symlink()
         assert Path(str(run_dir),
                     'bathy_meter.nc').samefile(str(grid_dir.join('bathy.nc')))
+
+    @patch('salishsea_cmd.prepare._remove_run_dir')
+    @patch('salishsea_cmd.prepare.logger')
+    def test_agrif_link_paths(self, m_logger, m_rm_run_dir, tmpdir):
+        forcing_dir = tmpdir.ensure_dir('foo')
+        grid_dir = forcing_dir.ensure_dir('grid')
+        grid_dir.ensure('coords.nc')
+        grid_dir.ensure('bathy.nc')
+        run_dir = tmpdir.ensure_dir('runs')
+        run_desc = {
+            'paths': {
+                'forcing': str(forcing_dir)
+            },
+            'grid': {
+                'AGRIF_1': {
+                    'coordinates': 'coords.nc',
+                    'bathymetry': 'bathy.nc'
+                }
+            }
+        }
+        salishsea_cmd.prepare._make_grid_links(
+            run_desc, Path(str(run_dir)), agrif_n=1
+        )
+        assert Path(str(run_dir), '1_coordinates.nc').is_symlink()
+        assert Path(str(run_dir), '1_coordinates.nc'
+                    ).samefile(str(grid_dir.join('coords.nc')))
+        assert Path(str(run_dir), '1_bathy_meter.nc').is_symlink()
+        assert Path(str(run_dir), '1_bathy_meter.nc'
+                    ).samefile(str(grid_dir.join('bathy.nc')))
 
 
 class TestMakeForcingLinks:
@@ -1289,26 +1318,54 @@ class TestRecordVCSRevisions:
         )
 
 
+@patch('salishsea_cmd.prepare._make_grid_links')
 class TestAddAgrifFiles:
     """Unit tests for `salishsea prepare` _add_agrid_files() function.
     """
 
     @patch('salishsea_cmd.prepare.get_run_desc_value', side_effect=KeyError)
-    def test_no_agrif(self, m_get_run_desc_value):
+    def test_no_agrif(self, m_get_run_desc_value, m_mk_grid_links):
         run_desc = {}
         salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
         assert m_get_run_desc_value.call_args_list == [
             call(run_desc, ('AGRIF',), fatal=False)
         ]
 
-    def test_no_fixed_grids_file(self):
+    def test_no_fixed_grids_file(self, m_mk_grid_links):
         run_desc = {'AGRIF': {}}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
 
-    def test_fixed_grids_file(self, tmpdir):
+    def test_fixed_grids_file(self, m_mk_grid_links, tmpdir):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
-        run_desc = {'AGRIF': {'fixed grids': str(p_fixed_grids)}}
+        run_desc = {
+            'AGRIF': {
+                'fixed grids': str(p_fixed_grids)
+            },
+            'grid': {
+                'AGRIF_1': {}
+            },
+        }
         salishsea_cmd.prepare._add_agrif_files(run_desc, Path(str(p_run_dir)))
         assert p_run_dir.join('AGRIF_FixedGrids.in').check(file=True)
+
+    @patch('salishsea_cmd.prepare.shutil.copy2')
+    def test_make_grid_links(self, m_copy2, m_mk_grid_links, tmpdir):
+        p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
+        run_desc = {
+            'AGRIF': {
+                'fixed grids': str(p_fixed_grids)
+            },
+            'grid': {
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc',
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            }
+        }
+        salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
+        assert m_mk_grid_links.call_args_list == [
+            call(run_desc, Path('run_dir'), agrif_n=1),
+            call(run_desc, Path('run_dir'), agrif_n=2),
+        ]
