@@ -529,10 +529,7 @@ def _modules(system, nemo34):
                 u'module load python\n'
             )
     elif system == 'bugaboo':
-        modules = (
-            u'module load python\n'
-            u'module load intel/15.0.2\n'
-            )
+        modules = (u'module load python\n' u'module load intel/15.0.2\n')
     return modules
 
 
