@@ -1201,6 +1201,30 @@ class TestMakeRestartLinks:
             )
         m_symlink_to.assert_called_once_with(Path(str(p_results)))
 
+    def test_agrif_link(self, tmpdir):
+        p_results = tmpdir.ensure(
+            'results/SalishSea/nowcast/SalishSea_00475200_restart.nc'
+        )
+        p_agrif_results = tmpdir.ensure(
+            'results/SalishSea/nowcast/1_SalishSea_00475200_restart.nc'
+        )
+        run_desc = {
+            'restart': {
+                'AGRIF_1': {
+                    'restart.nc': str(p_agrif_results),
+                },
+            },
+        }
+        patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
+        with patch_symlink_to as m_symlink_to:
+            salishsea_cmd.prepare._make_restart_links(
+                run_desc,
+                Path('run_dir'),
+                nocheck_init=False,
+                agrif_n=1,
+            )
+        m_symlink_to.assert_called_once_with(Path(str(p_agrif_results)))
+
     @patch('salishsea_cmd.prepare.logger')
     @patch('salishsea_cmd.prepare._remove_run_dir')
     def test_no_link_path(self, m_rm_run_dir, m_logger):
@@ -1318,25 +1342,33 @@ class TestRecordVCSRevisions:
         )
 
 
+@patch('salishsea_cmd.prepare.logger')
 @patch('salishsea_cmd.prepare._make_grid_links')
+@patch('salishsea_cmd.prepare._make_restart_links')
 class TestAddAgrifFiles:
     """Unit tests for `salishsea prepare` _add_agrid_files() function.
     """
 
     @patch('salishsea_cmd.prepare.get_run_desc_value', side_effect=KeyError)
-    def test_no_agrif(self, m_get_run_desc_value, m_mk_grid_links):
+    def test_no_agrif(
+        self, m_get_run_desc_value, mk_restart_links, m_mk_grid_links, m_logger
+    ):
         run_desc = {}
         salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
         assert m_get_run_desc_value.call_args_list == [
             call(run_desc, ('AGRIF',), fatal=False)
         ]
 
-    def test_no_fixed_grids_file(self, m_mk_grid_links):
+    def test_no_fixed_grids_file(
+        self, mk_restart_links, m_mk_grid_links, m_logger
+    ):
         run_desc = {'AGRIF': {}}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
 
-    def test_fixed_grids_file(self, m_mk_grid_links, tmpdir):
+    def test_fixed_grids_file(
+        self, mk_restart_links, m_mk_grid_links, m_logger, tmpdir
+    ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
         run_desc = {
@@ -1346,12 +1378,17 @@ class TestAddAgrifFiles:
             'grid': {
                 'AGRIF_1': {}
             },
+            'restart': {
+                'AGRIF_1': {}
+            },
         }
         salishsea_cmd.prepare._add_agrif_files(run_desc, Path(str(p_run_dir)))
         assert p_run_dir.join('AGRIF_FixedGrids.in').check(file=True)
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
-    def test_make_grid_links(self, m_copy2, m_mk_grid_links, tmpdir):
+    def test_make_grid_links(
+        self, m_copy2, mk_restart_links, m_mk_grid_links, m_logger, tmpdir
+    ):
         p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
         run_desc = {
             'AGRIF': {
@@ -1362,10 +1399,62 @@ class TestAddAgrifFiles:
                 'bathymetry': 'bathy.nc',
                 'AGRIF_1': {},
                 'AGRIF_2': {},
-            }
+            },
+            'restart': {
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
         }
         salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
         assert m_mk_grid_links.call_args_list == [
             call(run_desc, Path('run_dir'), agrif_n=1),
             call(run_desc, Path('run_dir'), agrif_n=2),
         ]
+
+    @patch('salishsea_cmd.prepare.shutil.copy2')
+    def test_make_restart_links(
+        self, m_copy2, m_mk_restart_links, m_mk_grid_links, m_logger, tmpdir
+    ):
+        p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
+        run_desc = {
+            'AGRIF': {
+                'fixed grids': str(p_fixed_grids)
+            },
+            'grid': {
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc',
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+            'restart': {
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+        }
+        salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
+        assert m_mk_restart_links.call_args_list == [
+            call(run_desc, Path('run_dir'), agrif_n=1),
+            call(run_desc, Path('run_dir'), agrif_n=2),
+        ]
+
+    @patch('salishsea_cmd.prepare.shutil.copy2')
+    def test_grid_restart_sub_grids_mismatch(
+        self, m_copy2, m_mk_restart_links, m_mk_grid_links, m_logger, tmpdir
+    ):
+        p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
+        run_desc = {
+            'AGRIF': {
+                'fixed grids': str(p_fixed_grids)
+            },
+            'grid': {
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc',
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+            'restart': {
+                'AGRIF_1': {},
+            },
+        }
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))

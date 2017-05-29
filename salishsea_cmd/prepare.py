@@ -1063,7 +1063,7 @@ def _check_atmos_files(run_desc, run_dir):
                     raise SystemExit(2)
 
 
-def _make_restart_links(run_desc, run_dir, nocheck_init):
+def _make_restart_links(run_desc, run_dir, nocheck_init, agrif_n=None):
     """For a NEMO-3.6 run, create symlinks in run_dir to the restart
     files given in the run description restart section.
 
@@ -1075,11 +1075,17 @@ def _make_restart_links(run_desc, run_dir, nocheck_init):
     :param boolean nocheck_init: Suppress restart file existence check;
                                  the default is to check
 
+    :param int agrif_n: AGRIF sub-grid number.
+
     :raises: :py:exc:`SystemExit` if a symlink target does not exist
     """
+    if agrif_n is None:
+        keys = ('restart',)
+    else:
+        keys = ('restart', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n))
     try:
         link_names = get_run_desc_value(
-            run_desc, ('restart',), run_dir=run_dir, fatal=False
+            run_desc, keys, run_dir=run_dir, fatal=False
         )
     except KeyError:
         logger.warning(
@@ -1087,11 +1093,18 @@ def _make_restart_links(run_desc, run_dir, nocheck_init):
             'so proceeding on the assumption that initial conditions '
             'have been provided'
         )
-        link_names = {}
+        return
     for link_name in link_names:
-        source = get_run_desc_value(
-            run_desc, ('restart', link_name), expand_path=True
-        )
+        if agrif_n is None:
+            keys = ('restart', link_name)
+        else:
+            keys = (
+                'restart', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n), link_name
+            )
+            link_name = '{agrif_n}_{link_name}'.format(
+                agrif_n=agrif_n, link_name=link_name
+            )
+        source = get_run_desc_value(run_desc, keys, expand_path=True)
         if not source.exists() and not nocheck_init:
             logger.error(
                 '{} not found; cannot create symlink - '
@@ -1180,6 +1193,23 @@ def _add_agrif_files(run_desc, run_dir):
             n_sub_grids += 1
             agrif_n = int(key.split('_')[1])
             _make_grid_links(run_desc, run_dir, agrif_n=agrif_n)
+    sub_grids_count = 0
+    restart = get_run_desc_value(run_desc, ('restart',))
+    for key in restart:
+        if key.startswith('AGRIF'):
+            sub_grids_count += 1
+            agrif_n = int(key.split('_')[1])
+            _make_restart_links(run_desc, run_dir, agrif_n=agrif_n)
+    if sub_grids_count != n_sub_grids:
+        logger.error(
+            'Found {n_sub_grids} AGRIF sub-grids in grid section, '
+            'but {sub_grids_count} in restart section - '
+            'please check your run description file'.format(
+                n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
+            )
+        )
+        _remove_run_dir(run_dir)
+        raise SystemExit(2)
 
 
 # All of the namelists that NEMO-3.4 requires, but empty so that they result
