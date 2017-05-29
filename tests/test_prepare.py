@@ -78,6 +78,7 @@ class TestParser:
 @patch('salishsea_cmd.prepare._make_forcing_links')
 @patch('salishsea_cmd.prepare._make_restart_links')
 @patch('salishsea_cmd.prepare._record_vcs_revisions')
+@patch('salishsea_cmd.prepare._add_agrif_files')
 class TestPrepare:
     """Unit tests for `salishsea prepare` prepare() function.
     """
@@ -89,7 +90,7 @@ class TestPrepare:
         ]
     )
     def test_prepare(
-        self, m_rvr, m_mrl, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd,
+        self, m_aaf, m_rvr, m_mrl, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd,
         m_resolved_path, m_frns, m_cxe, m_cne, m_lrd, nemo34, m_cne_return,
         m_cxe_return
     ):
@@ -121,8 +122,10 @@ class TestPrepare:
         m_mfl.assert_called_once_with(m_lrd(), m_mrd(), nemo34, False)
         if nemo34:
             assert not m_mrl.called
+            assert not m_aaf.called
         else:
             m_mrl.assert_called_once_with(m_lrd(), m_mrd(), False)
+            m_aaf.assert_called_once_with(m_lrd(), m_mrd())
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
 
@@ -1171,7 +1174,7 @@ class TestMakeRestartLinks:
 
     @patch('salishsea_cmd.prepare.logger')
     @patch('salishsea_cmd.prepare._remove_run_dir')
-    def test_no_link_path(self, m_rm_run_dir, m_logger, tmpdir):
+    def test_no_link_path(self, m_rm_run_dir, m_logger):
         run_desc = {
             'restart': {
                 'restart.nc': 'SalishSea/nowcast/SalishSea_00475200_restart.nc'
@@ -1189,7 +1192,7 @@ class TestMakeRestartLinks:
         )
         m_rm_run_dir.assert_called_once_with(Path('run_dir'))
 
-    def test_nocheck_init(self, tmpdir):
+    def test_nocheck_init(self):
         run_desc = {
             'restart': {
                 'restart.nc': 'SalishSea/nowcast/SalishSea_00475200_restart.nc'
@@ -1284,3 +1287,28 @@ class TestRecordVCSRevisions:
             Path(str(ss_run_sets)),
             Path('run_dir'), nemo_cmd.prepare.get_hg_revision
         )
+
+
+class TestAddAgrifFiles:
+    """Unit tests for `salishsea prepare` _add_agrid_files() function.
+    """
+
+    @patch('salishsea_cmd.prepare.get_run_desc_value', side_effect=KeyError)
+    def test_no_agrif(self, m_get_run_desc_value):
+        run_desc = {}
+        salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
+        assert m_get_run_desc_value.call_args_list == [
+            call(run_desc, ('AGRIF',), fatal=False)
+        ]
+
+    def test_no_fixed_grids_file(self):
+        run_desc = {'AGRIF': {}}
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
+
+    def test_fixed_grids_file(self, tmpdir):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
+        run_desc = {'AGRIF': {'fixed grids': str(p_fixed_grids)}}
+        salishsea_cmd.prepare._add_agrif_files(run_desc, Path(str(p_run_dir)))
+        assert p_run_dir.join('AGRIF_FixedGrids.in').check(file=True)
