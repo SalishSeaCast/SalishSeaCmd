@@ -1193,7 +1193,17 @@ class TestMakeRestartLinks:
         p_results = tmpdir.ensure(
             'results/SalishSea/nowcast/SalishSea_00475200_restart.nc'
         )
-        run_desc = {'restart': {'restart.nc': str(p_results)}}
+        p_agrif_results = tmpdir.ensure(
+            'results/SalishSea/nowcast/1_SalishSea_00475200_restart.nc'
+        )
+        run_desc = {
+            'restart': {
+                'restart.nc': str(p_results),
+                'AGRIF_1': {
+                    'restart.nc': str(p_agrif_results)
+                },
+            },
+        }
         patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
         with patch_symlink_to as m_symlink_to:
             salishsea_cmd.prepare._make_restart_links(
@@ -1210,8 +1220,9 @@ class TestMakeRestartLinks:
         )
         run_desc = {
             'restart': {
+                'restart.nc': str(p_results),
                 'AGRIF_1': {
-                    'restart.nc': str(p_agrif_results),
+                    'restart.nc': str(p_agrif_results)
                 },
             },
         }
