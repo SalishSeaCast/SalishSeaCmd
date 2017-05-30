@@ -140,7 +140,7 @@ def prepare(desc_file, nemo34, nocheck_init):
         _make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
     if not nemo34:
-        _add_agrif_files(run_desc, run_dir)
+        _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir)
     return run_dir
 
 
@@ -472,7 +472,9 @@ def _get_namelist_value(key, lines):
     return value, line_index
 
 
-def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
+def _copy_run_set_files(
+    run_desc, desc_file, run_set_dir, run_dir, nemo34, agrif_n=None
+):
     """Copy the run-set files given into run_dir.
 
     For all versions of NEMO the YAML run description file 
@@ -511,6 +513,8 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
 
     :param boolean nemo34: Prepare a NEMO-3.4 run;
                            the default is to prepare a NEMO-3.6 run
+
+    :param int agrif_n: AGRIF sub-grid number.
     """
     try:
         iodefs = get_run_desc_value(
@@ -534,19 +538,33 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
         )
     else:
         try:
+            keys = ('output', 'domaindefs')
+            domain_def_filename = 'domain_def.xml'
+            if agrif_n is not None:
+                keys = (
+                    'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n),
+                    'domaindefs'
+                )
+                domain_def_filename = '{agrif_n}_domain_def.xml'.format(
+                    agrif_n=agrif_n
+                )
             domains_def = get_run_desc_value(
                 run_desc,
-                ('output', 'domaindefs'),
+                keys,
                 resolve_path=True,
                 run_dir=run_dir,
                 fatal=False,
             )
         except KeyError:
             # Alternate key spelling for backward compatibility
+            keys = ('output', 'domain')
+            if agrif_n is not None:
+                keys = (
+                    'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n),
+                    'domain'
+                )
             domains_def = get_run_desc_value(
-                run_desc, ('output', 'domain'),
-                resolve_path=True,
-                run_dir=run_dir
+                run_desc, keys, resolve_path=True, run_dir=run_dir
             )
         try:
             fields_def = get_run_desc_value(
@@ -563,17 +581,28 @@ def _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34):
                 run_dir=run_dir
             )
         run_set_files.extend([
-            (domains_def, 'domain_def.xml'),
+            (domains_def, domain_def_filename),
             (fields_def, 'field_def.xml'),
         ])
         try:
+            keys = ('output', 'filedefs')
+            file_def_filename = 'file_def.xml'
+            if agrif_n is not None:
+                keys = (
+                    'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n),
+                    'filedefs'
+                )
+                file_def_filename = '{agrif_n}_file_def.xml'.format(
+                    agrif_n=agrif_n
+                )
             files_def = get_run_desc_value(
-                run_desc, ('output', 'filedefs'),
+                run_desc,
+                keys,
                 resolve_path=True,
                 run_dir=run_dir,
                 fatal=False
             )
-            run_set_files.append((files_def, 'file_def.xml'))
+            run_set_files.append((files_def, file_def_filename))
         except KeyError:
             # `files` key is optional and only used with XIOS-2
             pass
@@ -1164,14 +1193,24 @@ def _record_vcs_revisions(run_desc, run_dir):
             )
 
 
-def _add_agrif_files(run_desc, run_dir):
+def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir):
     """Add file copies and symlinks to temporary run directory for
     AGRIF runs.
 
-    :param run_dir:
     :param dict run_desc: Run description dictionary.
 
-    :raises: SystemExit
+    :param desc_file: File path/name of the YAML run description file.
+    :type desc_file: :py:class:`pathlib.Path`
+
+    :param run_set_dir: Directory containing the run description file,
+                        from which relative paths for the namelist section
+                        files start.
+    :type run_set_dir: :py:class:`pathlib.Path`
+
+    :param run_dir: Path of the temporary run directory.
+    :type run_dir: :py:class:`pathlib.Path`
+
+    :raises: SystemExit if mismatching number of sub-grids is detected
     """
     try:
         get_run_desc_value(run_desc, ('AGRIF',), fatal=False)
@@ -1185,6 +1224,7 @@ def _add_agrif_files(run_desc, run_dir):
         nemo_cmd.fspath(fixed_grids),
         nemo_cmd.fspath(run_dir / 'AGRIF_FixedGrids.in')
     )
+    # sub-grid coordinates and bathymetry files
     n_sub_grids = 0
     grid = get_run_desc_value(run_desc, ('grid',))
     for key in grid:
@@ -1192,6 +1232,7 @@ def _add_agrif_files(run_desc, run_dir):
             n_sub_grids += 1
             agrif_n = int(key.split('_')[1])
             _make_grid_links(run_desc, run_dir, agrif_n=agrif_n)
+    # sub-grid restart files
     sub_grids_count = 0
     restart = get_run_desc_value(run_desc, ('restart',))
     for key in restart:
@@ -1203,6 +1244,26 @@ def _add_agrif_files(run_desc, run_dir):
         logger.error(
             'Found {n_sub_grids} AGRIF sub-grids in grid section, '
             'but {sub_grids_count} in restart section - '
+            'please check your run description file'.format(
+                n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
+            )
+        )
+        _remove_run_dir(run_dir)
+        raise SystemExit(2)
+    # sub-grid output files
+    sub_grids_count = 0
+    output = get_run_desc_value(run_desc, ('output',))
+    for key in output:
+        if key.startswith('AGRIF'):
+            sub_grids_count += 1
+            agrif_n = int(key.split('_')[1])
+            _copy_run_set_files(
+                run_desc, desc_file, run_set_dir, run_dir, agrif_n=agrif_n
+            )
+    if sub_grids_count != n_sub_grids:
+        logger.error(
+            'Found {n_sub_grids} AGRIF sub-grids in grid section, '
+            'but {sub_grids_count} in output section - '
             'please check your run description file'.format(
                 n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
             )
