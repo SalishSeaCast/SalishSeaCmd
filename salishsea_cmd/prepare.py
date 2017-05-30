@@ -17,8 +17,10 @@
 Sets up the necessary symbolic links for a Salish Sea NEMO run
 in a specified directory and changes the pwd to that directory.
 """
+import functools
 import logging
 import os
+
 try:
     from pathlib import Path
 except ImportError:
@@ -1252,89 +1254,51 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
     n_sub_grids = 0
     with (run_dir / 'AGRIF_FixedGrids.in').open('rt') as f:
         n_sub_grids = len([line for line in f if len(line.split()) == 8])
-    # sub-grid coordinates and bathymetry files
-    sub_grids_count = 0
-    grid = get_run_desc_value(run_desc, ('grid',))
-    for key in grid:
-        if key.startswith('AGRIF'):
-            sub_grids_count += 1
-            agrif_n = int(key.split('_')[1])
-            _make_grid_links(run_desc, run_dir, agrif_n=agrif_n)
-    if sub_grids_count != n_sub_grids:
-        logger.error(
-            'Expected {n_sub_grids} AGRIF sub-grids in grid section, '
-            'but found {sub_grids_count} - '
-            'please check your run description file'.format(
-                n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
+    run_desc_sections = {
+        # sub-grid coordinates and bathymetry files
+        'grid':
+        functools.partial(_make_grid_links, run_desc, run_dir),
+        # sub-grid restart files
+        'restart':
+        functools.partial(
+            _make_restart_links, run_desc, run_dir, nocheck_init
+        ),
+        # sub-grid namelist files
+        'namelists':
+        functools.partial(
+            _make_namelists_nemo36, run_set_dir, run_desc, run_dir
+        ),
+        # sub-grid output files
+        'output':
+        functools.partial(
+            _copy_run_set_files,
+            run_desc,
+            desc_file,
+            run_set_dir,
+            run_dir,
+            nemo34=False
+        ),
+    }
+    for run_desc_section, func in run_desc_sections.items():
+        sub_grids_count = 0
+        section = get_run_desc_value(run_desc, (run_desc_section,))
+        for key in section:
+            if key.startswith('AGRIF'):
+                sub_grids_count += 1
+                agrif_n = int(key.split('_')[1])
+                func(agrif_n=agrif_n)
+        if sub_grids_count != n_sub_grids:
+            logger.error(
+                'Expected {n_sub_grids} AGRIF sub-grids in {section} section, '
+                'but found {sub_grids_count} - '
+                'please check your run description file'.format(
+                    n_sub_grids=n_sub_grids,
+                    section=run_desc_section,
+                    sub_grids_count=sub_grids_count
+                )
             )
-        )
-        _remove_run_dir(run_dir)
-        raise SystemExit(2)
-    # sub-grid restart files
-    sub_grids_count = 0
-    restart = get_run_desc_value(run_desc, ('restart',))
-    for key in restart:
-        if key.startswith('AGRIF'):
-            sub_grids_count += 1
-            agrif_n = int(key.split('_')[1])
-            _make_restart_links(
-                run_desc, run_dir, nocheck_init, agrif_n=agrif_n
-            )
-    if sub_grids_count != n_sub_grids:
-        logger.error(
-            'Expected {n_sub_grids} AGRIF sub-grids in restart section, '
-            'but found {sub_grids_count} - '
-            'please check your run description file'.format(
-                n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
-            )
-        )
-        _remove_run_dir(run_dir)
-        raise SystemExit(2)
-    # sub-grid namelist files
-    sub_grids_count = 0
-    namelists = get_run_desc_value(run_desc, ('namelists',))
-    for key in namelists:
-        if key.startswith('AGRIF'):
-            sub_grids_count += 1
-            agrif_n = int(key.split('_')[1])
-            _make_namelists_nemo36(
-                run_set_dir, run_desc, run_dir, agrif_n=agrif_n
-            )
-    if sub_grids_count != n_sub_grids:
-        logger.error(
-            'Expected {n_sub_grids} AGRIF sub-grids in namelists section, '
-            'but found {sub_grids_count} - '
-            'please check your run description file'.format(
-                n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
-            )
-        )
-        _remove_run_dir(run_dir)
-        raise SystemExit(2)
-    # sub-grid output files
-    sub_grids_count = 0
-    output = get_run_desc_value(run_desc, ('output',))
-    for key in output:
-        if key.startswith('AGRIF'):
-            sub_grids_count += 1
-            agrif_n = int(key.split('_')[1])
-            _copy_run_set_files(
-                run_desc,
-                desc_file,
-                run_set_dir,
-                run_dir,
-                nemo34=False,
-                agrif_n=agrif_n
-            )
-    if sub_grids_count != n_sub_grids:
-        logger.error(
-            'Expected {n_sub_grids} AGRIF sub-grids in output section, '
-            'but found {sub_grids_count} - '
-            'please check your run description file'.format(
-                n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
-            )
-        )
-        _remove_run_dir(run_dir)
-        raise SystemExit(2)
+            _remove_run_dir(run_dir)
+            raise SystemExit(2)
 
 
 # All of the namelists that NEMO-3.4 requires, but empty so that they result
