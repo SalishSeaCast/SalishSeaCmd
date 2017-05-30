@@ -1253,7 +1253,11 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
     # Get number of sub-grids
     n_sub_grids = 0
     with (run_dir / 'AGRIF_FixedGrids.in').open('rt') as f:
-        n_sub_grids = len([line for line in f if len(line.split()) == 8])
+        n_sub_grids = len([
+            line for line in f
+            if not line.startswith('#') and len(line.split()) == 8
+        ])
+
     run_desc_sections = {
         # sub-grid coordinates and bathymetry files
         'grid':
