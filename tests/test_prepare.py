@@ -125,7 +125,10 @@ class TestPrepare:
             assert not m_aaf.called
         else:
             m_mrl.assert_called_once_with(m_lrd(), m_mrd(), False)
-            m_aaf.assert_called_once_with(m_lrd(), m_mrd())
+            m_aaf.assert_called_once_with(
+                m_lrd(),
+                Path('SalishSea.yaml'), m_resolved_path().parent, m_mrd()
+            )
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
 
@@ -568,6 +571,9 @@ class TestCopyRunSetFiles:
                 iodefs_key: 'iodef.xml',
                 domains_key: 'domain_def.xml',
                 fields_key: 'field_def.xml',
+                'AGRIF_1': {
+                    domains_key: '1_domain_def.xml',
+                },
             },
         }
         desc_file = Path('foo.yaml')
@@ -585,6 +591,58 @@ class TestCopyRunSetFiles:
             call(
                 str(pwd / 'domain_def.xml'),
                 str(Path('run_dir') / 'domain_def.xml')
+            ),
+            call(
+                str(pwd / 'field_def.xml'),
+                str(Path('run_dir') / 'field_def.xml')
+            ),
+        ]
+        assert m_copy.call_args_list == expected
+
+    @pytest.mark.parametrize(
+        'iodefs_key, domains_key, fields_key',
+        [
+            ('iodefs', '1_domaindefs', 'fielddefs'),  # recommended
+            ('files', '1_domain', 'fields'),  # backward compatibility
+        ]
+    )
+    @patch('salishsea_cmd.prepare.shutil.copy2')
+    @patch('salishsea_cmd.prepare._set_xios_server_mode')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
+    def test_nemo36_copy_agrif_run_set_files_no_path(
+        self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key,
+        fields_key
+    ):
+        run_desc = {
+            'output': {
+                iodefs_key: 'iodef.xml',
+                domains_key: 'domain_def.xml',
+                fields_key: 'field_def.xml',
+                'AGRIF_1': {
+                    domains_key: '1_domain_def.xml',
+                },
+            },
+        }
+        desc_file = Path('foo.yaml')
+        pwd = Path.cwd()
+        m_get_run_desc_value.side_effect = (
+            pwd / 'iodef.xml', pwd / '1_domain_def.xml', pwd / 'field_def.xml',
+            KeyError
+        )
+        salishsea_cmd.prepare._copy_run_set_files(
+            run_desc,
+            desc_file,
+            pwd,
+            Path('run_dir'),
+            nemo34=False,
+            agrif_n=1,
+        )
+        expected = [
+            call(str(pwd / 'iodef.xml'), str(Path('run_dir') / 'iodef.xml')),
+            call(str(pwd / 'foo.yaml'), str(Path('run_dir') / 'foo.yaml')),
+            call(
+                str(pwd / '1_domain_def.xml'),
+                str(Path('run_dir') / '1_domain_def.xml')
             ),
             call(
                 str(pwd / 'field_def.xml'),
@@ -645,6 +703,9 @@ class TestCopyRunSetFiles:
                 iodefs_key: '../iodef.xml',
                 domains_key: '../domain_def.xml',
                 fields_key: '../field_def.xml',
+                'AGRIF_1': {
+                    domains_key: '1_domain_def.xml',
+                },
             },
         }
         desc_file = Path('foo.yaml')
@@ -674,6 +735,62 @@ class TestCopyRunSetFiles:
         ]
         assert m_copy.call_args_list == expected
 
+    @pytest.mark.parametrize(
+        'iodefs_key, domains_key, fields_key',
+        [
+            ('iodefs', 'domaindefs', 'fielddefs'),  # recommended
+            ('files', 'domain', 'fields'),  # backward compatibility
+        ]
+    )
+    @patch('salishsea_cmd.prepare.shutil.copy2')
+    @patch('salishsea_cmd.prepare._set_xios_server_mode')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
+    def test_nemo36_copy_agrif_run_set_files_relative_path(
+        self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key,
+        fields_key
+    ):
+        run_desc = {
+            'output': {
+                iodefs_key: '../iodef.xml',
+                domains_key: '../domain_def.xml',
+                fields_key: '../field_def.xml',
+                'AGRIF_1': {
+                    domains_key: '1_domain_def.xml',
+                },
+            },
+        }
+        desc_file = Path('foo.yaml')
+        pwd = Path.cwd()
+        m_get_run_desc_value.side_effect = (
+            (pwd / '../iodef.xml').resolve(),
+            (pwd / '../1_domain_def.xml').resolve(),
+            (pwd / '../field_def.xml').resolve(), KeyError
+        )
+        salishsea_cmd.prepare._copy_run_set_files(
+            run_desc,
+            desc_file,
+            pwd,
+            Path('run_dir'),
+            nemo34=False,
+            agrif_n=1,
+        )
+        expected = [
+            call(
+                str(pwd.parent / 'iodef.xml'),
+                str(Path('run_dir') / 'iodef.xml')
+            ),
+            call(str(pwd / 'foo.yaml'), str(Path('run_dir') / 'foo.yaml')),
+            call(
+                str(pwd.parent / '1_domain_def.xml'),
+                str(Path('run_dir') / '1_domain_def.xml')
+            ),
+            call(
+                str(pwd.parent / 'field_def.xml'),
+                str(Path('run_dir') / 'field_def.xml')
+            ),
+        ]
+        assert m_copy.call_args_list == expected
+
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
     @patch('salishsea_cmd.prepare.get_run_desc_value')
@@ -684,6 +801,10 @@ class TestCopyRunSetFiles:
                 'filedefs': '../file_def.xml',
                 'domaindefs': '../domain_def.xml',
                 'fielddefs': '../field_def.xml',
+                'AGRIF_1': {
+                    'domaindefs': '../1_domain_def.xml',
+                    'filedefs': '../1_file_def.xml',
+                },
             },
         }
         desc_file = Path('foo.yaml')
@@ -700,6 +821,43 @@ class TestCopyRunSetFiles:
         assert m_copy.call_args_list[-1] == call(
             str(pwd.parent / 'file_def.xml'),
             str(Path('run_dir') / 'file_def.xml')
+        )
+
+    @patch('salishsea_cmd.prepare.shutil.copy2')
+    @patch('salishsea_cmd.prepare._set_xios_server_mode')
+    @patch('salishsea_cmd.prepare.get_run_desc_value')
+    def test_nemo36_files_def(self, m_get_run_desc_value, m_sxsm, m_copy):
+        run_desc = {
+            'output': {
+                'iodefs': '../iodef.xml',
+                'filedefs': '../file_def.xml',
+                'domaindefs': '../domain_def.xml',
+                'fielddefs': '../field_def.xml',
+                'AGRIF_1': {
+                    'domaindefs': '../1_domain_def.xml',
+                    'filedefs': '../1_file_def.xml',
+                },
+            },
+        }
+        desc_file = Path('foo.yaml')
+        pwd = Path.cwd()
+        m_get_run_desc_value.side_effect = (
+            (pwd / '../iodef.xml').resolve(),
+            (pwd / '../1_domain_def.xml').resolve(),
+            (pwd / '../field_def.xml').resolve(),
+            (pwd / '../1_file_def.xml').resolve()
+        )
+        salishsea_cmd.prepare._copy_run_set_files(
+            run_desc,
+            desc_file,
+            pwd,
+            Path('run_dir'),
+            nemo34=False,
+            agrif_n=1,
+        )
+        assert m_copy.call_args_list[-1] == call(
+            str(pwd.parent / '1_file_def.xml'),
+            str(Path('run_dir') / '1_file_def.xml')
         )
 
 
@@ -1356,29 +1514,37 @@ class TestRecordVCSRevisions:
 @patch('salishsea_cmd.prepare.logger')
 @patch('salishsea_cmd.prepare._make_grid_links')
 @patch('salishsea_cmd.prepare._make_restart_links')
+@patch('salishsea_cmd.prepare._copy_run_set_files')
 class TestAddAgrifFiles:
     """Unit tests for `salishsea prepare` _add_agrid_files() function.
     """
 
     @patch('salishsea_cmd.prepare.get_run_desc_value', side_effect=KeyError)
     def test_no_agrif(
-        self, m_get_run_desc_value, mk_restart_links, m_mk_grid_links, m_logger
+        self, m_get_run_desc_value, m_cp_run_set_files, mk_restart_links,
+        m_mk_grid_links, m_logger
     ):
         run_desc = {}
-        salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
+        salishsea_cmd.prepare._add_agrif_files(
+            run_desc, Path('foo.yaml'), Path('run_set_dir'), Path('run_dir')
+        )
         assert m_get_run_desc_value.call_args_list == [
             call(run_desc, ('AGRIF',), fatal=False)
         ]
 
     def test_no_fixed_grids_file(
-        self, mk_restart_links, m_mk_grid_links, m_logger
+        self, m_cp_run_set_files, mk_restart_links, m_mk_grid_links, m_logger
     ):
         run_desc = {'AGRIF': {}}
         with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
+            salishsea_cmd.prepare._add_agrif_files(
+                run_desc,
+                Path('foo.yaml'), Path('run_set_dir'), Path('run_dir')
+            )
 
     def test_fixed_grids_file(
-        self, mk_restart_links, m_mk_grid_links, m_logger, tmpdir
+        self, m_cp_run_set_files, mk_restart_links, m_mk_grid_links, m_logger,
+        tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
         p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
@@ -1392,13 +1558,20 @@ class TestAddAgrifFiles:
             'restart': {
                 'AGRIF_1': {}
             },
+            'output': {
+                'AGRIF_1': {},
+            },
         }
-        salishsea_cmd.prepare._add_agrif_files(run_desc, Path(str(p_run_dir)))
+        salishsea_cmd.prepare._add_agrif_files(
+            run_desc,
+            Path('foo.yaml'), Path('run_set_dir'), Path(str(p_run_dir))
+        )
         assert p_run_dir.join('AGRIF_FixedGrids.in').check(file=True)
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     def test_make_grid_links(
-        self, m_copy2, mk_restart_links, m_mk_grid_links, m_logger, tmpdir
+        self, m_copy2, m_cp_run_set_files, mk_restart_links, m_mk_grid_links,
+        m_logger, tmpdir
     ):
         p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
         run_desc = {
@@ -1415,8 +1588,14 @@ class TestAddAgrifFiles:
                 'AGRIF_1': {},
                 'AGRIF_2': {},
             },
+            'output': {
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
         }
-        salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
+        salishsea_cmd.prepare._add_agrif_files(
+            run_desc, Path('foo.yaml'), Path('run_set_dir'), Path('run_dir')
+        )
         assert m_mk_grid_links.call_args_list == [
             call(run_desc, Path('run_dir'), agrif_n=1),
             call(run_desc, Path('run_dir'), agrif_n=2),
@@ -1424,7 +1603,8 @@ class TestAddAgrifFiles:
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     def test_make_restart_links(
-        self, m_copy2, m_mk_restart_links, m_mk_grid_links, m_logger, tmpdir
+        self, m_copy2, m_cp_run_set_files, m_mk_restart_links, m_mk_grid_links,
+        m_logger, tmpdir
     ):
         p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
         run_desc = {
@@ -1441,8 +1621,14 @@ class TestAddAgrifFiles:
                 'AGRIF_1': {},
                 'AGRIF_2': {},
             },
+            'output': {
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
         }
-        salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
+        salishsea_cmd.prepare._add_agrif_files(
+            run_desc, Path('foo.yaml'), Path('run_set_dir'), Path('run_dir')
+        )
         assert m_mk_restart_links.call_args_list == [
             call(run_desc, Path('run_dir'), agrif_n=1),
             call(run_desc, Path('run_dir'), agrif_n=2),
@@ -1450,7 +1636,8 @@ class TestAddAgrifFiles:
 
     @patch('salishsea_cmd.prepare.shutil.copy2')
     def test_grid_restart_sub_grids_mismatch(
-        self, m_copy2, m_mk_restart_links, m_mk_grid_links, m_logger, tmpdir
+        self, m_copy2, m_cp_run_set_files, m_mk_restart_links, m_mk_grid_links,
+        m_logger, tmpdir
     ):
         p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
         run_desc = {
@@ -1466,6 +1653,86 @@ class TestAddAgrifFiles:
             'restart': {
                 'AGRIF_1': {},
             },
+            'output': {
+                'AGRIF_1': {},
+            },
         }
         with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._add_agrif_files(run_desc, Path('run_dir'))
+            salishsea_cmd.prepare._add_agrif_files(
+                run_desc,
+                Path('foo.yaml'), Path('run_set_dir'), Path('run_dir')
+            )
+
+    @patch('salishsea_cmd.prepare.shutil.copy2')
+    def test_copy_run_set_files(
+        self, m_copy2, m_cp_run_set_files, m_mk_restart_links, m_mk_grid_links,
+        m_logger, tmpdir
+    ):
+        p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
+        run_desc = {
+            'AGRIF': {
+                'fixed grids': str(p_fixed_grids)
+            },
+            'grid': {
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc',
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+            'restart': {
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+            'output': {
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+        }
+        salishsea_cmd.prepare._add_agrif_files(
+            run_desc, Path('foo.yaml'), Path('run_set_dir'), Path('run_dir')
+        )
+        assert m_cp_run_set_files.call_args_list == [
+            call(
+                run_desc,
+                Path('foo.yaml'),
+                Path('run_set_dir'),
+                Path('run_dir'),
+                agrif_n=1
+            ),
+            call(
+                run_desc,
+                Path('foo.yaml'),
+                Path('run_set_dir'),
+                Path('run_dir'),
+                agrif_n=2
+            ),
+        ]
+
+    @patch('salishsea_cmd.prepare.shutil.copy2')
+    def test_grid_output_sub_grids_mismatch(
+        self, m_copy2, m_cp_run_set_files, m_mk_restart_links, m_mk_grid_links,
+        m_logger, tmpdir
+    ):
+        p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
+        run_desc = {
+            'AGRIF': {
+                'fixed grids': str(p_fixed_grids)
+            },
+            'grid': {
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc',
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+            'restart': {
+                'AGRIF_1': {},
+            },
+            'output': {
+                'AGRIF_1': {},
+            },
+        }
+        with pytest.raises(SystemExit):
+            salishsea_cmd.prepare._add_agrif_files(
+                run_desc,
+                Path('foo.yaml'), Path('run_set_dir'), Path('run_dir')
+            )
