@@ -1512,15 +1512,19 @@ class TestRecordVCSRevisions:
         )
 
 
-@patch('salishsea_cmd.prepare.logger')
+@patch('salishsea_cmd.prepare.logger', autospec=True)
 @patch('salishsea_cmd.prepare._make_grid_links', autospec=True)
 @patch('salishsea_cmd.prepare._make_restart_links', autospec=True)
-@patch('salishsea_cmd.prepare._copy_run_set_files')
+@patch('salishsea_cmd.prepare._copy_run_set_files', autospec=True)
 class TestAddAgrifFiles:
     """Unit tests for `salishsea prepare` _add_agrid_files() function.
     """
 
-    @patch('salishsea_cmd.prepare.get_run_desc_value', side_effect=KeyError)
+    @patch(
+        'salishsea_cmd.prepare.get_run_desc_value',
+        side_effect=KeyError,
+        autospec=True
+    )
     def test_no_agrif(
         self, m_get_run_desc_value, m_cp_run_set_files, mk_restart_links,
         m_mk_grid_links, m_logger
@@ -1579,7 +1583,7 @@ class TestAddAgrifFiles:
         )
         assert p_run_dir.join('AGRIF_FixedGrids.in').check(file=True)
 
-    @patch('salishsea_cmd.prepare.shutil.copy2')
+    @patch('salishsea_cmd.prepare.shutil.copy2', autospec=True)
     def test_make_grid_links(
         self, m_copy2, m_cp_run_set_files, mk_restart_links, m_mk_grid_links,
         m_logger, tmpdir
@@ -1616,7 +1620,7 @@ class TestAddAgrifFiles:
             call(run_desc, Path('run_dir'), agrif_n=2),
         ]
 
-    @patch('salishsea_cmd.prepare.shutil.copy2')
+    @patch('salishsea_cmd.prepare.shutil.copy2', autospec=True)
     def test_make_restart_links(
         self, m_copy2, m_cp_run_set_files, m_mk_restart_links, m_mk_grid_links,
         m_logger, tmpdir
@@ -1653,7 +1657,7 @@ class TestAddAgrifFiles:
             call(run_desc, Path('run_dir'), False, agrif_n=2),
         ]
 
-    @patch('salishsea_cmd.prepare.shutil.copy2')
+    @patch('salishsea_cmd.prepare.shutil.copy2', autospec=True)
     def test_grid_restart_sub_grids_mismatch(
         self, m_copy2, m_cp_run_set_files, m_mk_restart_links, m_mk_grid_links,
         m_logger, tmpdir
@@ -1685,7 +1689,7 @@ class TestAddAgrifFiles:
                 nocheck_init=False
             )
 
-    @patch('salishsea_cmd.prepare.shutil.copy2')
+    @patch('salishsea_cmd.prepare.shutil.copy2', autospec=True)
     def test_copy_run_set_files(
         self, m_copy2, m_cp_run_set_files, m_mk_restart_links, m_mk_grid_links,
         m_logger, tmpdir
@@ -1723,6 +1727,7 @@ class TestAddAgrifFiles:
                 Path('foo.yaml'),
                 Path('run_set_dir'),
                 Path('run_dir'),
+                nemo34=False,
                 agrif_n=1
             ),
             call(
@@ -1730,11 +1735,12 @@ class TestAddAgrifFiles:
                 Path('foo.yaml'),
                 Path('run_set_dir'),
                 Path('run_dir'),
+                nemo34=False,
                 agrif_n=2
             ),
         ]
 
-    @patch('salishsea_cmd.prepare.shutil.copy2')
+    @patch('salishsea_cmd.prepare.shutil.copy2', autospec=True)
     def test_grid_output_sub_grids_mismatch(
         self, m_copy2, m_cp_run_set_files, m_mk_restart_links, m_mk_grid_links,
         m_logger, tmpdir
