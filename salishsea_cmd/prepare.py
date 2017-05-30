@@ -140,7 +140,9 @@ def prepare(desc_file, nemo34, nocheck_init):
         _make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
     if not nemo34:
-        _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir)
+        _add_agrif_files(
+            run_desc, desc_file, run_set_dir, run_dir, nocheck_init
+        )
     return run_dir
 
 
@@ -1193,7 +1195,7 @@ def _record_vcs_revisions(run_desc, run_dir):
             )
 
 
-def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir):
+def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
     """Add file copies and symlinks to temporary run directory for
     AGRIF runs.
 
@@ -1209,6 +1211,9 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir):
 
     :param run_dir: Path of the temporary run directory.
     :type run_dir: :py:class:`pathlib.Path`
+
+    :param boolean nocheck_init: Suppress restart file existence check;
+                                 the default is to check
 
     :raises: SystemExit if mismatching number of sub-grids is detected
     """
@@ -1239,7 +1244,9 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir):
         if key.startswith('AGRIF'):
             sub_grids_count += 1
             agrif_n = int(key.split('_')[1])
-            _make_restart_links(run_desc, run_dir, agrif_n=agrif_n)
+            _make_restart_links(
+                run_desc, run_dir, nocheck_init, agrif_n=agrif_n
+            )
     if sub_grids_count != n_sub_grids:
         logger.error(
             'Found {n_sub_grids} AGRIF sub-grids in grid section, '
