@@ -1265,7 +1265,12 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
             sub_grids_count += 1
             agrif_n = int(key.split('_')[1])
             _copy_run_set_files(
-                run_desc, desc_file, run_set_dir, run_dir, agrif_n=agrif_n
+                run_desc,
+                desc_file,
+                run_set_dir,
+                run_dir,
+                nemo34=False,
+                agrif_n=agrif_n
             )
     if sub_grids_count != n_sub_grids:
         logger.error(
