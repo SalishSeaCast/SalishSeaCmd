@@ -1248,14 +1248,28 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
         nemo_cmd.fspath(fixed_grids),
         nemo_cmd.fspath(run_dir / 'AGRIF_FixedGrids.in')
     )
-    # sub-grid coordinates and bathymetry files
+    # Get number of sub-grids
     n_sub_grids = 0
+    with (run_dir / 'AGRIF_FixedGrids.in').open('rt') as f:
+        n_sub_grids = len([line for line in f if len(line.split()) == 8])
+    # sub-grid coordinates and bathymetry files
+    sub_grids_count = 0
     grid = get_run_desc_value(run_desc, ('grid',))
     for key in grid:
         if key.startswith('AGRIF'):
-            n_sub_grids += 1
+            sub_grids_count += 1
             agrif_n = int(key.split('_')[1])
             _make_grid_links(run_desc, run_dir, agrif_n=agrif_n)
+    if sub_grids_count != n_sub_grids:
+        logger.error(
+            'Expected {n_sub_grids} AGRIF sub-grids in grid section, '
+            'but found {sub_grids_count} - '
+            'please check your run description file'.format(
+                n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
+            )
+        )
+        _remove_run_dir(run_dir)
+        raise SystemExit(2)
     # sub-grid restart files
     sub_grids_count = 0
     restart = get_run_desc_value(run_desc, ('restart',))
@@ -1268,8 +1282,8 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
             )
     if sub_grids_count != n_sub_grids:
         logger.error(
-            'Found {n_sub_grids} AGRIF sub-grids in grid section, '
-            'but {sub_grids_count} in restart section - '
+            'Expected {n_sub_grids} AGRIF sub-grids in restart section, '
+            'but found {sub_grids_count} - '
             'please check your run description file'.format(
                 n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
             )
@@ -1288,8 +1302,8 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
             )
     if sub_grids_count != n_sub_grids:
         logger.error(
-            'Found {n_sub_grids} AGRIF sub-grids in grid section, '
-            'but {sub_grids_count} in namelists section - '
+            'Expected {n_sub_grids} AGRIF sub-grids in namelists section, '
+            'but found {sub_grids_count} - '
             'please check your run description file'.format(
                 n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
             )
@@ -1313,8 +1327,8 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
             )
     if sub_grids_count != n_sub_grids:
         logger.error(
-            'Found {n_sub_grids} AGRIF sub-grids in grid section, '
-            'but {sub_grids_count} in output section - '
+            'Expected {n_sub_grids} AGRIF sub-grids in output section, '
+            'but found {sub_grids_count} - '
             'please check your run description file'.format(
                 n_sub_grids=n_sub_grids, sub_grids_count=sub_grids_count
             )
