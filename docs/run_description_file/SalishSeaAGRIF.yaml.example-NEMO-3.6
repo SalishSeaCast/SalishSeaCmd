@@ -1,0 +1,174 @@
+# salishsea command processor run description example for NEMO-3.6
+
+config_name: SalishSea
+
+# How is the domain to be distributed over the processors in the
+# i (longitude) and j (latitude) directions?
+# These values are used to set the nammpp namelist jpni & jpnj values
+# and to set the number of processors and nodes in the PBS script
+MPI decomposition: 8x18
+
+# For runs on systems that use qsub/PBS/TORQUE
+run_id: example
+walltime: 10:00:00
+# If missing, email address is set to ${USER}@eoas.ubc.ca
+email: dlatornell@example.com
+
+
+# Only required if your run uses AGRIF
+AGRIF:
+  fixed grids: $HOME/MEOPAR/NEMO-forcing-BS1/AGRIF_FixedGrids.in
+
+
+paths:
+  # Absolute path to NEMO-3.6 CONFIG/ directory.
+  NEMO code config: $HOME/MEOPAR/NEMO-3.6-code/NEMOGCM/CONFIG
+  # If relative, paths below are taken from current directory
+  XIOS: $HOME/MEOPAR/XIOS2
+  forcing: $HOME/MEOPAR/NEMO-forcing-MD
+  runs directory: ../../../SalishSea/
+
+
+grid:
+  # If relative, paths are taken from the grid/ directory in the forcing
+  # path above
+  coordinates: coordinates_seagrid_SalishSea.nc
+  bathymetry: bathy_meter_SalishSea2.nc
+  AGRIF_1:
+    # Symlinks will be prefixed with 1_
+    coordinates: $HOME/MEOPAR/NEMO-forcing-BS1/1_coordinates_seagrid_SalishSea201702.nc
+    bathymetry: $HOME/MEOPAR/NEMO-forcing-BS1/1_bathymetry_201702.nc
+
+
+forcing:
+  # The keys below are the names of symlinks that will be created.
+  # The targets of those symlinks will be the paths named by the associated
+  # "link to:" keys;
+  # e.g. a symlink named NEMO-atmos will be created to
+  # /results/forcing/atmospheric/GEM2.5/operational/
+  #
+  # You only need to include keys that are used in the namelist(s) for
+  # your run.
+  #
+  # If relative, paths are taken from forcing path above
+  NEMO-atmos:
+    link to: /results/forcing/atmospheric/GEM2.5/operational/
+    check link:
+      type: atmospheric
+      namelist filename: namelist_cfg
+  open_boundaries:
+    link to: $HOME/MEOPAR/NEMO-forcing-MD/open_boundaries/
+  rivers:
+    link to: $HOME/MEOPAR/NEMO-forcing-MD/rivers/
+  bfr_coef.nc:
+    link to: grid/jetty_mask_bathy201702.nc
+  bio_climatology:
+    link to: rivers/bio_climatology
+  bio_open_boundaries:
+    link to: open_boundaries
+  #
+  # AGRIF inputs are specific to each subgrid and stored all in one directory
+  #
+  1_rivers:
+    link to: $HOME/MEOPAR/NEMO-forcing-BS1/1_rivers/
+  1_NEMO-atmos:
+    link to: $HOME/MEOPAR/NEMO-forcing-BS1/1_atmospheric/
+  1_bio_climatology:
+    link to: $HOME/MEOPAR/NEMO-forcing-BS1/1_bio_climatology/
+
+
+restart:
+  # This section is only relevant if your namelist says that you are using
+  # restart file(s) from a prior run to initialize your run,
+  # if not, it is ignored
+  #
+  # The keys below are the names of symlinks that will be created.
+  # The targets of those symlinks will be the paths provided as values
+  # e.g. a symlink named restart_trc.nc will be created to
+  # /results/SalishSea/nowcast-green/06dec15/SalishSea_00004320_restart_trc.nc
+  #
+  # You only need to include keys that are used in the namelist(s) for
+  # your run.
+  #
+  # Paths must be absolute
+  restart.nc: /results/SalishSea/nowcast/05may15/SalishSea_02056320_restart.nc
+  restart_trc.nc: /results/SalishSea/nowcast-green/06dec15/SalishSea_00004320_restart_trc.nc
+  AGRIF_1:
+    # Symlinks will be prefixed with 1_
+    restart.nc: /results/SalishSea/nowcast/05may15/1_SalishSea_02056320_restart.nc
+    restart_trc.nc: /results/SalishSea/nowcast-green/06dec15/1_SalishSea_00004320_restart_trc.nc
+
+
+namelists:
+  # The namelist section files in the lists below will be concatenated
+  # to create a namelist file whose name is the key under which the files
+  # are listed. The keys are the names of the namelist files that NEMO-3.6
+  # expects.
+  #
+  # The only required key is namelist_cfg.
+  #
+  # Corresponding namelist*_ref files will be copied from CONFIG/SHARED/
+  # unless they are provided in this section.
+  #
+  # If relative, paths are taken from current directory
+  #
+  # Parent grid namelists
+  namelist_cfg:
+    - namelist.time.cont
+    - namelist.domain.40
+    - namelist.surface.green
+    - namelist.lateral
+    - namelist.bottom
+    - namelist.tracer
+    - namelist.dynamics
+    - namelist.vertical
+    - namelist.compute
+  namelist_smelt_cfg:
+    - namelist_smelt_cfg
+  namelist_top_cfg:
+    - namelist_top_cfg
+
+  # Zoom domain namelists
+  AGRIF_1:
+    namelist_cfg:
+      - 1_namelist.time.cont
+      - 1_namelist.domain.20
+      - 1_namelist.surface.green
+      - 1_namelist.lateral
+      - 1_namelist.bottom
+      - 1_namelist.tracer
+      - 1_namelist.dynamics
+      - namelist.vertical
+      - namelist.compute
+      - 1_namelist.agrif
+    namelist_smelt_cfg:
+      - 1_namelist_smelt_cfg
+    namelist_top_cfg:
+      - namelist_top_cfg
+
+
+output:
+  separate XIOS server: True
+  XIOS servers: 1
+  # If relative, paths are taken from current directory
+  iodefs: iodef.xml
+  filedefs: ../file_def.xml
+  domaindefs: ../domain_def.xml
+  fielddefs: field_def.xml
+  AGRIF_1:
+    # namelist file names will be prefixed with 1_
+    domaindefs: xios2/1_domain_def.xml
+    filedefs: xios2/1_file_def_green.xml
+
+
+# Optional section
+vcs revisions:
+  hg:
+    # repos pointed to by paths: NEMO code config, paths: XIOS, and paths: forcing
+    # will be automatically recorded
+    #
+    # List any additional repos to record revision & status of here
+    - $HOME/MEOPAR/SS-run-sets
+    - $HOME/MEOPAR/SalishSeaCmd
+    - $HOME/MEOPAR/NEMO-Cmd
+    - $HOME/MEOPAR/NEMO-forcing-BS1
