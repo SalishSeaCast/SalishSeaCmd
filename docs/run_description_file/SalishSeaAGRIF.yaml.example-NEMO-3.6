@@ -128,7 +128,7 @@ namelists:
   namelist_top_cfg:
     - namelist_top_cfg
 
-  # Zoom domain namelists
+  # Zoom domain namelists will be prefixed with 1_
   AGRIF_1:
     namelist_cfg:
       - 1_namelist.time.cont
@@ -156,7 +156,7 @@ output:
   domaindefs: ../domain_def.xml
   fielddefs: field_def.xml
   AGRIF_1:
-    # namelist file names will be prefixed with 1_
+    # xml file names will be prefixed with 1_
     domaindefs: xios2/1_domain_def.xml
     filedefs: xios2/1_file_def_green.xml
 
