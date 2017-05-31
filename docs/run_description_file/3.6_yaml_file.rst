@@ -257,7 +257,7 @@ or by setting the value associated with the :kbd:`type` key to :py:obj:`None`.
 :kbd:`restart` Section
 ======================
 
-The optional :kbd:`restart` section of the run description file contains key-value pairs that provide paths and file names of restart files to be used to initialize the run.
+The *optional* :kbd:`restart` section of the run description file contains key-value pairs that provide paths and file names of restart files to be used to initialize the run.
 
 The paths may be relative or absolute,
 and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
@@ -289,7 +289,7 @@ and exit with an error message if not.
 :kbd:`namelists` Section
 ========================
 
-The :kbd:`namelists` section of the run description file contains a dict of lists of NEMO namelist section files that will be concatenated to construct :file:`namelist*_cfg` files
+The :kbd:`namelists` section of the run description file contains one or more dicts of lists of NEMO namelist section files that will be concatenated to construct :file:`namelist*_cfg` files
 (the file names required by NEMO)
 file for the run.
 
@@ -443,7 +443,7 @@ the number of XIOS servers to run.
 :kbd:`vcs revisions` Section
 ============================
 
-The optional :kbd:`vcs revisions` section of the run description file contains lists of version control system repositories of which the revision and status will be recorded in the temporary run and run results directories.
+The *optional* :kbd:`vcs revisions` section of the run description file contains lists of version control system repositories of which the revision and status will be recorded in the temporary run and run results directories.
 
 .. note::
     Revision and status record files for the :file:`NEMO-3.6-code`,
@@ -458,6 +458,8 @@ An example :kbd:`vcs revisions` section:
     vcs revisions:
       hg:
         - $HOME/MEOPAR/SS-run-sets
+        - $HOME/MEOPAR/NEMO-Cmd
+        - $HOME/MEOPAR/SalishSeaCmd
 
 The sub-section keys
 (:kbd:`hg` above)
