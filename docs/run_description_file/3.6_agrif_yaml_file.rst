@@ -1,0 +1,249 @@
+.. Copyright 2013-2017 The Salish Sea MEOPAR contributors
+.. and The University of British Columbia
+..
+.. Licensed under the Apache License, Version 2.0 (the "License");
+.. you may not use this file except in compliance with the License.
+.. You may obtain a copy of the License at
+..
+..    http://www.apache.org/licenses/LICENSE-2.0
+..
+.. Unless required by applicable law or agreed to in writing, software
+.. distributed under the License is distributed on an "AS IS" BASIS,
+.. WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+.. See the License for the specific language governing permissions and
+.. limitations under the License.
+
+
+.. _NEMO-3.6-RunDescriptionFileForAGRIF-Runs:
+
+********************************************
+NEMO-3.6 Run Description File for AGRIF Runs
+********************************************
+
+.. warning::
+    The :kbd:`SalishSeaCmd` package provides support for running NEMO-3.6 with `AGRIF`_ sub-grids as of version 3.2.
+    AGRIF is not supported for NEMO-3.4.
+
+This section describes the additional sections that can be included in a NEMO-3.6 YAML run description file to enable :kbd:`SalishSeaCmd` to handle runs that use `AGRIF`_
+(Adaptive Grid Refinement in Fortran).
+
+.. _AGRIF: https://www-ljk.imag.fr/MOISE/AGRIF/index.html
+
+
+.. _NEMO-3.6-AGRIF-ExampleRunDescriptionYAML-File:
+
+Example AGRIF Run Description YAML File
+=======================================
+
+Example:
+
+.. literalinclude:: SalishSeaAGRIF.yaml.example-NEMO-3.6
+   :language: yaml
+
+
+.. _NEMO-3.6-AGRIF-BasicRunConfiguration:
+
+Basic Run Configuration
+=======================
+
+There are no changes to the basic run configuration key-value pairs for AGRIF runs.
+Please see :ref:`NEMO-3.6-BasicRunConfiguration`.
+
+
+.. _NEMO-3.6-AGRIF:
+
+:kbd:`AGRIF` Section
+====================
+
+The existence of an :kbd:`AGRIF` section in the run description YAML file signals to :command:`salishsea run` and :command:`salishsea prepare` that the YAML file includes AGRIF sub-grid sections.
+It also contains the path to the :file:`AGRIF_FixedGrids.in` file that NEMO-3.6 uses to configure itself for an AGRIF run.
+
+An example :kbd:`AGRIF` section:
+
+.. code-block:: yaml
+
+    AGRIF:
+      fixed grids: $HOME/MEOPAR/NEMO-forcing-BS1/AGRIF_FixedGrids.in
+
+The value associated with the :kbd:`fixed grids` key must be an absolute path.
+The path may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+and :envvar:`$USER` as an alternative spelling of the user's userid.
+
+
+.. _NEMO-3.6-AGRIF-Paths:
+
+:kbd:`paths` Section
+====================
+
+There are no changes to the :kbd:`paths` section for AGRIF runs.
+Please see :ref:`NEMO-3.6-Paths`.
+
+
+.. _NEMO-3.6-AGRIF-Grid:
+
+:kbd:`grid` Section
+===================
+
+The :kbd:`grid` section must contain :kbd:`coordinates` and :kbd:`bathymetry` items for the main grid as described in :ref:`NEMO-3.6-Grid`.
+
+.. note::
+    Land processor elimination is not supported for AGRIF runs.
+
+An example :kbd:`grid` section:
+
+.. code-block:: yaml
+
+    grid:
+      coordinates: coordinates_seagrid_SalishSea201702.nc
+      bathymetry: bathymetry_201702.nc
+      land processor elimination: False
+      AGRIF_1:
+        coordinates: $HOME/MEOPAR/NEMO-forcing-BS1/1_coordinates_seagrid_SalishSea201702.nc
+        bathymetry: $HOME/MEOPAR/NEMO-forcing-BS1/1_bathymetry_201702.nc
+
+The :kbd:`AGRIF_1` key identifies a :kbd:`grid` sub-section for the first AGRIF sub-grid.
+It must contain :kbd:`coordinates` and :kbd:`bathymetry` items for the sub-grid.
+Those items must follow the same rules as described in :ref:`NEMO-3.6-Grid` for the main grid coordinates and bathymetry.
+The :kbd:`AGRIF_1` coordinates file will be symlinked in the run directory as :file:`1_coordinates.nc`
+(the file name required by NEMO).
+Likewise,
+the :kbd:`AGRIF_1` bathymetry file will be symlinked as :file:`1_bathy_meter.nc`.
+
+Additional AGRIF sub-grid sections are defined by adding additional :kbd:`AGRIF_n` sub-sections.
+The :kbd:`n` value from each :kbd:`AGRIF_n` sub-section will be used as the prefix for the coordinates and bathymetry links for that sub-grid.
+
+
+.. _NEMO-3.6-AGRIF-Forcing:
+
+:kbd:`forcing` Section
+======================
+
+There are no changes to the :kbd:`forcing` section for AGRIF runs.
+Please see :ref:`NEMO-3.6-Forcing`.
+
+
+.. _NEMO-3.6-AGRIF-Restart:
+
+:kbd:`restart` Section
+======================
+
+The *optional* :kbd:`restart` section of the run description file contains key-value pairs that provide paths and file names of restart files to be used to initialize the run.
+
+Here is an example :kbd:`restart` section:
+
+.. code-block:: yaml
+
+    restart:
+      # Parent
+      restart.nc: $HOME/MEOPAR/NEMO-forcing-MD/hindcast/28sep14/SalishSea_00025920_restart_expanded.nc
+      AGRIF_1:
+        restart.nc: $HOME/MEOPAR/NEMO-forcing-BS1/1_SalishSea_00025920_restart_expanded.nc
+
+The :kbd:`AGRIF_1` key identifies a :kbd:`restart` sub-section for the first AGRIF sub-grid.
+It contains key-value pairs that provide paths and file names of restart files to be used to initialize sub-grid for the run.
+Those items must follow the same rules as described in :ref:`NEMO-3.6-Grid` for the main grid restart files.
+The :kbd:`AGRIF_1` restart file will be symlinked in the run directory as :file:`1_restart.nc`
+
+NEMO requires that the name of the model restart file be :kbd:`restart.nc`,
+so that is the key that you must use.
+For an (optional) tracers restart file the required file name (key) is :kbd:`restart_trc.nc`.
+
+Additional AGRIF sub-grid sections are defined by adding additional :kbd:`AGRIF_n` sub-sections.
+The :kbd:`n` value from each :kbd:`AGRIF_n` sub-section will be used as the prefix for the restart file links for that sub-grid.
+
+
+.. _NEMO-3.6-AGRIF-Namelists:
+
+:kbd:`namelists` Section
+========================
+
+The :kbd:`namelists` section of the run description file must contain the dicts of lists of NEMO namelist section files for the main grid as described in :ref:`NEMO-3.6-Namelists`.
+It also contains :kbd:`AGRIF_n` sub-section(s) that provide the namelists for the AGRIF sub-grid(s).
+
+An example :kbd:`grid` section:
+
+.. code-block:: yaml
+
+    namelists:
+      # Parent grid namelists
+      namelist_cfg:
+        - namelist.time.cont
+        - namelist.domain.40
+        - namelist.surface.green
+        - namelist.lateral
+        - namelist.bottom
+        - namelist.tracer
+        - namelist.dynamics
+        - namelist.vertical
+        - namelist.compute
+      namelist_smelt_cfg:
+        - namelist_smelt_cfg
+      namelist_top_cfg:
+        - namelist_top_cfg
+
+      # Zoom domain namelists
+      AGRIF_1:
+        namelist_cfg:
+          - 1_namelist.time.cont
+          - 1_namelist.domain.20
+          - 1_namelist.surface.green
+          - 1_namelist.lateral
+          - 1_namelist.bottom
+          - 1_namelist.tracer
+          - 1_namelist.dynamics
+          - namelist.vertical
+          - namelist.compute
+          - 1_namelist.agrif
+        namelist_smelt_cfg:
+          - 1_namelist_smelt_cfg
+        namelist_top_cfg:
+          - namelist_top_cfg
+
+The :kbd:`AGRIF_1` key identifies a :kbd:`restart` sub-section for the first AGRIF sub-grid.
+Those items must follow the same rules as described in :ref:`NEMO-3.6-Namelists` for the main grid namelist files.
+The namelist section files associated with the :kbd:`namelist_cfg` key in the :kbd:`AGRIF_1` sub-section will be concatenated to create the :file:`1_namelist_cfg` file in the run directory
+(the file name required by NEMO).
+Other namelists will be similarly prefixed.
+
+Additional AGRIF sub-grid sections are defined by adding additional :kbd:`AGRIF_n` sub-sections.
+The :kbd:`n` value from each :kbd:`AGRIF_n` sub-section will be used as the prefix for the namelist files for that sub-grid.
+
+
+.. _NEMO-3.6-AGRIF-Output:
+
+:kbd:`output` Section
+=====================
+
+The :kbd:`output` section of the run description file must contain key-value pairs that provide the names of the files that define the output files,
+domains,
+and fields to be used by the XIOS server for the run as described in :ref:`NEMO-3.6-Output`,
+as well as domain and files definitions for the AGRIF sub-grids.
+
+.. note::
+    It is assumed here that AGRIF runs use XIOS-2.
+
+Here is an example :kbd:`output` section:
+
+.. code-block:: yaml
+
+    output:
+      separate XIOS server: True
+      XIOS servers: 1
+      iodefs: xios2/iodef.xml
+      domaindefs: xios2/domain_def.xml
+      fielddefs: ../hindcast/field_def.xml
+      filedefs: xios2/file_def.xml
+      AGRIF_1:
+        domaindefs: xios2/1_domain_def.xml
+        filedefs: xios2/1_file_def.xml
+
+The :kbd:`AGRIF_1` key identifies an :kbd:`output` sub-section for the first AGRIF sub-grid.
+It must contain :kbd:`domaindefs` and :kbd:`filedefs` items for the sub-grid.
+Those items must follow the same rules as described in :ref:`NEMO-3.6-Output` for the main grid domain and files definitions.
+The :kbd:`AGRIF_1` domain definition file will be copied into the run directory as :file:`1_domain_def.xml`
+(the file name required by NEMO).
+Likewise,
+the :kbd:`AGRIF_1` files definition file will be copied as :file:`1_file_def.xml`.
+
+Additional AGRIF sub-grid sections are defined by adding additional :kbd:`AGRIF_n` sub-sections.
+The :kbd:`n` value from each :kbd:`AGRIF_n` sub-section will be used as the prefix for the domain and files definition files for that sub-grid.
