@@ -259,7 +259,7 @@ it is appended to the directory containing the run description file.
 :kbd:`vcs revisions` Section
 ============================
 
-The optional :kbd:`vcs revisions` section of the run description file contains lists of version control system repositories of which the revision and status will be recorded in the temporary run and run results directories.
+The *optional* :kbd:`vcs revisions` section of the run description file contains lists of version control system repositories of which the revision and status will be recorded in the temporary run and run results directories.
 
 .. note::
     Revision and status record files for the :file:`NEMO-code`,
@@ -274,6 +274,8 @@ An example :kbd:`vcs revisions` section:
     vcs revisions:
       hg:
         - $HOME/MEOPAR/SS-run-sets
+        - $HOME/MEOPAR/NEMO-Cmd
+        - $HOME/MEOPAR/SalishSeaCmd
 
 The sub-section keys
 (:kbd:`hg` above)
