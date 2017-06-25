@@ -220,7 +220,10 @@ def run(
     else:
         xios_processors = 0
     results_dir = Path(results_dir)
-    system = os.getenv('WGSYSTEM') or socket.gethostname().split('.')[0]
+    system = (
+        os.getenv('WGSYSTEM') or os.getenv('CC_CLUSTER') or
+        socket.gethostname().split('.')[0]
+    )
     batch_script = _build_batch_script(
         run_desc,
         fspath(desc_file), nemo_processors, xios_processors, max_deflate_jobs,
