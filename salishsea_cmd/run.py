@@ -589,7 +589,10 @@ def _pbs_features(n_processors, system):
 
 
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, system):
-    home = u'${HOME}' if system == 'salish' else u'${PBS_O_HOME}'
+    home = (
+        u'${PBS_O_HOME}'
+        if system in {'bugaboo', 'jasper', 'orcinus'} else u'${HOME}'
+    )
     defns = (
         u'RUN_ID="{run_id}"\n'
         u'RUN_DESC="{run_desc_file}"\n'
