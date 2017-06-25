@@ -316,33 +316,52 @@ class TestRun:
         ]
 
 
-class TestPbsCommon:
-    """Unit tests for `salishsea run` pbs_common() function.
+class TestSlurm:
+    """Unit tests for `salishsea run` _slurm() function.
     """
 
-    def test_walltime_leading_zero(self):
+    def test_slurm(self):
+        desc_file = StringIO(u'run_id: foo\n' u'walltime: 01:02:03\n')
+        run_desc = yaml.load(desc_file)
+        slurm_directives = salishsea_cmd.run._slurm(
+            run_desc, 42, 'me@example.com', 'foo/'
+        )
+        expected = (
+            u'#SBATCH --job-name=foo\n'
+            u'#SBATCH --ntasks=42\n'
+            u'#SBATCH --mem-per-cpu=2000M\n'
+            u'#SBATCH --time=1:02:03\n'
+            u'#SBATCH --mail-user=me@example.com\n'
+            u'#SBATCH --mail-type=ALL\n'
+        )
+        assert slurm_directives == expected
+
+
+class TestPbsCommon:
+    """Unit tests for `salishsea run` _pbs_common() function.
+    """
+
+    @pytest.mark.parametrize(
+        'walltime, expected_walltime', [
+            ('01:02:03', '1:02:03'),
+            ('1:02:03', '1:02:03'),
+        ]
+    )
+    def test_walltime(self, walltime, expected_walltime):
         """Ensure correct handling of walltime w/ leading zero in YAML desc file
 
         re: issue#16
         """
-        desc_file = StringIO(u'run_id: foo\n' u'walltime: 01:02:03\n')
+        desc_file = StringIO(
+            u'run_id: foo\n'
+            u'walltime: {walltime}\n'.format(walltime=walltime)
+        )
         run_desc = yaml.load(desc_file)
         pbs_directives = salishsea_cmd.run._pbs_common(
             run_desc, 42, 'me@example.com', 'foo/'
         )
-        assert 'walltime=1:02:03' in pbs_directives
-
-    def test_walltime_no_leading_zero(self):
-        """Ensure correct handling of walltime w/o leading zero in YAML desc file
-
-        re: issue#16
-        """
-        desc_file = StringIO(u'run_id: foo\n' u'walltime: 1:02:03\n')
-        run_desc = yaml.load(desc_file)
-        pbs_directives = salishsea_cmd.run._pbs_common(
-            run_desc, 42, 'me@example.com', 'foo/'
-        )
-        assert 'walltime=1:02:03' in pbs_directives
+        expected = 'walltime={expected}'.format(expected=expected_walltime)
+        assert expected in pbs_directives
 
 
 class TestPbsFeatures:
