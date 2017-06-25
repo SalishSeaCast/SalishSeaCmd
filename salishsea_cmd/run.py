@@ -334,18 +334,28 @@ def _build_batch_script(
         email = get_run_desc_value(run_desc, ('email',), fatal=False)
     except KeyError:
         email = u'{user}@eoas.ubc.ca'.format(user=os.getenv('USER'))
-    script = u'\n'.join((
-        script, u'{pbs_common}'
-        u'{pbs_features}\n'.format(
-            pbs_common=_pbs_common(
-                run_desc, nemo_processors + xios_processors, email,
-                fspath(results_dir)
-            ),
-            pbs_features=_pbs_features(
-                nemo_processors + xios_processors, system
+    if system in {'cedar', 'graham'}:
+        script = u'\n'.join((
+            script, u'{slurm}\n'.format(
+                slurm=_slurm(
+                    run_desc, nemo_processors + xios_processors, email,
+                    fspath(results_dir)
+                )
             )
-        )
-    ))
+        ))
+    else:
+        script = u'\n'.join((
+            script, u'{pbs_common}'
+            u'{pbs_features}\n'.format(
+                pbs_common=_pbs_common(
+                    run_desc, nemo_processors + xios_processors, email,
+                    fspath(results_dir)
+                ),
+                pbs_features=_pbs_features(
+                    nemo_processors + xios_processors, system
+                )
+            )
+        ))
     script = u'\n'.join((
         script, u'{defns}\n'
         u'{modules}\n'
@@ -367,6 +377,94 @@ def _build_batch_script(
     return script
 
 
+def _slurm(
+    run_desc,
+    n_processors,
+    email,
+    results_dir,
+    pmem='2000M',
+    deflate=False,
+    result_type=''
+):
+    """Return the SBATCH directives used to run NEMO on a cluster that uses the
+    Slurm Workload Manager for job scheduling.
+
+    The string that is returned is intended for inclusion in a bash script
+    that will submitted be to the cluster queue manager via the
+    :command:`sbatch` command.
+
+    :param dict run_desc: Run description dictionary.
+
+    :param int n_processors: Number of processors that the run will be
+                             executed on.
+                             For NEMO-3.6 runs this is the sum of NEMO and
+                             XIOS processors.
+
+    :param str email: Email address to send job begin, end & abort
+                      notifications to.
+
+    :param str results_dir: Directory to store results into.
+
+    :param str pmem: Memory per processor.
+
+    :param boolean deflate: Return directives for a run results deflation job
+                            when :py:obj:`True`.
+
+    :param str result_type: Run result type ('grid', 'ptrc', or 'dia') for
+                            deflation job.
+
+    :returns: PBS directives for run script.
+    :rtype: Unicode str
+    """
+    run_id = get_run_desc_value(run_desc, ('run_id',))
+    if deflate:
+        run_id = '{result_type}_{run_id}_deflate'.format(
+            run_id=run_id, result_type=result_type
+        )
+    try:
+        td = datetime.timedelta(
+            seconds=get_run_desc_value(run_desc, ('walltime',))
+        )
+    except TypeError:
+        t = datetime.datetime.strptime(
+            get_run_desc_value(run_desc, ('walltime',)), '%H:%M:%S'
+        ).time()
+        td = datetime.timedelta(
+            hours=t.hour, minutes=t.minute, seconds=t.second
+        )
+    walltime = _td2hms(td)
+    sbatch_directives = (
+        u'#SBATCH --job-name={run_id}\n'
+        u'#SBATCH --ntasks={procs}\n'
+        u'#SBATCH --mem-per-cpu={pmem}\n'
+        u'#SBATCH --time={walltime}\n'
+        u'#SBATCH --mail-user={email}\n'
+        u'#SBATCH --mail-type=ALL\n'
+    ).format(
+        run_id=run_id,
+        procs=n_processors,
+        pmem=pmem,
+        walltime=walltime,
+        email=email,
+    )
+    # stdout = (
+    #     'stdout_deflate_{result_type}'.format(result_type=result_type)
+    #     if deflate else 'stdout'
+    # )
+    # stderr = (
+    #     'stderr_deflate_{result_type}'.format(result_type=result_type)
+    #     if deflate else 'stderr'
+    # )
+    # sbatch_directives += (
+    #     u'# stdout and stderr file paths/names\n'
+    #     u'#SBATCH --output={results_dir}/{stdout}\n'
+    #     u'#SBATCH --error={results_dir}/{stderr}\n'
+    # ).format(
+    #     results_dir=results_dir, stdout=stdout, stderr=stderr
+    # )
+    return sbatch_directives
+
+
 def _pbs_common(
     run_desc,
     n_processors,
@@ -376,22 +474,21 @@ def _pbs_common(
     deflate=False,
     result_type=''
 ):
-    """Return the common PBS directives used to run NEMO in a TORQUE/PBS
-    multiple processor context.
+    """Return the PBS directives used to run NEMO on a cluster that uses the
+    TORQUE resource manager for job scheduling.
 
     The string that is returned is intended for inclusion in a bash script
-    that will be to the TORQUE/PBS queue manager via the :command:`qsub`
-    command.
+    that will be to the cluster queue manager via the :command:`qsub` command.
 
     :param dict run_desc: Run description dictionary.
 
     :param int n_processors: Number of processors that the run will be
                              executed on.
-                             For NEMO-3.6 runs this is the sum of NMEO and
+                             For NEMO-3.6 runs this is the sum of NEMO and
                              XIOS processors.
 
     :param str email: Email address to send job begin, end & abort
-                    notifications to.
+                      notifications to.
 
     :param str results_dir: Directory to store results into.
 
