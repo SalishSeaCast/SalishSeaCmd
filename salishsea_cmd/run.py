@@ -224,6 +224,7 @@ def run(
         os.getenv('WGSYSTEM') or os.getenv('CC_CLUSTER') or
         socket.gethostname().split('.')[0]
     )
+    qsub = 'sbatch' if system in {'cedar', 'graham'} else 'qsub'
     batch_script = _build_batch_script(
         run_desc,
         fspath(desc_file), nemo_processors, xios_processors, max_deflate_jobs,
@@ -248,12 +249,12 @@ def run(
     os.chdir(fspath(run_dir))
     if waitjob:
         cmd = (
-            'qsub -W depend=afterok:{waitjob} SalishSeaNEMO.sh'.format(
-                waitjob=waitjob
+            '{qsub} -W depend=afterok:{waitjob} SalishSeaNEMO.sh'.format(
+                qsub=qsub, waitjob=waitjob
             )
         )
     else:
-        cmd = 'qsub SalishSeaNEMO.sh'
+        cmd = '{qsub} SalishSeaNEMO.sh'.format(qsub=qsub)
     qsub_msg = subprocess.check_output(
         shlex.split(cmd), universal_newlines=True
     )
@@ -267,8 +268,12 @@ def run(
                 result_type=result_type
             )
             cmd = ((
-                'qsub -W depend=afterok:{nemo_job_no} ' + deflate_script
-            ).format(nemo_job_no=nemo_job_no, deflate_script=deflate_script))
+                '{qsub} -W depend=afterok:{nemo_job_no} ' + deflate_script
+            ).format(
+                qsub=qsub,
+                nemo_job_no=nemo_job_no,
+                deflate_script=deflate_script
+            ))
             deflate_qsub_msg = subprocess.check_output(
                 shlex.split(cmd), universal_newlines=True
             )
