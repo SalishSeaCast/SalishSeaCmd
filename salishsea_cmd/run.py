@@ -504,33 +504,47 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, system):
 
 
 def _modules(system, nemo34):
-    modules = u''
-    if system == 'jasper':
-        modules = (
+    modules = {
+        'bugaboo': (u'module load python\n'
+                    u'module load intel/15.0.2\n'),
+        'cedar': (
+            u'module load netcdf-mpi/4.4.1.1\n'
+            u'module load netcdf-fortran-mpi/4.4.4\n'
+            u'module load python27-scipy-stack/2017a\n'
+        ),
+        'graham': (
+            u'module load netcdf-mpi/4.4.1.1\n'
+            u'module load netcdf-fortran-mpi/4.4.4\n'
+            u'module load python27-scipy-stack/2017a\n'
+        ),
+        'jasper': (
             u'module load application/python/2.7.3\n'
             u'module load library/netcdf/4.1.3\n'
             u'module load library/szip/2.1\n'
             u'module load application/nco/4.3.9\n'
-        )
-    elif system == 'orcinus':
-        if nemo34:
-            modules = (
-                u'module load intel\n'
-                u'module load intel/14.0/netcdf_hdf5\n'
-                u'module load python\n'
-            )
-        else:
-            modules = (
-                u'module load intel\n'
-                u'module load intel/14.0/netcdf-4.3.3.1_mpi\n'
-                u'module load intel/14.0/netcdf-fortran-4.4.0_mpi\n'
-                u'module load intel/14.0/hdf5-1.8.15p1_mpi\n'
-                u'module load intel/14.0/nco-4.5.2\n'
-                u'module load python\n'
-            )
-    elif system == 'bugaboo':
-        modules = (u'module load python\n' u'module load intel/15.0.2\n')
-    return modules
+        ),
+        'orcinus nemo36': (
+            u'module load intel\n'
+            u'module load intel/14.0/netcdf-4.3.3.1_mpi\n'
+            u'module load intel/14.0/netcdf-fortran-4.4.0_mpi\n'
+            u'module load intel/14.0/hdf5-1.8.15p1_mpi\n'
+            u'module load intel/14.0/nco-4.5.2\n'
+            u'module load python\n'
+        ),
+        'orcinus nemo34': (
+            u'module load intel\n'
+            u'module load intel/14.0/netcdf_hdf5\n'
+            u'module load python\n'
+        ),
+    }
+    system_key = system
+    if system == 'orcinus':
+        system_key = 'orcinus nemo34' if nemo34 else 'orcinus nemo36'
+    try:
+        modules_block = modules[system_key]
+    except KeyError:
+        modules_block = u''
+    return modules_block
 
 
 def _execute(

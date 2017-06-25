@@ -372,6 +372,78 @@ class TestPbsFeatures:
         assert pbs_features == expected
 
 
+class TestModules:
+    """Unit tests for _modules function.
+    """
+
+    @pytest.mark.parametrize('nemo34', [
+        True,
+        False,
+    ])
+    def test_unknown_system(self, nemo34):
+        modules = salishsea_cmd.run._modules('salish', nemo34)
+        assert modules == u''
+
+    @pytest.mark.parametrize('nemo34', [
+        True,
+        False,
+    ])
+    def test_bugaboo(self, nemo34):
+        modules = salishsea_cmd.run._modules('bugaboo', nemo34)
+        expected = (u'module load python\n' u'module load intel/15.0.2\n')
+        assert modules == expected
+
+    @pytest.mark.parametrize(
+        'system, nemo34', [
+            ('cedar', True),
+            ('graham', False),
+        ]
+    )
+    def test_cedar_graham(self, system, nemo34):
+        modules = salishsea_cmd.run._modules(system, nemo34)
+        expected = (
+            u'module load netcdf-mpi/4.4.1.1\n'
+            u'module load netcdf-fortran-mpi/4.4.4\n'
+            u'module load python27-scipy-stack/2017a\n'
+        )
+        assert modules == expected
+
+    @pytest.mark.parametrize('nemo34', [
+        True,
+        False,
+    ])
+    def test_jasper(self, nemo34):
+        modules = salishsea_cmd.run._modules('jasper', nemo34)
+        expected = (
+            u'module load application/python/2.7.3\n'
+            u'module load library/netcdf/4.1.3\n'
+            u'module load library/szip/2.1\n'
+            u'module load application/nco/4.3.9\n'
+        )
+        assert modules == expected
+
+    def test_orcinus_nemo36(self):
+        modules = salishsea_cmd.run._modules('orcinus', nemo34=False)
+        expected = (
+            u'module load intel\n'
+            u'module load intel/14.0/netcdf-4.3.3.1_mpi\n'
+            u'module load intel/14.0/netcdf-fortran-4.4.0_mpi\n'
+            u'module load intel/14.0/hdf5-1.8.15p1_mpi\n'
+            u'module load intel/14.0/nco-4.5.2\n'
+            u'module load python\n'
+        )
+        assert modules == expected
+
+    def test_orcinus_nemo34(self):
+        modules = salishsea_cmd.run._modules('orcinus', nemo34=True)
+        expected = (
+            u'module load intel\n'
+            u'module load intel/14.0/netcdf_hdf5\n'
+            u'module load python\n'
+        )
+        assert modules == expected
+
+
 class TestExecute:
     """Unit test for _execute function.
     """
