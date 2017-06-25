@@ -331,9 +331,9 @@ def _build_batch_script(
     """
     script = u'#!/bin/bash\n'
     try:
-        email = get_run_desc_value(run_desc, ('email',))
+        email = get_run_desc_value(run_desc, ('email',), fatal=False)
     except KeyError:
-        email = u'{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
+        email = u'{user}@eoas.ubc.ca'.format(user=os.getenv('USER'))
     script = u'\n'.join((
         script, u'{pbs_common}'
         u'{pbs_features}\n'.format(
