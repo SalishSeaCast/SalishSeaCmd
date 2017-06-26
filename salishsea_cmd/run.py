@@ -368,7 +368,7 @@ def _build_batch_script(
             modules=_modules(system, nemo34),
             execute=_execute(
                 nemo_processors, xios_processors, max_deflate_jobs,
-                separate_deflate
+                separate_deflate, system
             ),
             fix_permissions=_fix_permissions(),
             cleanup=_cleanup(),
@@ -656,7 +656,8 @@ def _modules(system, nemo34):
 
 
 def _execute(
-    nemo_processors, xios_processors, max_deflate_jobs, separate_deflate
+    nemo_processors, xios_processors, max_deflate_jobs, separate_deflate,
+    system
 ):
     mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
     if xios_processors:
@@ -680,13 +681,26 @@ def _execute(
         u'echo "Results combining ended at $(date)"\n'
     )
     if not separate_deflate:
-        script += (
-            u'\n'
-            u'echo "Results deflation started at $(date)"\n'
-            u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
-            u'--jobs {max_deflate_jobs} --debug\n'
-            u'echo "Results deflation ended at $(date)"\n'
-        ).format(max_deflate_jobs=max_deflate_jobs)
+        if system in {'cedar', 'graham'}:
+            # Load the nco module just before deflation because it replaces
+            # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
+            # variants
+            script += (
+                u'\n'
+                u'echo "Results deflation started at $(date)"\n'
+                u'module load nco/4.6.6\n'
+                u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
+                u'--jobs {max_deflate_jobs} --debug\n'
+                u'echo "Results deflation ended at $(date)"\n'
+            ).format(max_deflate_jobs=max_deflate_jobs)
+        else:
+            script += (
+                u'\n'
+                u'echo "Results deflation started at $(date)"\n'
+                u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
+                u'--jobs {max_deflate_jobs} --debug\n'
+                u'echo "Results deflation ended at $(date)"\n'
+            ).format(max_deflate_jobs=max_deflate_jobs)
     script += (
         u'\n'
         u'echo "Results gathering started at $(date)"\n'
