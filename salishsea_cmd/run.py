@@ -224,7 +224,7 @@ def run(
         os.getenv('WGSYSTEM') or os.getenv('CC_CLUSTER') or
         socket.gethostname().split('.')[0]
     )
-    qsub = 'sbatch' if system in {'cedar', 'graham'} else 'qsub'
+    qsub = 'sbatch --output=stdout --error=stderr' if system in {'cedar', 'graham'} else 'qsub'
     batch_script = _build_batch_script(
         run_desc,
         fspath(desc_file), nemo_processors, xios_processors, max_deflate_jobs,
