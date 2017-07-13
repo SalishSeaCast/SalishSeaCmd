@@ -16,5 +16,5 @@
 """
 PROJECT = 'SalishSeaCmd'
 DESCRIPTION = 'Salish Sea NEMO Command Processor'
-VERSION = '3.2.dev0'
+VERSION = '3.2'
 DEV_STATUS = '5 - Production'
