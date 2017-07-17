@@ -324,7 +324,7 @@ class TestSlurm:
         desc_file = StringIO(u'run_id: foo\n' u'walltime: 01:02:03\n')
         run_desc = yaml.load(desc_file)
         slurm_directives = salishsea_cmd.run._slurm(
-            run_desc, 42, 'me@example.com', 'foo/'
+            run_desc, 42, 'me@example.com', Path('foo')
         )
         expected = (
             u'#SBATCH --job-name=foo\n'
@@ -333,6 +333,9 @@ class TestSlurm:
             u'#SBATCH --time=1:02:03\n'
             u'#SBATCH --mail-user=me@example.com\n'
             u'#SBATCH --mail-type=ALL\n'
+            u'# stdout and stderr file paths/names\n'
+            u'#SBATCH --output=foo/stdout\n'
+            u'#SBATCH --error=foo/stderr\n'
         )
         assert slurm_directives == expected
 

@@ -224,7 +224,7 @@ def run(
         os.getenv('WGSYSTEM') or os.getenv('CC_CLUSTER') or
         socket.gethostname().split('.')[0]
     )
-    qsub = 'sbatch --output=stdout --error=stderr' if system in {'cedar', 'graham'} else 'qsub'
+    qsub = 'sbatch' if system in {'cedar', 'graham'} else 'qsub'
     batch_script = _build_batch_script(
         run_desc,
         fspath(desc_file), nemo_processors, xios_processors, max_deflate_jobs,
@@ -339,7 +339,7 @@ def _build_batch_script(
             script, u'{slurm}\n'.format(
                 slurm=_slurm(
                     run_desc, nemo_processors + xios_processors, email,
-                    fspath(results_dir)
+                    results_dir
                 )
             )
         ))
@@ -403,7 +403,8 @@ def _slurm(
     :param str email: Email address to send job begin, end & abort
                       notifications to.
 
-    :param str results_dir: Directory to store results into.
+    :param results_dir: Directory to store results into.
+    :type results_dir: :py:class:`pathlib.Path`
 
     :param str pmem: Memory per processor.
 
@@ -447,21 +448,21 @@ def _slurm(
         walltime=walltime,
         email=email,
     )
-    # stdout = (
-    #     'stdout_deflate_{result_type}'.format(result_type=result_type)
-    #     if deflate else 'stdout'
-    # )
-    # stderr = (
-    #     'stderr_deflate_{result_type}'.format(result_type=result_type)
-    #     if deflate else 'stderr'
-    # )
-    # sbatch_directives += (
-    #     u'# stdout and stderr file paths/names\n'
-    #     u'#SBATCH --output={results_dir}/{stdout}\n'
-    #     u'#SBATCH --error={results_dir}/{stderr}\n'
-    # ).format(
-    #     results_dir=results_dir, stdout=stdout, stderr=stderr
-    # )
+    stdout = (
+        'stdout_deflate_{result_type}'.format(result_type=result_type)
+        if deflate else 'stdout'
+    )
+    stderr = (
+        'stderr_deflate_{result_type}'.format(result_type=result_type)
+        if deflate else 'stderr'
+    )
+    sbatch_directives += (
+        u'# stdout and stderr file paths/names\n'
+        u'#SBATCH --output={stdout}\n'
+        u'#SBATCH --error={stderr}\n'
+    ).format(
+        stdout=results_dir / stdout, stderr=results_dir / stderr
+    )
     return sbatch_directives
 
 
