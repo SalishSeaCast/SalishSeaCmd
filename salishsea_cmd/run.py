@@ -418,6 +418,8 @@ def _slurm(
     :rtype: Unicode str
     """
     run_id = get_run_desc_value(run_desc, ('run_id',))
+    processors_per_node = 32
+    nodes = math.ceil(n_processors / processors_per_node)
     if deflate:
         run_id = '{result_type}_{run_id}_deflate'.format(
             run_id=run_id, result_type=result_type
@@ -436,14 +438,17 @@ def _slurm(
     walltime = _td2hms(td)
     sbatch_directives = (
         u'#SBATCH --job-name={run_id}\n'
-        u'#SBATCH --ntasks={procs}\n'
-        u'#SBATCH --mem-per-cpu={pmem}\n'
+        u'#SBATCH --nodes={nodes}\n'
+        u'#SBATCH --ntasks-per-node={processors_per_node}\n'
+        u'#SBATCH --mem=127G\n'
         u'#SBATCH --time={walltime}\n'
         u'#SBATCH --mail-user={email}\n'
         u'#SBATCH --mail-type=ALL\n'
+        u'#SBATCH --account=def-allen-ab\n'
     ).format(
         run_id=run_id,
-        procs=n_processors,
+        nodes=int(nodes),
+        processors_per_node=processors_per_node,
         pmem=pmem,
         walltime=walltime,
         email=email,
