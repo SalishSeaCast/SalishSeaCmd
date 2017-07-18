@@ -328,11 +328,13 @@ class TestSlurm:
         )
         expected = (
             u'#SBATCH --job-name=foo\n'
-            u'#SBATCH --ntasks=42\n'
-            u'#SBATCH --mem-per-cpu=2000M\n'
+            u'#SBATCH --nodes=2\n'
+            u'#SBATCH --ntasks-per-node=32\n'
+            u'#SBATCH --mem=127G\n'
             u'#SBATCH --time=1:02:03\n'
             u'#SBATCH --mail-user=me@example.com\n'
             u'#SBATCH --mail-type=ALL\n'
+            u'#SBATCH --account=def-allen-ab\n'
             u'# stdout and stderr file paths/names\n'
             u'#SBATCH --output=foo/stdout\n'
             u'#SBATCH --error=foo/stderr\n'
