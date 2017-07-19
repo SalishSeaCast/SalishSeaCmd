@@ -255,6 +255,7 @@ def run(
         )
     else:
         cmd = '{qsub} SalishSeaNEMO.sh'.format(qsub=qsub)
+    results_dir.mkdir(parents=True, exist_ok=True)
     qsub_msg = subprocess.check_output(
         shlex.split(cmd), universal_newlines=True
     )
