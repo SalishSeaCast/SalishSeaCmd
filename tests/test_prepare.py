@@ -1774,7 +1774,7 @@ class TestAddAgrifFiles:
         p_open = patch('salishsea_cmd.prepare.Path.open')
         with p_open as m_open:
             m_open().__enter__.return_value = (
-                '1\n# Byanes Sound\n40 70 2 30 3 3 3 43 \n'
+                '2\n# Byanes Sound\n40 70 2 30 3 3 3 43 \n'
                 '110 130 50 80 3 3 3 42\n'.splitlines()
             )
             salishsea_cmd.prepare._add_agrif_files(
@@ -1819,7 +1819,7 @@ class TestAddAgrifFiles:
         p_open = patch('salishsea_cmd.prepare.Path.open')
         with p_open as m_open:
             m_open().__enter__.return_value = (
-                '1\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
+                '2\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
                 splitlines()
             )
             with pytest.raises(SystemExit):
@@ -1863,7 +1863,7 @@ class TestAddAgrifFiles:
         p_open = patch('salishsea_cmd.prepare.Path.open')
         with p_open as m_open:
             m_open().__enter__.return_value = (
-                '1\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
+                '2\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
                 splitlines()
             )
             salishsea_cmd.prepare._add_agrif_files(
@@ -1909,7 +1909,7 @@ class TestAddAgrifFiles:
         p_open = patch('salishsea_cmd.prepare.Path.open')
         with p_open as m_open:
             m_open().__enter__.return_value = (
-                '1\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
+                '2\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
                 splitlines()
             )
             with pytest.raises(SystemExit):
@@ -1953,7 +1953,7 @@ class TestAddAgrifFiles:
         p_open = patch('salishsea_cmd.prepare.Path.open')
         with p_open as m_open:
             m_open().__enter__.return_value = (
-                '1\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
+                '2\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
                 splitlines()
             )
             salishsea_cmd.prepare._add_agrif_files(
@@ -1999,7 +1999,7 @@ class TestAddAgrifFiles:
         p_open = patch('salishsea_cmd.prepare.Path.open')
         with p_open as m_open:
             m_open().__enter__.return_value = (
-                '1\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
+                '2\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
                 splitlines()
             )
             with pytest.raises(SystemExit):
@@ -2043,7 +2043,7 @@ class TestAddAgrifFiles:
         p_open = patch('salishsea_cmd.prepare.Path.open')
         with p_open as m_open:
             m_open().__enter__.return_value = (
-                '1\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
+                '2\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
                 splitlines()
             )
             salishsea_cmd.prepare._add_agrif_files(
@@ -2103,7 +2103,7 @@ class TestAddAgrifFiles:
         p_open = patch('salishsea_cmd.prepare.Path.open')
         with p_open as m_open:
             m_open().__enter__.return_value = (
-                '1\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
+                '2\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.
                 splitlines()
             )
             with pytest.raises(SystemExit):
