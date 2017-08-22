@@ -96,19 +96,21 @@ The :kbd:`paths` section of the run description file is a collection of director
   The path may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
   and :envvar:`$USER` as an alternative spelling of the user's userid.
 
-:kbd:`forcing`
-  The path to the :ref:`NEMO-forcing-repo` clone where the netCDF files for the grid coordinates,
-  bathymetry,
-  initial conditions,
-  open boundary conditions,
-  etc. are to be found.
+:kbd:`runs directory`
+  The path to the directory where run directories will be created by the :command:`salishsea run` (or :command:`salishsea prepare`) sub-command.
 
   This path may be relative or absolute,
   and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
   and :envvar:`$USER` as an alternative spelling of the user's userid.
 
-:kbd:`runs directory`
-  The path to the directory where run directories will be created by the :command:`salishsea run` (or :command:`salishsea prepare`) sub-command.
+:kbd:`forcing`
+  *Optional* path to the directory where the repository clones containing the netCDF files for the grid coordinates,
+  bathymetry,
+  initial conditions,
+  open boundary conditions,
+  etc. are to be found.
+
+  This path is used as the base for relative paths in the :ref:`NEMO-3.6-Grid` and :ref:`NEMO-3.6-Forcing` sections below.
 
   This path may be relative or absolute,
   and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
@@ -131,18 +133,18 @@ An example :kbd:`grid` section:
 .. code-block:: yaml
 
     grid:
-      coordinates: coordinates_seagrid_SalishSea201702.nc
-      bathymetry: bathymetry_201702.nc
-      land processor elimination: bathymetry_201702.csv
+      coordinates: $HOME/MEOPAR/grid/coordinates_seagrid_SalishSea201702.nc
+      bathymetry: $HOME/MEOPAR/grid/bathymetry_201702.nc
+      land processor elimination: $HOME/MEOPAR/grid/bathymetry_201702.csv
+
+Relative or absolute paths may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
+and :envvar:`$USER` as an alternative spelling of the user's userid.
 
 If simple file names are provided,
 those files are presumed to be in the :file:`grid/` sub-directory of the directory tree pointed to by the :kbd:`forcing` key in the :ref:`NEMO-3.6-Paths`.
 
 If relative paths are given,
 they are appended to the :file:`grid/` directory of the :kbd:`forcing` path.
-
-Relative or absolute paths may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
-and :envvar:`$USER` as an alternative spelling of the user's userid.
 
 :kbd:`coordinates`
   The name of,
@@ -189,15 +191,18 @@ An example :kbd:`forcing` section:
     forcing:
       NEMO-atmos:
         link to: /results/forcing/atmospheric/GEM2.5/operational/
-      open_boundaries:
-        link to: open_boundaries/
       rivers:
-        link to: rivers/
+        link to: $HOME/MEOPAR/rivers
+      tides:
+        link to: $HOME/MEOPAR/tides
+      tracers:
+        link to: $HOME/MEOPAR/tracers
 
 The sub-section keys
 (:kbd:`NEMO-atmos`,
-:kbd:`open_boundaries`,
-and :kbd:`rivers` above)
+:kbd:`rivers`,
+:kbd:`tides`,
+and :kbd:`tracers` above)
 are the names of the symlinks that will be created in the run directory.
 Those names are expected to appear in the appropriate places in the namelists.
 The values associated with the :kbd:`link to` keys are the targets of the symlinks that will be created in the run directory.
@@ -447,8 +452,7 @@ The *optional* :kbd:`vcs revisions` section of the run description file contains
 
 .. note::
     Revision and status record files for the :file:`NEMO-3.6-code`,
-    :file:`XIOS`,
-    and :file:`NEMO-forcing` Mercurial repositories listed in the :ref:`NEMO-3.6-Paths` section are always generated,
+    and :file:`XIOS` Mercurial repositories listed in the :ref:`NEMO-3.6-Paths` section are always generated,
     so those repository paths should not be included in the :kbd:`vcs revisions` section.
 
 An example :kbd:`vcs revisions` section:
@@ -458,8 +462,13 @@ An example :kbd:`vcs revisions` section:
     vcs revisions:
       hg:
         - $HOME/MEOPAR/SS-run-sets
+        - $HOME/MEOPAR/grid
+        - $HOME/MEOPAR/rivers
+        - $HOME/MEOPAR/tides
+        - $HOME/MEOPAR/tracers
         - $HOME/MEOPAR/NEMO-Cmd
         - $HOME/MEOPAR/SalishSeaCmd
+        - $HOME/MEOPAR/XIOS-ARCH
 
 The sub-section keys
 (:kbd:`hg` above)

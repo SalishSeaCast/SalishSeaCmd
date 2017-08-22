@@ -263,8 +263,7 @@ The *optional* :kbd:`vcs revisions` section of the run description file contains
 
 .. note::
     Revision and status record files for the :file:`NEMO-code`,
-    :file:`XIOS`,
-    and :file:`NEMO-forcing` Mercurial repositories listed in the :ref:`NEMO-3.4-Paths` section are always generated,
+    and :file:`XIOS` Mercurial repositories listed in the :ref:`NEMO-3.4-Paths` section are always generated,
     so those repository paths should not be included in the :kbd:`vcs revisions` section.
 
 An example :kbd:`vcs revisions` section:
