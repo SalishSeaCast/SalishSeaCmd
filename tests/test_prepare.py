@@ -1604,13 +1604,11 @@ class TestRecordVCSRevisions:
         nemo_code_repo = tmpdir.ensure_dir('NEMO-3.6-code')
         nemo_config = nemo_code_repo.ensure_dir('NEMOGCM', 'CONFIG')
         xios_code_repo = tmpdir.ensure_dir('XIOS')
-        nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
         run_desc = {
             config_name_key: 'SalishSea',
             'paths': {
                 nemo_code_config_key: str(nemo_config),
                 'XIOS': str(xios_code_repo),
-                'forcing': str(nemo_forcing)
             }
         }
         salishsea_cmd.prepare._record_vcs_revisions(run_desc, Path('run_dir'))
@@ -1621,10 +1619,6 @@ class TestRecordVCSRevisions:
             ),
             call(
                 Path(str(xios_code_repo)),
-                Path('run_dir'), nemo_cmd.prepare.get_hg_revision
-            ),
-            call(
-                Path(str(nemo_forcing)),
                 Path('run_dir'), nemo_cmd.prepare.get_hg_revision
             ),
         ]

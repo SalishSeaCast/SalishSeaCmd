@@ -1192,10 +1192,7 @@ def _record_vcs_revisions(run_desc, run_dir):
     xios_code_repo = get_run_desc_value(
         run_desc, ('paths', 'XIOS'), resolve_path=True, run_dir=run_dir
     )
-    forcing_repo = get_run_desc_value(
-        run_desc, ('paths', 'forcing'), resolve_path=True, run_dir=run_dir
-    )
-    for repo in (nemo_code_config.parent.parent, xios_code_repo, forcing_repo):
+    for repo in (nemo_code_config.parent.parent, xios_code_repo):
         nemo_cmd.prepare.write_repo_rev_file(
             repo, run_dir, nemo_cmd.prepare.get_hg_revision
         )

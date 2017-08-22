@@ -30,9 +30,6 @@ paths:
   # If relative, paths below are taken from current directory
   # You can use ~, $USER, $HOME if you wish.
   XIOS: $HOME/MEOPAR/XIOS/
-  # Directory to use as base for relative paths in grid: and forcing: sections
-  # below
-  forcing: ../../../NEMO-forcing/
   # Directory in which to create temporary run directories
   # Typically NOT inside a version control repository
   runs directory: ../../../SalishSea/
@@ -40,13 +37,13 @@ paths:
 grid:
   # If relative, paths are taken from the grid/ directory in the forcing
   # path above
-  coordinates: coordinates_seagrid_SalishSea201702.nc
-  bathymetry: bathymetry_201702.nc
+  coordinates: $HOME/MEOPAR/grid/coordinates_seagrid_SalishSea201702.nc
+  bathymetry: $HOME/MEOPAR/grid/bathymetry_201702.nc
   # Optional path/filename for land processor elimination MPI-LPE mapping
   # file that matches bathymetry;
   # If "land processor elimination:" key is absent or has the value "False",
   # land processor elimination is disabled
-  land processor elimination: bathymetry_201702.csv
+  land processor elimination: $HOME/MEOPAR/grid/bathymetry_201702.csv
 
 forcing:
   # The keys below are the names of symlinks that will be created.
@@ -67,14 +64,12 @@ forcing:
     check link:
       type: atmospheric
       namelist filename: namelist_cfg
-  open_boundaries:
-    link to: open_boundaries/
   rivers:
-    link to: rivers/
-  initial_strat:
-    link to: initial_strat/
-  initial_green:
-    link to: initial_green/
+    link to: $HOME/MEOPAR/rivers
+  tides:
+    link to: $HOME/MEOPAR/tides
+  tracers:
+    link to: $HOME/MEOPAR/tracers
 
 restart:
   # The keys below are the names of symlinks that will be created.
@@ -126,3 +121,10 @@ output:
 vcs revisions:
   hg:
     - $HOME/MEOPAR/SS-run-sets
+    - $HOME/MEOPAR/grid
+    - $HOME/MEOPAR/rivers
+    - $HOME/MEOPAR/tides
+    - $HOME/MEOPAR/tracers
+    - $HOME/MEOPAR/NEMO-Cmd
+    - $HOME/MEOPAR/SalishSeaCmd
+    - $HOME/MEOPAR/XIOS-ARCH
