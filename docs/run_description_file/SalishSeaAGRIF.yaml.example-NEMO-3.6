@@ -25,14 +25,14 @@ paths:
   NEMO code config: $HOME/MEOPAR/NEMO-3.6-code/NEMOGCM/CONFIG
   # If relative, paths below are taken from current directory
   XIOS: $HOME/MEOPAR/XIOS-2
-  runs directory: ../../../SalishSea/
+  runs directory: $HOME/MEOPAR/SalishSea/
 
 
 grid:
   # If relative, paths are taken from the grid/ directory in the forcing
   # path above
-  coordinates: coordinates_seagrid_SalishSea.nc
-  bathymetry: bathy_meter_SalishSea2.nc
+  coordinates: $HOME/MEOPAR/grid/coordinates_seagrid_SalishSea.nc
+  bathymetry: $HOME/MEOPAR/grid/bathy_meter_SalishSea2.nc
   AGRIF_1:
     # Symlinks will be prefixed with 1_
     coordinates: $HOME/MEOPAR/NEMO-forcing-BS1/1_coordinates_seagrid_SalishSea201702.nc
@@ -60,9 +60,9 @@ forcing:
   rivers:
     link to: $HOME/MEOPAR/NEMO-forcing-MD/rivers/
   bfr_coef.nc:
-    link to: grid/jetty_mask_bathy201702.nc
+    link to: $HOME/MEOPAR/grid/jetty_mask_bathy201702.nc
   bio_climatology:
-    link to: rivers/bio_climatology
+    link to: $HOME/MEOPAR/rivers/bio/
   bio_open_boundaries:
     link to: open_boundaries
   #
