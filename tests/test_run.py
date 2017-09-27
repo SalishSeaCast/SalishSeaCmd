@@ -316,11 +316,12 @@ class TestRun:
         ]
 
 
+@patch('salishsea_cmd.run.log', autospec=True)
 class TestSlurm:
     """Unit tests for `salishsea run` _slurm() function.
     """
 
-    def test_slurm(self):
+    def test_slurm(self, m_logger):
         desc_file = StringIO(u'run_id: foo\n' u'walltime: 01:02:03\n')
         run_desc = yaml.load(desc_file)
         slurm_directives = salishsea_cmd.run._slurm(
@@ -334,12 +335,26 @@ class TestSlurm:
             u'#SBATCH --time=1:02:03\n'
             u'#SBATCH --mail-user=me@example.com\n'
             u'#SBATCH --mail-type=ALL\n'
-            u'#SBATCH --account=def-allen-ab\n'
+            u'#SBATCH --account=def-allen\n'
             u'# stdout and stderr file paths/names\n'
             u'#SBATCH --output=foo/stdout\n'
             u'#SBATCH --error=foo/stderr\n'
         )
         assert slurm_directives == expected
+        assert m_logger.info.called
+
+    def test_account_directive(self, m_logger):
+        desc_file = StringIO(
+            u'run_id: foo\n'
+            u'walltime: 01:02:03\n'
+            u'account: def-sverdrup\n'
+        )
+        run_desc = yaml.load(desc_file)
+        slurm_directives = salishsea_cmd.run._slurm(
+            run_desc, 42, 'me@example.com', Path('foo')
+        )
+        assert u'#SBATCH --account=def-sverdrup\n' in slurm_directives
+        assert not m_logger.info.called
 
 
 class TestPbsCommon:
