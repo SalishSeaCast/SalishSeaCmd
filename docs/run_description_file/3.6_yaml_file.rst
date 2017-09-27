@@ -70,6 +70,13 @@ The following key-value pairs provide the basic configuration for the run:
   as well as notification of abnormal abort messages.
   The email key is only required if the address is different than would be constructed by combining your user id on the machine that the job runs on with :kbd:`@eos.ubc.ca`.
 
+:kbd:`account`
+  *Optional.*
+  The account name to include in the :kbd:`#SBATCH` directives section of the :file:`SalishSeaNEMO.sh` job script.
+  This key-value pair is required on systems like :kbd:`cedar.computecanada.ca` and :kbd:`graham.computecanada.ca` that use the `Slurm Workload Manager`_ and that you submit runs to with the :command:`sbatch` command.
+
+  .. _Slurm Workload Manager: https://slurm.schedmd.com/
+
 
 .. _NEMO-3.6-Paths:
 

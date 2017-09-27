@@ -445,7 +445,6 @@ def _slurm(
         u'#SBATCH --time={walltime}\n'
         u'#SBATCH --mail-user={email}\n'
         u'#SBATCH --mail-type=ALL\n'
-        u'#SBATCH --account=def-allen-ab\n'
     ).format(
         run_id=run_id,
         nodes=int(nodes),
@@ -454,6 +453,18 @@ def _slurm(
         walltime=walltime,
         email=email,
     )
+    try:
+        account = get_run_desc_value(run_desc, ('account',), fatal=False)
+        sbatch_directives += (
+            u'#SBATCH --account={account}\n'.format(account=account)
+        )
+    except KeyError:
+        sbatch_directives += u'#SBATCH --account=def-allen\n'
+        log.info(
+            'No account found in run description YAML file, '
+            'so assuming def-allen. If sbatch complains you can specify a '
+            'different account with a YAML line like account: def-allen'
+        )
     stdout = (
         'stdout_deflate_{result_type}'.format(result_type=result_type)
         if deflate else 'stdout'
