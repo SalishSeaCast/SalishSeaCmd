@@ -55,8 +55,9 @@ For example:
 ::
 
     usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS] [--nemo3.4]
-                         [--nocheck-initial-conditions] [--no-submit]
-                         [--separate-deflate] [--waitjob WAITJOB] [-q]
+                         [--nocheck-initial-conditions] [--no-deflate]
+                         [--no-submit] [--separate-deflate] [--waitjob WAITJOB]
+                         [-q]
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
@@ -77,6 +78,12 @@ For example:
                             Suppress checking of the initial conditions link.
                             Useful if you are submitting a job to wait on a
                             previous job
+      --no-deflate          Do not include "salishsea deflate" command in the bash
+                            script. Use this option if you are using on-the-fly
+                            deflation in XIOS-2; i.e. you are using 1 XIOS-2
+                            process and have the compression_level="4" attribute
+                            set in all of the file_group definitions in your
+                            file_def.xml file.
       --no-submit           Prepare the temporary run directory, and the bash
                             script to execute the NEMO run, but don't submit the
                             run to the queue. This is useful during development
@@ -111,8 +118,9 @@ The results are gathered in the specified results directory.
 ::
 
     usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS] [--nemo3.4]
-                         [--nocheck-initial-conditions] [--no-submit]
-                         [--separate-deflate] [--waitjob WAITJOB] [-q]
+                         [--nocheck-initial-conditions] [--no-deflate]
+                         [--no-submit] [--separate-deflate] [--waitjob WAITJOB]
+                         [-q]
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
@@ -133,6 +141,12 @@ The results are gathered in the specified results directory.
                             Suppress checking of the initial conditions link.
                             Useful if you are submitting a job to wait on a
                             previous job
+      --no-deflate          Do not include "salishsea deflate" command in the bash
+                            script. Use this option if you are using on-the-fly
+                            deflation in XIOS-2; i.e. you are using 1 XIOS-2
+                            process and have the compression_level="4" attribute
+                            set in all of the file_group definitions in your
+                            file_def.xml file.
       --no-submit           Prepare the temporary run directory, and the bash
                             script to execute the NEMO run, but don't submit the
                             run to the queue. This is useful during development
