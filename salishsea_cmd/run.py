@@ -92,6 +92,18 @@ class Run(cliff.command.Command):
             previous job'''
         )
         parser.add_argument(
+            '--no-deflate',
+            dest='no_deflate',
+            action='store_true',
+            help='''
+            Do not include "salishsea deflate" command in the bash script.
+            Use this option if you are using on-the-fly deflation in XIOS-2;
+            i.e. you are using 1 XIOS-2 process and have the 
+            compression_level="4" attribute set in all of the file_group
+            definitions in your file_def.xml file.            
+            '''
+        )
+        parser.add_argument(
             '--no-submit',
             dest='no_submit',
             action='store_true',
@@ -142,9 +154,9 @@ class Run(cliff.command.Command):
         qsub_msg = run(
             parsed_args.desc_file, parsed_args.results_dir,
             parsed_args.max_deflate_jobs, parsed_args.nemo34,
-            parsed_args.nocheck_init, parsed_args.no_submit,
-            parsed_args.separate_deflate, parsed_args.waitjob,
-            parsed_args.quiet
+            parsed_args.nocheck_init, parsed_args.no_deflate,
+            parsed_args.no_submit, parsed_args.separate_deflate,
+            parsed_args.waitjob, parsed_args.quiet
         )
         if not parsed_args.quiet and not parsed_args.separate_deflate:
             log.info(qsub_msg)
@@ -156,6 +168,7 @@ def run(
     max_deflate_jobs=4,
     nemo34=False,
     nocheck_init=False,
+    no_deflate=False,
     no_submit=False,
     separate_deflate=False,
     waitjob=0,
@@ -186,10 +199,13 @@ def run(
     :param boolean nocheck_init: Suppress initial condition link check
                                  the default is to check
 
+    :param boolean no_deflate: Do not include "salishsea deflate" command in
+                               the bash script.
+
     :param boolean no_submit: Prepare the temporary run directory,
                               and the bash script to execute the NEMO run,
                               but don't submit the run to the queue.
-                              
+
     :param boolean separate_deflate: Produce separate bash scripts to deflate 
                                      the run results and qsub them to run as 
                                      serial jobs after the NEMO run finishes.
@@ -228,7 +244,7 @@ def run(
     batch_script = _build_batch_script(
         run_desc,
         fspath(desc_file), nemo_processors, xios_processors, max_deflate_jobs,
-        results_dir, run_dir, system, nemo34, separate_deflate
+        results_dir, run_dir, system, nemo34, no_deflate, separate_deflate
     )
     batch_file = run_dir / 'SalishSeaNEMO.sh'
     with batch_file.open('wt') as f:
@@ -292,7 +308,7 @@ def run(
 
 def _build_batch_script(
     run_desc, desc_file, nemo_processors, xios_processors, max_deflate_jobs,
-    results_dir, run_dir, system, nemo34, separate_deflate
+    results_dir, run_dir, system, nemo34, no_deflate, separate_deflate
 ):
     """Build the Bash script that will execute the run.
 
@@ -322,6 +338,9 @@ def _build_batch_script(
 
     :param boolean nemo34: Build batch script for a NEMO-3.4 run;
                            the default is to do so for a NEMO-3.6 run.
+
+    :param boolean no_deflate: Do not include "salishsea deflate" command in
+                               the bash script.
 
     :param boolean separate_deflate: Produce separate bash scripts to deflate
                                      the run results and qsub them to run as
@@ -366,7 +385,7 @@ def _build_batch_script(
             ),
             modules=_modules(system, nemo34),
             execute=_execute(
-                nemo_processors, xios_processors, max_deflate_jobs,
+                nemo_processors, xios_processors, no_deflate, max_deflate_jobs,
                 separate_deflate, system
             ),
             fix_permissions=_fix_permissions(),
@@ -651,8 +670,8 @@ def _modules(system, nemo34):
 
 
 def _execute(
-    nemo_processors, xios_processors, max_deflate_jobs, separate_deflate,
-    system
+    nemo_processors, xios_processors, no_deflate, max_deflate_jobs,
+    separate_deflate, system
 ):
     mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
     if xios_processors:
@@ -675,7 +694,7 @@ def _execute(
         u'${COMBINE} ${RUN_DESC} --debug\n'
         u'echo "Results combining ended at $(date)"\n'
     )
-    if not separate_deflate:
+    if not no_deflate and not separate_deflate:
         if system in {'cedar', 'graham'}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
