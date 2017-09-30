@@ -346,17 +346,15 @@ def _build_batch_script(
         ))
     else:
         script = u'\n'.join((
-            script, u'{pbs_common}'
-            u'{pbs_features}\n'.format(
+            script, u'{pbs_common}\n'.format(
                 pbs_common=_pbs_common(
                     run_desc, nemo_processors + xios_processors, email,
                     fspath(results_dir)
-                ),
-                pbs_features=_pbs_features(
-                    nemo_processors + xios_processors, system
                 )
             )
         ))
+    if system == 'orcinus':
+        script += u'#PBS -l partition=QDR\n'
     script = u'\n'.join((
         script, u'{defns}\n'
         u'{modules}\n'
@@ -592,24 +590,9 @@ def _td2hms(timedelta):
     return u'{0[0]}:{0[1]:02d}:{0[2]:02d}'.format(hms)
 
 
-def _pbs_features(n_processors, system):
-    pbs_features = u''
-    if system == 'jasper':
-        ppn = 12
-        nodes = math.ceil(n_processors / ppn)
-        pbs_features = (
-            u'#PBS -l feature=X5675\n'
-            u'#PBS -l nodes={}:ppn={}\n'.format(int(nodes), ppn)
-        )
-    elif system == 'orcinus':
-        pbs_features = u'#PBS -l partition=QDR\n'
-    return pbs_features
-
-
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, system):
     home = (
-        u'${PBS_O_HOME}'
-        if system in {'bugaboo', 'jasper', 'orcinus'} else u'${HOME}'
+        u'${PBS_O_HOME}' if system in {'bugaboo', 'orcinus'} else u'${HOME}'
     )
     defns = (
         u'RUN_ID="{run_id}"\n'
@@ -642,12 +625,6 @@ def _modules(system, nemo34):
             u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
             u'module load python27-scipy-stack/2017a\n'
-        ),
-        'jasper': (
-            u'module load application/python/2.7.3\n'
-            u'module load library/netcdf/4.1.3\n'
-            u'module load library/szip/2.1\n'
-            u'module load application/nco/4.3.9\n'
         ),
         'orcinus nemo36': (
             u'module load intel\n'
