@@ -199,7 +199,7 @@ An example :kbd:`grid` section:
         namelist_top_cfg:
           - namelist_top_cfg
 
-The :kbd:`AGRIF_1` key identifies a :kbd:`restart` sub-section for the first AGRIF sub-grid.
+The :kbd:`AGRIF_1` key identifies a :kbd:`namelist` sub-section for the first AGRIF sub-grid.
 Those items must follow the same rules as described in :ref:`NEMO-3.6-Namelists` for the main grid namelist files.
 The namelist section files associated with the :kbd:`namelist_cfg` key in the :kbd:`AGRIF_1` sub-section will be concatenated to create the :file:`1_namelist_cfg` file in the run directory
 (the file name required by NEMO).
