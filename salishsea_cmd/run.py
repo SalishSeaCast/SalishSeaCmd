@@ -381,7 +381,7 @@ def _build_batch_script(
         u'{fix_permissions}\n'
         u'{cleanup}'.format(
             defns=_definitions(
-                run_desc, desc_file, run_dir, results_dir, system
+                run_desc, desc_file, run_dir, results_dir, system, no_deflate
             ),
             modules=_modules(system, nemo34),
             execute=_execute(
@@ -609,24 +609,32 @@ def _td2hms(timedelta):
     return u'{0[0]}:{0[1]:02d}:{0[2]:02d}'.format(hms)
 
 
-def _definitions(run_desc, run_desc_file, run_dir, results_dir, system):
+def _definitions(
+    run_desc, run_desc_file, run_dir, results_dir, system, no_deflate
+):
     home = (
         u'${PBS_O_HOME}' if system in {'bugaboo', 'orcinus'} else u'${HOME}'
     )
+    salishsea_cmd = os.path.join(home, '.local/bin/salishsea')
     defns = (
         u'RUN_ID="{run_id}"\n'
         u'RUN_DESC="{run_desc_file}"\n'
         u'WORK_DIR="{run_dir}"\n'
         u'RESULTS_DIR="{results_dir}"\n'
         u'COMBINE="{salishsea_cmd} combine"\n'
-        u'DEFLATE="{salishsea_cmd} deflate"\n'
-        u'GATHER="{salishsea_cmd} gather"\n'
     ).format(
         run_id=get_run_desc_value(run_desc, ('run_id',)),
         run_desc_file=run_desc_file,
         run_dir=run_dir,
         results_dir=results_dir,
-        salishsea_cmd=os.path.join(home, '.local/bin/salishsea'),
+        salishsea_cmd=salishsea_cmd,
+    )
+    if not no_deflate:
+        defns += u'DEFLATE="{salishsea_cmd} deflate"\n'.format(
+            salishsea_cmd=salishsea_cmd
+        )
+    defns += u'GATHER="{salishsea_cmd} gather"\n'.format(
+        salishsea_cmd=salishsea_cmd
     )
     return defns
 
