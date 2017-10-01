@@ -408,7 +408,12 @@ class TestBuildBatchScript:
             u'WORK_DIR="."\n'
             u'RESULTS_DIR="results_dir"\n'
             u'COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"\n'
-            u'DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"\n'
+        )
+        if not no_deflate:
+            expected += (
+                u'DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"\n'
+            )
+        expected += (
             u'GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"\n'
             u'\n'
             u'module load python\n'
@@ -501,7 +506,10 @@ class TestBuildBatchScript:
             u'WORK_DIR="."\n'
             u'RESULTS_DIR="results_dir"\n'
             u'COMBINE="${HOME}/.local/bin/salishsea combine"\n'
-            u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
+        )
+        if not no_deflate:
+            expected += (u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n')
+        expected += (
             u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
             u'\n'
             u'module load netcdf-mpi/4.4.1.1\n'
@@ -594,7 +602,12 @@ class TestBuildBatchScript:
             u'WORK_DIR="."\n'
             u'RESULTS_DIR="results_dir"\n'
             u'COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"\n'
-            u'DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"\n'
+        )
+        if not no_deflate:
+            expected += (
+                u'DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"\n'
+            )
+        expected += (
             u'GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"\n'
             u'\n'
             u'module load intel\n'
@@ -688,7 +701,10 @@ class TestBuildBatchScript:
             u'WORK_DIR="."\n'
             u'RESULTS_DIR="results_dir"\n'
             u'COMBINE="${HOME}/.local/bin/salishsea combine"\n'
-            u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
+        )
+        if not no_deflate:
+            expected += (u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n')
+        expected += (
             u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
             u'\n'
             u'\n'
@@ -797,6 +813,47 @@ class TestPbsCommon:
         )
         expected = 'walltime={expected}'.format(expected=expected_walltime)
         assert expected in pbs_directives
+
+
+class TestDefinitions:
+    """Unit tests for _definitions function.
+    """
+
+    @pytest.mark.parametrize(
+        'system, home, no_deflate', [
+            ('bugaboo', '${PBS_O_HOME}', True),
+            ('bugaboo', '${PBS_O_HOME}', False),
+            ('cedar', '${HOME}', True),
+            ('cedar', '${HOME}', False),
+            ('graham', '${HOME}', True),
+            ('graham', '${HOME}', False),
+            ('orcinus', '${PBS_O_HOME}', True),
+            ('orcinus', '${PBS_O_HOME}', False),
+            ('salish', '${HOME}', True),
+            ('salish', '${HOME}', False),
+        ]
+    )
+    def test_definitions(self, system, home, no_deflate):
+        desc_file = StringIO(u'run_id: foo\n')
+        run_desc = yaml.load(desc_file)
+        defns = salishsea_cmd.run._definitions(
+            run_desc, 'SalishSea.yaml',
+            Path('run_dir'), Path('results_dir'), system, no_deflate
+        )
+        expected = (
+            u'RUN_ID="foo"\n'
+            u'RUN_DESC="SalishSea.yaml"\n'
+            u'WORK_DIR="run_dir"\n'
+            u'RESULTS_DIR="results_dir"\n'
+            u'COMBINE="{home}/.local/bin/salishsea combine"\n'
+        ).format(home=home)
+        if not no_deflate:
+            expected += (u'DEFLATE="{home}/.local/bin/salishsea deflate"\n'
+                         ).format(home=home)
+        expected += (
+            u'GATHER="{home}/.local/bin/salishsea gather"\n'.format(home=home)
+        )
+        assert defns == expected
 
 
 class TestModules:
