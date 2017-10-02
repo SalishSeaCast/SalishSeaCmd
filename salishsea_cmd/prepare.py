@@ -28,7 +28,6 @@ except ImportError:
     from pathlib2 import Path
 import shutil
 import time
-import uuid
 import xml.etree.ElementTree
 
 import arrow
@@ -228,10 +227,10 @@ def _check_xios_exec(run_desc):
 
 
 def _make_run_dir(run_desc):
-    """Create the directory from which NEMO will be run.
+    """Create the temporary directory from which NEMO will be run.
 
-    The location is the directory comes from the run description,
-    and its name is a hostname- and time-based UUID.
+    The location is the in the runs directory from the run description,
+    and its name is the run id combined with an ISO-format date/time stamp.
 
     :param run_desc: Run description dictionary.
     :type run_desc: dict
@@ -239,10 +238,13 @@ def _make_run_dir(run_desc):
     :returns: Path of the temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
+    run_id = get_run_desc_value(run_desc, ('run_id',))
     runs_dir = get_run_desc_value(
         run_desc, ('paths', 'runs directory'), resolve_path=True
     )
-    run_dir = runs_dir / str(uuid.uuid1())
+    run_dir = runs_dir / '{run_id}_{timestamp}'.format(
+        run_id=run_id, timestamp=arrow.now().isoformat()
+    )
     run_dir.mkdir()
     return run_dir
 
