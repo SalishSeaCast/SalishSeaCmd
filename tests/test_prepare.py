@@ -265,16 +265,23 @@ class TestMakeRunDir:
     """Unit test for `salishsea prepare` _make_run_dir() function.
     """
 
-    @patch('salishsea_cmd.prepare.uuid.uuid1', return_value='uuid')
-    def test_make_run_dir(self, m_uuid1, tmpdir):
+    @patch(
+        'salishsea_cmd.prepare.arrow.Arrow.isoformat',
+        return_value='2017-10-01T18:23:55.555919-07:00'
+    )
+    def test_make_run_dir(self, m_isoformat, tmpdir):
         p_runs_dir = tmpdir.ensure_dir('SalishSea')
         run_desc = {
+            'run_id': 'foo',
             'paths': {
                 'runs directory': str(p_runs_dir)
             },
         }
         run_dir = salishsea_cmd.prepare._make_run_dir(run_desc)
-        assert run_dir == Path(str(p_runs_dir)) / m_uuid1()
+        expected = (
+            Path(str(p_runs_dir)) / 'foo_2017-10-01T18:23:55.555919-07:00'
+        )
+        assert run_dir == expected
 
 
 class TestRemoveRunDir:
