@@ -243,7 +243,8 @@ def _make_run_dir(run_desc):
         run_desc, ('paths', 'runs directory'), resolve_path=True
     )
     run_dir = runs_dir / '{run_id}_{timestamp}'.format(
-        run_id=run_id, timestamp=arrow.now().isoformat()
+        run_id=run_id,
+        timestamp=arrow.now().format('YYYY-MM-DDTHHmmss.SSSSSSZ')
     )
     run_dir.mkdir()
     return run_dir

@@ -25,6 +25,7 @@ except ImportError:
     # Python 2.7
     from mock import call, Mock, patch
 
+import arrow
 import cliff.app
 import nemo_cmd.prepare
 import pytest
@@ -266,8 +267,8 @@ class TestMakeRunDir:
     """
 
     @patch(
-        'salishsea_cmd.prepare.arrow.Arrow.isoformat',
-        return_value='2017-10-01T18:23:55.555919-07:00'
+        'salishsea_cmd.prepare.arrow.now',
+        return_value=arrow.get('2017-10-01 18:23:55.555919-0700')
     )
     def test_make_run_dir(self, m_isoformat, tmpdir):
         p_runs_dir = tmpdir.ensure_dir('SalishSea')
@@ -279,7 +280,7 @@ class TestMakeRunDir:
         }
         run_dir = salishsea_cmd.prepare._make_run_dir(run_desc)
         expected = (
-            Path(str(p_runs_dir)) / 'foo_2017-10-01T18:23:55.555919-07:00'
+            Path(str(p_runs_dir)) / 'foo_2017-10-01T182355.555919-0700'
         )
         assert run_dir == expected
 
