@@ -177,7 +177,9 @@ The :command:`run` sub-command does the following:
    * executes the :ref:`salishsea-deflate` to deflate the variables in the large netCDF results files using the Lempel-Ziv compression algorithm to reduce the size of the file on disk
    * executes the :ref:`salishsea-gather` to collect the run description and results files into the results directory
 
-#. Submit the job script to the queue manager via the :command:`qsub` command.
+#. Submit the job script to the queue manager via the appropriate command
+   (:command:`qsub` for systems that use TORQUE/MOAB; e.g. :kbd:`bugaboo`, :kbd:`orcinus`, and :kbd:`salish`,
+   or :command:`sbatch` for systems that use slurm; e.g. :kbd:`cedar` and :kbd:`graham`).
 
 See the :ref:`RunDescriptionFileStructure` section for details of the run description YAML file.
 
@@ -188,7 +190,7 @@ Example:
 
     $ salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
 
-    salishsea_cmd.run INFO: salishsea_cmd.prepare Created run directory ../../SalishSea/38e87e0c-472d-11e3-9c8e-0025909a8461
+    salishsea_cmd.run INFO: salishsea_cmd.prepare Created run directory /global/scratch/sallen/20mar17hindcast_2017-10-01T183841.082501-0700
     salishsea_cmd.run INFO: 3330782.orca2.ibb
 
 If the :command:`run` sub-command prints an error message,
