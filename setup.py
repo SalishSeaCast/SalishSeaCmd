@@ -46,7 +46,7 @@ except IOError:
 install_requires = [
     # see environment-dev.yaml for versions most recently used in development
     'arrow',
-    'cliff',
+    'cliff!=2.9.0',
     'python-hglib',
     'netcdf4',
     'python-dateutil',
