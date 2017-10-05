@@ -48,7 +48,7 @@ dependencies:
 
   - pip:
     - arrow
-    - cliff
+    - cliff~=2.9.0
     - python-hglib
 
     # For SalishSeaTools package
