@@ -237,8 +237,8 @@ def run(
         xios_processors = 0
     results_dir = Path(results_dir)
     system = (
-        os.getenv('WGSYSTEM') or os.getenv('CC_CLUSTER') or
-        socket.gethostname().split('.')[0]
+        os.getenv('WGSYSTEM') or os.getenv('CC_CLUSTER')
+        or socket.gethostname().split('.')[0]
     )
     qsub = 'sbatch' if system in {'cedar', 'graham'} else 'qsub'
     batch_script = _build_batch_script(
@@ -601,7 +601,11 @@ def _td2hms(timedelta):
     :rtype: unicode
     """
     seconds = int(timedelta.total_seconds())
-    periods = (('hour', 60 * 60), ('minute', 60), ('second', 1),)
+    periods = (
+        ('hour', 60 * 60),
+        ('minute', 60),
+        ('second', 1),
+    )
     hms = []
     for period_name, period_seconds in periods:
         period_value, seconds = divmod(seconds, period_seconds)
