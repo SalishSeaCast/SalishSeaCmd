@@ -20,6 +20,14 @@
 :kbd:`SalishSeaCmd` Changes That Break Backward Compatibility
 *************************************************************
 
+Version 3.3
+===========
+
+The following change that was introduced in version 3.3 of the :kbd:`SalishSeaCmd` package is incompatible with earlier versions:
+
+* The :command:`salishsea get_cgrf` sub-command was removed.
+
+
 Version 3.1
 ===========
 
