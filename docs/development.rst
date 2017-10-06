@@ -61,9 +61,9 @@ if you don't have `ssh key authentication`_ set up on Bitbucket.
 Development Environment
 =======================
 
-The :kbd:`SalishSeaCmd` package depends on the :kbd:`SalishSeaTools` and :kbd:`NEMO-Cmd` packages,
-so you need to clone their repos,
-:ref:`tools-repo` and :ref:`NEMO-Cmd-repo`,
+The :kbd:`SalishSeaCmd` package depends on the :kbd:`NEMO-Cmd` package,
+so you need to clone its repo,
+:ref:`NEMO-Cmd-repo`,
 beside your clone of :ref:`SalishSeaCmd-repo`.
 
 Setting up an isolated development environment using `Conda`_ is recommended.
@@ -79,14 +79,10 @@ and building the documentation with the commands:
 
     $ conda env create -f SalishSeaCmd/environment-dev.yaml
     $ source activate salishsea-cmd
-    (salishsea-cmd)$ pip install --editable tools/SalishSeaTools
     (salishsea-cmd)$ pip install --editable NEMO-Cmd
     (salishsea-cmd)$ pip install --editable SalishSeaCmd
 
-The :kbd:`--editable` option in the :command:`pip install` commands above installs the :kbd:`SalishSeaTools` package from the :ref:`tools-repo`,
-the :kbd:`NEMO-Cmd` package,
-and the :kbd:`SalishSeaCmd` package,
-via symlinks so that :program:`salishsea` in the :kbd:`salishsea-cmd` environment will be automatically updated as the repos evolve.
+The :kbd:`--editable` option in the :command:`pip install` commands above installs the :kbd:`NEMO-Cmd` package and the :kbd:`SalishSeaCmd` package via symlinks so that :program:`salishsea` in the :kbd:`salishsea-cmd` environment will be automatically updated as the repos evolve.
 
 To deactivate the environment use:
 
@@ -140,16 +136,15 @@ The output looks something like::
 
   rm -rf _build/*
   sphinx-build -b html -d _build/doctrees   . _build/html
-  Running Sphinx v1.5.1
+  Running Sphinx v1.6.3
   making output directory...
   loading pickled environment... not yet created
   loading intersphinx inventory from https://docs.python.org/3/objects.inv...
-  loading intersphinx inventory from http://salishsea-meopar-docs.readthedocs.org/en/latest/objects.inv...
-  intersphinx inventory has moved: http://salishsea-meopar-docs.readthedocs.org/en/latest/objects.inv -> http://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv
+  loading intersphinx inventory from http://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv...
   loading intersphinx inventory from http://nemo-cmd.readthedocs.io/en/latest/objects.inv...
   building [mo]: targets for 0 po files that are out of date
-  building [html]: targets for 7 source files that are out of date
-  updating environment: 7 added, 0 changed, 0 removed
+  building [html]: targets for 10 source files that are out of date
+  updating environment: 10 added, 0 changed, 0 removed
   reading sources... [100%] subcommands
   looking for now-outdated files... none found
   pickling environment... done
@@ -166,6 +161,7 @@ The output looks something like::
   build succeeded.
 
   Build finished. The HTML pages are in _build/html.
+
 
 The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
 You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build before committing and pushing your changes to Bitbucket.
@@ -194,18 +190,17 @@ use:
 to run the test suite.
 The output looks something like::
 
-  ============================ test session starts ============================
-  platform linux -- Python 3.6.0, pytest-3.0.6, py-1.4.32, pluggy-0.4.0
+  ============================ test session starts =============================
+  platform linux -- Python 3.6.2, pytest-3.2.1, py-1.4.34, pluggy-0.4.0
   rootdir: /media/doug/warehouse/MEOPAR/SalishSeaCmd, inifile:
-  collected 108 items
+  collected 182 items
 
-  tests/test_api.py ..........
-  tests/test_get_cgrf.py .............
-  tests/test_lib.py ..
-  tests/test_prepare.py ...............................................................
-  tests/test_run.py ....................
+  tests/test_api.py ........
+  tests/test_lib.py .........
+  tests/test_prepare.py ...............................................................................................
+  tests/test_run.py ......................................................................
 
-  ======================== 118 passed in 2.93 seconds =========================
+  ========================= 182 passed in 1.61 seconds =========================
 
 You can monitor what lines of code the test suite exercises using the `coverage.py`_ tool with the command:
 

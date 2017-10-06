@@ -6,7 +6,6 @@
 #
 #   $ conda env create -f SalishSeaCmd/environment.yaml
 #   $ source activate salishsea-cmd
-#   (salishsea-cmd)$ pip install --editable tools/SalishSeaTools
 #   (salishsea-cmd)$ pip install --editable NEMO-Cmd/
 #   (salishsea-cmd)$ pip install --editable SalishSeaCmd/
 #
@@ -23,19 +22,9 @@ channels:
   - defaults
 
 dependencies:
-  - netCDF4
   - pip
-  - python=3.5
+  - python=3.6
   - pyyaml
-
-  # For SalishSeaTools package
-  - bottleneck
-  - matplotlib
-  - numpy
-  - pandas
-  - requests
-  - scipy
-  - xarray
 
   # For unit tests
   - coverage
@@ -47,12 +36,8 @@ dependencies:
 
   - pip:
     - arrow
-    - cliff~=2.9.0
+    - cliff!=2.9.0
     - python-hglib
-
-    # For SalishSeaTools package
-    - angles
-    - retrying
 
     # For coding style
     - yapf
