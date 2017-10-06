@@ -39,9 +39,8 @@ The command :kbd:`salishsea --help` produces a list of the available :program:`s
     complete       print bash completion command
     deflate        Deflate variables in netCDF files using Lempel-Ziv compression.
     gather         Gather results from a NEMO run.
-    get_cgrf       Download and symlink CGRF atmospheric forcing files
     help           print detailed help for another command
-    prepare        Prepare a Salish Sea NEMO run
+    prepare        Prepare a Salish Sea NEMO run.
     run            Prepare, execute, and gather results from a Salish Sea NEMO model run.
 
 For details of the arguments and options for a sub-command use
@@ -436,34 +435,4 @@ and see :ref:`nemocmd:nemo-gather` for more details.
 .. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
 
 If the :command:`gather` sub-command prints an error message,
-you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
-
-
-.. _salishsea-get_cgrf:
-
-:kbd:`get_cgrf` Sub-command
-===========================
-
-The :command:`get_cgrf` sub-command downloads CGRF products atmospheric forcing files from Dalhousie rsync repository and symlinks them with the file names that NEMO expects:
-
-.. code-block:: bash
-
-    usage: salishsea get_cgrf [-h] [-d DAYS] [--user USERID] [--password PASSWD]
-                              START_DATE
-
-    Download CGRF products atmospheric forcing files from Dalhousie rsync
-    repository and symlink with the file names that NEMO expects.
-
-    positional arguments:
-      START_DATE            1st date to download files for
-
-    optional arguments:
-      -h, --help            show this help message and exit
-      -d DAYS, --days DAYS  Number of days to download; defaults to 1
-      --user USERID         User id for Dalhousie CGRF rsync repository
-      --password PASSWD     Passowrd for Dalhousie CGRF rsync repository
-
-The command *must* be run in the :file:`/ocean/dlatorne/CGRF/` directory.
-
-If the :command:`get_cgrf` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.

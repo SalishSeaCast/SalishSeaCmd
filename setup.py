@@ -48,10 +48,8 @@ install_requires = [
     'arrow',
     'cliff!=2.9.0',
     'python-hglib',
-    'netcdf4',
     'PyYAML',
     # 'NEMO-Cmd',  # use cd tools; pip install -e NEMO-Cmd
-    # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools
 ]
 if sys.version_info[0] == 2:
     install_requires.append('pathlib2')
@@ -79,7 +77,6 @@ setup(
             'combine = nemo_cmd.combine:Combine',
             'deflate = nemo_cmd.deflate:Deflate',
             'gather = nemo_cmd.gather:Gather',
-            'get_cgrf = salishsea_cmd.get_cgrf:GetCGRF',
             'prepare = salishsea_cmd.prepare:Prepare',
             'run = salishsea_cmd.run:Run',
         ],
