@@ -400,7 +400,7 @@ def _slurm(
     n_processors,
     email,
     results_dir,
-    pmem='2000M',
+    mem='125G',
     deflate=False,
     result_type=''
 ):
@@ -424,7 +424,7 @@ def _slurm(
     :param results_dir: Directory to store results into.
     :type results_dir: :py:class:`pathlib.Path`
 
-    :param str pmem: Memory per processor.
+    :param str mem: Memory per node.
 
     :param boolean deflate: Return directives for a run results deflation job
                             when :py:obj:`True`.
@@ -458,7 +458,7 @@ def _slurm(
         u'#SBATCH --job-name={run_id}\n'
         u'#SBATCH --nodes={nodes}\n'
         u'#SBATCH --ntasks-per-node={processors_per_node}\n'
-        u'#SBATCH --mem=127G\n'
+        u'#SBATCH --mem={mem}\n'
         u'#SBATCH --time={walltime}\n'
         u'#SBATCH --mail-user={email}\n'
         u'#SBATCH --mail-type=ALL\n'
@@ -466,7 +466,7 @@ def _slurm(
         run_id=run_id,
         nodes=int(nodes),
         processors_per_node=processors_per_node,
-        pmem=pmem,
+        mem=mem,
         walltime=walltime,
         email=email,
     )
