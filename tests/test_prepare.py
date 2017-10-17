@@ -1182,8 +1182,9 @@ class TestMakeGridLinks:
         }
         salishsea_cmd.prepare._make_grid_links(run_desc, Path(str(run_dir)))
         assert Path(str(run_dir), 'coordinates.nc').is_symlink()
-        assert Path(str(run_dir), 'coordinates.nc'
-                    ).samefile(str(grid_dir.join('coords.nc')))
+        assert Path(str(run_dir), 'coordinates.nc').samefile(
+            str(grid_dir.join('coords.nc'))
+        )
         assert Path(str(run_dir), 'bathy_meter.nc').is_symlink()
         assert Path(str(run_dir),
                     'bathy_meter.nc').samefile(str(grid_dir.join('bathy.nc')))
@@ -1211,11 +1212,13 @@ class TestMakeGridLinks:
             run_desc, Path(str(run_dir)), agrif_n=1
         )
         assert Path(str(run_dir), '1_coordinates.nc').is_symlink()
-        assert Path(str(run_dir), '1_coordinates.nc'
-                    ).samefile(str(grid_dir.join('coords.nc')))
+        assert Path(str(run_dir), '1_coordinates.nc').samefile(
+            str(grid_dir.join('coords.nc'))
+        )
         assert Path(str(run_dir), '1_bathy_meter.nc').is_symlink()
-        assert Path(str(run_dir), '1_bathy_meter.nc'
-                    ).samefile(str(grid_dir.join('bathy.nc')))
+        assert Path(str(run_dir), '1_bathy_meter.nc').samefile(
+            str(grid_dir.join('bathy.nc'))
+        )
 
 
 class TestMakeForcingLinks:

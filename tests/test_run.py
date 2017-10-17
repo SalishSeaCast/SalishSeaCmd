@@ -205,10 +205,10 @@ class TestRun:
             Path(str(p_results_dir)),
             Path(str(p_run_dir)), 'orcinus', nemo34, False, False
         )
-        m_sco.assert_called_once_with([
-            'qsub', '-W', 'depend=afterok:42', 'SalishSeaNEMO.sh'
-        ],
-                                      universal_newlines=True)
+        m_sco.assert_called_once_with(
+            ['qsub', '-W', 'depend=afterok:42', 'SalishSeaNEMO.sh'],
+            universal_newlines=True
+        )
         assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
         assert qsb_msg == '43.orca2.ibb'
 

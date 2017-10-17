@@ -303,8 +303,9 @@ def run_in_subprocess(run_id, run_desc, results_dir, nemo34=False):
                 log.info(line)
     except subprocess.CalledProcessError as e:
         log.error(
-            'subprocess {cmd} failed with return code {status}'.
-            format(cmd=cmd, status=e.returncode)
+            'subprocess {cmd} failed with return code {status}'.format(
+                cmd=cmd, status=e.returncode
+            )
         )
         for line in e.output.splitlines():
             if line:
