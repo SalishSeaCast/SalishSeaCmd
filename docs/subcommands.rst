@@ -20,7 +20,7 @@
 :command:`salishsea` Sub-Commands
 *********************************
 
-The command :kbd:`salishsea --help` produces a list of the available :program:`salishsea` options and sub-commands::
+The command :kbd:`salishsea help` produces a list of the available :program:`salishsea` options and sub-commands::
 
   usage: salishsea [--version] [-v | -q] [--log-file LOG_FILE] [-h] [--debug]
 
@@ -194,6 +194,10 @@ Example:
 
 If the :command:`run` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+
+If you are using on-the-fly deflation in :program:`XIOS-2`;
+i.e. you are using 1 :program:`XIOS-2` process and have the :kbd:`compression_level="4"` attribute set in all of the :kbd:`file_group` definitions in your :file:`file_def.xml` file;
+you should use the :kbd:`--no-deflate` option to exclude :ref:`nemo-deflate` from the :file:`SalishSeaNEMO.sh` job script.
 
 
 :kbd:`--separate-deflate` Option
