@@ -685,7 +685,8 @@ def _execute(
     nemo_processors, xios_processors, no_deflate, max_deflate_jobs,
     separate_deflate, system
 ):
-    mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
+    mpirun = u'/usr/bin/mpirun' if system == 'salish' else u'mpirun'
+    mpirun = u' '.join((mpirun, '-np', str(nemo_processors), './nemo.exe'))
     if xios_processors:
         mpirun = u' '.join(
             (mpirun, ':', '-np', str(xios_processors), './xios_server.exe')
