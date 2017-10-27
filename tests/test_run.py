@@ -703,7 +703,7 @@ class TestBuildBatchScript:
             u'COMBINE="${HOME}/.local/bin/salishsea combine"\n'
         )
         if not no_deflate:
-            expected += (u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n')
+            expected += u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
         expected += (
             u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
             u'\n'
@@ -713,7 +713,7 @@ class TestBuildBatchScript:
             u'echo "working dir: $(pwd)"\n'
             u'\n'
             u'echo "Starting run at $(date)"\n'
-            u'mpirun -np 6 ./nemo.exe : -np 1 ./xios_server.exe\n'
+            u'/usr/bin/mpirun -np 6 ./nemo.exe : -np 1 ./xios_server.exe\n'
             u'MPIRUN_EXIT_CODE=$?\n'
             u'echo "Ended run at $(date)"\n'
             u'\n'
@@ -941,8 +941,14 @@ class TestExecute:
         echo "working dir: $(pwd)"
 
         echo "Starting run at $(date)"
-        mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
-        MPIRUN_EXIT_CODE=$?
+        '''
+        if system == 'salish':
+            expected += '''/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+            '''
+        else:
+            expected += '''mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+            '''
+        expected += '''MPIRUN_EXIT_CODE=$?
         echo "Ended run at $(date)"
 
         echo "Results combining started at $(date)"
@@ -986,6 +992,36 @@ class TestExecute:
 
         echo "Starting run at $(date)"
         mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+        MPIRUN_EXIT_CODE=$?
+        echo "Ended run at $(date)"
+
+        echo "Results combining started at $(date)"
+        ${COMBINE} ${RUN_DESC} --debug
+        echo "Results combining ended at $(date)"
+        
+        echo "Results gathering started at $(date)"
+        ${GATHER} ${RESULTS_DIR} --debug
+        echo "Results gathering ended at $(date)"
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(script.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+    def test_salish_execute(self):
+        script = salishsea_cmd.run._execute(
+            nemo_processors=42,
+            xios_processors=1,
+            no_deflate=True,
+            max_deflate_jobs=4,
+            separate_deflate=False,
+            system='salish'
+        )
+        expected = '''mkdir -p ${RESULTS_DIR}
+        cd ${WORK_DIR}
+        echo "working dir: $(pwd)"
+
+        echo "Starting run at $(date)"
+        /usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
         MPIRUN_EXIT_CODE=$?
         echo "Ended run at $(date)"
 
