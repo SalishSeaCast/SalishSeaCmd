@@ -229,7 +229,7 @@ def _check_xios_exec(run_desc):
 def _make_run_dir(run_desc):
     """Create the temporary directory from which NEMO will be run.
 
-    The location is the in the runs directory from the run description,
+    The location is in the runs directory from the run description,
     and its name is the run id combined with an ISO-format date/time stamp.
 
     :param run_desc: Run description dictionary.
