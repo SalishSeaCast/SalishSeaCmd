@@ -174,7 +174,7 @@ class TestRun:
             (False, True, 4),
         ]
     )
-    def test_run_submit_waitjob(
+    def test_run_qsub_waitjob(
         self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, nemo34,
         sep_xios_server, xios_servers, tmpdir
     ):
@@ -211,6 +211,52 @@ class TestRun:
         )
         assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
         assert qsb_msg == '43.orca2.ibb'
+
+    @pytest.mark.parametrize(
+        'nemo34, sep_xios_server, xios_servers', [
+            (True, None, 0),
+            (False, False, 0),
+            (False, True, 4),
+        ]
+    )
+    def test_run_sbatch_waitjob(
+        self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, nemo34,
+        sep_xios_server, xios_servers, tmpdir
+    ):
+        p_run_dir = tmpdir.ensure_dir('run_dir')
+        m_prepare.return_value = Path(str(p_run_dir))
+        p_results_dir = tmpdir.ensure_dir('results_dir')
+        if not nemo34:
+            m_lrd.return_value = {
+                'output': {
+                    'separate XIOS server': sep_xios_server,
+                    'XIOS servers': xios_servers,
+                }
+            }
+        m_sco.return_value = '43'
+        with patch('salishsea_cmd.run.os.getenv', return_value='cedar'):
+            qsb_msg = salishsea_cmd.run.run(
+                Path('SalishSea.yaml'),
+                str(p_results_dir),
+                nemo34=nemo34,
+                waitjob=42
+            )
+        m_prepare.assert_called_once_with(
+            Path('SalishSea.yaml'), nemo34, False
+        )
+        m_lrd.assert_called_once_with(Path('SalishSea.yaml'))
+        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
+        m_bbs.assert_called_once_with(
+            m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
+            Path(str(p_results_dir)),
+            Path(str(p_run_dir)), 'cedar', nemo34, False, False
+        )
+        m_sco.assert_called_once_with(
+            ['sbatch', '-d', 'afterok:42', 'SalishSeaNEMO.sh'],
+            universal_newlines=True
+        )
+        assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
+        assert qsb_msg == '43'
 
     @pytest.mark.parametrize(
         'nemo34, sep_xios_server, xios_servers', [

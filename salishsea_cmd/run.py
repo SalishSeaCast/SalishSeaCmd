@@ -130,8 +130,8 @@ class Run(cliff.command.Command):
             type=int,
             default=0,
             help='''
-            Use -W waitjob in call to qsub, to make current job
-            wait for on waitjob.  WAITJOB is the queue job number.
+            Make this job wait for to start until the successful completion of 
+            WAITJOB.  WAITJOB is the queue job number of the job to wait for.
             '''
         )
         parser.add_argument(
@@ -210,8 +210,8 @@ def run(
                                      the run results and qsub them to run as 
                                      serial jobs after the NEMO run finishes.
 
-    :param int waitjob: use -W waitjob in call to qsub, to make current job
-                        wait for on waitjob.  Waitjob is the queue job number
+    :param int waitjob: Job number of the job to wait for successful completion
+                        of before starting this job.
 
     :param boolean quiet: Don't show the run directory path message;
                           the default is to show the temporary run directory 
@@ -240,7 +240,7 @@ def run(
         os.getenv('WGSYSTEM') or os.getenv('CC_CLUSTER')
         or socket.gethostname().split('.')[0]
     )
-    qsub = 'sbatch' if system in {'cedar', 'graham'} else 'qsub'
+    submit_cmd = 'sbatch' if system in {'cedar', 'graham'} else 'qsub'
     batch_script = _build_batch_script(
         run_desc,
         fspath(desc_file), nemo_processors, xios_processors, max_deflate_jobs,
@@ -264,13 +264,16 @@ def run(
     starting_dir = Path.cwd()
     os.chdir(fspath(run_dir))
     if waitjob:
+        depend_opt = (
+            '-W depend=afterok' if submit_cmd == 'qsub' else '-d afterok'
+        )
         cmd = (
-            '{qsub} -W depend=afterok:{waitjob} SalishSeaNEMO.sh'.format(
-                qsub=qsub, waitjob=waitjob
+            '{submit_cmd} {depend_opt}:{waitjob} SalishSeaNEMO.sh'.format(
+                submit_cmd=submit_cmd, depend_opt=depend_opt, waitjob=waitjob
             )
         )
     else:
-        cmd = '{qsub} SalishSeaNEMO.sh'.format(qsub=qsub)
+        cmd = '{qsub} SalishSeaNEMO.sh'.format(qsub=submit_cmd)
     results_dir.mkdir(parents=True, exist_ok=True)
     qsub_msg = subprocess.check_output(
         shlex.split(cmd), universal_newlines=True
@@ -285,9 +288,10 @@ def run(
                 result_type=result_type
             )
             cmd = ((
-                '{qsub} -W depend=afterok:{nemo_job_no} ' + deflate_script
+                '{submit_cmd} -W depend=afterok:{nemo_job_no} ' +
+                deflate_script
             ).format(
-                qsub=qsub,
+                submit_cmd=submit_cmd,
                 nemo_job_no=nemo_job_no,
                 deflate_script=deflate_script
             ))
