@@ -159,8 +159,8 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)), 'orcinus', nemo34, False, False
+            Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', nemo34,
+            False, False
         )
         m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],
                                       universal_newlines=True)
@@ -202,8 +202,8 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)), 'orcinus', nemo34, False, False
+            Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', nemo34,
+            False, False
         )
         m_sco.assert_called_once_with(
             ['qsub', '-W', 'depend=afterok:42', 'SalishSeaNEMO.sh'],
@@ -248,8 +248,8 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)), 'cedar', nemo34, False, False
+            Path(str(p_results_dir)), Path(str(p_run_dir)), 'cedar', nemo34,
+            False, False
         )
         m_sco.assert_called_once_with(
             ['sbatch', '-d', 'afterok:42', 'SalishSeaNEMO.sh'],
@@ -293,8 +293,8 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)), 'orcinus', nemo34, False, False
+            Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', nemo34,
+            False, False
         )
         assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
         assert not m_sco.called
@@ -332,8 +332,8 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)), 'orcinus', nemo34, True, False
+            Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', nemo34,
+            True, False
         )
         m_sco.assert_called_once_with(['qsub', 'SalishSeaNEMO.sh'],
                                       universal_newlines=True)
@@ -372,21 +372,21 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(), 'SalishSea.yaml', 144, xios_servers, 4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)), 'orcinus', nemo34, False, True
+            Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', nemo34,
+            False, True
         )
         assert m_bds.call_args_list == [
             call(
-                m_lrd(), '*_grid_[TUVW]*.nc', 'grid',
-                Path(str(p_results_dir)), 'orcinus', nemo34
+                m_lrd(), '*_grid_[TUVW]*.nc', 'grid', Path(str(p_results_dir)),
+                'orcinus', nemo34
             ),
             call(
-                m_lrd(), '*_ptrc_T*.nc', 'ptrc',
-                Path(str(p_results_dir)), 'orcinus', nemo34
+                m_lrd(), '*_ptrc_T*.nc', 'ptrc', Path(str(p_results_dir)),
+                'orcinus', nemo34
             ),
             call(
-                m_lrd(), '*_dia[12]_T*.nc', 'dia',
-                Path(str(p_results_dir)), 'orcinus', nemo34
+                m_lrd(), '*_dia[12]_T*.nc', 'dia', Path(str(p_results_dir)),
+                'orcinus', nemo34
             ),
         ]
         assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
@@ -883,8 +883,8 @@ class TestDefinitions:
         desc_file = StringIO(u'run_id: foo\n')
         run_desc = yaml.load(desc_file)
         defns = salishsea_cmd.run._definitions(
-            run_desc, 'SalishSea.yaml',
-            Path('run_dir'), Path('results_dir'), system, no_deflate
+            run_desc, 'SalishSea.yaml', Path('run_dir'), Path('results_dir'),
+            system, no_deflate
         )
         expected = (
             u'RUN_ID="foo"\n'
