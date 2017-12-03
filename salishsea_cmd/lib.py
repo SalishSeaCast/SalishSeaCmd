@@ -50,7 +50,8 @@ def get_n_processors(run_desc, run_dir):
     :rtype: int
     """
     jpni, jpnj = map(
-        int, get_run_desc_value(run_desc, ('MPI decomposition',)).split('x')
+        int,
+        get_run_desc_value(run_desc, ('MPI decomposition',)).split('x')
     )
     try:
         mpi_lpe_mapping = get_run_desc_value(
