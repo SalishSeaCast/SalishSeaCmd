@@ -242,9 +242,9 @@ def run(
     )
     submit_cmd = 'sbatch' if system in {'cedar', 'graham'} else 'qsub'
     batch_script = _build_batch_script(
-        run_desc,
-        fspath(desc_file), nemo_processors, xios_processors, max_deflate_jobs,
-        results_dir, run_dir, system, nemo34, no_deflate, separate_deflate
+        run_desc, fspath(desc_file), nemo_processors, xios_processors,
+        max_deflate_jobs, results_dir, run_dir, system, nemo34, no_deflate,
+        separate_deflate
     )
     batch_file = run_dir / 'SalishSeaNEMO.sh'
     with batch_file.open('wt') as f:

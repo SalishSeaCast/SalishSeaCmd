@@ -113,8 +113,8 @@ class TestPrepare:
             m_resolved_path().parent, m_lrd(), m_mrd(), nemo34
         )
         m_crsf.assert_called_once_with(
-            m_lrd(),
-            Path('SalishSea.yaml'), m_resolved_path().parent, m_mrd(), nemo34
+            m_lrd(), Path('SalishSea.yaml'),
+            m_resolved_path().parent, m_mrd(), nemo34
         )
         m_mel.assert_called_once_with(
             m_cne_return, m_mrd(), nemo34, m_cxe_return
@@ -127,8 +127,7 @@ class TestPrepare:
         else:
             m_mrl.assert_called_once_with(m_lrd(), m_mrd(), False)
             m_aaf.assert_called_once_with(
-                m_lrd(),
-                Path('SalishSea.yaml'),
+                m_lrd(), Path('SalishSea.yaml'),
                 m_resolved_path().parent, m_mrd(), False
             )
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
@@ -1029,8 +1028,8 @@ class TestMakeExecutableLinks:
         p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)),
-            Path(str(p_run_dir)), nemo34, Path(str(p_xios_bin_dir))
+            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)), nemo34,
+            Path(str(p_xios_bin_dir))
         )
         assert p_run_dir.join('nemo.exe').check(file=True, link=True)
 
@@ -1045,8 +1044,8 @@ class TestMakeExecutableLinks:
             p_nemo_bin_dir.ensure('server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)),
-            Path(str(p_run_dir)), nemo34, Path(str(p_xios_bin_dir))
+            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)), nemo34,
+            Path(str(p_xios_bin_dir))
         )
         if nemo34:
             assert p_run_dir.join('server.exe').check(file=True, link=True)
@@ -1074,8 +1073,8 @@ class TestMakeExecutableLinks:
             p_xios_bin_dir.ensure('xios_server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)),
-            Path(str(p_run_dir)), nemo34, Path(str(p_xios_bin_dir))
+            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)), nemo34,
+            Path(str(p_xios_bin_dir))
         )
         if nemo34:
             assert not p_run_dir.join('xios_server.exe').check(
@@ -1622,12 +1621,12 @@ class TestRecordVCSRevisions:
         salishsea_cmd.prepare._record_vcs_revisions(run_desc, Path('run_dir'))
         assert m_write.call_args_list == [
             call(
-                Path(str(nemo_code_repo)),
-                Path('run_dir'), nemo_cmd.prepare.get_hg_revision
+                Path(str(nemo_code_repo)), Path('run_dir'),
+                nemo_cmd.prepare.get_hg_revision
             ),
             call(
-                Path(str(xios_code_repo)),
-                Path('run_dir'), nemo_cmd.prepare.get_hg_revision
+                Path(str(xios_code_repo)), Path('run_dir'),
+                nemo_cmd.prepare.get_hg_revision
             ),
         ]
 
@@ -1658,8 +1657,8 @@ class TestRecordVCSRevisions:
         }
         salishsea_cmd.prepare._record_vcs_revisions(run_desc, Path('run_dir'))
         assert m_write.call_args_list[-1] == call(
-            Path(str(ss_run_sets)),
-            Path('run_dir'), nemo_cmd.prepare.get_hg_revision
+            Path(str(ss_run_sets)), Path('run_dir'),
+            nemo_cmd.prepare.get_hg_revision
         )
 
 
