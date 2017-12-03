@@ -32,4 +32,3 @@ Run description files are typically stored in a sub-directory of your clone of t
 
    3.6_yaml_file
    3.6_agrif_yaml_file
-   3.4_yaml_file

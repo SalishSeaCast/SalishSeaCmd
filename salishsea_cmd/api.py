@@ -85,7 +85,7 @@ def gather(results_dir):
     return gather_plugin.gather(results_dir)
 
 
-def prepare(run_desc_file, nemo34=False, nocheck_init=False):
+def prepare(run_desc_file, nocheck_init=False):
     """Prepare a Salish Sea NEMO run.
 
     A UUID named temporary run directory is created and symbolic links
@@ -98,9 +98,6 @@ def prepare(run_desc_file, nemo34=False, nocheck_init=False):
     :param run_desc_file: File path/name of the YAML run description file.
     :type run_desc_file: :py:class:`pathlib.Path`
 
-    :arg boolean nemo34: Prepare a NEMO-3.4 run;
-                         the default is to prepare a NEMO-3.6 run
-
     :arg nocheck_init: Suppress initial condition link check the
                        default is to check
     :type nocheck_init: boolean
@@ -108,7 +105,7 @@ def prepare(run_desc_file, nemo34=False, nocheck_init=False):
     :returns: Path of the temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
-    return prepare_plugin.prepare(run_desc_file, nemo34, nocheck_init)
+    return prepare_plugin.prepare(run_desc_file, nocheck_init)
 
 
 def run_description(
@@ -122,8 +119,7 @@ def run_description(
     runs_dir=None,
     forcing=None,
     init_conditions=None,
-    namelists=None,
-    nemo34=False
+    namelists=None
 ):
     """Return a Salish Sea NEMO run description dict template.
 
@@ -191,10 +187,6 @@ def run_description(
                          for the version of NEMO that you are using for
                          details of the data structure.
 
-    :arg boolean nemo34: Return run description dict template a NEMO-3.4
-                         run;
-                         the default is to return the dict for a
-                         NEMO-3.6 run.
     """
     run_description = {
         'config_name': config_name,
@@ -203,6 +195,7 @@ def run_description(
         'walltime': walltime,
         'paths': {
             'NEMO code config': NEMO_code_config,
+            'XIOS': XIOS_code,
             'forcing': forcing_path,
             'runs directory': runs_dir,
         },
@@ -210,67 +203,41 @@ def run_description(
             'coordinates': 'coordinates_seagrid_SalishSea.nc',
             'bathymetry': 'bathy_meter_SalishSea2.nc',
         },
+        'forcing': forcing,
         'output': {
             'files': 'iodef.xml',
         }
     }
-    if nemo34:
-        if forcing is None:
-            run_description['forcing'] = {
-                'atmospheric':
-                '/results/forcing/atmospheric/GEM2.5/operational/',
-                'initial conditions': init_conditions,
-                'open boundaries': 'open_boundaries/',
-                'rivers': 'rivers/',
-            }
-        else:
-            run_description['forcing'] = forcing
-        if namelists is None:
-            run_description['namelists'] = [
+    if namelists is None:
+        run_description['namelists'] = {
+            'namelist_cfg': [
                 'namelist.time',
                 'namelist.domain',
                 'namelist.surface',
                 'namelist.lateral',
                 'namelist.bottom',
-                'namelist.tracers',
+                'namelist.tracer',
                 'namelist.dynamics',
+                'namelist.vertical',
                 'namelist.compute',
             ]
-        else:
-            run_description['namelists'] = namelists
-    else:
-        run_description['paths']['XIOS'] = XIOS_code
-        run_description['forcing'] = forcing
-        if namelists is None:
-            run_description['namelists'] = {
-                'namelist_cfg': [
-                    'namelist.time',
-                    'namelist.domain',
-                    'namelist.surface',
-                    'namelist.lateral',
-                    'namelist.bottom',
-                    'namelist.tracer',
-                    'namelist.dynamics',
-                    'namelist.vertical',
-                    'namelist.compute',
-                ]
-            }
-        else:
-            run_description['namelists'] = namelists
-        run_description['output'] = {
-            'domain': 'domain_def.xml',
-            'fields': None,
-            'separate XIOS server': True,
-            'XIOS servers': 1,
         }
-        if NEMO_code_config is not None:
-            run_description['output']['fields'] = os.path.join(
-                NEMO_code_config, 'SHARED/field_def.xml'
-            )
+    else:
+        run_description['namelists'] = namelists
+    run_description['output'] = {
+        'domain': 'domain_def.xml',
+        'fields': None,
+        'separate XIOS server': True,
+        'XIOS servers': 1,
+    }
+    if NEMO_code_config is not None:
+        run_description['output']['fields'] = os.path.join(
+            NEMO_code_config, 'SHARED/field_def.xml'
+        )
     return run_description
 
 
-def run_in_subprocess(run_id, run_desc, results_dir, nemo34=False):
+def run_in_subprocess(run_id, run_desc, results_dir):
     """Execute `salishsea run` in a subprocess.
 
     :arg str run_id: Job identifier that appears in the :command:`qstat`
@@ -281,9 +248,6 @@ def run_in_subprocess(run_id, run_desc, results_dir, nemo34=False):
     :arg dict run_desc: Run description data structure that will be
                         written to the temporary YAML file.
 
-    :arg boolean nemo34: Execute a NEMO-3.4 run;
-                         the default is to execute a NEMO-3.6 run
-
     :arg results_dir: Directory to store results into.
     :type results_dir: str
     """
@@ -291,8 +255,6 @@ def run_in_subprocess(run_id, run_desc, results_dir, nemo34=False):
     with open(yaml_file, 'wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
     cmd = ['salishsea', 'run']
-    if nemo34:
-        cmd.append('--nemo3.4')
     cmd.extend([yaml_file, results_dir])
     try:
         output = subprocess.check_output(

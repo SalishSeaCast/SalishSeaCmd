@@ -75,14 +75,6 @@ class Run(cliff.command.Command):
             use for netCDF deflating. Defaults to 4.'''
         )
         parser.add_argument(
-            '--nemo3.4',
-            dest='nemo34',
-            action='store_true',
-            help='''
-            Do a NEMO-3.4 run;
-            the default is to do a NEMO-3.6 run'''
-        )
-        parser.add_argument(
             '--nocheck-initial-conditions',
             dest='nocheck_init',
             action='store_true',
@@ -153,10 +145,10 @@ class Run(cliff.command.Command):
         """
         qsub_msg = run(
             parsed_args.desc_file, parsed_args.results_dir,
-            parsed_args.max_deflate_jobs, parsed_args.nemo34,
-            parsed_args.nocheck_init, parsed_args.no_deflate,
-            parsed_args.no_submit, parsed_args.separate_deflate,
-            parsed_args.waitjob, parsed_args.quiet
+            parsed_args.max_deflate_jobs, parsed_args.nocheck_init,
+            parsed_args.no_deflate, parsed_args.no_submit,
+            parsed_args.separate_deflate, parsed_args.waitjob,
+            parsed_args.quiet
         )
         if not parsed_args.quiet and not parsed_args.separate_deflate:
             log.info(qsub_msg)
@@ -166,7 +158,6 @@ def run(
     desc_file,
     results_dir,
     max_deflate_jobs=4,
-    nemo34=False,
     nocheck_init=False,
     no_deflate=False,
     no_submit=False,
@@ -193,9 +184,6 @@ def run(
     :param int max_deflate_jobs: Maximum number of concurrent sub-processes to
                                  use for netCDF deflating.
 
-    :param boolean nemo34: Prepare a NEMO-3.4 run;
-                           the default is to prepare a NEMO-3.6 run
-
     :param boolean nocheck_init: Suppress initial condition link check
                                  the default is to check
 
@@ -221,7 +209,7 @@ def run(
               run script.
     :rtype: str
     """
-    run_dir = api.prepare(desc_file, nemo34, nocheck_init)
+    run_dir = api.prepare(desc_file, nocheck_init)
     if not quiet:
         log.info('Created run directory {}'.format(run_dir))
     run_desc = lib.load_run_desc(desc_file)
@@ -229,7 +217,7 @@ def run(
     separate_xios_server = get_run_desc_value(
         run_desc, ('output', 'separate XIOS server')
     )
-    if not nemo34 and separate_xios_server:
+    if separate_xios_server:
         xios_processors = get_run_desc_value(
             run_desc, ('output', 'XIOS servers')
         )
@@ -243,7 +231,7 @@ def run(
     submit_cmd = 'sbatch' if system in {'cedar', 'graham'} else 'qsub'
     batch_script = _build_batch_script(
         run_desc, fspath(desc_file), nemo_processors, xios_processors,
-        max_deflate_jobs, results_dir, run_dir, system, nemo34, no_deflate,
+        max_deflate_jobs, results_dir, run_dir, system, no_deflate,
         separate_deflate
     )
     batch_file = run_dir / 'SalishSeaNEMO.sh'
@@ -256,7 +244,7 @@ def run(
         result_types = ('grid', 'ptrc', 'dia')
         for pattern, result_type in zip(patterns, result_types):
             deflate_script = _build_deflate_script(
-                run_desc, pattern, result_type, results_dir, system, nemo34
+                run_desc, pattern, result_type, results_dir, system
             )
             script_file = run_dir / 'deflate_{}.sh'.format(result_type)
             with script_file.open('wt') as f:
@@ -312,7 +300,7 @@ def run(
 
 def _build_batch_script(
     run_desc, desc_file, nemo_processors, xios_processors, max_deflate_jobs,
-    results_dir, run_dir, system, nemo34, no_deflate, separate_deflate
+    results_dir, run_dir, system, no_deflate, separate_deflate
 ):
     """Build the Bash script that will execute the run.
 
@@ -339,9 +327,6 @@ def _build_batch_script(
 
     :param str system: Name of the system that the run will be executed on;
                        e.g. :kbd:`salish`, :kbd:`orcinus`
-
-    :param boolean nemo34: Build batch script for a NEMO-3.4 run;
-                           the default is to do so for a NEMO-3.6 run.
 
     :param boolean no_deflate: Do not include "salishsea deflate" command in
                                the bash script.
@@ -387,7 +372,7 @@ def _build_batch_script(
             defns=_definitions(
                 run_desc, desc_file, run_dir, results_dir, system, no_deflate
             ),
-            modules=_modules(system, nemo34),
+            modules=_modules(system),
             execute=_execute(
                 nemo_processors, xios_processors, no_deflate, max_deflate_jobs,
                 separate_deflate, system
@@ -647,7 +632,7 @@ def _definitions(
     return defns
 
 
-def _modules(system, nemo34):
+def _modules(system):
     modules = {
         'bugaboo': (u'module load python\n'
                     u'module load intel/15.0.2\n'),
@@ -661,7 +646,7 @@ def _modules(system, nemo34):
             u'module load netcdf-fortran-mpi/4.4.4\n'
             u'module load python27-scipy-stack/2017a\n'
         ),
-        'orcinus nemo36': (
+        'orcinus': (
             u'module load intel\n'
             u'module load intel/14.0/netcdf-4.3.3.1_mpi\n'
             u'module load intel/14.0/netcdf-fortran-4.4.0_mpi\n'
@@ -669,15 +654,8 @@ def _modules(system, nemo34):
             u'module load intel/14.0/nco-4.5.2\n'
             u'module load python\n'
         ),
-        'orcinus nemo34': (
-            u'module load intel\n'
-            u'module load intel/14.0/netcdf_hdf5\n'
-            u'module load python\n'
-        ),
     }
     system_key = system
-    if system == 'orcinus':
-        system_key = 'orcinus nemo34' if nemo34 else 'orcinus nemo36'
     try:
         modules_block = modules[system_key]
     except KeyError:
@@ -760,9 +738,7 @@ def _cleanup():
     return script
 
 
-def _build_deflate_script(
-    run_desc, pattern, result_type, results_dir, system, nemo34
-):
+def _build_deflate_script(run_desc, pattern, result_type, results_dir, system):
     script = u'#!/bin/bash\n'
     try:
         email = get_run_desc_value(run_desc, ('email',))
@@ -798,8 +774,6 @@ def _build_deflate_script(
         u'\n'
         u'exit ${{DEFLATE_EXIT_CODE}}\n'
     ).format(
-        results_dir=results_dir,
-        modules=_modules(system, nemo34),
-        pattern=pattern
+        results_dir=results_dir, modules=_modules(system), pattern=pattern
     )
     return script
