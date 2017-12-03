@@ -175,7 +175,7 @@ Running the Unit Tests
 ======================
 
 The test suite for the :kbd:`SalishSeaCmd` package is in :file:`SalishSeaCmd/tests/`.
-The `pytest`_ tools is used for test fixtures and as the test runner for the suite.
+The `pytest`_ tool is used for test fixtures and as the test runner for the suite.
 
 .. _pytest: https://docs.pytest.org/en/latest/
 
