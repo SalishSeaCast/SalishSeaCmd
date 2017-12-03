@@ -50,12 +50,10 @@ class TestParser:
         parser = prepare_cmd.get_parser('salishsea prepare')
         parsed_args = parser.parse_args(['foo'])
         assert parsed_args.desc_file == Path('foo')
-        assert not parsed_args.nemo34
         assert not parsed_args.quiet
 
     @pytest.mark.parametrize(
         'flag, attr', [
-            ('--nemo3.4', 'nemo34'),
             ('-q', 'quiet'),
             ('--quiet', 'quiet'),
         ]
@@ -67,8 +65,8 @@ class TestParser:
 
 
 @patch('salishsea_cmd.prepare.lib.load_run_desc')
-@patch('salishsea_cmd.prepare._check_nemo_exec')
-@patch('salishsea_cmd.prepare._check_xios_exec')
+@patch('salishsea_cmd.prepare._check_nemo_exec', return_value='nemo_bin_dir')
+@patch('salishsea_cmd.prepare._check_xios_exec', return_value='xios_bin_dir')
 @patch('nemo_cmd.api.find_rebuild_nemo_script')
 @patch('nemo_cmd.resolved_path')
 @patch('salishsea_cmd.prepare._make_run_dir')
@@ -84,52 +82,34 @@ class TestPrepare:
     """Unit tests for `salishsea prepare` prepare() function.
     """
 
-    @pytest.mark.parametrize(
-        'nemo34, m_cne_return, m_cxe_return', [
-            (True, 'bin_dir', ''),
-            (False, 'nemo_bin_dir', 'xios_bin_dir'),
-        ]
-    )
     def test_prepare(
         self, m_aaf, m_rvr, m_mrl, m_mfl, m_mgl, m_mel, m_crsf, m_mnl, m_mrd,
-        m_resolved_path, m_frns, m_cxe, m_cne, m_lrd, nemo34, m_cne_return,
-        m_cxe_return
+        m_resolved_path, m_frns, m_cxe, m_cne, m_lrd
     ):
-        m_cne.return_value = m_cne_return
-        m_cxe.return_value = m_cxe_return
         run_dir = salishsea_cmd.prepare.prepare(
-            Path('SalishSea.yaml'), nemo34, nocheck_init=False
+            Path('SalishSea.yaml'), nocheck_init=False
         )
         m_lrd.assert_called_once_with(Path('SalishSea.yaml'))
-        m_cne.assert_called_once_with(m_lrd(), nemo34)
-        if nemo34:
-            assert not m_cxe.called
-        else:
-            m_cne.assert_called_once_with(m_lrd(), nemo34)
+        m_cne.assert_called_once_with(m_lrd())
+        m_cne.assert_called_once_with(m_lrd())
         m_frns.assert_called_once_with(m_lrd())
         m_resolved_path.assert_called_once_with(Path('SalishSea.yaml'))
         m_mrd.assert_called_once_with(m_lrd())
         m_mnl.assert_called_once_with(
-            m_resolved_path().parent, m_lrd(), m_mrd(), nemo34
+            m_resolved_path().parent, m_lrd(), m_mrd()
         )
         m_crsf.assert_called_once_with(
             m_lrd(), Path('SalishSea.yaml'),
-            m_resolved_path().parent, m_mrd(), nemo34
+            m_resolved_path().parent, m_mrd()
         )
-        m_mel.assert_called_once_with(
-            m_cne_return, m_mrd(), nemo34, m_cxe_return
-        )
+        m_mel.assert_called_once_with('nemo_bin_dir', m_mrd(), 'xios_bin_dir')
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
-        m_mfl.assert_called_once_with(m_lrd(), m_mrd(), nemo34, False)
-        if nemo34:
-            assert not m_mrl.called
-            assert not m_aaf.called
-        else:
-            m_mrl.assert_called_once_with(m_lrd(), m_mrd(), False)
-            m_aaf.assert_called_once_with(
-                m_lrd(), Path('SalishSea.yaml'),
-                m_resolved_path().parent, m_mrd(), False
-            )
+        m_mfl.assert_called_once_with(m_lrd(), m_mrd(), False)
+        m_mrl.assert_called_once_with(m_lrd(), m_mrd(), False)
+        m_aaf.assert_called_once_with(
+            m_lrd(), Path('SalishSea.yaml'),
+            m_resolved_path().parent, m_mrd(), False
+        )
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
 
@@ -156,9 +136,7 @@ class TestCheckNemoExec:
         }
         p_bin_dir = p_config.ensure_dir('SalishSea', 'BLD', 'bin')
         p_bin_dir.ensure('nemo.exe')
-        nemo_bin_dir = salishsea_cmd.prepare._check_nemo_exec(
-            run_desc, nemo34=False
-        )
+        nemo_bin_dir = salishsea_cmd.prepare._check_nemo_exec(run_desc)
         assert nemo_bin_dir == Path(str(p_bin_dir))
 
     @pytest.mark.parametrize(
@@ -179,62 +157,7 @@ class TestCheckNemoExec:
             },
         }
         with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=False)
-
-    @pytest.mark.parametrize(
-        'config_name_key, nemo_code_config_key', [
-            ('config name', 'NEMO code config'),
-            ('config_name', 'NEMO-code-config'),
-        ]
-    )
-    @patch('salishsea_cmd.prepare.logger')
-    @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_iom_server_exec_not_found(
-        self, m_get_run_desc_value, m_logger, config_name_key,
-        nemo_code_config_key, tmpdir
-    ):
-        p_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
-        run_desc = {
-            config_name_key: 'SalishSea',
-            'paths': {
-                nemo_code_config_key: str(p_config)
-            },
-        }
-        p_bin_dir = p_config.ensure_dir('SalishSea', 'BLD', 'bin')
-        m_get_run_desc_value.side_effect = (Path(str(p_config)), 'SalishSea')
-        p_exists = patch(
-            'salishsea_cmd.prepare.Path.exists', side_effect=[True, False]
-        )
-        with p_exists:
-            salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=True)
-        m_logger.warning.assert_called_once_with(
-            '{}/server.exe not found - are you running without key_iomput?'
-            .format(p_bin_dir)
-        )
-
-    @pytest.mark.parametrize(
-        'config_name_key, nemo_code_config_key', [
-            ('config name', 'NEMO code config'),
-            ('config_name', 'NEMO-code-config'),
-        ]
-    )
-    @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_nemo36_no_iom_server_check(
-        self, m_get_run_desc_value, config_name_key, nemo_code_config_key,
-        tmpdir
-    ):
-        p_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
-        run_desc = {
-            config_name_key: 'SalishSea',
-            'paths': {
-                nemo_code_config_key: str(p_config)
-            },
-        }
-        p_config.ensure_dir('SalishSea', 'BLD', 'bin')
-        m_get_run_desc_value.side_effect = (Path(str(p_config)), 'SalishSea')
-        with patch('salishsea_cmd.prepare.Path.exists') as m_exists:
-            salishsea_cmd.prepare._check_nemo_exec(run_desc, nemo34=False)
-        assert m_exists.call_count == 1
+            salishsea_cmd.prepare._check_nemo_exec(run_desc)
 
 
 @patch('salishsea_cmd.prepare.logger')
@@ -310,76 +233,7 @@ class TestMakeNamelists:
     """Unit tests for `salishsea prepare` _make_namelists() function.
     """
 
-    def test_nemo34(self):
-        run_desc = {}
-        with patch('salishsea_cmd.prepare._make_namelist_nemo34') as m_mn34:
-            salishsea_cmd.prepare._make_namelists(
-                Path('run_set_dir'), run_desc, Path('run_dir'), nemo34=True
-            )
-        m_mn34.assert_called_once_with(
-            Path('run_set_dir'), run_desc, Path('run_dir')
-        )
-
-    def test_nemo36(self):
-        run_desc = {}
-        with patch('salishsea_cmd.prepare._make_namelists_nemo36') as m_mn36:
-            salishsea_cmd.prepare._make_namelists(
-                Path('run_set_dir'), run_desc, Path('run_dir'), nemo34=False
-            )
-        m_mn36.assert_called_once_with(
-            Path('run_set_dir'), run_desc, Path('run_dir')
-        )
-
-
-class TestMakeNamelistNEMO34:
-    """Unit tests for `salishsea prepare` _make_namelist_nemo34() function.
-    """
-
-    def test_make_namelist_nemo34(self, tmpdir):
-        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
-        p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
-        run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time'))]}
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        p_set_mpi_decomp = patch(
-            'salishsea_cmd.prepare._set_mpi_decomposition', autospec=True
-        )
-        with p_set_mpi_decomp:
-            salishsea_cmd.prepare._make_namelist_nemo34(
-                Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
-            )
-        assert p_run_dir.join('namelist').check()
-
-    @patch('salishsea_cmd.prepare.logger')
-    def test_namelist_file_not_found_error(self, m_logger, tmpdir):
-        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
-        run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time'))]}
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_namelist_nemo34(
-                Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
-            )
-
-    def test_namelist_ends_with_empty_namelists(self, tmpdir):
-        p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
-        p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
-        run_desc = {'namelists': [str(p_run_set_dir.join('namelist.time'))]}
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        p_set_mpi_decomp = patch(
-            'salishsea_cmd.prepare._set_mpi_decomposition', autospec=True
-        )
-        with p_set_mpi_decomp:
-            salishsea_cmd.prepare._make_namelist_nemo34(
-                Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
-            )
-        namelist = p_run_dir.join('namelist').read()
-        assert namelist.endswith(salishsea_cmd.prepare.EMPTY_NAMELISTS)
-
-
-class TestMakeNamelistsNEMO36:
-    """Unit tests for `salishsea prepare` _make_namelists_nemo36() function.
-    """
-
-    def test_make_namelists_nemo36(self, tmpdir):
+    def test_make_namelists(self, tmpdir):
         p_nemo_config_dir = tmpdir.ensure_dir('NEMO-3.6/NEMOGCM/CONFIG')
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('namelist.time').write('&namrun\n&end\n')
@@ -406,7 +260,7 @@ class TestMakeNamelistsNEMO36:
             'salishsea_cmd.prepare._set_mpi_decomposition', autospec=True
         )
         with p_set_mpi_decomp:
-            salishsea_cmd.prepare._make_namelists_nemo36(
+            salishsea_cmd.prepare._make_namelists(
                 Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
             )
         assert p_run_dir.join('namelist_cfg').check(file=True, link=False)
@@ -420,7 +274,7 @@ class TestMakeNamelistsNEMO36:
             file=True, link=False
         )
 
-    def test_agrif_make_namelists_nemo36(self, tmpdir):
+    def test_agrif_make_namelists(self, tmpdir):
         p_nemo_config_dir = tmpdir.ensure_dir('NEMO-3.6/NEMOGCM/CONFIG')
         p_run_set_dir = tmpdir.ensure_dir('run_set_dir')
         p_run_set_dir.join('1_namelist.time').write('&namrun\n&end\n')
@@ -451,7 +305,7 @@ class TestMakeNamelistsNEMO36:
             'salishsea_cmd.prepare._set_mpi_decomposition', autospec=True
         )
         with p_set_mpi_decomp:
-            salishsea_cmd.prepare._make_namelists_nemo36(
+            salishsea_cmd.prepare._make_namelists(
                 Path(str(p_run_set_dir)),
                 run_desc,
                 Path(str(p_run_dir)),
@@ -487,7 +341,7 @@ class TestMakeNamelistsNEMO36:
         }
         p_run_dir = tmpdir.ensure_dir('run_dir')
         with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_namelists_nemo36(
+            salishsea_cmd.prepare._make_namelists(
                 Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
             )
 
@@ -524,7 +378,7 @@ class TestMakeNamelistsNEMO36:
             'salishsea_cmd.prepare._set_mpi_decomposition', autospec=True
         )
         with p_set_mpi_decomp:
-            salishsea_cmd.prepare._make_namelists_nemo36(
+            salishsea_cmd.prepare._make_namelists(
                 Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
             )
         assert p_run_dir.join('namelist_ref').check(file=True, link=False)
@@ -572,7 +426,7 @@ class TestMakeNamelistsNEMO36:
             'salishsea_cmd.prepare._set_mpi_decomposition', autospec=True
         )
         with p_set_mpi_decomp:
-            salishsea_cmd.prepare._make_namelists_nemo36(
+            salishsea_cmd.prepare._make_namelists(
                 Path(str(p_run_set_dir)),
                 run_desc,
                 Path(str(p_run_dir)),
@@ -613,7 +467,7 @@ class TestMakeNamelistsNEMO36:
             'salishsea_cmd.prepare._set_mpi_decomposition', autospec=True
         )
         with p_set_mpi_decomp as m_set_mpi_decomp:
-            salishsea_cmd.prepare._make_namelists_nemo36(
+            salishsea_cmd.prepare._make_namelists(
                 Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
             )
         m_set_mpi_decomp.assert_called_once_with(
@@ -641,7 +495,7 @@ class TestMakeNamelistsNEMO36:
         p_nemo_config_dir.ensure('SalishSea/EXP00/namelist_top_ref')
         p_nemo_config_dir.ensure('SalishSea/EXP00/namelist_pisces_ref')
         with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_namelists_nemo36(
+            salishsea_cmd.prepare._make_namelists(
                 Path(str(p_run_set_dir)), run_desc, Path(str(p_run_dir))
             )
 
@@ -668,7 +522,7 @@ class TestMakeNamelistsNEMO36:
         p_nemo_config_dir.ensure('SalishSea/EXP00/1_namelist_top_ref')
         p_nemo_config_dir.ensure('SalishSea/EXP00/1_namelist_pisces_ref')
         with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_namelists_nemo36(
+            salishsea_cmd.prepare._make_namelists(
                 Path(str(p_run_set_dir)),
                 run_desc,
                 Path(str(p_run_dir)),
@@ -681,36 +535,6 @@ class TestCopyRunSetFiles:
     """
 
     @pytest.mark.parametrize(
-        'iodefs_key',
-        [
-            'iodefs',  # recommended
-            'files',  # backward compatibility
-        ]
-    )
-    @patch('salishsea_cmd.prepare.shutil.copy2')
-    @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_nemo34_copy_run_set_files_no_path(
-        self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key
-    ):
-        run_desc = {'output': {iodefs_key: 'iodef.xml'}}
-        desc_file = Path('foo.yaml')
-        pwd = Path.cwd()
-        m_get_run_desc_value.return_value = pwd / 'iodef.xml'
-        salishsea_cmd.prepare._copy_run_set_files(
-            run_desc, desc_file, pwd, Path('run_dir'), nemo34=True
-        )
-        expected = [
-            call(str(pwd / 'iodef.xml'), str(Path('run_dir') / 'iodef.xml')),
-            call(str(pwd / 'foo.yaml'), str(Path('run_dir') / 'foo.yaml')),
-            call(
-                str(pwd / 'xmlio_server.def'),
-                str(Path('run_dir') / 'xmlio_server.def')
-            ),
-        ]
-        assert m_copy.call_args_list == expected
-
-    @pytest.mark.parametrize(
         'iodefs_key, domains_key, fields_key',
         [
             ('iodefs', 'domaindefs', 'fielddefs'),  # recommended
@@ -720,7 +544,7 @@ class TestCopyRunSetFiles:
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
     @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_nemo36_copy_run_set_files_no_path(
+    def test_copy_run_set_files_no_path(
         self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key,
         fields_key
     ):
@@ -741,7 +565,7 @@ class TestCopyRunSetFiles:
             KeyError
         )
         salishsea_cmd.prepare._copy_run_set_files(
-            run_desc, desc_file, pwd, Path('run_dir'), nemo34=False
+            run_desc, desc_file, pwd, Path('run_dir')
         )
         expected = [
             call(str(pwd / 'iodef.xml'), str(Path('run_dir') / 'iodef.xml')),
@@ -767,7 +591,7 @@ class TestCopyRunSetFiles:
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
     @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_nemo36_copy_agrif_run_set_files_no_path(
+    def test_copy_agrif_run_set_files_no_path(
         self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key,
         fields_key
     ):
@@ -788,12 +612,7 @@ class TestCopyRunSetFiles:
             KeyError
         )
         salishsea_cmd.prepare._copy_run_set_files(
-            run_desc,
-            desc_file,
-            pwd,
-            Path('run_dir'),
-            nemo34=False,
-            agrif_n=1,
+            run_desc, desc_file, pwd, Path('run_dir'), agrif_n=1
         )
         expected = [
             call(str(pwd / 'iodef.xml'), str(Path('run_dir') / 'iodef.xml')),
@@ -810,39 +629,6 @@ class TestCopyRunSetFiles:
         assert m_copy.call_args_list == expected
 
     @pytest.mark.parametrize(
-        'iodefs_key',
-        [
-            'iodefs',  # recommended
-            'files',  # backward compatibility
-        ]
-    )
-    @patch('salishsea_cmd.prepare.shutil.copy2')
-    @patch('salishsea_cmd.prepare._set_xios_server_mode')
-    @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_nemo34_copy_run_set_files_relative_path(
-        self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key
-    ):
-        run_desc = {'output': {iodefs_key: '../iodef.xml'}}
-        desc_file = Path('foo.yaml')
-        pwd = Path.cwd()
-        m_get_run_desc_value.return_value = (pwd / '../iodef.xml').resolve()
-        salishsea_cmd.prepare._copy_run_set_files(
-            run_desc, desc_file, pwd, Path('run_dir'), nemo34=True
-        )
-        expected = [
-            call(
-                str(pwd.parent / 'iodef.xml'),
-                str(Path('run_dir') / 'iodef.xml')
-            ),
-            call(str(pwd / 'foo.yaml'), str(Path('run_dir') / 'foo.yaml')),
-            call(
-                str(pwd / 'xmlio_server.def'),
-                str(Path('run_dir') / 'xmlio_server.def')
-            ),
-        ]
-        assert m_copy.call_args_list == expected
-
-    @pytest.mark.parametrize(
         'iodefs_key, domains_key, fields_key',
         [
             ('iodefs', 'domaindefs', 'fielddefs'),  # recommended
@@ -852,7 +638,7 @@ class TestCopyRunSetFiles:
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
     @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_nemo36_copy_run_set_files_relative_path(
+    def test_copy_run_set_files_relative_path(
         self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key,
         fields_key
     ):
@@ -872,7 +658,7 @@ class TestCopyRunSetFiles:
             pwd / '../domain_def.xml'
         ).resolve(), (pwd / '../field_def.xml').resolve(), KeyError)
         salishsea_cmd.prepare._copy_run_set_files(
-            run_desc, desc_file, pwd, Path('run_dir'), nemo34=False
+            run_desc, desc_file, pwd, Path('run_dir')
         )
         expected = [
             call(
@@ -901,7 +687,7 @@ class TestCopyRunSetFiles:
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
     @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_nemo36_copy_agrif_run_set_files_relative_path(
+    def test_copy_agrif_run_set_files_relative_path(
         self, m_get_run_desc_value, m_sxsm, m_copy, iodefs_key, domains_key,
         fields_key
     ):
@@ -921,12 +707,7 @@ class TestCopyRunSetFiles:
             pwd / '../1_domain_def.xml'
         ).resolve(), (pwd / '../field_def.xml').resolve(), KeyError)
         salishsea_cmd.prepare._copy_run_set_files(
-            run_desc,
-            desc_file,
-            pwd,
-            Path('run_dir'),
-            nemo34=False,
-            agrif_n=1,
+            run_desc, desc_file, pwd, Path('run_dir'), agrif_n=1
         )
         expected = [
             call(
@@ -948,7 +729,7 @@ class TestCopyRunSetFiles:
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
     @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_nemo36_files_def(self, m_get_run_desc_value, m_sxsm, m_copy):
+    def test_files_def(self, m_get_run_desc_value, m_sxsm, m_copy):
         run_desc = {
             'output': {
                 'iodefs': '../iodef.xml',
@@ -970,7 +751,7 @@ class TestCopyRunSetFiles:
             (pwd / '../file_def.xml').resolve()
         )
         salishsea_cmd.prepare._copy_run_set_files(
-            run_desc, desc_file, pwd, Path('run_dir'), nemo34=False
+            run_desc, desc_file, pwd, Path('run_dir')
         )
         assert m_copy.call_args_list[-1] == call(
             str(pwd.parent / 'file_def.xml'),
@@ -980,7 +761,7 @@ class TestCopyRunSetFiles:
     @patch('salishsea_cmd.prepare.shutil.copy2')
     @patch('salishsea_cmd.prepare._set_xios_server_mode')
     @patch('salishsea_cmd.prepare.get_run_desc_value')
-    def test_nemo36_files_def(self, m_get_run_desc_value, m_sxsm, m_copy):
+    def test_agrif_files_def(self, m_get_run_desc_value, m_sxsm, m_copy):
         run_desc = {
             'output': {
                 'iodefs': '../iodef.xml',
@@ -1002,12 +783,7 @@ class TestCopyRunSetFiles:
             (pwd / '../1_file_def.xml').resolve()
         )
         salishsea_cmd.prepare._copy_run_set_files(
-            run_desc,
-            desc_file,
-            pwd,
-            Path('run_dir'),
-            nemo34=False,
-            agrif_n=1,
+            run_desc, desc_file, pwd, Path('run_dir'), agrif_n=1
         )
         assert m_copy.call_args_list[-1] == call(
             str(pwd.parent / '1_file_def.xml'),
@@ -1019,8 +795,7 @@ class TestMakeExecutableLinks:
     """Unit tests for `salishsea prepare` _make_executable_links() function.
     """
 
-    @pytest.mark.parametrize('nemo34', [True, False])
-    def test_nemo_exe_symlink(self, nemo34, tmpdir):
+    def test_nemo_exe_symlink(self, tmpdir):
         p_nemo_bin_dir = tmpdir.ensure_dir(
             'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin'
         )
@@ -1028,62 +803,37 @@ class TestMakeExecutableLinks:
         p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)), nemo34,
+            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)),
             Path(str(p_xios_bin_dir))
         )
         assert p_run_dir.join('nemo.exe').check(file=True, link=True)
 
-    @pytest.mark.parametrize('nemo34', [True, False])
-    def test_server_exe_symlink(self, nemo34, tmpdir):
+    def test_server_exe_symlink(self, tmpdir):
         p_nemo_bin_dir = tmpdir.ensure_dir(
             'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin'
         )
         p_nemo_bin_dir.ensure('nemo.exe')
         p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
-        if nemo34:
-            p_nemo_bin_dir.ensure('server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)), nemo34,
+            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)),
             Path(str(p_xios_bin_dir))
         )
-        if nemo34:
-            assert p_run_dir.join('server.exe').check(file=True, link=True)
-        else:
-            assert not p_run_dir.join('server.exe').check(file=True, link=True)
+        assert not p_run_dir.join('server.exe').check(file=True, link=True)
 
-    @pytest.mark.parametrize(
-        'nemo34, xios_code_repo', [
-            (True, None),
-            (False, 'xios_code_repo'),
-        ]
-    )
-    def test_xios_server_exe_symlink(
-        self,
-        nemo34,
-        xios_code_repo,
-        tmpdir,
-    ):
+    def test_xios_server_exe_symlink(self, tmpdir):
         p_nemo_bin_dir = tmpdir.ensure_dir(
             'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin'
         )
         p_nemo_bin_dir.ensure('nemo.exe')
         p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
-        if not nemo34:
-            p_xios_bin_dir.ensure('xios_server.exe')
+        p_xios_bin_dir.ensure('xios_server.exe')
         p_run_dir = tmpdir.ensure_dir('run_dir')
         salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)), nemo34,
+            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)),
             Path(str(p_xios_bin_dir))
         )
-        if nemo34:
-            assert not p_run_dir.join('xios_server.exe').check(
-                file=True, link=True
-            )
-        else:
-            assert p_run_dir.join('xios_server.exe').check(
-                file=True, link=True
-            )
+        assert p_run_dir.join('xios_server.exe').check(file=True, link=True)
 
 
 class TestMakeGridLinks:
@@ -1220,97 +970,6 @@ class TestMakeGridLinks:
         )
 
 
-class TestMakeForcingLinks:
-    """Unit tests for `salishsea prepare` _make_forcing_links() function.
-    """
-
-    def test_nemo34(self, tmpdir):
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        run_desc = {'paths': {'forcing': 'nemo_forcing_dir'}}
-        patch_mfl34 = patch('salishsea_cmd.prepare._make_forcing_links_nemo34')
-        with patch_mfl34 as m_mfl34:
-            salishsea_cmd.prepare._make_forcing_links(
-                run_desc,
-                Path(str(p_run_dir)),
-                nemo34=True,
-                nocheck_init=False
-            )
-        m_mfl34.assert_called_once_with(run_desc, Path(str(p_run_dir)), False)
-
-    def test_nemo36(self, tmpdir):
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        run_desc = {'paths': {'forcing': 'nemo_forcing_dir'}}
-        patch_mfl36 = patch('salishsea_cmd.prepare._make_forcing_links_nemo36')
-        with patch_mfl36 as m_mfl36:
-            salishsea_cmd.prepare._make_forcing_links(
-                run_desc,
-                Path(str(p_run_dir)),
-                nemo34=False,
-                nocheck_init=False
-            )
-        m_mfl36.assert_called_once_with(run_desc, Path(str(p_run_dir)))
-
-
-class TestMakeForcingLinksNEMO34:
-    """Unit tests for `salishsea prepare` _make_forcing_links_nemo34() function.
-    """
-
-    @pytest.mark.parametrize(
-        'link_path, expected',
-        [
-            ('SalishSea_00475200_restart.nc', 'SalishSea_00475200_restart.nc'),
-            ('initial_strat/', 'initial_strat/'),
-        ],
-    )
-    @patch('salishsea_cmd.prepare._check_atmos_files')
-    @patch('salishsea_cmd.prepare.logger')
-    @patch('salishsea_cmd.prepare._remove_run_dir')
-    def test_make_forcing_links_no_restart_path(
-        self, m_rm_run_dir, m_logger, m_caf, link_path, expected, tmpdir
-    ):
-        forcing_dir = tmpdir.ensure_dir('foo')
-        run_desc = {
-            'paths': {
-                'forcing': str(forcing_dir),
-            },
-            'forcing': {
-                'atmospheric': 'bar',
-                'initial conditions': link_path,
-                'open boundaries': 'open_boundaries/',
-                'rivers': 'rivers/',
-            },
-        }
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_forcing_links_nemo34(
-                run_desc, Path('run_dir'), nocheck_init=False
-            )
-        m_logger.error.assert_called_once_with(
-            '{} not found; cannot create symlink - '
-            'please check the forcing path and initial conditions file names '
-            'in your run description file'.format(forcing_dir.join(expected))
-        )
-        m_rm_run_dir.assert_called_once_with(Path('run_dir'))
-
-    @patch('salishsea_cmd.prepare._check_atmos_files')
-    @patch('salishsea_cmd.prepare.logger')
-    def test_make_forcing_links_no_forcing_path(self, m_logger, m_caf):
-        run_desc = {
-            'paths': {
-                'forcing': 'foo',
-            },
-            'forcing': {
-                'atmospheric': 'bar',
-                'initial conditions': 'initial_strat/',
-                'open boundaries': 'open_boundaries/',
-                'rivers': 'rivers/',
-            },
-        }
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_forcing_links_nemo34(
-                run_desc, Path('run_dir'), nocheck_init=False
-            )
-
-
 class TestResolveForcingPath:
     """Unit tests for `salishsea prepare` _resolve_forcing_path() function.
     """
@@ -1356,8 +1015,8 @@ class TestResolveForcingPath:
         assert path == Path('/foo/bar')
 
 
-class TestMakeForcingLinksNEMO36:
-    """Unit tests for `salishsea prepare` _make_forcing_links_nemo36() function.
+class TestMakeForcingLinks:
+    """Unit tests for `salishsea prepare` _make_forcing_links() function.
     """
 
     def test_abs_path_link(self, tmpdir):
@@ -1377,7 +1036,7 @@ class TestMakeForcingLinksNEMO36:
         }
         patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
         with patch_symlink_to as m_symlink_to:
-            salishsea_cmd.prepare._make_forcing_links_nemo36(
+            salishsea_cmd.prepare._make_forcing_links(
                 run_desc, Path('run_dir')
             )
         m_symlink_to.assert_called_once_with(Path(str(p_atmos_ops)))
@@ -1397,7 +1056,7 @@ class TestMakeForcingLinksNEMO36:
         }
         patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
         with patch_symlink_to as m_symlink_to:
-            salishsea_cmd.prepare._make_forcing_links_nemo36(
+            salishsea_cmd.prepare._make_forcing_links(
                 run_desc, Path('run_dir')
             )
         m_symlink_to.assert_called_once_with(
@@ -1419,7 +1078,7 @@ class TestMakeForcingLinksNEMO36:
             }
         }
         with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_forcing_links_nemo36(
+            salishsea_cmd.prepare._make_forcing_links(
                 run_desc, Path('run_dir')
             )
         m_logger.error.assert_called_once_with(
@@ -1452,7 +1111,7 @@ class TestMakeForcingLinksNEMO36:
         }
         patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
         with patch_symlink_to as m_symlink_to:
-            salishsea_cmd.prepare._make_forcing_links_nemo36(
+            salishsea_cmd.prepare._make_forcing_links(
                 run_desc, Path('run_dir')
             )
         m_chk_atmos_frc_link.assert_called_once_with(
@@ -1483,7 +1142,7 @@ class TestMakeForcingLinksNEMO36:
         salishsea_cmd.prepare._remove_run_dir = Mock()
         with patch_symlink_to as m_symlink_to:
             with pytest.raises(SystemExit):
-                salishsea_cmd.prepare._make_forcing_links_nemo36(
+                salishsea_cmd.prepare._make_forcing_links(
                     run_desc, Path('run_dir')
                 )
 
@@ -1666,7 +1325,7 @@ class TestRecordVCSRevisions:
 @patch('salishsea_cmd.prepare._make_grid_links', autospec=True)
 @patch('salishsea_cmd.prepare._make_restart_links', autospec=True)
 @patch('salishsea_cmd.prepare._copy_run_set_files', autospec=True)
-@patch('salishsea_cmd.prepare._make_namelists_nemo36', autospec=True)
+@patch('salishsea_cmd.prepare._make_namelists', autospec=True)
 class TestAddAgrifFiles:
     """Unit tests for `salishsea prepare` _add_agrid_files() function.
     """
@@ -2060,7 +1719,6 @@ class TestAddAgrifFiles:
                 Path('foo.yaml'),
                 Path('run_set_dir'),
                 Path('run_dir'),
-                nemo34=False,
                 agrif_n=1
             ),
             call(
@@ -2068,7 +1726,6 @@ class TestAddAgrifFiles:
                 Path('foo.yaml'),
                 Path('run_set_dir'),
                 Path('run_dir'),
-                nemo34=False,
                 agrif_n=2
             ),
         ]
