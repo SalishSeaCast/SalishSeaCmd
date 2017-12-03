@@ -68,14 +68,6 @@ class Prepare(cliff.command.Command):
             previous job'''
         )
         parser.add_argument(
-            '--nemo3.4',
-            dest='nemo34',
-            action='store_true',
-            help='''
-            Prepare a NEMO-3.4 run;
-            the default is to prepare a NEMO-3.6 run'''
-        )
-        parser.add_argument(
             '-q',
             '--quiet',
             action='store_true',
@@ -93,15 +85,13 @@ class Prepare(cliff.command.Command):
         The path to the run directory is logged to the console on completion
         of the set-up.
         """
-        run_dir = prepare(
-            parsed_args.desc_file, parsed_args.nemo34, parsed_args.nocheck_init
-        )
+        run_dir = prepare(parsed_args.desc_file)
         if not parsed_args.quiet:
             logger.info('Created run directory {}'.format(run_dir))
         return run_dir
 
 
-def prepare(desc_file, nemo34, nocheck_init):
+def prepare(desc_file, nocheck_init):
     """Create and prepare the temporary run directory.
 
     The temporary run directory is created with a UUID as its name.
@@ -114,10 +104,6 @@ def prepare(desc_file, nemo34, nocheck_init):
     :param desc_file: File path/name of the YAML run description file.
     :type desc_file: :py:class:`pathlib.Path`
 
-    :arg nemo34: Prepare a NEMO-3.4 run;
-                 the default is to prepare a NEMO-3.6 run
-    :type nemo34: boolean
-
     :arg nocheck_init: Suppress initial condition link check the
                        default is to check
     :type nocheck_init: boolean
@@ -126,27 +112,23 @@ def prepare(desc_file, nemo34, nocheck_init):
     :rtype: :py:class:`pathlib.Path`
     """
     run_desc = lib.load_run_desc(desc_file)
-    nemo_bin_dir = _check_nemo_exec(run_desc, nemo34)
-    xios_bin_dir = _check_xios_exec(run_desc) if not nemo34 else ''
+    nemo_bin_dir = _check_nemo_exec(run_desc)
+    xios_bin_dir = _check_xios_exec(run_desc)
     nemo_cmd.api.find_rebuild_nemo_script(run_desc)
     run_set_dir = nemo_cmd.resolved_path(desc_file).parent
     run_dir = _make_run_dir(run_desc)
-    _make_namelists(run_set_dir, run_desc, run_dir, nemo34)
-    _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir, nemo34)
-    _make_executable_links(nemo_bin_dir, run_dir, nemo34, xios_bin_dir)
+    _make_namelists(run_set_dir, run_desc, run_dir)
+    _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir)
+    _make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
-    _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init)
-    if not nemo34:
-        _make_restart_links(run_desc, run_dir, nocheck_init)
+    _make_forcing_links(run_desc, run_dir, nocheck_init)
+    _make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
-    if not nemo34:
-        _add_agrif_files(
-            run_desc, desc_file, run_set_dir, run_dir, nocheck_init
-        )
+    _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)
     return run_dir
 
 
-def _check_nemo_exec(run_desc, nemo34):
+def _check_nemo_exec(run_desc):
     """Calculate absolute paths of NEMO executable's directory.
 
     Confirm that the NEMO executable exists, raising a SystemExit
@@ -156,9 +138,6 @@ def _check_nemo_exec(run_desc, nemo34):
     exists, issuing a warning if it does not.
 
     :param dict run_desc: Run description dictionary.
-
-    :param boolean nemo34: Prepare a NEMO-3.4 run;
-                           the default is to prepare a NEMO-3.6 run
 
     :returns: Absolute path of NEMO executable's directory.
     :rtype: :py:class:`pathlib.Path`
@@ -190,13 +169,6 @@ def _check_nemo_exec(run_desc, nemo34):
             '{} not found - did you forget to build it?'.format(nemo_exec)
         )
         raise SystemExit(2)
-    if nemo34:
-        iom_server_exec = nemo_bin_dir / 'server.exe'
-        if not iom_server_exec.exists():
-            logger.warning(
-                '{} not found - are you running without key_iomput?'
-                .format(iom_server_exec)
-            )
     return nemo_bin_dir
 
 
@@ -269,71 +241,7 @@ def _remove_run_dir(run_dir):
         pass
 
 
-def _make_namelists(run_set_dir, run_desc, run_dir, nemo34):
-    """Build the namelist file(s) for the run in run_dir by concatenating
-    the list(s) of namelist section files provided in run_desc.
-
-    If any of the required namelist section files are missing,
-    delete the run directory and raise a SystemExit exception.
-
-    :param run_set_dir: Directory containing the run description file,
-                        from which relative paths for the namelist section
-                        files start.
-    :type run_set_dir: :py:class:`pathlib.Path`
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :param boolean nemo34: Prepare a NEMO-3.4 run;
-                           the default is to prepare a NEMO-3.6 run
-
-    :raises: SystemExit
-    """
-    if nemo34:
-        _make_namelist_nemo34(run_set_dir, run_desc, run_dir)
-    else:
-        _make_namelists_nemo36(run_set_dir, run_desc, run_dir)
-
-
-def _make_namelist_nemo34(run_set_dir, run_desc, run_dir):
-    """Build the namelist file for the NEMO-3.4 run in run_dir by
-    concatenating the list of namelist section files provided in run_desc.
-
-    If any of the required namelist section files are missing,
-    delete the run directory and raise a SystemExit exception.
-
-    :param run_set_dir: Directory containing the run description file,
-                        from which relative paths for the namelist section
-                        files start.
-    :type run_set_dir: :py:class:`pathlib.Path`
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :raises: SystemExit
-    """
-    namelists = get_run_desc_value(run_desc, ('namelists',), run_dir=run_dir)
-    namelist_filename = 'namelist'
-    with (run_dir / namelist_filename).open('wt') as namelist:
-        for nl in namelists:
-            try:
-                with (run_set_dir / nl).open('rt') as f:
-                    namelist.writelines(f.readlines())
-                    namelist.write(u'\n\n')
-            except IOError as e:
-                logger.error(e)
-                namelist.close()
-                _remove_run_dir(run_dir)
-                raise SystemExit(2)
-        namelist.writelines(EMPTY_NAMELISTS)
-    _set_mpi_decomposition(namelist_filename, run_desc, run_dir)
-
-
-def _make_namelists_nemo36(run_set_dir, run_desc, run_dir, agrif_n=None):
+def _make_namelists(run_set_dir, run_desc, run_dir, agrif_n=None):
     """Build the namelist files for the NEMO-3.6 run in run_dir by
     concatenating the lists of namelist section files provided in run_desc.
 
@@ -498,7 +406,7 @@ def _get_namelist_value(key, lines):
 
 
 def _copy_run_set_files(
-    run_desc, desc_file, run_set_dir, run_dir, nemo34, agrif_n=None
+    run_desc, desc_file, run_set_dir, run_dir, agrif_n=None
 ):
     """Copy the run-set files given into run_dir.
 
@@ -536,9 +444,6 @@ def _copy_run_set_files(
     :param run_dir: Path of the temporary run directory.
     :type run_dir: :py:class:`pathlib.Path`
 
-    :param boolean nemo34: Prepare a NEMO-3.4 run;
-                           the default is to prepare a NEMO-3.6 run
-
     :param int agrif_n: AGRIF sub-grid number.
     """
     try:
@@ -557,86 +462,72 @@ def _copy_run_set_files(
         (iodefs, 'iodef.xml'),
         (run_set_dir / desc_file.name, desc_file.name),
     ]
-    if nemo34:
-        run_set_files.append(
-            (run_set_dir / 'xmlio_server.def', 'xmlio_server.def')
+    try:
+        keys = ('output', 'domaindefs')
+        domain_def_filename = 'domain_def.xml'
+        if agrif_n is not None:
+            keys = (
+                'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n),
+                'domaindefs'
+            )
+            domain_def_filename = '{agrif_n}_domain_def.xml'.format(
+                agrif_n=agrif_n
+            )
+        domains_def = get_run_desc_value(
+            run_desc,
+            keys,
+            resolve_path=True,
+            run_dir=run_dir,
+            fatal=False,
         )
-    else:
-        try:
-            keys = ('output', 'domaindefs')
-            domain_def_filename = 'domain_def.xml'
-            if agrif_n is not None:
-                keys = (
-                    'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n),
-                    'domaindefs'
-                )
-                domain_def_filename = '{agrif_n}_domain_def.xml'.format(
-                    agrif_n=agrif_n
-                )
-            domains_def = get_run_desc_value(
-                run_desc,
-                keys,
-                resolve_path=True,
-                run_dir=run_dir,
-                fatal=False,
+    except KeyError:
+        # Alternate key spelling for backward compatibility
+        keys = ('output', 'domain')
+        if agrif_n is not None:
+            keys = (
+                'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n), 'domain'
             )
-        except KeyError:
-            # Alternate key spelling for backward compatibility
-            keys = ('output', 'domain')
-            if agrif_n is not None:
-                keys = (
-                    'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n),
-                    'domain'
-                )
-            domains_def = get_run_desc_value(
-                run_desc, keys, resolve_path=True, run_dir=run_dir
+        domains_def = get_run_desc_value(
+            run_desc, keys, resolve_path=True, run_dir=run_dir
+        )
+    try:
+        fields_def = get_run_desc_value(
+            run_desc, ('output', 'fielddefs'),
+            resolve_path=True,
+            run_dir=run_dir,
+            fatal=False
+        )
+    except KeyError:
+        # Alternate key spelling for backward compatibility
+        fields_def = get_run_desc_value(
+            run_desc, ('output', 'fields'), resolve_path=True, run_dir=run_dir
+        )
+    run_set_files.extend([
+        (domains_def, domain_def_filename),
+        (fields_def, 'field_def.xml'),
+    ])
+    try:
+        keys = ('output', 'filedefs')
+        file_def_filename = 'file_def.xml'
+        if agrif_n is not None:
+            keys = (
+                'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n), 'filedefs'
             )
-        try:
-            fields_def = get_run_desc_value(
-                run_desc, ('output', 'fielddefs'),
-                resolve_path=True,
-                run_dir=run_dir,
-                fatal=False
+            file_def_filename = '{agrif_n}_file_def.xml'.format(
+                agrif_n=agrif_n
             )
-        except KeyError:
-            # Alternate key spelling for backward compatibility
-            fields_def = get_run_desc_value(
-                run_desc, ('output', 'fields'),
-                resolve_path=True,
-                run_dir=run_dir
-            )
-        run_set_files.extend([
-            (domains_def, domain_def_filename),
-            (fields_def, 'field_def.xml'),
-        ])
-        try:
-            keys = ('output', 'filedefs')
-            file_def_filename = 'file_def.xml'
-            if agrif_n is not None:
-                keys = (
-                    'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n),
-                    'filedefs'
-                )
-                file_def_filename = '{agrif_n}_file_def.xml'.format(
-                    agrif_n=agrif_n
-                )
-            files_def = get_run_desc_value(
-                run_desc,
-                keys,
-                resolve_path=True,
-                run_dir=run_dir,
-                fatal=False
-            )
-            run_set_files.append((files_def, file_def_filename))
-        except KeyError:
-            # `files` key is optional and only used with XIOS-2
-            pass
+        files_def = get_run_desc_value(
+            run_desc, keys, resolve_path=True, run_dir=run_dir, fatal=False
+        )
+        run_set_files.append((files_def, file_def_filename))
+    except KeyError:
+        # `files` key is optional and only used with XIOS-2
+        pass
     for source, dest_name in run_set_files:
         shutil.copy2(
             nemo_cmd.fspath(source), nemo_cmd.fspath(run_dir / dest_name)
         )
-    if not nemo34:
-        _set_xios_server_mode(run_desc, run_dir)
+    _set_xios_server_mode(run_desc, run_dir)
 
 
 def _set_xios_server_mode(run_desc, run_dir):
@@ -684,7 +575,7 @@ def _set_xios_server_mode(run_desc, run_dir):
         f.writelines(lines)
 
 
-def _make_executable_links(nemo_bin_dir, run_dir, nemo34, xios_bin_dir):
+def _make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir):
     """Create symlinks in run_dir to the NEMO and I/O server executables
     and record the code repository revision(s) used for the run.
 
@@ -702,21 +593,14 @@ def _make_executable_links(nemo_bin_dir, run_dir, nemo34, xios_bin_dir):
     :param run_dir: Path of the temporary run directory.
     :type run_dir: :py:class:`pathlib.Path`
 
-    :param boolean nemo34: Make executable links for a NEMO-3.4 run
-                           if :py:obj:`True`,
-                           otherwise make links for a NEMO-3.6 run.
-
     :param xios_bin_dir: Absolute path of directory containing XIOS executable.
     :type xios_bin_dir: :py:class:`pathlib.Path`
     """
     nemo_exec = nemo_bin_dir / 'nemo.exe'
     (run_dir / 'nemo.exe').symlink_to(nemo_exec)
     iom_server_exec = nemo_bin_dir / 'server.exe'
-    if nemo34 and iom_server_exec.exists():
-        (run_dir / 'server.exe').symlink_to(iom_server_exec)
-    if not nemo34:
-        xios_server_exec = xios_bin_dir / 'xios_server.exe'
-        (run_dir / 'xios_server.exe').symlink_to(xios_server_exec)
+    xios_server_exec = xios_bin_dir / 'xios_server.exe'
+    (run_dir / 'xios_server.exe').symlink_to(xios_server_exec)
 
 
 def _make_grid_links(run_desc, run_dir, agrif_n=None):
@@ -776,87 +660,6 @@ def _make_grid_links(run_desc, run_dir, agrif_n=None):
         (run_dir / link_name).symlink_to(source)
 
 
-def _make_forcing_links(run_desc, run_dir, nemo34, nocheck_init):
-    """Create symlinks in run_dir to the forcing directory/file names,
-    and record the NEMO-forcing repo revision used for the run.
-
-    The NEMO-forcing revision record is the output of the
-    :command:`hg parents` in the NEMO-forcing repo.
-    It is stored in the :file:`NEMO-forcing_rev.txt` file in run_dir.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :param boolean nemo34: Make forcing links for a NEMO-3.4 run
-                           if :py:obj:`True`,
-                           otherwise make links for a NEMO-3.6 run.
-
-    :param nocheck_init: Suppress initial condition link check
-                         the default is to check
-    :type nocheck_init: boolean
-
-    :raises: :py:exc:`SystemExit` if the NEMO-forcing repo path does not
-             exist
-    """
-    if nemo34:
-        _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init)
-    else:
-        _make_forcing_links_nemo36(run_desc, run_dir)
-
-
-def _make_forcing_links_nemo34(run_desc, run_dir, nocheck_init):
-    """For a NEMO-3.4 run, create symlinks in run_dir to the forcing
-    directory/file names that the Salish Sea model uses by convention.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :param boolean nocheck_init: Suppress initial condition link check;
-                                 the default is to check
-
-    :raises: :py:exc:`SystemExit` if a symlink target does not exist
-    """
-    symlinks = []
-    init_conditions = _resolve_forcing_path(
-        run_desc, ('initial conditions',), run_dir
-    )
-    link_name = (
-        'restart.nc'
-        if 'restart' in nemo_cmd.fspath(init_conditions) else 'initial_strat'
-    )
-    if not init_conditions.exists() and not nocheck_init:
-        logger.error(
-            '{} not found; cannot create symlink - '
-            'please check the forcing path and initial conditions file names '
-            'in your run description file'.format(init_conditions)
-        )
-        _remove_run_dir(run_dir)
-        raise SystemExit(2)
-    symlinks.append((init_conditions, link_name))
-    atmospheric = _resolve_forcing_path(run_desc, ('atmospheric',), run_dir)
-    open_boundaries = _resolve_forcing_path(
-        run_desc, ('open boundaries',), run_dir
-    )
-    rivers = _resolve_forcing_path(run_desc, ('rivers',), run_dir)
-    forcing_dirs = ((atmospheric, 'NEMO-atmos'),
-                    (open_boundaries, 'open_boundaries'), (rivers, 'rivers'))
-    for source, link_name in forcing_dirs:
-        if not source.exists():
-            logger.error(
-                '{} not found; cannot create symlink - '
-                'please check the forcing paths and file names '
-                'in your run description file'.format(source)
-            )
-            _remove_run_dir(run_dir)
-            raise SystemExit(2)
-        (run_dir / link_name).symlink_to(source)
-    _check_atmos_files(run_desc, run_dir)
-
-
 def _resolve_forcing_path(run_desc, keys, run_dir):
     """Calculate a resolved path for a forcing path.
     
@@ -890,7 +693,7 @@ def _resolve_forcing_path(run_desc, keys, run_dir):
     return nemo_forcing_dir / path
 
 
-def _make_forcing_links_nemo36(run_desc, run_dir):
+def _make_forcing_links(run_desc, run_dir):
     """For a NEMO-3.6 run, create symlinks in run_dir to the forcing
     directory/file names given in the run description forcing section.
 
@@ -1268,9 +1071,7 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
         ),
         # sub-grid namelist files
         'namelists':
-        functools.partial(
-            _make_namelists_nemo36, run_set_dir, run_desc, run_dir
-        ),
+        functools.partial(_make_namelists, run_set_dir, run_desc, run_dir),
         # sub-grid output files
         'output':
         functools.partial(
@@ -1279,7 +1080,6 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
             desc_file,
             run_set_dir,
             run_dir,
-            nemo34=False
         ),
     }
     for run_desc_section, func in run_desc_sections.items():
@@ -1302,103 +1102,3 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
             )
             _remove_run_dir(run_dir)
             raise SystemExit(2)
-
-
-# All of the namelists that NEMO-3.4 requires, but empty so that they result
-# in the defaults defined in the NEMO code being used.
-EMPTY_NAMELISTS = u"""
-&namrun        !  Parameters of the run
-&end
-&nam_diaharm   !  Harmonic analysis of tidal constituents ('key_diaharm')
-&end
-&namzgr        !  Vertical coordinate
-&end
-&namzgr_sco    !  s-Coordinate or hybrid z-s-coordinate
-&end
-&namdom        !  Space and time domain (bathymetry, mesh, timestep)
-&end
-&namtsd        !  Data : Temperature  & Salinity
-&end
-&namsbc        !  Surface Boundary Condition (surface module)
-&end
-&namsbc_ana    !  Analytical surface boundary condition
-&end
-&namsbc_flx    !  Surface boundary condition : flux formulation
-&end
-&namsbc_clio   !  CLIO bulk formulae
-&end
-&namsbc_core   !  CORE bulk formulae
-&end
-&namsbc_mfs    !  MFS bulk formulae
-&end
-&namtra_qsr    !  Penetrative solar radiation
-&end
-&namsbc_rnf    !  Runoffs namelist surface boundary condition
-&end
-&namsbc_apr    !  Atmospheric pressure used as ocean forcing or in bulk
-&end
-&namsbc_ssr    !  Surface boundary condition : sea surface restoring
-&end
-&namsbc_alb    !  Albedo parameters
-&end
-&namlbc        !  Lateral momentum boundary condition
-&end
-&namcla        !  Cross land advection
-&end
-&nam_tide      !  Tide parameters (#ifdef key_tide)
-&end
-&nambdy        !  Unstructured open boundaries ("key_bdy")
-&end
-&nambdy_index  !  Open boundaries - definition ("key_bdy")
-&end
-&nambdy_dta    !  Open boundaries - external data ("key_bdy")
-&end
-&nambdy_tide   !  Tidal forcing at open boundaries
-&end
-&nambfr        !  Bottom friction
-&end
-&nambbc        !  Bottom temperature boundary condition
-&end
-&nambbl        !  Bottom boundary layer scheme
-&end
-&nameos        !  Ocean physical parameters
-&end
-&namtra_adv    !  Advection scheme for tracer
-&end
-&namtra_ldf    !  Lateral diffusion scheme for tracers
-&end
-&namtra_dmp    !  Tracer: T & S newtonian damping
-&end
-&namdyn_adv    !  Formulation of the momentum advection
-&end
-&namdyn_vor    !  Option of physics/algorithm (not control by CPP keys)
-&end
-&namdyn_hpg    !  Hydrostatic pressure gradient option
-&end
-&namdyn_ldf    !  Lateral diffusion on momentum
-&end
-&namzdf        !  Vertical physics
-&end
-&namzdf_gls    !  GLS vertical diffusion ("key_zdfgls")
-&end
-&namsol        !  Elliptic solver / island / free surface
-&end
-&nammpp        !  Massively Parallel Processing ("key_mpp_mpi)
-&end
-&namctl        !  Control prints & Benchmark
-&end
-&namnc4        !  netCDF4 chunking and compression settings ("key_netcdf4")
-&end
-&namptr        !  Poleward Transport Diagnostic
-&end
-&namhsb        !  Heat and salt budgets
-&end
-&namdct        !  Transports through sections
-&end
-&namsbc_wave   !  External fields from wave model
-&end
-&namdyn_nept   !  Neptune effect
-&end           !  (simplified: lateral & vertical diffusions removed)
-&namtrj        !  Handling non-linear trajectory for TAM
-&end           !  (output for direct model, input for TAM)
-"""
