@@ -121,7 +121,7 @@ def prepare(desc_file, nocheck_init):
     _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir)
     _make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
-    _make_forcing_links(run_desc, run_dir, nocheck_init)
+    _make_forcing_links(run_desc, run_dir)
     _make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
     _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)

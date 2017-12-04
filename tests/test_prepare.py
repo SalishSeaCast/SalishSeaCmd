@@ -104,7 +104,7 @@ class TestPrepare:
         )
         m_mel.assert_called_once_with('nemo_bin_dir', m_mrd(), 'xios_bin_dir')
         m_mgl.assert_called_once_with(m_lrd(), m_mrd())
-        m_mfl.assert_called_once_with(m_lrd(), m_mrd(), False)
+        m_mfl.assert_called_once_with(m_lrd(), m_mrd())
         m_mrl.assert_called_once_with(m_lrd(), m_mrd(), False)
         m_aaf.assert_called_once_with(
             m_lrd(), Path('SalishSea.yaml'),
