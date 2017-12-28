@@ -85,7 +85,7 @@ class Prepare(cliff.command.Command):
         The path to the run directory is logged to the console on completion
         of the set-up.
         """
-        run_dir = prepare(parsed_args.desc_file)
+        run_dir = prepare(parsed_args.desc_file, parsed_args.nocheck_init)
         if not parsed_args.quiet:
             logger.info('Created run directory {}'.format(run_dir))
         return run_dir
