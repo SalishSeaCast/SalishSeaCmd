@@ -360,100 +360,6 @@ class TestBuildBatchScript:
     """Unit test for _build_batch_script() function.
     """
 
-    @pytest.mark.parametrize('no_deflate', [
-        True,
-        False,
-    ])
-    def test_bugaboo(self, no_deflate):
-        desc_file = StringIO(
-            u'run_id: foo\n'
-            u'walltime: 01:02:03\n'
-            u'email: me@example.com'
-        )
-        run_desc = yaml.load(desc_file)
-        script = salishsea_cmd.run._build_batch_script(
-            run_desc,
-            'SalishSea.yaml',
-            nemo_processors=42,
-            xios_processors=1,
-            max_deflate_jobs=4,
-            results_dir=Path('results_dir'),
-            run_dir=Path(),
-            system='bugaboo',
-            no_deflate=no_deflate,
-            separate_deflate=False
-        )
-        expected = (
-            u'#!/bin/bash\n'
-            u'\n'
-            u'#PBS -N foo\n'
-            u'#PBS -S /bin/bash\n'
-            u'#PBS -l procs=43\n'
-            u'# memory per processor\n'
-            u'#PBS -l pmem=2000mb\n'
-            u'#PBS -l walltime=1:02:03\n'
-            u'# email when the job [b]egins and [e]nds, or is [a]borted\n'
-            u'#PBS -m bea\n'
-            u'#PBS -M me@example.com\n'
-            u'# stdout and stderr file paths/names\n'
-            u'#PBS -o results_dir/stdout\n'
-            u'#PBS -e results_dir/stderr\n'
-            u'\n'
-            u'\n'
-            u'RUN_ID="foo"\n'
-            u'RUN_DESC="SalishSea.yaml"\n'
-            u'WORK_DIR="."\n'
-            u'RESULTS_DIR="results_dir"\n'
-            u'COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"\n'
-        )
-        if not no_deflate:
-            expected += (
-                u'DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"\n'
-            )
-        expected += (
-            u'GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"\n'
-            u'\n'
-            u'module load python\n'
-            u'module load intel/15.0.2\n'
-            u'\n'
-            u'mkdir -p ${RESULTS_DIR}\n'
-            u'cd ${WORK_DIR}\n'
-            u'echo "working dir: $(pwd)"\n'
-            u'\n'
-            u'echo "Starting run at $(date)"\n'
-            u'mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n'
-            u'MPIRUN_EXIT_CODE=$?\n'
-            u'echo "Ended run at $(date)"\n'
-            u'\n'
-            u'echo "Results combining started at $(date)"\n'
-            u'${COMBINE} ${RUN_DESC} --debug\n'
-            u'echo "Results combining ended at $(date)"\n'
-        )
-        if not no_deflate:
-            expected += (
-                u'\n'
-                u'echo "Results deflation started at $(date)"\n'
-                u'${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
-                u'--jobs 4 --debug\n'
-                u'echo "Results deflation ended at $(date)"\n'
-            )
-        expected += (
-            u'\n'
-            u'echo "Results gathering started at $(date)"\n'
-            u'${GATHER} ${RESULTS_DIR} --debug\n'
-            u'echo "Results gathering ended at $(date)"\n'
-            u'\n'
-            u'chmod go+rx ${RESULTS_DIR}\n'
-            u'chmod g+rw ${RESULTS_DIR}/*\n'
-            u'chmod o+r ${RESULTS_DIR}/*\n'
-            u'\n'
-            u'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            u'rmdir $(pwd)\n'
-            u'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            u'exit ${MPIRUN_EXIT_CODE}\n'
-        )
-        assert script == expected
-
     @pytest.mark.parametrize(
         'system, account, no_deflate', [
             ('cedar', 'rrg-allen', True),
@@ -785,9 +691,59 @@ class TestSbatchDirectives:
         assert not m_logger.info.called
 
 
-class TestPbsCommon:
-    """Unit tests for `salishsea run` _pbs_common() function.
+class TestPbsDirectives:
+    """Unit tests for `salishsea run` _pbs_directives() function.
     """
+
+    def test_pbs_directives_run(self):
+        desc_file = StringIO(u'run_id: foo\n' u'walltime: 01:02:03\n')
+        run_desc = yaml.load(desc_file)
+        pbs_directives = salishsea_cmd.run._pbs_directives(
+            run_desc, 42, 'me@example.com', Path('foo')
+        )
+        expected = (
+            u'#PBS -N foo\n'
+            u'#PBS -S /bin/bash\n'
+            u'#PBS -l procs=42\n'
+            u'# memory per processor\n'
+            u'#PBS -l pmem=2000mb\n'
+            u'#PBS -l walltime=1:02:03\n'
+            u'# email when the job [b]egins and [e]nds, or is [a]borted\n'
+            u'#PBS -m bea\n'
+            u'#PBS -M me@example.com\n'
+            u'# stdout and stderr file paths/names\n'
+            u'#PBS -o foo/stdout\n'
+            u'#PBS -e foo/stderr\n'
+        )
+        assert pbs_directives == expected
+
+    def test_pbs_directives_deflate(self):
+        desc_file = StringIO(u'run_id: foo\n' u'walltime: 01:02:03\n')
+        run_desc = yaml.load(desc_file)
+        pbs_directives = salishsea_cmd.run._pbs_directives(
+            run_desc,
+            1,
+            'me@example.com',
+            Path('foo'),
+            pmem='2500mb',
+            deflate=True,
+            result_type='ptrc'
+        )
+        expected = (
+            u'#PBS -N ptrc_foo_deflate\n'
+            u'#PBS -S /bin/bash\n'
+            u'#PBS -l procs=1\n'
+            u'# memory per processor\n'
+            u'#PBS -l pmem=2500mb\n'
+            u'#PBS -l walltime=1:02:03\n'
+            u'# email when the job [b]egins and [e]nds, or is [a]borted\n'
+            u'#PBS -m bea\n'
+            u'#PBS -M me@example.com\n'
+            u'# stdout and stderr file paths/names\n'
+            u'#PBS -o foo/stdout_deflate_ptrc\n'
+            u'#PBS -e foo/stderr_deflate_ptrc\n'
+        )
+        assert pbs_directives == expected
 
     @pytest.mark.parametrize(
         'walltime, expected_walltime', [
@@ -805,8 +761,8 @@ class TestPbsCommon:
             u'walltime: {walltime}\n'.format(walltime=walltime)
         )
         run_desc = yaml.load(desc_file)
-        pbs_directives = salishsea_cmd.run._pbs_common(
-            run_desc, 42, 'me@example.com', 'foo/'
+        pbs_directives = salishsea_cmd.run._pbs_directives(
+            run_desc, 42, 'me@example.com', Path('')
         )
         expected = 'walltime={expected}'.format(expected=expected_walltime)
         assert expected in pbs_directives
@@ -818,8 +774,6 @@ class TestDefinitions:
 
     @pytest.mark.parametrize(
         'system, home, no_deflate', [
-            ('bugaboo', '${PBS_O_HOME}', True),
-            ('bugaboo', '${PBS_O_HOME}', False),
             ('cedar', '${HOME}', True),
             ('cedar', '${HOME}', False),
             ('graham', '${HOME}', True),
@@ -861,11 +815,6 @@ class TestModules:
         modules = salishsea_cmd.run._modules('salish')
         assert modules == u''
 
-    def test_bugaboo(self):
-        modules = salishsea_cmd.run._modules('bugaboo')
-        expected = (u'module load python\n' u'module load intel/15.0.2\n')
-        assert modules == expected
-
     @pytest.mark.parametrize('system', [
         'cedar',
         'graham',
@@ -898,7 +847,6 @@ class TestExecute:
 
     @pytest.mark.parametrize(
         'system', [
-            'bugaboo',
             'cedar',
             'graham',
             'orcinus',
