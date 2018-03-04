@@ -345,9 +345,9 @@ def _build_batch_script(
         email = u'{user}@eoas.ubc.ca'.format(user=os.getenv('USER'))
     if system in {'cedar', 'graham'}:
         script = u'\n'.join((
-            script, u'{slurm}\n'.format(
-                slurm=_slurm(
-                    run_desc, nemo_processors + xios_processors, email,
+            script, u'{sbatch_directives}\n'.format(
+                sbatch_directives=_sbatch_directives(
+                    run_desc, system, nemo_processors + xios_processors, email,
                     results_dir
                 )
             )
@@ -384,8 +384,9 @@ def _build_batch_script(
     return script
 
 
-def _slurm(
+def _sbatch_directives(
     run_desc,
+    system,
     n_processors,
     email,
     results_dir,
@@ -401,6 +402,8 @@ def _slurm(
     :command:`sbatch` command.
 
     :param dict run_desc: Run description dictionary.
+
+    :param str system: Name of the HPC system on which to execute the run.
 
     :param int n_processors: Number of processors that the run will be
                              executed on.
@@ -465,7 +468,10 @@ def _slurm(
             u'#SBATCH --account={account}\n'.format(account=account)
         )
     except KeyError:
-        sbatch_directives += u'#SBATCH --account=def-allen\n'
+        account = 'rrg-allen' if system == 'cedar' else 'def-allen'
+        sbatch_directives += (
+            u'#SBATCH --account={account}\n'.format(account=account)
+        )
         log.info(
             'No account found in run description YAML file, '
             'so assuming def-allen. If sbatch complains you can specify a '

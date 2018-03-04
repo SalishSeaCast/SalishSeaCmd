@@ -14,7 +14,11 @@
 # limitations under the License.
 """SalishSeaCmd run sub-command plug-in unit tests
 """
-from io import StringIO
+try:
+    from io import StringIO
+except ImportError:
+    # Python 2.7
+    from cStringIO import StringIO
 try:
     from pathlib import Path
 except ImportError:
@@ -451,14 +455,14 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize(
-        'system, no_deflate', [
-            ('cedar', True),
-            ('cedar', False),
-            ('graham', True),
-            ('graham', False),
+        'system, account, no_deflate', [
+            ('cedar', 'rrg-allen', True),
+            ('cedar', 'rrg-allen', False),
+            ('graham', 'def-allen', True),
+            ('graham', 'def-allen', False),
         ]
     )
-    def test_cedar_graham(self, system, no_deflate):
+    def test_cedar_graham(self, system, account, no_deflate):
         desc_file = StringIO(
             u'run_id: foo\n'
             u'walltime: 01:02:03\n'
@@ -487,7 +491,7 @@ class TestBuildBatchScript:
             u'#SBATCH --time=1:02:03\n'
             u'#SBATCH --mail-user=me@example.com\n'
             u'#SBATCH --mail-type=ALL\n'
-            u'#SBATCH --account=def-allen\n'
+            u'#SBATCH --account={account}\n'
             u'# stdout and stderr file paths/names\n'
             u'#SBATCH --output=results_dir/stdout\n'
             u'#SBATCH --error=results_dir/stderr\n'
@@ -497,10 +501,10 @@ class TestBuildBatchScript:
             u'RUN_DESC="SalishSea.yaml"\n'
             u'WORK_DIR="."\n'
             u'RESULTS_DIR="results_dir"\n'
-            u'COMBINE="${HOME}/.local/bin/salishsea combine"\n'
-        )
+            u'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
+        ).format(account=account)
         if not no_deflate:
-            expected += (u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n')
+            expected += u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
         expected += (
             u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
             u'\n'
@@ -737,16 +741,19 @@ class TestBuildBatchScript:
         assert script == expected
 
 
+@pytest.mark.parametrize(
+    'system, account', [('cedar', 'rrg-allen'), ('graham', 'def-allen')]
+)
 @patch('salishsea_cmd.run.log', autospec=True)
-class TestSlurm:
-    """Unit tests for _slurm() function.
+class TestSbatchDirectives:
+    """Unit tests for _sbatch_directives() function.
     """
 
-    def test_slurm(self, m_logger):
+    def test_sbatch_directives(self, m_logger, system, account):
         desc_file = StringIO(u'run_id: foo\n' u'walltime: 01:02:03\n')
         run_desc = yaml.load(desc_file)
-        slurm_directives = salishsea_cmd.run._slurm(
-            run_desc, 42, 'me@example.com', Path('foo')
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc, system, 42, 'me@example.com', Path('foo')
         )
         expected = (
             u'#SBATCH --job-name=foo\n'
@@ -756,23 +763,23 @@ class TestSlurm:
             u'#SBATCH --time=1:02:03\n'
             u'#SBATCH --mail-user=me@example.com\n'
             u'#SBATCH --mail-type=ALL\n'
-            u'#SBATCH --account=def-allen\n'
+            u'#SBATCH --account={account}\n'
             u'# stdout and stderr file paths/names\n'
             u'#SBATCH --output=foo/stdout\n'
             u'#SBATCH --error=foo/stderr\n'
-        )
+        ).format(account=account)
         assert slurm_directives == expected
         assert m_logger.info.called
 
-    def test_account_directive(self, m_logger):
+    def test_account_directive_from_yaml(self, m_logger, system, account):
         desc_file = StringIO(
             u'run_id: foo\n'
             u'walltime: 01:02:03\n'
             u'account: def-sverdrup\n'
         )
         run_desc = yaml.load(desc_file)
-        slurm_directives = salishsea_cmd.run._slurm(
-            run_desc, 42, 'me@example.com', Path('foo')
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc, system, 42, 'me@example.com', Path('foo')
         )
         assert u'#SBATCH --account=def-sverdrup\n' in slurm_directives
         assert not m_logger.info.called
