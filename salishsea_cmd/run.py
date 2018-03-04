@@ -354,8 +354,8 @@ def _build_batch_script(
         ))
     else:
         script = u'\n'.join((
-            script, u'{pbs_common}\n'.format(
-                pbs_common=_pbs_common(
+            script, u'{pbs_directives}\n'.format(
+                pbs_directives=_pbs_directives(
                     run_desc, nemo_processors + xios_processors, email,
                     fspath(results_dir)
                 )
@@ -424,7 +424,7 @@ def _sbatch_directives(
     :param str result_type: Run result type ('grid', 'ptrc', or 'dia') for
                             deflation job.
 
-    :returns: PBS directives for run script.
+    :returns: SBATCH directives for run script.
     :rtype: Unicode str
     """
     run_id = get_run_desc_value(run_desc, ('run_id',))
@@ -472,11 +472,11 @@ def _sbatch_directives(
         sbatch_directives += (
             u'#SBATCH --account={account}\n'.format(account=account)
         )
-        log.info(
+        log.info((
             'No account found in run description YAML file, '
-            'so assuming def-allen. If sbatch complains you can specify a '
+            'so assuming {account}. If sbatch complains you can specify a '
             'different account with a YAML line like account: def-allen'
-        )
+        ).format(account=account))
     stdout = (
         'stdout_deflate_{result_type}'.format(result_type=result_type)
         if deflate else 'stdout'
@@ -495,7 +495,7 @@ def _sbatch_directives(
     return sbatch_directives
 
 
-def _pbs_common(
+def _pbs_directives(
     run_desc,
     n_processors,
     email,
@@ -520,7 +520,8 @@ def _pbs_common(
     :param str email: Email address to send job begin, end & abort
                       notifications to.
 
-    :param str results_dir: Directory to store results into.
+    :param results_dir: Directory to store results into.
+    :type results_dir: :py:class:`pathlib.Path`
 
     :param str pmem: Memory per processor.
 
@@ -611,9 +612,7 @@ def _td2hms(timedelta):
 def _definitions(
     run_desc, run_desc_file, run_dir, results_dir, system, no_deflate
 ):
-    home = (
-        u'${PBS_O_HOME}' if system in {'bugaboo', 'orcinus'} else u'${HOME}'
-    )
+    home = (u'${PBS_O_HOME}' if system == 'orcinus' else u'${HOME}')
     salishsea_cmd = os.path.join(home, '.local/bin/salishsea')
     defns = (
         u'RUN_ID="{run_id}"\n'
@@ -640,8 +639,6 @@ def _definitions(
 
 def _modules(system):
     modules = {
-        'bugaboo': (u'module load python\n'
-                    u'module load intel/15.0.2\n'),
         'cedar': (
             u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
@@ -752,8 +749,8 @@ def _build_deflate_script(run_desc, pattern, result_type, results_dir, system):
         email = u'{user}@eos.ubc.ca'.format(user=os.getenv('USER'))
     pmem = '2500mb' if result_type == 'ptrc' else '2000mb'
     script = u'\n'.join((
-        script, u'{pbs_common}\n'.format(
-            pbs_common=_pbs_common(
+        script, u'{pbs_directives}\n'.format(
+            pbs_directives=_pbs_directives(
                 run_desc,
                 1,
                 email,
