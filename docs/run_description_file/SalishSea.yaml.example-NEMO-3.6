@@ -10,7 +10,7 @@ config_name: SalishSea
 # and to set the number of processors and nodes in the PBS script
 MPI decomposition: 8x18
 
-# For runs on systems that use qsub/PBS/TORQUE
+# For runs on systems that use qsub/PBS/TORQUE or sbatch/SLURM
 #
 # The run_id value appears in the list of jobs display by the showq command
 run_id: example
@@ -22,6 +22,14 @@ walltime: 10:00:00
 # Email address to send job begin, end, and abort notifications to
 # If missing, email address is set to ${USER}@eos.ubc.ca
 email: you@example.com
+
+# For runs on systems that use sbatch/SLURM
+#
+# **Optional**
+# Account name to charge resources used by the job to
+# If missing, account defaults to rrg-allen on cedar and def-allen on
+# other systems
+account: def-allen
 
 paths:
   # Absolute path to NEMO-3.6 CONFIG/ directory.
