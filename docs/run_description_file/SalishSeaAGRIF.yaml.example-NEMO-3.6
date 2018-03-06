@@ -1,6 +1,6 @@
 # salishsea command processor run description example for NEMO-3.6
 
-config_name: SalishSea
+config_name: SalishSeaAGRIF
 
 # How is the domain to be distributed over the processors in the
 # i and j grid dimensions?
@@ -8,11 +8,19 @@ config_name: SalishSea
 # and to set the number of processors and nodes in the PBS script
 MPI decomposition: 8x18
 
-# For runs on systems that use qsub/PBS/TORQUE
+# For runs on systems that use qsub/PBS/TORQUE or sbatch/SLURM
 run_id: example
 walltime: 10:00:00
 # If missing, email address is set to ${USER}@eoas.ubc.ca
 email: dlatornell@example.com
+
+# For runs on systems that use sbatch/SLURM
+#
+# **Optional**
+# Account name to charge resources used by the job to
+# If missing, account defaults to rrg-allen on cedar and def-allen on
+# other systems
+account: def-allen
 
 
 # Only required if your run uses AGRIF
