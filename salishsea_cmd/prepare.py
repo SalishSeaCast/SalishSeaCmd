@@ -1064,11 +1064,6 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
         # sub-grid coordinates and bathymetry files
         'grid':
         functools.partial(_make_grid_links, run_desc, run_dir),
-        # sub-grid restart files
-        'restart':
-        functools.partial(
-            _make_restart_links, run_desc, run_dir, nocheck_init
-        ),
         # sub-grid namelist files
         'namelists':
         functools.partial(_make_namelists, run_set_dir, run_desc, run_dir),
@@ -1082,6 +1077,18 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
             run_dir,
         ),
     }
+    try:
+        # sub-grid restart files
+        link_names = get_run_desc_value(
+            run_desc, ('restart',), run_dir=run_dir, fatal=False
+        )
+        run_desc_sections['restart'] = functools.partial(
+            _make_restart_links, run_desc, run_dir, nocheck_init
+        )
+    except KeyError:
+        # The parent grid is not being initialized from a restart file,
+        # so the sub-grids can't be either
+        pass
     for run_desc_section, func in run_desc_sections.items():
         sub_grids_count = 0
         section = get_run_desc_value(run_desc, (run_desc_section,))
