@@ -1582,6 +1582,46 @@ class TestAddAgrifFiles:
                 )
 
     @patch('salishsea_cmd.prepare.shutil.copy2', autospec=True)
+    def test_no_restart(
+        self, m_copy2, m_mk_nl_36, m_cp_run_set_files, m_mk_restart_links,
+        m_mk_grid_links, m_logger, tmpdir
+    ):
+        p_fixed_grids = tmpdir.ensure('AGRIF_FixedGrids.in')
+        run_desc = {
+            'AGRIF': {
+                'fixed grids': str(p_fixed_grids)
+            },
+            'grid': {
+                'coordinates': 'coords.nc',
+                'bathymetry': 'bathy.nc',
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+            'namelists': {
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+            'output': {
+                'AGRIF_1': {},
+                'AGRIF_2': {},
+            },
+        }
+        p_open = patch('salishsea_cmd.prepare.Path.open')
+        with p_open as m_open:
+            m_open().__enter__.return_value = (
+                '2\n40 70 2 30 3 3 3 43 \n110 130 50 80 3 3 3 42\n'.splitlines(
+                )
+            )
+            salishsea_cmd.prepare._add_agrif_files(
+                run_desc,
+                Path('foo.yaml'),
+                Path('run_set_dir'),
+                Path('run_dir'),
+                nocheck_init=False
+            )
+        assert m_mk_restart_links.call_args_list == []
+
+    @patch('salishsea_cmd.prepare.shutil.copy2', autospec=True)
     def test_make_namelists_nemo36(
         self, m_copy2, m_mk_nl_36, m_cp_run_set_files, m_mk_restart_links,
         m_mk_grid_links, m_logger, tmpdir
