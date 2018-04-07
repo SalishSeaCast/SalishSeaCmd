@@ -48,6 +48,7 @@ todo_include_todos = True
 
 autodoc_mock_imports = [
     'arrow',
+    'cliff',
     'cliff.command',
     'cliff.commandmanager',
     'hglib',
