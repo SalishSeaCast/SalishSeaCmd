@@ -20,6 +20,17 @@
 :kbd:`SalishSeaCmd` Changes That Break Backward Compatibility
 *************************************************************
 
+Version 3.4
+===========
+
+The following changes that were introduced in version 3.4 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
+
+* Replaced the :kbd:`salishsea run --no-deflate` command-line option with :kbd:`salishsea run --deflate` so that the default run options assume that XIOS-2 on-the-fly deflation is being used.
+* Dropped :kbd:`bugaboo` from the list of recognized systems.
+* Default to using account :kbd:`rrg-allen` when running on :kbd:`cedar`.
+* Dropped support for NEMO-3.4.
+
+
 Version 3.3
 ===========
 
