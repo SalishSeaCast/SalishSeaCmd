@@ -90,7 +90,7 @@ class TestTakeAction:
             results_dir='results dir',
             max_deflate_jobs=4,
             nocheck_init=False,
-            no_deflate=False,
+            deflate=False,
             no_submit=False,
             separate_deflate=False,
             waitjob=0,
@@ -274,7 +274,7 @@ class TestRun:
         assert not m_sco.called
         assert qsb_msg is None
 
-    def test_run_no_deflate(
+    def test_run_deflate(
         self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir('run_dir')
@@ -288,7 +288,7 @@ class TestRun:
         }
         with patch('salishsea_cmd.run.os.getenv', return_value='orcinus'):
             qsb_msg = salishsea_cmd.run.run(
-                Path('SalishSea.yaml'), str(p_results_dir), no_deflate=True
+                Path('SalishSea.yaml'), str(p_results_dir), deflate=True
             )
         m_prepare.assert_called_once_with(Path('SalishSea.yaml'), False)
         m_lrd.assert_called_once_with(Path('SalishSea.yaml'))
@@ -361,14 +361,14 @@ class TestBuildBatchScript:
     """
 
     @pytest.mark.parametrize(
-        'system, account, no_deflate', [
+        'system, account, deflate', [
             ('cedar', 'rrg-allen', True),
             ('cedar', 'rrg-allen', False),
             ('graham', 'def-allen', True),
             ('graham', 'def-allen', False),
         ]
     )
-    def test_cedar_graham(self, system, account, no_deflate):
+    def test_cedar_graham(self, system, account, deflate):
         desc_file = StringIO(
             u'run_id: foo\n'
             u'walltime: 01:02:03\n'
@@ -384,7 +384,7 @@ class TestBuildBatchScript:
             results_dir=Path('results_dir'),
             run_dir=Path(),
             system=system,
-            no_deflate=no_deflate,
+            deflate=deflate,
             separate_deflate=False
         )
         expected = (
@@ -409,7 +409,7 @@ class TestBuildBatchScript:
             u'RESULTS_DIR="results_dir"\n'
             u'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
         ).format(account=account)
-        if not no_deflate:
+        if deflate:
             expected += u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
         expected += (
             u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
@@ -431,7 +431,7 @@ class TestBuildBatchScript:
             u'${COMBINE} ${RUN_DESC} --debug\n'
             u'echo "Results combining ended at $(date)"\n'
         )
-        if not no_deflate:
+        if deflate:
             expected += (
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
@@ -457,11 +457,11 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
-    @pytest.mark.parametrize('no_deflate', [
+    @pytest.mark.parametrize('deflate', [
         True,
         False,
     ])
-    def test_orcinus(self, no_deflate):
+    def test_orcinus(self, deflate):
         desc_file = StringIO(
             u'run_id: foo\n'
             u'walltime: 01:02:03\n'
@@ -477,7 +477,7 @@ class TestBuildBatchScript:
             results_dir=Path('results_dir'),
             run_dir=Path(),
             system='orcinus',
-            no_deflate=no_deflate,
+            deflate=deflate,
             separate_deflate=False
         )
         expected = (
@@ -504,7 +504,7 @@ class TestBuildBatchScript:
             u'RESULTS_DIR="results_dir"\n'
             u'COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"\n'
         )
-        if not no_deflate:
+        if deflate:
             expected += (
                 u'DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"\n'
             )
@@ -531,7 +531,7 @@ class TestBuildBatchScript:
             u'${COMBINE} ${RUN_DESC} --debug\n'
             u'echo "Results combining ended at $(date)"\n'
         )
-        if not no_deflate:
+        if deflate:
             expected += (
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
@@ -556,11 +556,11 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
-    @pytest.mark.parametrize('no_deflate', [
+    @pytest.mark.parametrize('deflate', [
         True,
         False,
     ])
-    def test_salish(self, no_deflate):
+    def test_salish(self, deflate):
         desc_file = StringIO(
             u'run_id: foo\n'
             u'walltime: 01:02:03\n'
@@ -576,7 +576,7 @@ class TestBuildBatchScript:
             results_dir=Path('results_dir'),
             run_dir=Path(),
             system='salish',
-            no_deflate=no_deflate,
+            deflate=deflate,
             separate_deflate=False
         )
         expected = (
@@ -602,7 +602,7 @@ class TestBuildBatchScript:
             u'RESULTS_DIR="results_dir"\n'
             u'COMBINE="${HOME}/.local/bin/salishsea combine"\n'
         )
-        if not no_deflate:
+        if deflate:
             expected += u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
         expected += (
             u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
@@ -621,7 +621,7 @@ class TestBuildBatchScript:
             u'${COMBINE} ${RUN_DESC} --debug\n'
             u'echo "Results combining ended at $(date)"\n'
         )
-        if not no_deflate:
+        if deflate:
             expected += (
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
@@ -773,7 +773,7 @@ class TestDefinitions:
     """
 
     @pytest.mark.parametrize(
-        'system, home, no_deflate', [
+        'system, home, deflate', [
             ('cedar', '${HOME}', True),
             ('cedar', '${HOME}', False),
             ('graham', '${HOME}', True),
@@ -784,12 +784,12 @@ class TestDefinitions:
             ('salish', '${HOME}', False),
         ]
     )
-    def test_definitions(self, system, home, no_deflate):
+    def test_definitions(self, system, home, deflate):
         desc_file = StringIO(u'run_id: foo\n')
         run_desc = yaml.load(desc_file)
         defns = salishsea_cmd.run._definitions(
             run_desc, 'SalishSea.yaml', Path('run_dir'), Path('results_dir'),
-            system, no_deflate
+            system, deflate
         )
         expected = (
             u'RUN_ID="foo"\n'
@@ -798,7 +798,7 @@ class TestDefinitions:
             u'RESULTS_DIR="results_dir"\n'
             u'COMBINE="{home}/.local/bin/salishsea combine"\n'
         ).format(home=home)
-        if not no_deflate:
+        if deflate:
             expected += (u'DEFLATE="{home}/.local/bin/salishsea deflate"\n'
                          ).format(home=home)
         expected += (
@@ -857,7 +857,7 @@ class TestExecute:
         script = salishsea_cmd.run._execute(
             nemo_processors=42,
             xios_processors=1,
-            no_deflate=False,
+            deflate=True,
             max_deflate_jobs=4,
             separate_deflate=False,
             system=system
@@ -897,17 +897,17 @@ class TestExecute:
             assert line.strip() == expected[i].strip()
 
     @pytest.mark.parametrize(
-        'no_deflate, separate_deflate', [
-            (True, True),
-            (True, False),
+        'deflate, separate_deflate', [
             (False, True),
+            (False, False),
+            (True, True),
         ]
     )
-    def test_execute_without_deflate(self, no_deflate, separate_deflate):
+    def test_execute_without_deflate(self, deflate, separate_deflate):
         script = salishsea_cmd.run._execute(
             nemo_processors=42,
             xios_processors=1,
-            no_deflate=no_deflate,
+            deflate=deflate,
             max_deflate_jobs=4,
             separate_deflate=separate_deflate,
             system='cedar'
@@ -937,7 +937,7 @@ class TestExecute:
         script = salishsea_cmd.run._execute(
             nemo_processors=42,
             xios_processors=1,
-            no_deflate=True,
+            deflate=True,
             max_deflate_jobs=4,
             separate_deflate=False,
             system='salish'
@@ -954,6 +954,10 @@ class TestExecute:
         echo "Results combining started at $(date)"
         ${COMBINE} ${RUN_DESC} --debug
         echo "Results combining ended at $(date)"
+
+        echo "Results deflation started at $(date)"
+        ${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc --jobs 4 --debug
+        echo "Results deflation ended at $(date)"
         
         echo "Results gathering started at $(date)"
         ${GATHER} ${RESULTS_DIR} --debug
