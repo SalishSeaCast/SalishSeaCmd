@@ -53,10 +53,9 @@ For example:
 
 ::
 
-    usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS] [--nemo3.4]
-                         [--nocheck-initial-conditions] [--no-deflate]
-                         [--no-submit] [--separate-deflate] [--waitjob WAITJOB]
-                         [-q]
+    usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS]
+                         [--nocheck-initial-conditions] [--deflate] [--no-submit]
+                         [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
@@ -70,30 +69,36 @@ For example:
     optional arguments:
       -h, --help            show this help message and exit
       --max-deflate-jobs MAX_DEFLATE_JOBS
-                            Maximum number of concurrent sub-processes to use for
-                            netCDF deflating. Defaults to 4.
-      --nemo3.4             Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
+                            Maximum number of concurrent sub-processes to
+                            use for netCDF deflating. Defaults to 4.
       --nocheck-initial-conditions
                             Suppress checking of the initial conditions link.
                             Useful if you are submitting a job to wait on a
                             previous job
-      --no-deflate          Do not include "salishsea deflate" command in the bash
-                            script. Use this option if you are using on-the-fly
-                            deflation in XIOS-2; i.e. you are using 1 XIOS-2
-                            process and have the compression_level="4" attribute
-                            set in all of the file_group definitions in your
-                            file_def.xml file.
+      --deflate             Include "salishsea deflate" command in the bash
+                            script.
+                            Use this option, or the --separate-deflate option
+                            if you are *not* using on-the-fly deflation in XIOS-2;
+                            i.e. you are using more than 1 XIOS-2 process and/or
+                            do not have the compression_level="4" attribute set in
+                            all of
+                            the file_group definitions in your file_def.xml file.
       --no-submit           Prepare the temporary run directory, and the bash
-                            script to execute the NEMO run, but don't submit the
-                            run to the queue. This is useful during development
-                            runs when you want to hack on the bash script and/or
-                            use the same temporary run directory more than once.
+                            script to execute
+                            the NEMO run, but don't submit the run to the queue.
+                            This is useful during development runs when you want
+                            to hack on the
+                            bash script and/or use the same temporary run
+                            directory more than
+                            once.
       --separate-deflate    Produce separate bash scripts to deflate the run
-                            results and qsub them to run as serial jobs after the
-                            NEMO run finishes via the `qsub -W depend=afterok`
-                            feature.
-      --waitjob WAITJOB     Use -W waitjob in call to qsub, to make current job
-                            wait for on waitjob. WAITJOB is the queue job number.
+                            results and submit
+                            them to run as serial jobs after the NEMO run finishes
+                            via the the queue manager's job chaining feature.
+      --waitjob WAITJOB     Make this job wait for to start until the successful
+                            completion of
+                            WAITJOB. WAITJOB is the queue job number of the job to
+                            wait for.
       -q, --quiet           Don't show the run directory path or job submission
                             message.
 
@@ -116,10 +121,9 @@ The results are gathered in the specified results directory.
 
 ::
 
-    usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS] [--nemo3.4]
-                         [--nocheck-initial-conditions] [--no-deflate]
-                         [--no-submit] [--separate-deflate] [--waitjob WAITJOB]
-                         [-q]
+    usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS]
+                         [--nocheck-initial-conditions] [--deflate] [--no-submit]
+                         [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
@@ -133,30 +137,36 @@ The results are gathered in the specified results directory.
     optional arguments:
       -h, --help            show this help message and exit
       --max-deflate-jobs MAX_DEFLATE_JOBS
-                            Maximum number of concurrent sub-processes to use for
-                            netCDF deflating. Defaults to 4.
-      --nemo3.4             Do a NEMO-3.4 run; the default is to do a NEMO-3.6 run
+                            Maximum number of concurrent sub-processes to
+                            use for netCDF deflating. Defaults to 4.
       --nocheck-initial-conditions
                             Suppress checking of the initial conditions link.
                             Useful if you are submitting a job to wait on a
                             previous job
-      --no-deflate          Do not include "salishsea deflate" command in the bash
-                            script. Use this option if you are using on-the-fly
-                            deflation in XIOS-2; i.e. you are using 1 XIOS-2
-                            process and have the compression_level="4" attribute
-                            set in all of the file_group definitions in your
-                            file_def.xml file.
+      --deflate             Include "salishsea deflate" command in the bash
+                            script.
+                            Use this option, or the --separate-deflate option
+                            if you are *not* using on-the-fly deflation in XIOS-2;
+                            i.e. you are using more than 1 XIOS-2 process and/or
+                            do not have the compression_level="4" attribute set in
+                            all of
+                            the file_group definitions in your file_def.xml file.
       --no-submit           Prepare the temporary run directory, and the bash
-                            script to execute the NEMO run, but don't submit the
-                            run to the queue. This is useful during development
-                            runs when you want to hack on the bash script and/or
-                            use the same temporary run directory more than once.
+                            script to execute
+                            the NEMO run, but don't submit the run to the queue.
+                            This is useful during development runs when you want
+                            to hack on the
+                            bash script and/or use the same temporary run
+                            directory more than
+                            once.
       --separate-deflate    Produce separate bash scripts to deflate the run
-                            results and qsub them to run as serial jobs after the
-                            NEMO run finishes via the `qsub -W depend=afterok`
-                            feature.
-      --waitjob WAITJOB     Use -W waitjob in call to qsub, to make current job
-                            wait for on waitjob. WAITJOB is the queue job number.
+                            results and submit
+                            them to run as serial jobs after the NEMO run finishes
+                            via the the queue manager's job chaining feature.
+      --waitjob WAITJOB     Make this job wait for to start until the successful
+                            completion of
+                            WAITJOB. WAITJOB is the queue job number of the job to
+                            wait for.
       -q, --quiet           Don't show the run directory path or job submission
                             message.
 
@@ -173,7 +183,6 @@ The :command:`run` sub-command does the following:
 
    * runs NEMO
    * executes the :ref:`salishsea-combine` to combine the per-processor restart and/or results files
-   * executes the :ref:`salishsea-deflate` to deflate the variables in the large netCDF results files using the Lempel-Ziv compression algorithm to reduce the size of the file on disk
    * executes the :ref:`salishsea-gather` to collect the run description and results files into the results directory
 
 #. Submit the job script to the queue manager via the appropriate command
@@ -195,9 +204,10 @@ Example:
 If the :command:`run` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
 
-If you are using on-the-fly deflation in :program:`XIOS-2`;
-i.e. you are using 1 :program:`XIOS-2` process and have the :kbd:`compression_level="4"` attribute set in all of the :kbd:`file_group` definitions in your :file:`file_def.xml` file;
-you should use the :kbd:`--no-deflate` option to exclude :ref:`nemo-deflate` from the :file:`SalishSeaNEMO.sh` job script.
+If you are *not* using on-the-fly deflation in :program:`XIOS-2`;
+i.e. you are using more than 1 :program:`XIOS-2` process and/or do not have the :kbd:`compression_level="4"` attribute set in all of the :kbd:`file_group` definitions in your :file:`file_def.xml` file;
+you should use the :kbd:`--deflate` option to include :ref:`nemo-deflate` in the :file:`SalishSeaNEMO.sh` job script,
+or :kbd:`--separate-deflate` to produce separate bash scripts to deflate the run results and submit them to run as serial jobs after the NEMO run finishes via the queue manager's job chaining feature.
 
 
 :kbd:`--separate-deflate` Option
@@ -271,11 +281,10 @@ If the :command:`prepare` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
 
 
-Run Directory Contents for NEMO-3.6
------------------------------------
+Run Directory Contents
+----------------------
 
-For NEMO-3.6 runs,
-(initiated by :command:`salishsea run ...` or :command:`salishsea prepare ...` commands)
+For runs initiated by :command:`salishsea run ...` or :command:`salishsea prepare ...` commands
 the run directory contains:
 
 * The run description file provided on the command line.
@@ -336,44 +345,6 @@ and :kbd:`XIOS` keys in the :kbd:`paths` section of the run description file,
 respectively.
 Those file provide a record of the last committed changesets in each of those directories,
 which is important reproducibility information for the run.
-
-
-Run Directory Contents for NEMO-3.4
------------------------------------
-
-For NEMO-3.4 runs,
-(initiated by :command:`salishsea run --nemo3.4 ...` or :command:`salishsea prepare --nemo3.4 ...` commands)
-the run directory contains a :file:`namelist`
-(the file name expected by NEMO)
-file that is constructed by concatenating the namelist segments listed in the run description file
-(see :ref:`RunDescriptionFileStructure`).
-That constructed namelist is concluded with empty instances of all of the namelists that NEMO requires so that default values will be used for any namelist variables not included in the namelist segments listed in the run description file.
-
-The run directory also contains symbolic links to:
-
-* The run description file provided on the command line
-
-* The :file:`namelist` file constructed from the namelists provided in the run description file
-
-* The IOM server definitions files provided on the command line,
-  aliased to :file:`iodefs.xml`,
-  the file name expected by NEMO
-
-* The :file:`xmlio_server.def` file found in the run-set directory where the run description file resides
-
-* The :file:`nemo.exe` and :file:`server.exe` executables found in the :file:`BLD/bin/` directory of the NEMO configuration given by the :kbd:`config_name` and :kbd:`NEMO-code` keys in the run description file.
-  :command:`salishsea prepare` aborts with an error message and exit code 2 if the :file:`nemo.exe` file is not found.
-  In that case the run directory is not created.
-  :command:`salishsea prepare` also check to confirm that :file:`server.exe` exists but only issues a warning if it is not found becuase that is a valid situation if you are not using :kbd:`key_iomput` in your configuration.
-
-* The coordinates and bathymetry files given in the :kbd:`grid` section of the run description file
-
-* The initial conditions,
-  open boundary conditions,
-  and rivers run-off forcing directories given in the :kbd:`forcing` section of the run description file.
-  The initial conditions may be specified from a restart file instead of a directory of netCDF files,
-  in which case the restart file is symlinked as :file:`restart.nc`,
-  the file name expected by NEMO.
 
 
 .. _salishsea-combine:

@@ -84,15 +84,16 @@ class Run(cliff.command.Command):
             previous job'''
         )
         parser.add_argument(
-            '--no-deflate',
-            dest='no_deflate',
+            '--deflate',
+            dest='deflate',
             action='store_true',
             help='''
-            Do not include "salishsea deflate" command in the bash script.
-            Use this option if you are using on-the-fly deflation in XIOS-2;
-            i.e. you are using 1 XIOS-2 process and have the 
-            compression_level="4" attribute set in all of the file_group
-            definitions in your file_def.xml file.            
+            Include "salishsea deflate" command in the bash script.
+            Use this option, or the --separate-deflate option
+            if you are *not* using on-the-fly deflation in XIOS-2;
+            i.e. you are using more than 1 XIOS-2 process and/or
+            do not have the compression_level="4" attribute set in all of 
+            the file_group definitions in your file_def.xml file.            
             '''
         )
         parser.add_argument(
@@ -112,9 +113,9 @@ class Run(cliff.command.Command):
             dest='separate_deflate',
             action='store_true',
             help='''
-            Produce separate bash scripts to deflate the run results and qsub
-            them to run as serial jobs after the NEMO run finishes via the
-            `qsub -W depend=afterok` feature.
+            Produce separate bash scripts to deflate the run results and submit
+            them to run as serial jobs after the NEMO run finishes via the 
+            queue manager's job chaining feature.
             '''
         )
         parser.add_argument(
@@ -146,7 +147,7 @@ class Run(cliff.command.Command):
         qsub_msg = run(
             parsed_args.desc_file, parsed_args.results_dir,
             parsed_args.max_deflate_jobs, parsed_args.nocheck_init,
-            parsed_args.no_deflate, parsed_args.no_submit,
+            parsed_args.deflate, parsed_args.no_submit,
             parsed_args.separate_deflate, parsed_args.waitjob,
             parsed_args.quiet
         )
@@ -159,7 +160,7 @@ def run(
     results_dir,
     max_deflate_jobs=4,
     nocheck_init=False,
-    no_deflate=False,
+    deflate=False,
     no_submit=False,
     separate_deflate=False,
     waitjob=0,
@@ -187,8 +188,8 @@ def run(
     :param boolean nocheck_init: Suppress initial condition link check
                                  the default is to check
 
-    :param boolean no_deflate: Do not include "salishsea deflate" command in
-                               the bash script.
+    :param boolean deflate: Include "salishsea deflate" command in the bash
+                            script.
 
     :param boolean no_submit: Prepare the temporary run directory,
                               and the bash script to execute the NEMO run,
@@ -231,7 +232,7 @@ def run(
     submit_cmd = 'sbatch' if system in {'cedar', 'graham'} else 'qsub'
     batch_script = _build_batch_script(
         run_desc, fspath(desc_file), nemo_processors, xios_processors,
-        max_deflate_jobs, results_dir, run_dir, system, no_deflate,
+        max_deflate_jobs, results_dir, run_dir, system, deflate,
         separate_deflate
     )
     batch_file = run_dir / 'SalishSeaNEMO.sh'
@@ -300,7 +301,7 @@ def run(
 
 def _build_batch_script(
     run_desc, desc_file, nemo_processors, xios_processors, max_deflate_jobs,
-    results_dir, run_dir, system, no_deflate, separate_deflate
+    results_dir, run_dir, system, deflate, separate_deflate
 ):
     """Build the Bash script that will execute the run.
 
@@ -328,8 +329,8 @@ def _build_batch_script(
     :param str system: Name of the system that the run will be executed on;
                        e.g. :kbd:`salish`, :kbd:`orcinus`
 
-    :param boolean no_deflate: Do not include "salishsea deflate" command in
-                               the bash script.
+    :param boolean deflate: Include "salishsea deflate" command in the bash
+                            script.
 
     :param boolean separate_deflate: Produce separate bash scripts to deflate
                                      the run results and qsub them to run as
@@ -370,11 +371,11 @@ def _build_batch_script(
         u'{fix_permissions}\n'
         u'{cleanup}'.format(
             defns=_definitions(
-                run_desc, desc_file, run_dir, results_dir, system, no_deflate
+                run_desc, desc_file, run_dir, results_dir, system, deflate
             ),
             modules=_modules(system),
             execute=_execute(
-                nemo_processors, xios_processors, no_deflate, max_deflate_jobs,
+                nemo_processors, xios_processors, deflate, max_deflate_jobs,
                 separate_deflate, system
             ),
             fix_permissions=_fix_permissions(),
@@ -610,7 +611,7 @@ def _td2hms(timedelta):
 
 
 def _definitions(
-    run_desc, run_desc_file, run_dir, results_dir, system, no_deflate
+    run_desc, run_desc_file, run_dir, results_dir, system, deflate
 ):
     home = (u'${PBS_O_HOME}' if system == 'orcinus' else u'${HOME}')
     salishsea_cmd = os.path.join(home, '.local/bin/salishsea')
@@ -627,7 +628,7 @@ def _definitions(
         results_dir=results_dir,
         salishsea_cmd=salishsea_cmd,
     )
-    if not no_deflate:
+    if deflate:
         defns += u'DEFLATE="{salishsea_cmd} deflate"\n'.format(
             salishsea_cmd=salishsea_cmd
         )
@@ -667,7 +668,7 @@ def _modules(system):
 
 
 def _execute(
-    nemo_processors, xios_processors, no_deflate, max_deflate_jobs,
+    nemo_processors, xios_processors, deflate, max_deflate_jobs,
     separate_deflate, system
 ):
     mpirun = u'/usr/bin/mpirun' if system == 'salish' else u'mpirun'
@@ -692,7 +693,7 @@ def _execute(
         u'${COMBINE} ${RUN_DESC} --debug\n'
         u'echo "Results combining ended at $(date)"\n'
     )
-    if not no_deflate and not separate_deflate:
+    if deflate and not separate_deflate:
         if system in {'cedar', 'graham'}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
