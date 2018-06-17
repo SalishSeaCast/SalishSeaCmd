@@ -112,7 +112,7 @@ def prepare(desc_file, nocheck_init):
     :rtype: :py:class:`pathlib.Path`
     """
     run_desc = lib.load_run_desc(desc_file)
-    nemo_bin_dir = _check_nemo_exec(run_desc)
+    nemo_bin_dir = nemo_cmd.prepare.check_nemo_exec(run_desc)
     xios_bin_dir = _check_xios_exec(run_desc)
     nemo_cmd.api.find_rebuild_nemo_script(run_desc)
     run_set_dir = nemo_cmd.resolved_path(desc_file).parent
@@ -126,50 +126,6 @@ def prepare(desc_file, nocheck_init):
     _record_vcs_revisions(run_desc, run_dir)
     _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)
     return run_dir
-
-
-def _check_nemo_exec(run_desc):
-    """Calculate absolute paths of NEMO executable's directory.
-
-    Confirm that the NEMO executable exists, raising a SystemExit
-    exception if it does not.
-
-    For NEMO-3.4 runs, confirm check that the IOM server executable
-    exists, issuing a warning if it does not.
-
-    :param dict run_desc: Run description dictionary.
-
-    :returns: Absolute path of NEMO executable's directory.
-    :rtype: :py:class:`pathlib.Path`
-
-    :raises: SystemExit
-    """
-    try:
-        nemo_config_dir = get_run_desc_value(
-            run_desc, ('paths', 'NEMO code config'),
-            resolve_path=True,
-            fatal=False
-        )
-    except KeyError:
-        # Alternate key spelling for backward compatibility
-        nemo_config_dir = get_run_desc_value(
-            run_desc, ('paths', 'NEMO-code-config'), resolve_path=True
-        )
-    try:
-        config_name = get_run_desc_value(
-            run_desc, ('config name',), fatal=False
-        )
-    except KeyError:
-        # Alternate key spelling for backward compatibility
-        config_name = get_run_desc_value(run_desc, ('config_name',))
-    nemo_bin_dir = nemo_config_dir / config_name / 'BLD' / 'bin'
-    nemo_exec = nemo_bin_dir / 'nemo.exe'
-    if not nemo_exec.exists():
-        logger.error(
-            '{} not found - did you forget to build it?'.format(nemo_exec)
-        )
-        raise SystemExit(2)
-    return nemo_bin_dir
 
 
 def _check_xios_exec(run_desc):
