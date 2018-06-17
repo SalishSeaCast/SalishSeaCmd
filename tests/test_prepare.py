@@ -114,52 +114,6 @@ class TestPrepare:
         assert run_dir == m_mrd()
 
 
-class TestCheckNemoExec:
-    """Unit tests for `salishsea prepare` _check_nemo_exec() function.
-    """
-
-    @pytest.mark.parametrize(
-        'config_name_key, nemo_code_config_key', [
-            ('config name', 'NEMO code config'),
-            ('config_name', 'NEMO-code-config'),
-        ]
-    )
-    def test_nemo_bin_dir_path(
-        self, config_name_key, nemo_code_config_key, tmpdir
-    ):
-        p_config = tmpdir.ensure_dir('NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
-        run_desc = {
-            config_name_key: 'SalishSea',
-            'paths': {
-                nemo_code_config_key: str(p_config)
-            },
-        }
-        p_bin_dir = p_config.ensure_dir('SalishSea', 'BLD', 'bin')
-        p_bin_dir.ensure('nemo.exe')
-        nemo_bin_dir = salishsea_cmd.prepare._check_nemo_exec(run_desc)
-        assert nemo_bin_dir == Path(str(p_bin_dir))
-
-    @pytest.mark.parametrize(
-        'config_name_key, nemo_code_config_key', [
-            ('config name', 'NEMO code config'),
-            ('config_name', 'NEMO-code-config'),
-        ]
-    )
-    @patch('salishsea_cmd.prepare.logger')
-    def test_nemo_exec_not_found(
-        self, m_logger, config_name_key, nemo_code_config_key, tmpdir
-    ):
-        p_code = tmpdir.ensure_dir('NEMO-3.6-code')
-        run_desc = {
-            config_name_key: 'SalishSea',
-            'paths': {
-                nemo_code_config_key: str(p_code)
-            },
-        }
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._check_nemo_exec(run_desc)
-
-
 @patch('salishsea_cmd.prepare.logger')
 class TestCheckXiosExec:
     """Unit tests for `salishsea prepare` _check_xios_exec() function.
