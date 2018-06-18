@@ -69,7 +69,7 @@ class TestParser:
 @patch('nemo_cmd.prepare.check_xios_exec', return_value='xios_bin_dir')
 @patch('nemo_cmd.api.find_rebuild_nemo_script')
 @patch('nemo_cmd.resolved_path')
-@patch('salishsea_cmd.prepare._make_run_dir')
+@patch('nemo_cmd.prepare.make_run_dir')
 @patch('salishsea_cmd.prepare._make_namelists')
 @patch('salishsea_cmd.prepare._copy_run_set_files')
 @patch('salishsea_cmd.prepare._make_executable_links')
@@ -112,29 +112,6 @@ class TestPrepare:
         )
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
-
-
-class TestMakeRunDir:
-    """Unit test for `salishsea prepare` _make_run_dir() function.
-    """
-
-    @patch(
-        'salishsea_cmd.prepare.arrow.now',
-        return_value=arrow.get('2017-10-01 18:23:55.555919-0700')
-    )
-    def test_make_run_dir(self, m_isoformat, tmpdir):
-        p_runs_dir = tmpdir.ensure_dir('SalishSea')
-        run_desc = {
-            'run_id': 'foo',
-            'paths': {
-                'runs directory': str(p_runs_dir)
-            },
-        }
-        run_dir = salishsea_cmd.prepare._make_run_dir(run_desc)
-        expected = (
-            Path(str(p_runs_dir)) / 'foo_2017-10-01T182355.555919-0700'
-        )
-        assert run_dir == expected
 
 
 class TestRemoveRunDir:
