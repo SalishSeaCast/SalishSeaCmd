@@ -66,7 +66,7 @@ class TestParser:
 
 @patch('salishsea_cmd.prepare.lib.load_run_desc')
 @patch('nemo_cmd.prepare.check_nemo_exec', return_value='nemo_bin_dir')
-@patch('salishsea_cmd.prepare._check_xios_exec', return_value='xios_bin_dir')
+@patch('nemo_cmd.prepare.check_xios_exec', return_value='xios_bin_dir')
 @patch('nemo_cmd.api.find_rebuild_nemo_script')
 @patch('nemo_cmd.resolved_path')
 @patch('salishsea_cmd.prepare._make_run_dir')
@@ -112,30 +112,6 @@ class TestPrepare:
         )
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
-
-
-@patch('salishsea_cmd.prepare.logger')
-class TestCheckXiosExec:
-    """Unit tests for `salishsea prepare` _check_xios_exec() function.
-    """
-
-    def test_xios_bin_dir_path(self, m_logger, tmpdir):
-        p_xios = tmpdir.ensure_dir('XIOS')
-        run_desc = {'paths': {'XIOS': str(p_xios)}}
-        p_bin_dir = p_xios.ensure_dir('bin')
-        p_bin_dir.ensure('xios_server.exe')
-        xios_bin_dir = salishsea_cmd.prepare._check_xios_exec(run_desc)
-        assert xios_bin_dir == Path(str(p_bin_dir))
-
-    def test_xios_exec_not_found(self, m_logger, tmpdir):
-        p_xios = tmpdir.ensure_dir('XIOS')
-        run_desc = {
-            'paths': {
-                'XIOS': str(p_xios)
-            },
-        }
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._check_xios_exec(run_desc)
 
 
 class TestMakeRunDir:
