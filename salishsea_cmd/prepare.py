@@ -116,7 +116,7 @@ def prepare(desc_file, nocheck_init):
     xios_bin_dir = nemo_cmd.prepare.check_xios_exec(run_desc)
     nemo_cmd.api.find_rebuild_nemo_script(run_desc)
     run_set_dir = nemo_cmd.resolved_path(desc_file).parent
-    run_dir = _make_run_dir(run_desc)
+    run_dir = nemo_cmd.prepare.make_run_dir(run_desc)
     _make_namelists(run_set_dir, run_desc, run_dir)
     _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir)
     _make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir)
@@ -125,30 +125,6 @@ def prepare(desc_file, nocheck_init):
     _make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
     _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)
-    return run_dir
-
-
-def _make_run_dir(run_desc):
-    """Create the temporary directory from which NEMO will be run.
-
-    The location is in the runs directory from the run description,
-    and its name is the run id combined with an ISO-format date/time stamp.
-
-    :param run_desc: Run description dictionary.
-    :type run_desc: dict
-    
-    :returns: Path of the temporary run directory
-    :rtype: :py:class:`pathlib.Path`
-    """
-    run_id = get_run_desc_value(run_desc, ('run_id',))
-    runs_dir = get_run_desc_value(
-        run_desc, ('paths', 'runs directory'), resolve_path=True
-    )
-    run_dir = runs_dir / '{run_id}_{timestamp}'.format(
-        run_id=run_id,
-        timestamp=arrow.now().format('YYYY-MM-DDTHHmmss.SSSSSSZ')
-    )
-    run_dir.mkdir()
     return run_dir
 
 
