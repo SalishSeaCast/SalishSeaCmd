@@ -65,7 +65,7 @@ class TestParser:
 
 
 @patch('salishsea_cmd.prepare.lib.load_run_desc')
-@patch('salishsea_cmd.prepare._check_nemo_exec', return_value='nemo_bin_dir')
+@patch('nemo_cmd.prepare.check_nemo_exec', return_value='nemo_bin_dir')
 @patch('salishsea_cmd.prepare._check_xios_exec', return_value='xios_bin_dir')
 @patch('nemo_cmd.api.find_rebuild_nemo_script')
 @patch('nemo_cmd.resolved_path')
