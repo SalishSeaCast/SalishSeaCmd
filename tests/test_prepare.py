@@ -114,28 +114,6 @@ class TestPrepare:
         assert run_dir == m_mrd()
 
 
-class TestRemoveRunDir:
-    """Unit tests for `salishsea prepare` _remove_run_dir() function.
-    """
-
-    def test_remove_run_dir(self, tmpdir):
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        salishsea_cmd.prepare._remove_run_dir(Path(str(p_run_dir)))
-        assert not p_run_dir.check()
-
-    def test_remove_run_dir_file(self, tmpdir):
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        p_run_dir.ensure('namelist')
-        salishsea_cmd.prepare._remove_run_dir(Path(str(p_run_dir)))
-        assert not p_run_dir.join('namelist').check()
-        assert not p_run_dir.check()
-
-    @patch('salishsea_cmd.prepare.Path.rmdir')
-    def test_remove_run_dir_no_run_dir(self, m_rmdir):
-        salishsea_cmd.prepare._remove_run_dir(Path('run_dir'))
-        assert not m_rmdir.called
-
-
 class TestMakeNamelists:
     """Unit tests for `salishsea prepare` _make_namelists() function.
     """
@@ -743,26 +721,25 @@ class TestMakeExecutableLinks:
         assert p_run_dir.join('xios_server.exe').check(file=True, link=True)
 
 
+@patch('salishsea_cmd.prepare.logger')
+@patch('nemo_cmd.prepare.remove_run_dir')
 class TestMakeGridLinks:
     """Unit tests for `nemo prepare` _make_grid_links() function.
     """
 
-    @patch('nemo_cmd.prepare._remove_run_dir')
-    def test_no_grid_coordinates_key(self, m_rm_run_dir):
+    def test_no_grid_coordinates_key(self, m_rm_run_dir, m_logger):
         run_desc = {}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, Path('run_dir'))
         m_rm_run_dir.assert_called_once_with(Path('run_dir'))
 
-    @patch('nemo_cmd.prepare._remove_run_dir')
-    def test_no_grid_bathymetry_key(self, m_rm_run_dir):
+    def test_no_grid_bathymetry_key(self, m_rm_run_dir, m_logger):
         run_desc = {'grid': {'coordinates': 'coords.nc'}}
         with pytest.raises(SystemExit):
             salishsea_cmd.prepare._make_grid_links(run_desc, Path('run_dir'))
         m_rm_run_dir.assert_called_once_with(Path('run_dir'))
 
-    @patch('nemo_cmd.prepare._remove_run_dir')
-    def test_no_forcing_key(self, m_rm_run_dir):
+    def test_no_forcing_key(self, m_rm_run_dir, m_logger):
         run_desc = {
             'grid': {
                 'coordinates': 'coords.nc',
@@ -773,9 +750,7 @@ class TestMakeGridLinks:
             salishsea_cmd.prepare._make_grid_links(run_desc, Path('run_dir'))
         m_rm_run_dir.assert_called_once_with(Path('run_dir'))
 
-    @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.logger')
-    def test_no_link_path_absolute_coords_bathy(self, m_logger, m_rm_run_dir):
+    def test_no_link_path_absolute_coords_bathy(self, m_rm_run_dir, m_logger):
         run_desc = {
             'grid': {
                 'coordinates': '/coords.nc',
@@ -791,10 +766,8 @@ class TestMakeGridLinks:
         )
         m_rm_run_dir.assert_called_once_with(Path('run_dir'))
 
-    @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.logger')
     def test_no_link_path_relative_coords_bathy(
-        self, m_logger, m_rm_run_dir, tmpdir
+        self, m_rm_run_dir, m_logger, tmpdir
     ):
         forcing_dir = tmpdir.ensure_dir('foo')
         grid_dir = forcing_dir.ensure_dir('grid')
@@ -819,9 +792,7 @@ class TestMakeGridLinks:
         )
         m_rm_run_dir.assert_called_once_with(Path(str(run_dir)))
 
-    @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.logger')
-    def test_link_paths(self, m_logger, m_rm_run_dir, tmpdir):
+    def test_link_paths(self, m_rm_run_dir, m_logger, tmpdir):
         forcing_dir = tmpdir.ensure_dir('foo')
         grid_dir = forcing_dir.ensure_dir('grid')
         grid_dir.ensure('coords.nc')
@@ -845,9 +816,7 @@ class TestMakeGridLinks:
         assert Path(str(run_dir),
                     'bathy_meter.nc').samefile(str(grid_dir.join('bathy.nc')))
 
-    @patch('salishsea_cmd.prepare._remove_run_dir')
-    @patch('salishsea_cmd.prepare.logger')
-    def test_agrif_link_paths(self, m_logger, m_rm_run_dir, tmpdir):
+    def test_agrif_link_paths(self, m_rm_run_dir, m_logger, tmpdir):
         forcing_dir = tmpdir.ensure_dir('foo')
         grid_dir = forcing_dir.ensure_dir('grid')
         grid_dir.ensure('coords.nc')
@@ -971,7 +940,7 @@ class TestMakeForcingLinks:
         )
 
     @patch('salishsea_cmd.prepare.logger')
-    @patch('salishsea_cmd.prepare._remove_run_dir')
+    @patch('nemo_cmd.prepare.remove_run_dir')
     def test_no_link_path(self, m_rm_run_dir, m_logger, tmpdir):
         p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
         run_desc = {
@@ -1026,7 +995,8 @@ class TestMakeForcingLinks:
         )
 
     @patch('salishsea_cmd.prepare.logger')
-    def test_unknown_link_checker(self, m_logger, tmpdir):
+    @patch('nemo_cmd.prepare.remove_run_dir')
+    def test_unknown_link_checker(self, m_rm_run_dir, m_logger, tmpdir):
         p_nemo_forcing = tmpdir.ensure_dir('NEMO-forcing')
         p_atmos_ops = tmpdir.ensure_dir(
             'results/forcing/atmospheric/GEM2.5/operational'
@@ -1046,7 +1016,6 @@ class TestMakeForcingLinks:
             }
         }
         patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
-        salishsea_cmd.prepare._remove_run_dir = Mock()
         with patch_symlink_to as m_symlink_to:
             with pytest.raises(SystemExit):
                 salishsea_cmd.prepare._make_forcing_links(
@@ -1118,7 +1087,7 @@ class TestMakeRestartLinks:
         m_symlink_to.assert_called_once_with(Path(str(p_agrif_results)))
 
     @patch('salishsea_cmd.prepare.logger')
-    @patch('salishsea_cmd.prepare._remove_run_dir')
+    @patch('nemo_cmd.prepare.remove_run_dir')
     def test_no_link_path(self, m_rm_run_dir, m_logger):
         run_desc = {
             'restart': {
