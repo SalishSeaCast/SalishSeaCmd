@@ -123,7 +123,7 @@ def prepare(desc_file, nocheck_init):
     )
     nemo_cmd.prepare.make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir)
     nemo_cmd.prepare.make_grid_links(run_desc, run_dir)
-    _make_forcing_links(run_desc, run_dir)
+    nemo_cmd.prepare.make_forcing_links(run_desc, run_dir)
     _make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
     _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)
@@ -161,57 +161,6 @@ def _resolve_forcing_path(run_desc, keys, run_dir):
         run_desc, ('paths', 'forcing'), resolve_path=True, run_dir=run_dir
     )
     return nemo_forcing_dir / path
-
-
-def _make_forcing_links(run_desc, run_dir):
-    """For a NEMO-3.6 run, create symlinks in run_dir to the forcing
-    directory/file names given in the run description forcing section.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :raises: :py:exc:`SystemExit` if a symlink target does not exist
-    """
-    link_checkers = {
-        'atmospheric': _check_atmospheric_forcing_link,
-    }
-    link_names = get_run_desc_value(run_desc, ('forcing',), run_dir=run_dir)
-    for link_name in link_names:
-        source = _resolve_forcing_path(
-            run_desc, (link_name, 'link to'), run_dir
-        )
-        if not source.exists():
-            logger.error(
-                '{} not found; cannot create symlink - '
-                'please check the forcing paths and file names '
-                'in your run description file'.format(source)
-            )
-            nemo_cmd.prepare.remove_run_dir(run_dir)
-            raise SystemExit(2)
-        (run_dir / link_name).symlink_to(source)
-        try:
-            link_checker = get_run_desc_value(
-                run_desc, ('forcing', link_name, 'check link'),
-                run_dir=run_dir,
-                fatal=False
-            )
-            link_checkers[link_checker['type']](
-                run_dir, source, link_checker['namelist filename']
-            )
-        except KeyError:
-            if 'check link' not in link_names[link_name]:
-                # No forcing link checker specified
-                pass
-            else:
-                if link_checker is not None:
-                    logger.error(
-                        'unknown forcing link checker: {}'
-                        .format(link_checker)
-                    )
-                    nemo_cmd.prepare.remove_run_dir(run_dir)
-                    raise SystemExit(2)
 
 
 def _check_atmospheric_forcing_link(run_dir, link_path, namelist_filename):
