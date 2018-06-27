@@ -117,7 +117,7 @@ def prepare(desc_file, nocheck_init):
     nemo_cmd.api.find_rebuild_nemo_script(run_desc)
     run_set_dir = nemo_cmd.resolved_path(desc_file).parent
     run_dir = nemo_cmd.prepare.make_run_dir(run_desc)
-    _make_namelists(run_set_dir, run_desc, run_dir)
+    nemo_cmd.prepare.make_namelists(run_set_dir, run_desc, run_dir)
     _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir)
     _make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
@@ -126,170 +126,6 @@ def prepare(desc_file, nocheck_init):
     _record_vcs_revisions(run_desc, run_dir)
     _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)
     return run_dir
-
-
-def _make_namelists(run_set_dir, run_desc, run_dir, agrif_n=None):
-    """Build the namelist files for the NEMO-3.6 run in run_dir by
-    concatenating the lists of namelist section files provided in run_desc.
-
-    If any of the required namelist section files are missing,
-    delete the run directory and raise a SystemExit exception.
-
-    :param run_set_dir: Directory containing the run description file,
-                        from which relative paths for the namelist section
-                        files start.
-    :type run_set_dir: :py:class:`pathlib.Path`
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :param int agrif_n: AGRIF sub-grid number.
-
-    :raises: SystemExit
-    """
-    try:
-        nemo_config_dir = get_run_desc_value(
-            run_desc, ('paths', 'NEMO code config'),
-            resolve_path=True,
-            run_dir=run_dir,
-            fatal=False
-        )
-    except KeyError:
-        # Alternate key spelling for backward compatibility
-        nemo_config_dir = get_run_desc_value(
-            run_desc, ('paths', 'NEMO-code-config'),
-            resolve_path=True,
-            run_dir=run_dir
-        )
-    try:
-        config_name = get_run_desc_value(
-            run_desc, ('config name',), run_dir=run_dir, fatal=False
-        )
-    except KeyError:
-        # Alternate key spelling for backward compatibility
-        config_name = get_run_desc_value(
-            run_desc, ('config_name',), run_dir=run_dir
-        )
-    keys = ('namelists',)
-    if agrif_n is not None:
-        keys = ('namelists', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n))
-    namelists = get_run_desc_value(run_desc, keys, run_dir=run_dir)
-    for namelist_filename in namelists:
-        if namelist_filename.startswith('AGRIF'):
-            continue
-        namelist_dest = namelist_filename
-        keys = ('namelists', namelist_filename)
-        if agrif_n is not None:
-            namelist_dest = '{agrif_n}_{namelist_filename}'.format(
-                agrif_n=agrif_n, namelist_filename=namelist_filename
-            )
-            keys = (
-                'namelists', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n),
-                namelist_filename
-            )
-        with (run_dir / namelist_dest).open('wt') as namelist:
-            namelist_files = get_run_desc_value(
-                run_desc, keys, run_dir=run_dir
-            )
-            for nl in namelist_files:
-                nl_path = nemo_cmd.expanded_path(nl)
-                if not nl_path.is_absolute():
-                    nl_path = run_set_dir / nl_path
-                try:
-                    with nl_path.open('rt') as f:
-                        namelist.writelines(f.readlines())
-                        namelist.write(u'\n\n')
-                except IOError as e:
-                    logger.error(e)
-                    namelist.close()
-                    nemo_cmd.prepare.remove_run_dir(run_dir)
-                    raise SystemExit(2)
-        ref_namelist = namelist_filename.replace('_cfg', '_ref')
-        if ref_namelist not in namelists:
-            ref_namelist_source = (
-                nemo_config_dir / config_name / 'EXP00' / ref_namelist
-            )
-            shutil.copy2(
-                nemo_cmd.fspath(ref_namelist_source),
-                nemo_cmd.fspath(
-                    run_dir / namelist_dest.replace('_cfg', '_ref')
-                )
-            )
-    if 'namelist_cfg' in namelists:
-        _set_mpi_decomposition('namelist_cfg', run_desc, run_dir)
-    else:
-        logger.error(
-            'No namelist_cfg key found in namelists section of run '
-            'description'
-        )
-        nemo_cmd.prepare.remove_run_dir(run_dir)
-        raise SystemExit(2)
-
-
-def _set_mpi_decomposition(namelist_filename, run_desc, run_dir):
-    """Update the &nammpp namelist jpni & jpnj values with the MPI
-    decomposition values from the run description.
-
-    A SystemExit exeception is raise if there is no MPI decomposition
-    specified in the run description.
-
-    :param str namelist_filename: The name of the namelist file.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :raises: SystemExit
-    """
-    try:
-        jpni, jpnj = get_run_desc_value(
-            run_desc, ('MPI decomposition',), fatal=False
-        ).split('x')
-    except KeyError:
-        logger.error(
-            'MPI decomposition value not found in YAML run description file. '
-            'Please add a line like:\n'
-            '  MPI decomposition: 8x18\n'
-            'that says how you want the domain distributed over the '
-            'processors in the i (longitude) and j (latitude) dimensions.'
-        )
-        nemo_cmd.prepare.remove_run_dir(run_dir)
-        raise SystemExit(2)
-    jpnij = str(lib.get_n_processors(run_desc, run_dir))
-    with (run_dir / namelist_filename).open('rt') as f:
-        lines = f.readlines()
-    for key, new_value in {'jpni': jpni, 'jpnj': jpnj, 'jpnij': jpnij}.items():
-        value, i = _get_namelist_value(key, lines)
-        lines[i] = lines[i].replace(value, new_value)
-    with (run_dir / namelist_filename).open('wt') as f:
-        f.writelines(lines)
-
-
-def _get_namelist_value(key, lines):
-    """Return the value corresponding to key in lines, and the index
-    at which key was found.
-
-    lines is expected to be a NEMO namelist in the form of a list of strings.
-
-    :arg key: The namelist key to find the value and line number of.
-    :type key: str
-
-    :arg lines: The namelist lines.
-    :type lines: list
-
-    :returns: The value corresponding to key,
-              and the index in lines at check key was found.
-    :rtype: 2-tuple
-    """
-    line_index = [
-        i for i, line in enumerate(lines)
-        if line.strip() and line.split()[0] == key
-    ][-1]
-    value = lines[line_index].split()[2]
-    return value, line_index
 
 
 def _copy_run_set_files(
@@ -953,7 +789,9 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
         functools.partial(_make_grid_links, run_desc, run_dir),
         # sub-grid namelist files
         'namelists':
-        functools.partial(_make_namelists, run_set_dir, run_desc, run_dir),
+        functools.partial(
+            nemo_cmd.prepare.make_namelists, run_set_dir, run_desc, run_dir
+        ),
         # sub-grid output files
         'output':
         functools.partial(
