@@ -72,7 +72,7 @@ class TestParser:
 @patch('nemo_cmd.prepare.make_run_dir')
 @patch('nemo_cmd.prepare.make_namelists')
 @patch('nemo_cmd.prepare.copy_run_set_files')
-@patch('salishsea_cmd.prepare._make_executable_links')
+@patch('nemo_cmd.prepare.make_executable_links')
 @patch('salishsea_cmd.prepare._make_grid_links')
 @patch('salishsea_cmd.prepare._make_forcing_links')
 @patch('salishsea_cmd.prepare._make_restart_links')
@@ -112,51 +112,6 @@ class TestPrepare:
         )
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
-
-
-class TestMakeExecutableLinks:
-    """Unit tests for `salishsea prepare` _make_executable_links() function.
-    """
-
-    def test_nemo_exe_symlink(self, tmpdir):
-        p_nemo_bin_dir = tmpdir.ensure_dir(
-            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin'
-        )
-        p_nemo_bin_dir.ensure('nemo.exe')
-        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)),
-            Path(str(p_xios_bin_dir))
-        )
-        assert p_run_dir.join('nemo.exe').check(file=True, link=True)
-
-    def test_server_exe_symlink(self, tmpdir):
-        p_nemo_bin_dir = tmpdir.ensure_dir(
-            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin'
-        )
-        p_nemo_bin_dir.ensure('nemo.exe')
-        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)),
-            Path(str(p_xios_bin_dir))
-        )
-        assert not p_run_dir.join('server.exe').check(file=True, link=True)
-
-    def test_xios_server_exe_symlink(self, tmpdir):
-        p_nemo_bin_dir = tmpdir.ensure_dir(
-            'NEMO-code/NEMOGCM/CONFIG/SalishSea/BLD/bin'
-        )
-        p_nemo_bin_dir.ensure('nemo.exe')
-        p_xios_bin_dir = tmpdir.ensure_dir('XIOS/bin')
-        p_xios_bin_dir.ensure('xios_server.exe')
-        p_run_dir = tmpdir.ensure_dir('run_dir')
-        salishsea_cmd.prepare._make_executable_links(
-            Path(str(p_nemo_bin_dir)), Path(str(p_run_dir)),
-            Path(str(p_xios_bin_dir))
-        )
-        assert p_run_dir.join('xios_server.exe').check(file=True, link=True)
 
 
 @patch('salishsea_cmd.prepare.logger')
