@@ -75,7 +75,7 @@ class TestParser:
 @patch('nemo_cmd.prepare.make_executable_links')
 @patch('nemo_cmd.prepare.make_grid_links')
 @patch('nemo_cmd.prepare.make_forcing_links')
-@patch('salishsea_cmd.prepare._make_restart_links')
+@patch('nemo_cmd.prepare.make_restart_links')
 @patch('salishsea_cmd.prepare._record_vcs_revisions')
 @patch('salishsea_cmd.prepare._add_agrif_files')
 class TestPrepare:
@@ -112,105 +112,6 @@ class TestPrepare:
         )
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
-
-
-class TestMakeRestartLinks:
-    """Unit tests for `salishsea prepare` _make_restart_links() function.
-    """
-
-    @patch('salishsea_cmd.prepare.logger')
-    def test_no_restart_key(self, m_logger):
-        run_desc = {}
-        salishsea_cmd.prepare._make_restart_links(
-            run_desc, Path('run_dir'), nocheck_init=False
-        )
-        m_logger.warning.assert_called_once_with(
-            'No restart section found in run description YAML file, '
-            'so proceeding on the assumption that initial conditions '
-            'have been provided'
-        )
-
-    def test_link(self, tmpdir):
-        p_results = tmpdir.ensure(
-            'results/SalishSea/nowcast/SalishSea_00475200_restart.nc'
-        )
-        p_agrif_results = tmpdir.ensure(
-            'results/SalishSea/nowcast/1_SalishSea_00475200_restart.nc'
-        )
-        run_desc = {
-            'restart': {
-                'restart.nc': str(p_results),
-                'AGRIF_1': {
-                    'restart.nc': str(p_agrif_results)
-                },
-            },
-        }
-        patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
-        with patch_symlink_to as m_symlink_to:
-            salishsea_cmd.prepare._make_restart_links(
-                run_desc, Path('run_dir'), nocheck_init=False
-            )
-        m_symlink_to.assert_called_once_with(Path(str(p_results)))
-
-    def test_agrif_link(self, tmpdir):
-        p_results = tmpdir.ensure(
-            'results/SalishSea/nowcast/SalishSea_00475200_restart.nc'
-        )
-        p_agrif_results = tmpdir.ensure(
-            'results/SalishSea/nowcast/1_SalishSea_00475200_restart.nc'
-        )
-        run_desc = {
-            'restart': {
-                'restart.nc': str(p_results),
-                'AGRIF_1': {
-                    'restart.nc': str(p_agrif_results)
-                },
-            },
-        }
-        patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
-        with patch_symlink_to as m_symlink_to:
-            salishsea_cmd.prepare._make_restart_links(
-                run_desc,
-                Path('run_dir'),
-                nocheck_init=False,
-                agrif_n=1,
-            )
-        m_symlink_to.assert_called_once_with(Path(str(p_agrif_results)))
-
-    @patch('salishsea_cmd.prepare.logger')
-    @patch('nemo_cmd.prepare.remove_run_dir')
-    def test_no_link_path(self, m_rm_run_dir, m_logger):
-        run_desc = {
-            'restart': {
-                'restart.nc': 'SalishSea/nowcast/SalishSea_00475200_restart.nc'
-            }
-        }
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_restart_links(
-                run_desc, Path('run_dir'), nocheck_init=False
-            )
-        m_logger.error.assert_called_once_with(
-            '{} not found; cannot create symlink - '
-            'please check the restart file paths and file names '
-            'in your run description file'
-            .format('SalishSea/nowcast/SalishSea_00475200_restart.nc')
-        )
-        m_rm_run_dir.assert_called_once_with(Path('run_dir'))
-
-    def test_nocheck_init(self):
-        run_desc = {
-            'restart': {
-                'restart.nc': 'SalishSea/nowcast/SalishSea_00475200_restart.nc'
-            }
-        }
-        patch_symlink_to = patch('salishsea_cmd.prepare.Path.symlink_to')
-        with patch_symlink_to as m_symlink_to:
-            salishsea_cmd.prepare._make_restart_links(
-                run_desc, Path('run_dir'), nocheck_init=True
-            )
-        m_symlink_to.assert_called_once_with(
-            Path('SalishSea/nowcast/SalishSea_00475200_restart.nc')
-        )
 
 
 class TestRecordVCSRevisions:
@@ -290,7 +191,7 @@ class TestRecordVCSRevisions:
 
 @patch('salishsea_cmd.prepare.logger', autospec=True)
 @patch('nemo_cmd.prepare.make_grid_links', autospec=True)
-@patch('salishsea_cmd.prepare._make_restart_links', autospec=True)
+@patch('nemo_cmd.prepare.make_restart_links', autospec=True)
 @patch('nemo_cmd.prepare.copy_run_set_files', autospec=True)
 @patch('nemo_cmd.prepare.make_namelists', autospec=True)
 class TestAddAgrifFiles:
