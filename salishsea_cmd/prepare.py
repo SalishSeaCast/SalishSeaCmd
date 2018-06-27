@@ -118,7 +118,9 @@ def prepare(desc_file, nocheck_init):
     run_set_dir = nemo_cmd.resolved_path(desc_file).parent
     run_dir = nemo_cmd.prepare.make_run_dir(run_desc)
     nemo_cmd.prepare.make_namelists(run_set_dir, run_desc, run_dir)
-    _copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir)
+    nemo_cmd.prepare.copy_run_set_files(
+        run_desc, desc_file, run_set_dir, run_dir
+    )
     _make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir)
     _make_grid_links(run_desc, run_dir)
     _make_forcing_links(run_desc, run_dir)
@@ -126,176 +128,6 @@ def prepare(desc_file, nocheck_init):
     _record_vcs_revisions(run_desc, run_dir)
     _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)
     return run_dir
-
-
-def _copy_run_set_files(
-    run_desc, desc_file, run_set_dir, run_dir, agrif_n=None
-):
-    """Copy the run-set files given into run_dir.
-
-    For all versions of NEMO the YAML run description file 
-    (from the command-line) is copied.
-    The IO defs file is also copied.
-    The file path/name of the IO defs file is taken from the :kbd:`output`
-    stanza of the YAML run description file.
-    The IO defs file is copied as :file:`iodef.xml` because that is the
-    name that NEMO-3.4 or XIOS expects.
-
-    For NEMO-3.4, the :file:`xmlio_server.def` file is also copied.
-
-    For NEMO-3.6, the domain defs and field defs files used by XIOS
-    are also copied.
-    Those file paths/names of those file are taken from the :kbd:`output`
-    stanza of the YAML run description file.
-    They are copied to :file:`domain_def.xml` and :file:`field_def.xml`,
-    repectively, because those are the file names that XIOS expects.
-    Optionally, the file defs file used by XIOS-2 is also copied.
-    Its file path/name is also taken from the :kbd:`output` stanza.
-    It is copied to :file:`file_def.xml` because that is the file name that
-    XIOS-2 expects.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param desc_file: File path/name of the YAML run description file.
-    :type desc_file: :py:class:`pathlib.Path`
-
-    :param run_set_dir: Directory containing the run description file,
-                        from which relative paths for the namelist section
-                        files start.
-    :type run_set_dir: :py:class:`pathlib.Path`
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :param int agrif_n: AGRIF sub-grid number.
-    """
-    try:
-        iodefs = get_run_desc_value(
-            run_desc, ('output', 'iodefs'),
-            resolve_path=True,
-            run_dir=run_dir,
-            fatal=False
-        )
-    except KeyError:
-        # Alternate key spelling for backward compatibility
-        iodefs = get_run_desc_value(
-            run_desc, ('output', 'files'), resolve_path=True, run_dir=run_dir
-        )
-    run_set_files = [
-        (iodefs, 'iodef.xml'),
-        (run_set_dir / desc_file.name, desc_file.name),
-    ]
-    try:
-        keys = ('output', 'domaindefs')
-        domain_def_filename = 'domain_def.xml'
-        if agrif_n is not None:
-            keys = (
-                'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n),
-                'domaindefs'
-            )
-            domain_def_filename = '{agrif_n}_domain_def.xml'.format(
-                agrif_n=agrif_n
-            )
-        domains_def = get_run_desc_value(
-            run_desc,
-            keys,
-            resolve_path=True,
-            run_dir=run_dir,
-            fatal=False,
-        )
-    except KeyError:
-        # Alternate key spelling for backward compatibility
-        keys = ('output', 'domain')
-        if agrif_n is not None:
-            keys = (
-                'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n), 'domain'
-            )
-        domains_def = get_run_desc_value(
-            run_desc, keys, resolve_path=True, run_dir=run_dir
-        )
-    try:
-        fields_def = get_run_desc_value(
-            run_desc, ('output', 'fielddefs'),
-            resolve_path=True,
-            run_dir=run_dir,
-            fatal=False
-        )
-    except KeyError:
-        # Alternate key spelling for backward compatibility
-        fields_def = get_run_desc_value(
-            run_desc, ('output', 'fields'), resolve_path=True, run_dir=run_dir
-        )
-    run_set_files.extend([
-        (domains_def, domain_def_filename),
-        (fields_def, 'field_def.xml'),
-    ])
-    try:
-        keys = ('output', 'filedefs')
-        file_def_filename = 'file_def.xml'
-        if agrif_n is not None:
-            keys = (
-                'output', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n), 'filedefs'
-            )
-            file_def_filename = '{agrif_n}_file_def.xml'.format(
-                agrif_n=agrif_n
-            )
-        files_def = get_run_desc_value(
-            run_desc, keys, resolve_path=True, run_dir=run_dir, fatal=False
-        )
-        run_set_files.append((files_def, file_def_filename))
-    except KeyError:
-        # `files` key is optional and only used with XIOS-2
-        pass
-    for source, dest_name in run_set_files:
-        shutil.copy2(
-            nemo_cmd.fspath(source), nemo_cmd.fspath(run_dir / dest_name)
-        )
-    _set_xios_server_mode(run_desc, run_dir)
-
-
-def _set_xios_server_mode(run_desc, run_dir):
-    """Update the :file:`iodef.xml` :kbd:`xios` context :kbd:`using_server`
-    variable text with the :kbd:`separate XIOS server` value from the
-    run description.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :raises: SystemExit
-    """
-    try:
-        sep_xios_server = get_run_desc_value(
-            run_desc, ('output', 'separate XIOS server'), fatal=False
-        )
-    except KeyError:
-        logger.error(
-            'separate XIOS server key/value not found in output section '
-            'of YAML run description file. '
-            'Please add lines like:\n'
-            '  separate XIOS server: True\n'
-            '  XIOS servers: 1\n'
-            'that say whether to run the XIOS server(s) attached or detached, '
-            'and how many of them to use.'
-        )
-        nemo_cmd.prepare.remove_run_dir(run_dir)
-        raise SystemExit(2)
-    tree = xml.etree.ElementTree.parse(nemo_cmd.fspath(run_dir / 'iodef.xml'))
-    root = tree.getroot()
-    using_server = root.find(
-        'context[@id="xios"]//variable[@id="using_server"]'
-    )
-    using_server.text = 'true' if sep_xios_server else 'false'
-    using_server_line = xml.etree.ElementTree.tostring(using_server).decode()
-    with (run_dir / 'iodef.xml').open('rt') as f:
-        lines = f.readlines()
-    for i, line in enumerate(lines):
-        if 'using_server' in line:
-            lines[i] = using_server_line
-            break
-    with (run_dir / 'iodef.xml').open('wt') as f:
-        f.writelines(lines)
 
 
 def _make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir):
@@ -795,7 +627,7 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
         # sub-grid output files
         'output':
         functools.partial(
-            _copy_run_set_files,
+            nemo_cmd.prepare.copy_run_set_files,
             run_desc,
             desc_file,
             run_set_dir,
