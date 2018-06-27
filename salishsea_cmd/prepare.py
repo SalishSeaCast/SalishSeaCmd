@@ -124,66 +124,10 @@ def prepare(desc_file, nocheck_init):
     nemo_cmd.prepare.make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir)
     nemo_cmd.prepare.make_grid_links(run_desc, run_dir)
     nemo_cmd.prepare.make_forcing_links(run_desc, run_dir)
-    _make_restart_links(run_desc, run_dir, nocheck_init)
+    nemo_cmd.prepare.make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
     _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)
     return run_dir
-
-
-def _make_restart_links(run_desc, run_dir, nocheck_init, agrif_n=None):
-    """For a NEMO-3.6 run, create symlinks in run_dir to the restart
-    files given in the run description restart section.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :param boolean nocheck_init: Suppress restart file existence check;
-                                 the default is to check
-
-    :param int agrif_n: AGRIF sub-grid number.
-
-    :raises: :py:exc:`SystemExit` if a symlink target does not exist
-    """
-    keys = ('restart',)
-    if agrif_n is not None:
-        keys = ('restart', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n))
-    try:
-        link_names = get_run_desc_value(
-            run_desc, keys, run_dir=run_dir, fatal=False
-        )
-    except KeyError:
-        logger.warning(
-            'No restart section found in run description YAML file, '
-            'so proceeding on the assumption that initial conditions '
-            'have been provided'
-        )
-        return
-    for link_name in link_names:
-        if link_name.startswith('AGRIF'):
-            continue
-        keys = ('restart', link_name)
-        if agrif_n is not None:
-            keys = (
-                'restart', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n), link_name
-            )
-            link_name = '{agrif_n}_{link_name}'.format(
-                agrif_n=agrif_n, link_name=link_name
-            )
-        source = get_run_desc_value(run_desc, keys, expand_path=True)
-        if not source.exists() and not nocheck_init:
-            logger.error(
-                '{} not found; cannot create symlink - '
-                'please check the restart file paths and file names '
-                'in your run description file'.format(source)
-            )
-            nemo_cmd.prepare.remove_run_dir(run_dir)
-            raise SystemExit(2)
-        if nocheck_init:
-            (run_dir / link_name).symlink_to(source)
-        else:
-            (run_dir / link_name).symlink_to(source.resolve())
 
 
 def _record_vcs_revisions(run_desc, run_dir):
@@ -296,7 +240,8 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
             run_desc, ('restart',), run_dir=run_dir, fatal=False
         )
         run_desc_sections['restart'] = functools.partial(
-            _make_restart_links, run_desc, run_dir, nocheck_init
+            nemo_cmd.prepare.make_restart_links, run_desc, run_dir,
+            nocheck_init
         )
     except KeyError:
         # The parent grid is not being initialized from a restart file,
