@@ -126,7 +126,9 @@ def prepare(desc_file, nocheck_init):
     nemo_cmd.prepare.make_forcing_links(run_desc, run_dir)
     nemo_cmd.prepare.make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
-    _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)
+    nemo_cmd.prepare.add_agrif_files(
+        run_desc, desc_file, run_set_dir, run_dir, nocheck_init
+    )
     return run_dir
 
 
@@ -171,99 +173,3 @@ def _record_vcs_revisions(run_desc, run_dir):
             nemo_cmd.prepare.write_repo_rev_file(
                 Path(repo), run_dir, vcs_funcs[vcs_tool]
             )
-
-
-def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
-    """Add file copies and symlinks to temporary run directory for
-    AGRIF runs.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param desc_file: File path/name of the YAML run description file.
-    :type desc_file: :py:class:`pathlib.Path`
-
-    :param run_set_dir: Directory containing the run description file,
-                        from which relative paths for the namelist section
-                        files start.
-    :type run_set_dir: :py:class:`pathlib.Path`
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :param boolean nocheck_init: Suppress restart file existence check;
-                                 the default is to check
-
-    :raises: SystemExit if mismatching number of sub-grids is detected
-    """
-    try:
-        get_run_desc_value(run_desc, ('AGRIF',), fatal=False)
-    except KeyError:
-        # Not an AGRIF run
-        return
-    fixed_grids = get_run_desc_value(
-        run_desc, ('AGRIF', 'fixed grids'), run_dir, resolve_path=True
-    )
-    shutil.copy2(
-        nemo_cmd.fspath(fixed_grids),
-        nemo_cmd.fspath(run_dir / 'AGRIF_FixedGrids.in')
-    )
-    # Get number of sub-grids
-    n_sub_grids = 0
-    with (run_dir / 'AGRIF_FixedGrids.in').open('rt') as f:
-        n_sub_grids = len([
-            line for line in f
-            if not line.startswith('#') and len(line.split()) == 8
-        ])
-
-    run_desc_sections = {
-        # sub-grid coordinates and bathymetry files
-        'grid':
-        functools.partial(nemo_cmd.prepare.make_grid_links, run_desc, run_dir),
-        # sub-grid namelist files
-        'namelists':
-        functools.partial(
-            nemo_cmd.prepare.make_namelists, run_set_dir, run_desc, run_dir
-        ),
-        # sub-grid output files
-        'output':
-        functools.partial(
-            nemo_cmd.prepare.copy_run_set_files,
-            run_desc,
-            desc_file,
-            run_set_dir,
-            run_dir,
-        ),
-    }
-    try:
-        # sub-grid restart files
-        link_names = get_run_desc_value(
-            run_desc, ('restart',), run_dir=run_dir, fatal=False
-        )
-        run_desc_sections['restart'] = functools.partial(
-            nemo_cmd.prepare.make_restart_links, run_desc, run_dir,
-            nocheck_init
-        )
-    except KeyError:
-        # The parent grid is not being initialized from a restart file,
-        # so the sub-grids can't be either
-        pass
-    for run_desc_section, func in run_desc_sections.items():
-        sub_grids_count = 0
-        section = get_run_desc_value(run_desc, (run_desc_section,))
-        for key in section:
-            if key.startswith('AGRIF'):
-                sub_grids_count += 1
-                agrif_n = int(key.split('_')[1])
-                func(agrif_n=agrif_n)
-        if sub_grids_count != n_sub_grids:
-            logger.error(
-                'Expected {n_sub_grids} AGRIF sub-grids in {section} section, '
-                'but found {sub_grids_count} - '
-                'please check your run description file'.format(
-                    n_sub_grids=n_sub_grids,
-                    section=run_desc_section,
-                    sub_grids_count=sub_grids_count
-                )
-            )
-            nemo_cmd.prepare.remove_run_dir(run_dir)
-            raise SystemExit(2)
