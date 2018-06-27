@@ -73,7 +73,7 @@ class TestParser:
 @patch('nemo_cmd.prepare.make_namelists')
 @patch('nemo_cmd.prepare.copy_run_set_files')
 @patch('nemo_cmd.prepare.make_executable_links')
-@patch('salishsea_cmd.prepare._make_grid_links')
+@patch('nemo_cmd.prepare.make_grid_links')
 @patch('salishsea_cmd.prepare._make_forcing_links')
 @patch('salishsea_cmd.prepare._make_restart_links')
 @patch('salishsea_cmd.prepare._record_vcs_revisions')
@@ -112,131 +112,6 @@ class TestPrepare:
         )
         m_rvr.assert_called_once_with(m_lrd(), m_mrd())
         assert run_dir == m_mrd()
-
-
-@patch('salishsea_cmd.prepare.logger')
-@patch('nemo_cmd.prepare.remove_run_dir')
-class TestMakeGridLinks:
-    """Unit tests for `nemo prepare` _make_grid_links() function.
-    """
-
-    def test_no_grid_coordinates_key(self, m_rm_run_dir, m_logger):
-        run_desc = {}
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_grid_links(run_desc, Path('run_dir'))
-        m_rm_run_dir.assert_called_once_with(Path('run_dir'))
-
-    def test_no_grid_bathymetry_key(self, m_rm_run_dir, m_logger):
-        run_desc = {'grid': {'coordinates': 'coords.nc'}}
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_grid_links(run_desc, Path('run_dir'))
-        m_rm_run_dir.assert_called_once_with(Path('run_dir'))
-
-    def test_no_forcing_key(self, m_rm_run_dir, m_logger):
-        run_desc = {
-            'grid': {
-                'coordinates': 'coords.nc',
-                'bathymetry': 'bathy.nc'
-            }
-        }
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_grid_links(run_desc, Path('run_dir'))
-        m_rm_run_dir.assert_called_once_with(Path('run_dir'))
-
-    def test_no_link_path_absolute_coords_bathy(self, m_rm_run_dir, m_logger):
-        run_desc = {
-            'grid': {
-                'coordinates': '/coords.nc',
-                'bathymetry': '/bathy.nc'
-            },
-        }
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_grid_links(run_desc, Path('run_dir'))
-        m_logger.error.assert_called_once_with(
-            '/coords.nc not found; cannot create symlink - '
-            'please check the forcing path and grid file names '
-            'in your run description file'
-        )
-        m_rm_run_dir.assert_called_once_with(Path('run_dir'))
-
-    def test_no_link_path_relative_coords_bathy(
-        self, m_rm_run_dir, m_logger, tmpdir
-    ):
-        forcing_dir = tmpdir.ensure_dir('foo')
-        grid_dir = forcing_dir.ensure_dir('grid')
-        run_dir = tmpdir.ensure_dir('runs')
-        run_desc = {
-            'paths': {
-                'forcing': str(forcing_dir)
-            },
-            'grid': {
-                'coordinates': 'coords.nc',
-                'bathymetry': 'bathy.nc'
-            },
-        }
-        with pytest.raises(SystemExit):
-            salishsea_cmd.prepare._make_grid_links(
-                run_desc, Path(str(run_dir))
-            )
-        m_logger.error.assert_called_once_with(
-            '{}/coords.nc not found; cannot create symlink - '
-            'please check the forcing path and grid file names '
-            'in your run description file'.format(grid_dir)
-        )
-        m_rm_run_dir.assert_called_once_with(Path(str(run_dir)))
-
-    def test_link_paths(self, m_rm_run_dir, m_logger, tmpdir):
-        forcing_dir = tmpdir.ensure_dir('foo')
-        grid_dir = forcing_dir.ensure_dir('grid')
-        grid_dir.ensure('coords.nc')
-        grid_dir.ensure('bathy.nc')
-        run_dir = tmpdir.ensure_dir('runs')
-        run_desc = {
-            'paths': {
-                'forcing': str(forcing_dir)
-            },
-            'grid': {
-                'coordinates': 'coords.nc',
-                'bathymetry': 'bathy.nc'
-            },
-        }
-        salishsea_cmd.prepare._make_grid_links(run_desc, Path(str(run_dir)))
-        assert Path(str(run_dir), 'coordinates.nc').is_symlink()
-        assert Path(str(run_dir), 'coordinates.nc').samefile(
-            str(grid_dir.join('coords.nc'))
-        )
-        assert Path(str(run_dir), 'bathy_meter.nc').is_symlink()
-        assert Path(str(run_dir),
-                    'bathy_meter.nc').samefile(str(grid_dir.join('bathy.nc')))
-
-    def test_agrif_link_paths(self, m_rm_run_dir, m_logger, tmpdir):
-        forcing_dir = tmpdir.ensure_dir('foo')
-        grid_dir = forcing_dir.ensure_dir('grid')
-        grid_dir.ensure('coords.nc')
-        grid_dir.ensure('bathy.nc')
-        run_dir = tmpdir.ensure_dir('runs')
-        run_desc = {
-            'paths': {
-                'forcing': str(forcing_dir)
-            },
-            'grid': {
-                'AGRIF_1': {
-                    'coordinates': 'coords.nc',
-                    'bathymetry': 'bathy.nc'
-                }
-            }
-        }
-        salishsea_cmd.prepare._make_grid_links(
-            run_desc, Path(str(run_dir)), agrif_n=1
-        )
-        assert Path(str(run_dir), '1_coordinates.nc').is_symlink()
-        assert Path(str(run_dir), '1_coordinates.nc').samefile(
-            str(grid_dir.join('coords.nc'))
-        )
-        assert Path(str(run_dir), '1_bathy_meter.nc').is_symlink()
-        assert Path(str(run_dir), '1_bathy_meter.nc').samefile(
-            str(grid_dir.join('bathy.nc'))
-        )
 
 
 class TestResolveForcingPath:
@@ -591,7 +466,7 @@ class TestRecordVCSRevisions:
 
 
 @patch('salishsea_cmd.prepare.logger', autospec=True)
-@patch('salishsea_cmd.prepare._make_grid_links', autospec=True)
+@patch('nemo_cmd.prepare.make_grid_links', autospec=True)
 @patch('salishsea_cmd.prepare._make_restart_links', autospec=True)
 @patch('nemo_cmd.prepare.copy_run_set_files', autospec=True)
 @patch('nemo_cmd.prepare.make_namelists', autospec=True)

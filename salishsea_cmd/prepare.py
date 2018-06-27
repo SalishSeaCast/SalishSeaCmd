@@ -122,69 +122,12 @@ def prepare(desc_file, nocheck_init):
         run_desc, desc_file, run_set_dir, run_dir
     )
     nemo_cmd.prepare.make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir)
-    _make_grid_links(run_desc, run_dir)
+    nemo_cmd.prepare.make_grid_links(run_desc, run_dir)
     _make_forcing_links(run_desc, run_dir)
     _make_restart_links(run_desc, run_dir, nocheck_init)
     _record_vcs_revisions(run_desc, run_dir)
     _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init)
     return run_dir
-
-
-def _make_grid_links(run_desc, run_dir, agrif_n=None):
-    """Create symlinks in run_dir to the file names that NEMO expects
-    for the bathymetry and coordinates files given in the run_desc dict.
-
-    For AGRIF sub-grids, the symlink names are prefixed with the agrif_n;
-    e.g. 1_coordinates.nc.
-
-    :param dict run_desc: Run description dictionary.
-
-    :param run_dir: Path of the temporary run directory.
-    :type run_dir: :py:class:`pathlib.Path`
-
-    :param int agrif_n: AGRIF sub-grid number.
-
-    :raises: SystemExit
-    """
-    coords_keys = ('grid', 'coordinates')
-    coords_filename = 'coordinates.nc'
-    bathy_keys = ('grid', 'bathymetry')
-    bathy_filename = 'bathy_meter.nc'
-    if agrif_n is not None:
-        coords_keys = (
-            'grid', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n), 'coordinates'
-        )
-        coords_filename = '{agrif_n}_coordinates.nc'.format(agrif_n=agrif_n)
-        bathy_keys = (
-            'grid', 'AGRIF_{agrif_n}'.format(agrif_n=agrif_n), 'bathymetry'
-        )
-        bathy_filename = '{agrif_n}_bathy_meter.nc'.format(agrif_n=agrif_n)
-    coords_path = get_run_desc_value(
-        run_desc, coords_keys, expand_path=True, run_dir=run_dir
-    )
-    bathy_path = get_run_desc_value(
-        run_desc, bathy_keys, expand_path=True, run_dir=run_dir
-    )
-    if coords_path.is_absolute() and bathy_path.is_absolute():
-        grid_paths = ((coords_path, coords_filename),
-                      (bathy_path, bathy_filename))
-    else:
-        nemo_forcing_dir = get_run_desc_value(
-            run_desc, ('paths', 'forcing'), resolve_path=True, run_dir=run_dir
-        )
-        grid_dir = nemo_forcing_dir / 'grid'
-        grid_paths = ((grid_dir / coords_path, coords_filename),
-                      (grid_dir / bathy_path, bathy_filename))
-    for source, link_name in grid_paths:
-        if not source.exists():
-            logger.error(
-                '{} not found; cannot create symlink - '
-                'please check the forcing path and grid file names '
-                'in your run description file'.format(source)
-            )
-            nemo_cmd.prepare.remove_run_dir(run_dir)
-            raise SystemExit(2)
-        (run_dir / link_name).symlink_to(source)
 
 
 def _resolve_forcing_path(run_desc, keys, run_dir):
@@ -590,7 +533,7 @@ def _add_agrif_files(run_desc, desc_file, run_set_dir, run_dir, nocheck_init):
     run_desc_sections = {
         # sub-grid coordinates and bathymetry files
         'grid':
-        functools.partial(_make_grid_links, run_desc, run_dir),
+        functools.partial(nemo_cmd.prepare.make_grid_links, run_desc, run_dir),
         # sub-grid namelist files
         'namelists':
         functools.partial(
