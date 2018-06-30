@@ -348,8 +348,8 @@ def _build_batch_script(
         script = u'\n'.join((
             script, u'{sbatch_directives}\n'.format(
                 sbatch_directives=_sbatch_directives(
-                    run_desc, system, nemo_processors + xios_processors, email,
-                    results_dir
+                    run_desc, system, nemo_processors +
+                    xios_processors, email, results_dir
                 )
             )
         ))
@@ -357,8 +357,8 @@ def _build_batch_script(
         script = u'\n'.join((
             script, u'{pbs_directives}\n'.format(
                 pbs_directives=_pbs_directives(
-                    run_desc, nemo_processors + xios_processors, email,
-                    fspath(results_dir)
+                    run_desc, nemo_processors +
+                    xios_processors, email, fspath(results_dir)
                 )
             )
         ))
