@@ -34,7 +34,7 @@ import subprocess
 
 import cliff.command
 from nemo_cmd.fspath import fspath
-from nemo_cmd.prepare import get_run_desc_value
+from nemo_cmd.prepare import get_n_processors, get_run_desc_value
 
 from salishsea_cmd import api, lib
 
@@ -214,7 +214,7 @@ def run(
     if not quiet:
         log.info('Created run directory {}'.format(run_dir))
     run_desc = lib.load_run_desc(desc_file)
-    nemo_processors = lib.get_n_processors(run_desc, run_dir)
+    nemo_processors = get_n_processors(run_desc, run_dir)
     separate_xios_server = get_run_desc_value(
         run_desc, ('output', 'separate XIOS server')
     )
@@ -348,8 +348,8 @@ def _build_batch_script(
         script = u'\n'.join((
             script, u'{sbatch_directives}\n'.format(
                 sbatch_directives=_sbatch_directives(
-                    run_desc, system, nemo_processors +
-                    xios_processors, email, results_dir
+                    run_desc, system, nemo_processors + xios_processors, email,
+                    results_dir
                 )
             )
         ))
@@ -357,8 +357,8 @@ def _build_batch_script(
         script = u'\n'.join((
             script, u'{pbs_directives}\n'.format(
                 pbs_directives=_pbs_directives(
-                    run_desc, nemo_processors +
-                    xios_processors, email, fspath(results_dir)
+                    run_desc, nemo_processors + xios_processors, email,
+                    fspath(results_dir)
                 )
             )
         ))
