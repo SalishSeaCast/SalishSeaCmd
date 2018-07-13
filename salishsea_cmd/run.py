@@ -66,6 +66,28 @@ class Run(cliff.command.Command):
             help='directory to store results into'
         )
         parser.add_argument(
+            '--cedar-broadwell',
+            dest='cedar_broadwell',
+            action='store_true',
+            help='''
+            Use broadwell (32 cores/node) nodes on cedar instead of the 
+            default skylake (48 cores/node) nodes.
+            ''',
+        )
+        parser.add_argument(
+            '--deflate',
+            dest='deflate',
+            action='store_true',
+            help='''
+            Include "salishsea deflate" command in the bash script.
+            Use this option, or the --separate-deflate option
+            if you are *not* using on-the-fly deflation in XIOS-2;
+            i.e. you are using more than 1 XIOS-2 process and/or
+            do not have the compression_level="4" attribute set in all of 
+            the file_group definitions in your file_def.xml file.            
+            '''
+        )
+        parser.add_argument(
             '--max-deflate-jobs',
             dest='max_deflate_jobs',
             type=int,
@@ -82,19 +104,6 @@ class Run(cliff.command.Command):
             Suppress checking of the initial conditions link.
             Useful if you are submitting a job to wait on a
             previous job'''
-        )
-        parser.add_argument(
-            '--deflate',
-            dest='deflate',
-            action='store_true',
-            help='''
-            Include "salishsea deflate" command in the bash script.
-            Use this option, or the --separate-deflate option
-            if you are *not* using on-the-fly deflation in XIOS-2;
-            i.e. you are using more than 1 XIOS-2 process and/or
-            do not have the compression_level="4" attribute set in all of 
-            the file_group definitions in your file_def.xml file.            
-            '''
         )
         parser.add_argument(
             '--no-submit',
@@ -145,11 +154,16 @@ class Run(cliff.command.Command):
         :type parsed_args: :class:`argparse.Namespace` instance
         """
         qsub_msg = run(
-            parsed_args.desc_file, parsed_args.results_dir,
-            parsed_args.max_deflate_jobs, parsed_args.nocheck_init,
-            parsed_args.deflate, parsed_args.no_submit,
-            parsed_args.separate_deflate, parsed_args.waitjob,
-            parsed_args.quiet
+            parsed_args.desc_file,
+            parsed_args.results_dir,
+            cedar_broadwell=parsed_args.cedar_broadwell,
+            deflate=parsed_args.deflate,
+            max_deflate_jobs=parsed_args.max_deflate_jobs,
+            nocheck_init=parsed_args.nocheck_init,
+            no_submit=parsed_args.no_submit,
+            separate_deflate=parsed_args.separate_deflate,
+            waitjob=parsed_args.waitjob,
+            quiet=parsed_args.quiet
         )
         if not parsed_args.quiet and not parsed_args.separate_deflate:
             log.info(qsub_msg)
@@ -158,9 +172,10 @@ class Run(cliff.command.Command):
 def run(
     desc_file,
     results_dir,
+    cedar_broadwell=False,
+    deflate=False,
     max_deflate_jobs=4,
     nocheck_init=False,
-    deflate=False,
     no_submit=False,
     separate_deflate=False,
     waitjob=0,
@@ -182,14 +197,16 @@ def run(
                             results;
                             it will be created if it does not exist.
 
+    :param boolean cedar_broadwell: Use broadwell (32 cores/node) on cedar.
+
+    :param boolean deflate: Include "salishsea deflate" command in the bash
+                            script.
+
     :param int max_deflate_jobs: Maximum number of concurrent sub-processes to
                                  use for netCDF deflating.
 
     :param boolean nocheck_init: Suppress initial condition link check
                                  the default is to check
-
-    :param boolean deflate: Include "salishsea deflate" command in the bash
-                            script.
 
     :param boolean no_submit: Prepare the temporary run directory,
                               and the bash script to execute the NEMO run,
@@ -233,7 +250,7 @@ def run(
     batch_script = _build_batch_script(
         run_desc, fspath(desc_file), nemo_processors, xios_processors,
         max_deflate_jobs, results_dir, run_dir, system, deflate,
-        separate_deflate
+        separate_deflate, cedar_broadwell
     )
     batch_file = run_dir / 'SalishSeaNEMO.sh'
     with batch_file.open('wt') as f:
@@ -301,7 +318,7 @@ def run(
 
 def _build_batch_script(
     run_desc, desc_file, nemo_processors, xios_processors, max_deflate_jobs,
-    results_dir, run_dir, system, deflate, separate_deflate
+    results_dir, run_dir, system, deflate, separate_deflate, cedar_broadwell
 ):
     """Build the Bash script that will execute the run.
 
@@ -336,6 +353,9 @@ def _build_batch_script(
                                      the run results and qsub them to run as
                                      serial jobs after the NEMO run finishes.
 
+    :param boolean cedar_broadwell: Use broadwell (32 cores/node) nodes on
+                                    cedar.
+
     :returns: Bash script to execute the run.
     :rtype: str
     """
@@ -348,8 +368,8 @@ def _build_batch_script(
         script = u'\n'.join((
             script, u'{sbatch_directives}\n'.format(
                 sbatch_directives=_sbatch_directives(
-                    run_desc, system, nemo_processors + xios_processors, email,
-                    results_dir
+                    run_desc, system, nemo_processors + xios_processors,
+                    cedar_broadwell, email, results_dir
                 )
             )
         ))
@@ -389,6 +409,7 @@ def _sbatch_directives(
     run_desc,
     system,
     n_processors,
+    cedar_broadwell,
     email,
     results_dir,
     mem='125G',
@@ -407,9 +428,10 @@ def _sbatch_directives(
     :param str system: Name of the HPC system on which to execute the run.
 
     :param int n_processors: Number of processors that the run will be
-                             executed on.
-                             For NEMO-3.6 runs this is the sum of NEMO and
-                             XIOS processors.
+                             executed on; the sum of NEMO and XIOS processors.
+
+    :param boolean cedar_broadwell: Use broadwell (32 cores/node) nodes on
+                                    cedar.
 
     :param str email: Email address to send job begin, end & abort
                       notifications to.
@@ -429,8 +451,14 @@ def _sbatch_directives(
     :rtype: Unicode str
     """
     run_id = get_run_desc_value(run_desc, ('run_id',))
-    processors_per_node = 32
+    constraint = (
+        'broadwell' if system == 'cedar' and cedar_broadwell else 'skylake'
+    )
+    processors_per_node = (
+        48 if system == 'cedar' and not cedar_broadwell else 32
+    )
     nodes = math.ceil(n_processors / processors_per_node)
+    mem = '187G' if system == 'cedar' and not cedar_broadwell else mem
     if deflate:
         run_id = '{result_type}_{run_id}_deflate'.format(
             run_id=run_id, result_type=result_type
@@ -447,8 +475,17 @@ def _sbatch_directives(
             hours=t.hour, minutes=t.minute, seconds=t.second
         )
     walltime = _td2hms(td)
-    sbatch_directives = (
-        u'#SBATCH --job-name={run_id}\n'
+    if system == 'cedar':
+        sbatch_directives = (
+            u'#SBATCH --job-name={run_id}\n'
+            u'#SBATCH --constraint={constraint}\n'
+        ).format(
+            run_id=run_id, constraint=constraint
+        )
+    else:
+        sbatch_directives = (u'#SBATCH --job-name={run_id}\n'
+                             ).format(run_id=run_id)
+    sbatch_directives += (
         u'#SBATCH --nodes={nodes}\n'
         u'#SBATCH --ntasks-per-node={processors_per_node}\n'
         u'#SBATCH --mem={mem}\n'
@@ -456,7 +493,6 @@ def _sbatch_directives(
         u'#SBATCH --mail-user={email}\n'
         u'#SBATCH --mail-type=ALL\n'
     ).format(
-        run_id=run_id,
         nodes=int(nodes),
         processors_per_node=processors_per_node,
         mem=mem,
