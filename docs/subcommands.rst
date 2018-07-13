@@ -53,8 +53,9 @@ For example:
 
 ::
 
-    usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS]
-                         [--nocheck-initial-conditions] [--deflate] [--no-submit]
+    usage: salishsea run [-h] [--cedar-broadwell] [--deflate]
+                         [--max-deflate-jobs MAX_DEFLATE_JOBS]
+                         [--nocheck-initial-conditions] [--no-submit]
                          [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
@@ -68,13 +69,9 @@ For example:
 
     optional arguments:
       -h, --help            show this help message and exit
-      --max-deflate-jobs MAX_DEFLATE_JOBS
-                            Maximum number of concurrent sub-processes to
-                            use for netCDF deflating. Defaults to 4.
-      --nocheck-initial-conditions
-                            Suppress checking of the initial conditions link.
-                            Useful if you are submitting a job to wait on a
-                            previous job
+      --cedar-broadwell     Use broadwell (32 cores/node) nodes on cedar instead
+                            of the
+                            default skylake (48 cores/node) nodes.
       --deflate             Include "salishsea deflate" command in the bash
                             script.
                             Use this option, or the --separate-deflate option
@@ -83,6 +80,13 @@ For example:
                             do not have the compression_level="4" attribute set in
                             all of
                             the file_group definitions in your file_def.xml file.
+      --max-deflate-jobs MAX_DEFLATE_JOBS
+                            Maximum number of concurrent sub-processes to
+                            use for netCDF deflating. Defaults to 4.
+      --nocheck-initial-conditions
+                            Suppress checking of the initial conditions link.
+                            Useful if you are submitting a job to wait on a
+                            previous job
       --no-submit           Prepare the temporary run directory, and the bash
                             script to execute
                             the NEMO run, but don't submit the run to the queue.
@@ -94,7 +98,8 @@ For example:
       --separate-deflate    Produce separate bash scripts to deflate the run
                             results and submit
                             them to run as serial jobs after the NEMO run finishes
-                            via the the queue manager's job chaining feature.
+                            via the
+                            queue manager's job chaining feature.
       --waitjob WAITJOB     Make this job wait for to start until the successful
                             completion of
                             WAITJOB. WAITJOB is the queue job number of the job to
@@ -121,8 +126,9 @@ The results are gathered in the specified results directory.
 
 ::
 
-    usage: salishsea run [-h] [--max-deflate-jobs MAX_DEFLATE_JOBS]
-                         [--nocheck-initial-conditions] [--deflate] [--no-submit]
+    usage: salishsea run [-h] [--cedar-broadwell] [--deflate]
+                         [--max-deflate-jobs MAX_DEFLATE_JOBS]
+                         [--nocheck-initial-conditions] [--no-submit]
                          [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
@@ -136,13 +142,9 @@ The results are gathered in the specified results directory.
 
     optional arguments:
       -h, --help            show this help message and exit
-      --max-deflate-jobs MAX_DEFLATE_JOBS
-                            Maximum number of concurrent sub-processes to
-                            use for netCDF deflating. Defaults to 4.
-      --nocheck-initial-conditions
-                            Suppress checking of the initial conditions link.
-                            Useful if you are submitting a job to wait on a
-                            previous job
+      --cedar-broadwell     Use broadwell (32 cores/node) nodes on cedar instead
+                            of the
+                            default skylake (48 cores/node) nodes.
       --deflate             Include "salishsea deflate" command in the bash
                             script.
                             Use this option, or the --separate-deflate option
@@ -151,6 +153,13 @@ The results are gathered in the specified results directory.
                             do not have the compression_level="4" attribute set in
                             all of
                             the file_group definitions in your file_def.xml file.
+      --max-deflate-jobs MAX_DEFLATE_JOBS
+                            Maximum number of concurrent sub-processes to
+                            use for netCDF deflating. Defaults to 4.
+      --nocheck-initial-conditions
+                            Suppress checking of the initial conditions link.
+                            Useful if you are submitting a job to wait on a
+                            previous job
       --no-submit           Prepare the temporary run directory, and the bash
                             script to execute
                             the NEMO run, but don't submit the run to the queue.
@@ -162,7 +171,8 @@ The results are gathered in the specified results directory.
       --separate-deflate    Produce separate bash scripts to deflate the run
                             results and submit
                             them to run as serial jobs after the NEMO run finishes
-                            via the the queue manager's job chaining feature.
+                            via the
+                            queue manager's job chaining feature.
       --waitjob WAITJOB     Make this job wait for to start until the successful
                             completion of
                             WAITJOB. WAITJOB is the queue job number of the job to
