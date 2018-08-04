@@ -134,7 +134,7 @@ class TestTakeAction:
 )
 @patch('salishsea_cmd.run._build_batch_script', return_value=u'batch script')
 @patch('salishsea_cmd.run.get_n_processors', return_value=144)
-@patch('salishsea_cmd.run.lib.load_run_desc')
+@patch('salishsea_cmd.run.load_run_desc')
 @patch('salishsea_cmd.run.api.prepare')
 class TestRun:
     """Unit tests for `salishsea run` run() function.

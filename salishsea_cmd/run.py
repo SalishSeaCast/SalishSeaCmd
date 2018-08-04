@@ -14,8 +14,7 @@
 # limitations under the License.
 """SalishSeaCmd command plug-in for run sub-command.
 
-Prepare for, execute, and gather the results of a run of the
-Salish Sea NEMO model.
+Prepare for, execute, and gather the results of a run of the Salish Sea NEMO model.
 """
 from __future__ import division
 
@@ -34,9 +33,9 @@ import subprocess
 
 import cliff.command
 from nemo_cmd.fspath import fspath
-from nemo_cmd.prepare import get_n_processors, get_run_desc_value
+from nemo_cmd.prepare import get_n_processors, get_run_desc_value, load_run_desc
 
-from salishsea_cmd import api, lib
+from salishsea_cmd import api
 
 log = logging.getLogger(__name__)
 
@@ -230,7 +229,7 @@ def run(
     run_dir = api.prepare(desc_file, nocheck_init)
     if not quiet:
         log.info('Created run directory {}'.format(run_dir))
-    run_desc = lib.load_run_desc(desc_file)
+    run_desc = load_run_desc(desc_file)
     nemo_processors = get_n_processors(run_desc, run_dir)
     separate_xios_server = get_run_desc_value(
         run_desc, ('output', 'separate XIOS server')

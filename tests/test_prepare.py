@@ -64,7 +64,7 @@ class TestParser:
         assert getattr(parsed_args, attr)
 
 
-@patch('salishsea_cmd.prepare.lib.load_run_desc')
+@patch('nemo_cmd.prepare.load_run_desc')
 @patch('nemo_cmd.prepare.check_nemo_exec', return_value='nemo_bin_dir')
 @patch('nemo_cmd.prepare.check_xios_exec', return_value='xios_bin_dir')
 @patch('nemo_cmd.api.find_rebuild_nemo_script')
