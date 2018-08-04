@@ -37,8 +37,6 @@ import nemo_cmd.api
 import nemo_cmd.prepare
 from nemo_cmd.prepare import get_run_desc_value
 
-from salishsea_cmd import lib
-
 logger = logging.getLogger(__name__)
 
 
@@ -111,7 +109,7 @@ def prepare(desc_file, nocheck_init):
     :returns: Path of the temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
-    run_desc = lib.load_run_desc(desc_file)
+    run_desc = nemo_cmd.prepare.load_run_desc(desc_file)
     nemo_bin_dir = nemo_cmd.prepare.check_nemo_exec(run_desc)
     xios_bin_dir = nemo_cmd.prepare.check_xios_exec(run_desc)
     nemo_cmd.api.find_rebuild_nemo_script(run_desc)
