@@ -29,7 +29,7 @@ It is a NEMO domain-specific command processor tool for the `Salish Sea NEMO mod
 License
 =======
 
-The Salish Sea NEMO command processor and documentation are copyright 2013-2017 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
+The Salish Sea NEMO command processor and documentation are copyright 2013-2018 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0
