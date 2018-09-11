@@ -463,7 +463,7 @@ class TestBuildBatchScript:
             u'\n'
             u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
-            u'module load python27-scipy-stack/2017a\n'
+            u'module load python/3.7.0\n'
             u'\n'
             u'mkdir -p ${RESULTS_DIR}\n'
             u'cd ${WORK_DIR}\n'
@@ -559,7 +559,7 @@ class TestBuildBatchScript:
             u'\n'
             u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
-            u'module load python27-scipy-stack/2017a\n'
+            u'module load python/3.7.0\n'
             u'\n'
             u'mkdir -p ${RESULTS_DIR}\n'
             u'cd ${WORK_DIR}\n'
@@ -1015,7 +1015,7 @@ class TestModules:
         expected = (
             u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
-            u'module load python27-scipy-stack/2017a\n'
+            u'module load python/3.7.0\n'
         )
         assert modules == expected
 
