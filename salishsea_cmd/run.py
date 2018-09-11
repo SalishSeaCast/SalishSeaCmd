@@ -678,7 +678,7 @@ def _modules(system):
         'cedar': (
             u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
-            u'module load scipy-stack/2018b\n'
+            u'module load python/3.7.0\n'
         ),
         'graham': (
             u'module load netcdf-mpi/4.4.1.1\n'
