@@ -457,7 +457,7 @@ def _sbatch_directives(
         48 if system == 'cedar' and not cedar_broadwell else 32
     )
     nodes = math.ceil(n_processors / processors_per_node)
-    mem = '187G' if system == 'cedar' and not cedar_broadwell else mem
+    mem = '0' if system == 'cedar' and not cedar_broadwell else mem
     if deflate:
         run_id = '{result_type}_{run_id}_deflate'.format(
             run_id=run_id, result_type=result_type
