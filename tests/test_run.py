@@ -406,7 +406,7 @@ class TestBuildBatchScript:
     @pytest.mark.parametrize(
         'cedar_broadwell, constraint, nodes, ntasks, mem, deflate', [
             (True, 'broadwell', 2, 32, '125G', True),
-            (False, 'skylake', 1, 48, '187G', True),
+            (False, 'skylake', 1, 48, '0', True),
         ]
     )
     def test_cedar(
@@ -800,7 +800,7 @@ class TestSbatchDirectives:
     @pytest.mark.parametrize(
         'system, account, cedar_broadwell, constraint, nodes, ntasks, mem', [
             ('cedar', 'rrg-allen', True, 'broadwell', 2, 32, '125G'),
-            ('cedar', 'rrg-allen', False, 'skylake', 1, 48, '187G'),
+            ('cedar', 'rrg-allen', False, 'skylake', 1, 48, '0'),
         ]
     )
     def test_sbatch_directives(
