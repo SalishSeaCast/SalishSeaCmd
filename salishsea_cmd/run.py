@@ -676,7 +676,6 @@ def _definitions(
 def _modules(system):
     modules = {
         'cedar': (
-            u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
             u'module load python/3.7.0\n'
         ),
