@@ -207,10 +207,10 @@ class TestRun:
             Path(str(p_results_dir)), Path(str(p_run_dir)), 'orcinus', False,
             False, False
         )
-        m_sco.assert_called_once_with(
-            ['qsub', '-W', 'depend=afterok:42', 'SalishSeaNEMO.sh'],
-            universal_newlines=True
-        )
+        m_sco.assert_called_once_with([
+            'qsub', '-W', 'depend=afterok:42', 'SalishSeaNEMO.sh'
+        ],
+                                      universal_newlines=True)
         assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
         assert qsb_msg == '43.orca2.ibb'
 
@@ -246,10 +246,10 @@ class TestRun:
             Path(str(p_results_dir)), Path(str(p_run_dir)), 'cedar', False,
             False, False
         )
-        m_sco.assert_called_once_with(
-            ['sbatch', '-d', 'afterok:42', 'SalishSeaNEMO.sh'],
-            universal_newlines=True
-        )
+        m_sco.assert_called_once_with([
+            'sbatch', '-d', 'afterok:42', 'SalishSeaNEMO.sh'
+        ],
+                                      universal_newlines=True)
         assert p_run_dir.join('SalishSeaNEMO.sh').check(file=True)
         assert qsb_msg == '43'
 
@@ -461,7 +461,6 @@ class TestBuildBatchScript:
         expected += (
             u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
             u'\n'
-            u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
             u'module load python/3.7.0\n'
             u'\n'
@@ -557,7 +556,6 @@ class TestBuildBatchScript:
         expected += (
             u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
             u'\n'
-            u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
             u'module load python/3.7.0\n'
             u'\n'
@@ -1013,7 +1011,6 @@ class TestModules:
     def test_cedar_graham(self, system):
         modules = salishsea_cmd.run._modules(system)
         expected = (
-            u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
             u'module load python/3.7.0\n'
         )
