@@ -367,8 +367,8 @@ def _build_batch_script(
         script = u'\n'.join((
             script, u'{sbatch_directives}\n'.format(
                 sbatch_directives=_sbatch_directives(
-                    run_desc, system, nemo_processors + xios_processors,
-                    cedar_broadwell, email, results_dir
+                    run_desc, system, nemo_processors +
+                    xios_processors, cedar_broadwell, email, results_dir
                 )
             )
         ))
@@ -376,8 +376,8 @@ def _build_batch_script(
         script = u'\n'.join((
             script, u'{pbs_directives}\n'.format(
                 pbs_directives=_pbs_directives(
-                    run_desc, nemo_processors + xios_processors, email,
-                    fspath(results_dir)
+                    run_desc, nemo_processors +
+                    xios_processors, email, fspath(results_dir)
                 )
             )
         ))
@@ -680,7 +680,6 @@ def _modules(system):
             u'module load python/3.7.0\n'
         ),
         'graham': (
-            u'module load netcdf-mpi/4.4.1.1\n'
             u'module load netcdf-fortran-mpi/4.4.4\n'
             u'module load python/3.7.0\n'
         ),
