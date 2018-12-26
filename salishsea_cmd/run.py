@@ -735,7 +735,8 @@ def _execute(
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
                 u'module load nco/4.6.6\n'
-                u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
+                u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12n]_T*.nc '
+                u'Slab_[UV]*.nc *_carp_T*.nc *_mtrc_T*.nc '
                 u'--jobs {max_deflate_jobs} --debug\n'
                 u'echo "Results deflation ended at $(date)"\n'
             ).format(max_deflate_jobs=max_deflate_jobs)
@@ -743,7 +744,8 @@ def _execute(
             script += (
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
-                u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
+                u'${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12n]_T*.nc '
+                u'Slab_[UV]*.nc *_carp_T*.nc *_mtrc_T*.nc '
                 u'--jobs {max_deflate_jobs} --debug\n'
                 u'echo "Results deflation ended at $(date)"\n'
             ).format(max_deflate_jobs=max_deflate_jobs)
