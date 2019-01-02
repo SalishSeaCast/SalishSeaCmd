@@ -455,7 +455,7 @@ the number of XIOS servers to run.
 :kbd:`vcs revisions` Section
 ============================
 
-The *optional* :kbd:`vcs revisions` section of the run description file contains lists of version control system repositories of which the revision and status will be recorded in the temporary run and run results directories.
+The *optional* :kbd:`vcs revisions` section of the run description file contains lists of version control system repositories for which the revision and status will be recorded in the temporary run and run results directories.
 
 .. note::
     Revision and status record files for the :file:`NEMO-3.6-code`,
@@ -484,11 +484,13 @@ At present only Mercurial
 (:kbd:`hg`)
 is supported.
 
-The paths listed under the version control tool key are the repositories of which the revision and status will be recorded.
+The paths listed under the version control tool key are the repositories for which the revision and status will be recorded.
 
 The repository paths may be relative or absolute,
 and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
 and :envvar:`$USER` as an alternative spelling of the user's userid.
+
+Absolute paths with environment variables are strongly recommended for portability and re-usability.
 
 For each repository,
 a file will be created in the temporary run directory.
@@ -498,6 +500,13 @@ from the example above,
 the files created will be::
 
   SS-run-sets_rev.txt
+  grid_rev.txt
+  rivers_rev.txt
+  tides_rev.txt
+  tracers_rev.txt
+  NEMO-Cmd_rev.txt
+  SalishSeaCmd_rev.txt
+  XIOS-ARCH_rev.txt
 
 Each file will contain the output of the :command:`hg parents -v` command for the repository.
 That is a record of the last committed revision of the repository that will be in effect for the run.
