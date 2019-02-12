@@ -46,30 +46,30 @@ class Prepare(cliff.command.Command):
 
     def get_parser(self, prog_name):
         parser = super(Prepare, self).get_parser(prog_name)
-        parser.description = '''
+        parser.description = """
             Set up the Salish Sea NEMO described in DESC_FILE
             and print the path to the run directory.
-        '''
+        """
         parser.add_argument(
-            'desc_file',
-            metavar='DESC_FILE',
+            "desc_file",
+            metavar="DESC_FILE",
             type=Path,
-            help='run description YAML file'
+            help="run description YAML file",
         )
         parser.add_argument(
-            '--nocheck-initial-conditions',
-            dest='nocheck_init',
-            action='store_true',
-            help='''
+            "--nocheck-initial-conditions",
+            dest="nocheck_init",
+            action="store_true",
+            help="""
             Suppress checking of the initial conditions link.
             Useful if you are submitting a job to wait on a
-            previous job'''
+            previous job""",
         )
         parser.add_argument(
-            '-q',
-            '--quiet',
-            action='store_true',
-            help="don't show the run directory path on completion"
+            "-q",
+            "--quiet",
+            action="store_true",
+            help="don't show the run directory path on completion",
         )
         return parser
 
@@ -85,7 +85,7 @@ class Prepare(cliff.command.Command):
         """
         run_dir = prepare(parsed_args.desc_file, parsed_args.nocheck_init)
         if not parsed_args.quiet:
-            logger.info('Created run directory {}'.format(run_dir))
+            logger.info("Created run directory {}".format(run_dir))
         return run_dir
 
 
@@ -116,9 +116,7 @@ def prepare(desc_file, nocheck_init):
     run_set_dir = nemo_cmd.resolved_path(desc_file).parent
     run_dir = nemo_cmd.prepare.make_run_dir(run_desc)
     nemo_cmd.prepare.make_namelists(run_set_dir, run_desc, run_dir)
-    nemo_cmd.prepare.copy_run_set_files(
-        run_desc, desc_file, run_set_dir, run_dir
-    )
+    nemo_cmd.prepare.copy_run_set_files(run_desc, desc_file, run_set_dir, run_dir)
     nemo_cmd.prepare.make_executable_links(nemo_bin_dir, run_dir, xios_bin_dir)
     nemo_cmd.prepare.make_grid_links(run_desc, run_dir)
     nemo_cmd.prepare.make_forcing_links(run_desc, run_dir)
@@ -141,31 +139,27 @@ def _record_vcs_revisions(run_desc, run_dir):
     """
     try:
         nemo_code_config = get_run_desc_value(
-            run_desc, ('paths', 'NEMO code config'),
-            resolve_path=True,
-            fatal=False
+            run_desc, ("paths", "NEMO code config"), resolve_path=True, fatal=False
         )
     except KeyError:
         # Alternate key spelling for backward compatibility
         nemo_code_config = get_run_desc_value(
-            run_desc, ('paths', 'NEMO-code-config'), resolve_path=True
+            run_desc, ("paths", "NEMO-code-config"), resolve_path=True
         )
     xios_code_repo = get_run_desc_value(
-        run_desc, ('paths', 'XIOS'), resolve_path=True, run_dir=run_dir
+        run_desc, ("paths", "XIOS"), resolve_path=True, run_dir=run_dir
     )
     for repo in (nemo_code_config.parent.parent, xios_code_repo):
         nemo_cmd.prepare.write_repo_rev_file(
             repo, run_dir, nemo_cmd.prepare.get_hg_revision
         )
-    if 'vcs revisions' not in run_desc:
+    if "vcs revisions" not in run_desc:
         return
-    vcs_funcs = {'hg': nemo_cmd.prepare.get_hg_revision}
-    vcs_tools = get_run_desc_value(
-        run_desc, ('vcs revisions',), run_dir=run_dir
-    )
+    vcs_funcs = {"hg": nemo_cmd.prepare.get_hg_revision}
+    vcs_tools = get_run_desc_value(run_desc, ("vcs revisions",), run_dir=run_dir)
     for vcs_tool in vcs_tools:
         repos = get_run_desc_value(
-            run_desc, ('vcs revisions', vcs_tool), run_dir=run_dir
+            run_desc, ("vcs revisions", vcs_tool), run_dir=run_dir
         )
         for repo in repos:
             nemo_cmd.prepare.write_repo_rev_file(
