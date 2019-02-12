@@ -29,6 +29,9 @@
 .. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
     :target: https://bitbucket.org/salishsea/salishseacmd/
     :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://black.readthedocs.io/en/stable/
+    :alt: The uncompromising Python code formatter
 .. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
     :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status
@@ -121,22 +124,36 @@ To deactivate the environment use:
 Coding Style
 ============
 
-The :kbd:`SalishSeaCmd` package uses the `yapf`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
-The project-specific differences from the :command:`yapf` implementation of PEP 8 are defined in the :file:`.style.yapf` in the repository root directory.
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://black.readthedocs.io/en/stable/
+    :alt: The uncompromising Python code formatter
 
-.. _yapf: https://github.com/google/yapf
+The :kbd:`SalishSeaCmd` package uses the `black`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
+
+.. _black: https://black.readthedocs.io/en/stable/
 .. _PEP 8: https://www.python.org/dev/peps/pep-0008/
 
-:command:`yapf` is installed as part of the :ref:`SalishSeaCmdDevelopmentEnvironment` setup.
+:command:`black` is installed as part of the :ref:`SalishSeaCmdDevelopmentEnvironment` setup.
 
-To run :command:`yapf` on the entire code-base use:
+To run :command:`black` on the entire code-base use:
 
 .. code-block:: bash
 
-    $ yapf --parallel --in-place --recursive salishsea_cmd/ tests/ __pkg_metadata__.py setup.py
+    $ cd SalishSeaCmd
+    $ conda activate salishsea-cmd
+    (salishsea-cmd)$ black ./
 
 in the repository root directory.
+The output looks something like::
 
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/salishsea_cmd/prepare.py
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/tests/test_api.py
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/salishsea_cmd/api.py
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/tests/test_prepare.py
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/salishsea_cmd/run.py
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/tests/test_run.py
+  All done! ✨ 🍰 ✨
+  6 files reformatted, 5 files left unchanged.
 
 .. _SalishSeaCmdBuildingTheDocumentation:
 

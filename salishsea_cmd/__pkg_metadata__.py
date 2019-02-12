@@ -14,7 +14,7 @@
 # limitations under the License.
 """SalishSeaCmd -- Salish Sea NEMO command processor
 """
-PROJECT = 'SalishSeaCmd'
-DESCRIPTION = 'Salish Sea NEMO Command Processor'
-VERSION = '19.1.dev0'
-DEV_STATUS = '5 - Production'
+PROJECT = "SalishSeaCmd"
+DESCRIPTION = "Salish Sea NEMO Command Processor"
+VERSION = "19.1.dev0"
+DEV_STATUS = "5 - Production"

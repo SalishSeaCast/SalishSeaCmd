@@ -11,6 +11,9 @@ Salish Sea NEMO Command Processor
 .. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
     :target: https://bitbucket.org/salishsea/salishseacmd/
     :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://black.readthedocs.io/en/stable/
+    :alt: The uncompromising Python code formatter
 .. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
     :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status

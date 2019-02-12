@@ -27,6 +27,9 @@ dependencies:
   - python=3
   - pyyaml
 
+  # For coding style
+  - black
+
   # For unit tests
   - coverage
   - pytest
@@ -39,6 +42,3 @@ dependencies:
     - arrow
     - cliff!=2.9.0
     - python-hglib
-
-    # For coding style
-    - yapf
