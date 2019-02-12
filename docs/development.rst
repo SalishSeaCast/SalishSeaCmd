@@ -285,3 +285,17 @@ Issue Tracker
 Development tasks,
 bug reports,
 and enhancement ideas are recorded and managed in the issue tracker at https://bitbucket.org/salishsea/salishseacmd/issues.
+
+
+License
+=======
+
+.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0
+    :alt: Licensed under the Apache License, Version 2.0
+
+The Salish Sea NEMO command processor and documentation are copyright 2013-2019 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
+
+They are licensed under the Apache License, Version 2.0.
+https://www.apache.org/licenses/LICENSE-2.0
+Please see the LICENSE file for details of the license.
