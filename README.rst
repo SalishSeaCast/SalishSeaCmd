@@ -2,6 +2,22 @@
 Salish Sea NEMO Command Processor
 *********************************
 
+.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0
+    :alt: Licensed under the Apache License, Version 2.0
+.. image:: https://img.shields.io/badge/python-3.5+-blue.svg
+    :target: https://docs.python.org/3.7/
+    :alt: Python Version
+.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
+    :target: https://bitbucket.org/salishsea/salishseacmd/
+    :alt: Mercurial on Bitbucket
+.. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
+    :target: https://salishseacmd.readthedocs.io/en/latest/
+    :alt: Documentation Status
+.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseacmd.svg
+    :target: https://bitbucket.org/salishsea/salishseacmd/issues?status=new&status=open
+    :alt: Issue Tracker
+
 The Salish Sea NEMO command processor, ``salishsea``, is a command line tool for doing various operations associated with the `Salish Sea NEMO model`_.
 
 .. _Salish Sea NEMO model: https://salishsea-meopar-docs.readthedocs.io/en/latest/
@@ -14,7 +30,7 @@ and what options are available to control it.
 Documentation for the command processor is in the ``docs/`` directory and is rendered at https://salishseacmd.readthedocs.io/en/latest/.
 
 .. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
-    :target: https://salishseacmd.readthedocs.io/en/latest/?badge=latest
+    :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status
 
 This an extensible tool built on the OpenStack ``cliff``
@@ -28,6 +44,10 @@ It is a NEMO domain-specific command processor tool for the `Salish Sea NEMO mod
 
 License
 =======
+
+.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0
+    :alt: Licensed under the Apache License, Version 2.0
 
 The Salish Sea NEMO command processor and documentation are copyright 2013-2019 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
 
