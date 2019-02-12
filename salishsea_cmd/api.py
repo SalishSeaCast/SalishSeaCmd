@@ -37,7 +37,7 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
 handler.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(name)s %(levelname)s: %(message)s')
+formatter = logging.Formatter("%(name)s %(levelname)s: %(message)s")
 handler.setFormatter(formatter)
 log.addHandler(handler)
 
@@ -109,17 +109,17 @@ def prepare(run_desc_file, nocheck_init=False):
 
 
 def run_description(
-    config_name='SalishSea',
+    config_name="SalishSea",
     run_id=None,
     walltime=None,
-    mpi_decomposition='8x18',
+    mpi_decomposition="8x18",
     NEMO_code_config=None,
     XIOS_code=None,
     forcing_path=None,
     runs_dir=None,
     forcing=None,
     init_conditions=None,
-    namelists=None
+    namelists=None,
 ):
     """Return a Salish Sea NEMO run description dict template.
 
@@ -189,50 +189,48 @@ def run_description(
 
     """
     run_description = {
-        'config_name': config_name,
-        'MPI decomposition': mpi_decomposition,
-        'run_id': run_id,
-        'walltime': walltime,
-        'paths': {
-            'NEMO code config': NEMO_code_config,
-            'XIOS': XIOS_code,
-            'forcing': forcing_path,
-            'runs directory': runs_dir,
+        "config_name": config_name,
+        "MPI decomposition": mpi_decomposition,
+        "run_id": run_id,
+        "walltime": walltime,
+        "paths": {
+            "NEMO code config": NEMO_code_config,
+            "XIOS": XIOS_code,
+            "forcing": forcing_path,
+            "runs directory": runs_dir,
         },
-        'grid': {
-            'coordinates': 'coordinates_seagrid_SalishSea.nc',
-            'bathymetry': 'bathy_meter_SalishSea2.nc',
+        "grid": {
+            "coordinates": "coordinates_seagrid_SalishSea.nc",
+            "bathymetry": "bathy_meter_SalishSea2.nc",
         },
-        'forcing': forcing,
-        'output': {
-            'files': 'iodef.xml',
-        }
+        "forcing": forcing,
+        "output": {"files": "iodef.xml"},
     }
     if namelists is None:
-        run_description['namelists'] = {
-            'namelist_cfg': [
-                'namelist.time',
-                'namelist.domain',
-                'namelist.surface',
-                'namelist.lateral',
-                'namelist.bottom',
-                'namelist.tracer',
-                'namelist.dynamics',
-                'namelist.vertical',
-                'namelist.compute',
+        run_description["namelists"] = {
+            "namelist_cfg": [
+                "namelist.time",
+                "namelist.domain",
+                "namelist.surface",
+                "namelist.lateral",
+                "namelist.bottom",
+                "namelist.tracer",
+                "namelist.dynamics",
+                "namelist.vertical",
+                "namelist.compute",
             ]
         }
     else:
-        run_description['namelists'] = namelists
-    run_description['output'] = {
-        'domain': 'domain_def.xml',
-        'fields': None,
-        'separate XIOS server': True,
-        'XIOS servers': 1,
+        run_description["namelists"] = namelists
+    run_description["output"] = {
+        "domain": "domain_def.xml",
+        "fields": None,
+        "separate XIOS server": True,
+        "XIOS servers": 1,
     }
     if NEMO_code_config is not None:
-        run_description['output']['fields'] = os.path.join(
-            NEMO_code_config, 'SHARED/field_def.xml'
+        run_description["output"]["fields"] = os.path.join(
+            NEMO_code_config, "SHARED/field_def.xml"
         )
     return run_description
 
@@ -251,10 +249,10 @@ def run_in_subprocess(run_id, run_desc, results_dir):
     :arg results_dir: Directory to store results into.
     :type results_dir: str
     """
-    yaml_file = '{}_subprocess_run.yaml'.format(run_id)
-    with open(yaml_file, 'wt') as f:
+    yaml_file = "{}_subprocess_run.yaml".format(run_id)
+    with open(yaml_file, "wt") as f:
         yaml.dump(run_desc, f, default_flow_style=False)
-    cmd = ['salishsea', 'run']
+    cmd = ["salishsea", "run"]
     cmd.extend([yaml_file, results_dir])
     try:
         output = subprocess.check_output(
@@ -265,7 +263,7 @@ def run_in_subprocess(run_id, run_desc, results_dir):
                 log.info(line)
     except subprocess.CalledProcessError as e:
         log.error(
-            'subprocess {cmd} failed with return code {status}'.format(
+            "subprocess {cmd} failed with return code {status}".format(
                 cmd=cmd, status=e.returncode
             )
         )
@@ -291,7 +289,7 @@ def _run_subcommand(app, app_args, argv):
     :type argv: list
     """
     command_manager = cliff.commandmanager.CommandManager(
-        'salishsea.app', convert_underscores=False
+        "salishsea.app", convert_underscores=False
     )
     try:
         subcommand = command_manager.find_command(argv)
