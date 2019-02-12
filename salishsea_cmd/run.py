@@ -482,8 +482,9 @@ def _sbatch_directives(
             run_id=run_id, constraint=constraint
         )
     else:
-        sbatch_directives = (u'#SBATCH --job-name={run_id}\n'
-                             ).format(run_id=run_id)
+        sbatch_directives = (u'#SBATCH --job-name={run_id}\n').format(
+            run_id=run_id
+        )
     sbatch_directives += (
         u'#SBATCH --nodes={nodes}\n'
         u'#SBATCH --ntasks-per-node={processors_per_node}\n'
@@ -735,20 +736,19 @@ def _execute(
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
                 u'module load nco/4.6.6\n'
-                u'${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc '
-                u'*_grid_[TUVW]*.nc *_turb_T*.nc *_dia[12n]_T*.nc '
-                u'FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc '
-                u'--jobs {max_deflate_jobs} --debug\n'
+                u'${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\'
+                u'  *_turb_T*.nc *_dia[12n]_T*.nc '
+                u'FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\'
+                u'  --jobs {max_deflate_jobs} --debug\n'
                 u'echo "Results deflation ended at $(date)"\n'
             ).format(max_deflate_jobs=max_deflate_jobs)
         else:
             script += (
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
-                u'${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc '
-                u'*_grid_[TUVW]*.nc *_turb_T*.nc *_dia[12n]_T*.nc '
-                u'FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc '
-                u'--jobs {max_deflate_jobs} --debug\n'
+                u'${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\'
+                u'  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\'
+                u'  --jobs {max_deflate_jobs} --debug\n'
                 u'echo "Results deflation ended at $(date)"\n'
             ).format(max_deflate_jobs=max_deflate_jobs)
     script += (

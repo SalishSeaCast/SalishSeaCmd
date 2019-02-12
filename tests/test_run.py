@@ -482,8 +482,9 @@ class TestBuildBatchScript:
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
                 u'module load nco/4.6.6\n'
-                u'${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
-                u'--jobs 4 --debug\n'
+                u'${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\'
+                u'  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\'
+                u'  --jobs 4 --debug\n'
                 u'echo "Results deflation ended at $(date)"\n'
             )
         expected += (
@@ -577,8 +578,9 @@ class TestBuildBatchScript:
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
                 u'module load nco/4.6.6\n'
-                u'${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
-                u'--jobs 4 --debug\n'
+                u'${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\'
+                u'  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\'
+                u'  --jobs 4 --debug\n'
                 u'echo "Results deflation ended at $(date)"\n'
             )
         expected += (
@@ -677,8 +679,9 @@ class TestBuildBatchScript:
             expected += (
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
-                u'${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
-                u'--jobs 4 --debug\n'
+                u'${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\'
+                u'  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\'
+                u'  --jobs 4 --debug\n'
                 u'echo "Results deflation ended at $(date)"\n'
             )
         expected += (
@@ -768,8 +771,9 @@ class TestBuildBatchScript:
             expected += (
                 u'\n'
                 u'echo "Results deflation started at $(date)"\n'
-                u'${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc '
-                u'--jobs 4 --debug\n'
+                u'${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\'
+                u'  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\'
+                u'  --jobs 4 --debug\n'
                 u'echo "Results deflation ended at $(date)"\n'
             )
         expected += (
@@ -1073,9 +1077,13 @@ class TestExecute:
         '''
         if system in {'cedar', 'graham'}:
             expected += 'module load nco/4.6.6\n'
-        expected += '''${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc --jobs 4 --debug
-        echo "Results deflation ended at $(date)"
-        
+        expected += (
+            '${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\'
+            '  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\'
+            '  --jobs 4 --debug\n'
+            'echo "Results deflation ended at $(date)"\n'
+        )
+        expected += '''
         echo "Results gathering started at $(date)"
         ${GATHER} ${RESULTS_DIR} --debug
         echo "Results gathering ended at $(date)"
@@ -1144,9 +1152,14 @@ class TestExecute:
         echo "Results combining ended at $(date)"
 
         echo "Results deflation started at $(date)"
-        ${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc *_dia[12]_T*.nc --jobs 4 --debug
-        echo "Results deflation ended at $(date)"
-        
+        '''
+        expected += (
+            '${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\'
+            '  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\'
+            '  --jobs 4 --debug\n'
+            'echo "Results deflation ended at $(date)"\n'
+        )
+        expected += '''
         echo "Results gathering started at $(date)"
         ${GATHER} ${RESULTS_DIR} --debug
         echo "Results gathering ended at $(date)"
