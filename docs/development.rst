@@ -20,12 +20,33 @@
 :kbd:`SalishSeaCmd` Package Development
 ***************************************
 
+.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0
+    :alt: Licensed under the Apache License, Version 2.0
+.. image:: https://img.shields.io/badge/python-3.5+-blue.svg
+    :target: https://docs.python.org/3.7/
+    :alt: Python Version
+.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
+    :target: https://bitbucket.org/salishsea/salishseacmd/
+    :alt: Mercurial on Bitbucket
+.. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
+    :target: https://salishseacmd.readthedocs.io/en/latest/
+    :alt: Documentation Status
+.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseacmd.svg
+    :target: https://bitbucket.org/salishsea/salishseacmd/issues?status=new&status=open
+    :alt: Issue Tracker
+
+
 .. _SalishSeaCmdPythonVersions:
 
 Python Versions
 ===============
 
-The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.6 or later.
+.. image:: https://img.shields.io/badge/python-3.5+-blue.svg
+    :target: https://docs.python.org/3.7/
+    :alt: Python Version
+
+The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.7 or later.
 However,
 the package must also run under `Python`_ 2.7 for use on the Westgrid HPC platform.
 
@@ -36,6 +57,10 @@ the package must also run under `Python`_ 2.7 for use on the Westgrid HPC platfo
 
 Getting the Code
 ================
+
+.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
+    :target: https://bitbucket.org/salishsea/salishseacmd/
+    :alt: Mercurial on Bitbucket
 
 Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from Bitbucket with:
 
@@ -117,6 +142,10 @@ in the repository root directory.
 
 Building the Documentation
 ==========================
+
+.. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
+    :target: https://salishseacmd.readthedocs.io/en/latest/
+    :alt: Documentation Status
 
 The documentation for the :kbd:`SalishSeaCmd` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
 Creating a :ref:`SalishSeaCmdDevelopmentEnvironment` as described above includes the installation of Sphinx.
@@ -235,6 +264,10 @@ create a Python 2.7 :ref:`SalishSeaCmdDevelopmentEnvironment`.
 Version Control Repository
 ==========================
 
+.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
+    :target: https://bitbucket.org/salishsea/salishseacmd/
+    :alt: Mercurial on Bitbucket
+
 The :kbd:`SalishSeaCmd` package code and documentation source files are available in the :ref:`SalishSeaCmd-repo` `Mercurial`_ repository at https://bitbucket.org/salishsea/salishseacmd.
 
 .. _Mercurial: https://www.mercurial-scm.org/
@@ -244,6 +277,10 @@ The :kbd:`SalishSeaCmd` package code and documentation source files are availabl
 
 Issue Tracker
 =============
+
+.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseacmd.svg
+    :target: https://bitbucket.org/salishsea/salishseacmd/issues?status=new&status=open
+    :alt: Issue Tracker
 
 Development tasks,
 bug reports,
