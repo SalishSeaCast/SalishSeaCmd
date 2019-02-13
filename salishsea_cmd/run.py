@@ -238,7 +238,7 @@ def run(
         or os.getenv("CC_CLUSTER")
         or socket.gethostname().split(".")[0]
     )
-    submit_cmd = "sbatch" if system in {"cedar", "graham"} else "qsub"
+    queue_job_cmd = "sbatch" if system in {"cedar", "graham"} else "qsub"
     batch_script = _build_batch_script(
         run_desc,
         fspath(desc_file),
@@ -270,39 +270,43 @@ def run(
     starting_dir = Path.cwd()
     os.chdir(fspath(run_dir))
     if waitjob:
-        depend_opt = "-W depend=afterok" if submit_cmd == "qsub" else "-d afterok"
+        depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
         cmd = "{submit_cmd} {depend_opt}:{waitjob} SalishSeaNEMO.sh".format(
-            submit_cmd=submit_cmd, depend_opt=depend_opt, waitjob=waitjob
+            submit_cmd=queue_job_cmd, depend_opt=depend_opt, waitjob=waitjob
         )
     else:
-        cmd = "{qsub} SalishSeaNEMO.sh".format(qsub=submit_cmd)
+        cmd = "{submit_cmd} SalishSeaNEMO.sh".format(submit_cmd=queue_job_cmd)
     results_dir.mkdir(parents=True, exist_ok=True)
-    qsub_msg = subprocess.check_output(shlex.split(cmd), universal_newlines=True)
+    submit_job_msg = subprocess.check_output(shlex.split(cmd), universal_newlines=True)
     if separate_deflate:
-        log.info("SalishSeaNEMO.sh queued as {qsub_msg}".format(qsub_msg=qsub_msg))
-        nemo_job_no = int(qsub_msg.split(".")[0])
+        log.info(
+            "SalishSeaNEMO.sh queued as {submit_job_msg}".format(
+                submit_job_msg=submit_job_msg
+            )
+        )
+        nemo_job_no = int(submit_job_msg.split(".")[0])
         for result_type in result_types:
             deflate_script = "deflate_{result_type}.sh".format(result_type=result_type)
             cmd = (
                 "{submit_cmd} -W depend=afterok:{nemo_job_no} " + deflate_script
             ).format(
-                submit_cmd=submit_cmd,
+                submit_cmd=queue_job_cmd,
                 nemo_job_no=nemo_job_no,
                 deflate_script=deflate_script,
             )
-            deflate_qsub_msg = subprocess.check_output(
+            deflate_job_msg = subprocess.check_output(
                 shlex.split(cmd), universal_newlines=True
             )
             log.info(
-                "{deflate_script} queued after {qsub_msg} as "
-                "{deflate_qsub_msg}".format(
+                "{deflate_script} queued after {submit_job_msg} as "
+                "{deflate_job_msg}".format(
                     deflate_script=deflate_script,
-                    qsub_msg=qsub_msg,
-                    deflate_qsub_msg=deflate_qsub_msg,
+                    submit_job_msg=submit_job_msg,
+                    deflate_job_msg=deflate_job_msg,
                 )
             )
     os.chdir(fspath(starting_dir))
-    return qsub_msg
+    return submit_job_msg
 
 
 def _build_batch_script(
