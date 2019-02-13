@@ -21,7 +21,7 @@ from salishsea_cmd import __pkg_metadata__
 
 python_classifiers = [
     "Programming Language :: Python :: {0}".format(py_version)
-    for py_version in ["2", "2.7", "3", "3.4", "3.5", "3.6"]
+    for py_version in ["3", "3.5", "3.6", "3.7"]
 ]
 other_classifiers = [
     "Development Status :: " + __pkg_metadata__.DEV_STATUS,
@@ -48,8 +48,6 @@ install_requires = [
     "PyYAML",
     # 'NEMO-Cmd',  # use cd tools; pip install -e NEMO-Cmd
 ]
-if sys.version_info[0] == 2:
-    install_requires.append("pathlib2")
 
 setup(
     name=__pkg_metadata__.PROJECT,
