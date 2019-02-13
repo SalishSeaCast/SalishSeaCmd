@@ -32,7 +32,7 @@ copyright = "{copyright_years}, {author}".format(
 )
 
 # The short X.Y version.
-from nemo_cmd import __pkg_metadata__
+from salishsea_cmd import __pkg_metadata__
 
 version = __pkg_metadata__.VERSION
 # The full version, including alpha/beta/rc tags.
