@@ -25,8 +25,7 @@ The Salish Sea NEMO command processor,
 is a command-line tool for doing various operations associated with the :ref:`SalishSeaNEMO` model.
 
 The :kbd:`SalishSeaCmd` package is a Python 3 package.
-It is developed and tested under Python 3.5 and should work with that and later versions of Python.
-The package also runs under Python 2.7 for use on the Westgrid HPC platform.
+It is developed and tested under Python 3.7 and should work with Python 3.5 and later.
 
 This an extensible tool built on the OpenStack ``cliff``
 (`Command Line Interface Formulation Framework`_)
