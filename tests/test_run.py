@@ -14,6 +14,7 @@
 # limitations under the License.
 """SalishSeaCmd run sub-command plug-in unit tests
 """
+import subprocess
 from io import StringIO
 from pathlib import Path
 from unittest.mock import call, Mock, patch
@@ -112,7 +113,7 @@ class TestTakeAction:
         assert not m_log.info.called
 
 
-@patch("salishsea_cmd.run.subprocess.check_output", return_value="43.orca2.ibb")
+@patch("salishsea_cmd.run.subprocess.run")
 @patch("salishsea_cmd.run._build_deflate_script", return_value="deflate script")
 @patch("salishsea_cmd.run._build_batch_script", return_value="batch script")
 @patch("salishsea_cmd.run.get_n_processors", return_value=144)
@@ -130,7 +131,7 @@ class TestRun:
         m_gnp,
         m_bbs,
         m_bds,
-        m_sco,
+        m_run,
         sep_xios_server,
         xios_servers,
         tmpdir,
@@ -144,6 +145,7 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
+        m_run().stdout = "43.orca2.ibb"
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir))
@@ -164,8 +166,11 @@ class TestRun:
             False,
             False,
         )
-        m_sco.assert_called_once_with(
-            ["qsub", "SalishSeaNEMO.sh"], universal_newlines=True
+        assert m_run.call_args_list[1] == call(
+            ["qsub", "SalishSeaNEMO.sh"],
+            check=True,
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert submit_job_msg == "43.orca2.ibb"
@@ -178,7 +183,7 @@ class TestRun:
         m_gnp,
         m_bbs,
         m_bds,
-        m_sco,
+        m_run,
         sep_xios_server,
         xios_servers,
         tmpdir,
@@ -192,6 +197,7 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
+        m_run().stdout = "43.orca2.ibb"
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
@@ -212,9 +218,11 @@ class TestRun:
             False,
             False,
         )
-        m_sco.assert_called_once_with(
+        assert m_run.call_args_list[1] == call(
             ["qsub", "-W", "depend=afterok:42", "SalishSeaNEMO.sh"],
+            check=True,
             universal_newlines=True,
+            stdout=subprocess.PIPE,
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert submit_job_msg == "43.orca2.ibb"
@@ -227,7 +235,7 @@ class TestRun:
         m_gnp,
         m_bbs,
         m_bds,
-        m_sco,
+        m_run,
         sep_xios_server,
         xios_servers,
         tmpdir,
@@ -241,7 +249,7 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
-        m_sco.return_value = "43"
+        m_run().stdout = "43"
         with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
@@ -262,8 +270,11 @@ class TestRun:
             False,
             False,
         )
-        m_sco.assert_called_once_with(
-            ["sbatch", "-d", "afterok:42", "SalishSeaNEMO.sh"], universal_newlines=True
+        assert m_run.call_args_list[1] == call(
+            ["sbatch", "-d", "afterok:42", "SalishSeaNEMO.sh"],
+            check=True,
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert submit_job_msg == "43"
@@ -276,7 +287,7 @@ class TestRun:
         m_gnp,
         m_bbs,
         m_bds,
-        m_sco,
+        m_run,
         sep_xios_server,
         xios_servers,
         tmpdir,
@@ -311,16 +322,17 @@ class TestRun:
             False,
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert not m_sco.called
+        assert not m_run.called
         assert submit_job_msg is None
 
-    def test_run_deflate(self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, tmpdir):
+    def test_run_deflate(self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_run, tmpdir):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_lrd.return_value = {
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
+        m_run().stdout = "43.orca2.ibb"
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), deflate=True
@@ -341,14 +353,17 @@ class TestRun:
             False,
             False,
         )
-        m_sco.assert_called_once_with(
-            ["qsub", "SalishSeaNEMO.sh"], universal_newlines=True
+        assert m_run.call_args_list[1] == call(
+            ["qsub", "SalishSeaNEMO.sh"],
+            check=True,
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert submit_job_msg == "43.orca2.ibb"
 
     def test_run_cedar_broadwell(
-        self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, tmpdir
+        self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_run, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         m_prepare.return_value = Path(str(p_run_dir))
@@ -356,7 +371,7 @@ class TestRun:
         m_lrd.return_value = {
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
-        m_sco.return_value = "43"
+        m_run().stdout = "43"
         with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), cedar_broadwell=True
@@ -381,7 +396,7 @@ class TestRun:
         assert submit_job_msg == "43"
 
     def test_run_separate_deflate(
-        self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, tmpdir
+        self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_run, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         m_prepare.return_value = Path(str(p_run_dir))
@@ -389,6 +404,7 @@ class TestRun:
         m_lrd.return_value = {
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
+        m_run().stdout = "43"
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
@@ -426,19 +442,30 @@ class TestRun:
         assert p_run_dir.join("deflate_grid.sh").check(file=True)
         assert p_run_dir.join("deflate_ptrc.sh").check(file=True)
         assert p_run_dir.join("deflate_dia.sh").check(file=True)
-        assert m_sco.call_args_list == [
-            call(["qsub", "SalishSeaNEMO.sh"], universal_newlines=True),
+        assert m_run.call_args_list[1:] == [
+            call(
+                ["qsub", "SalishSeaNEMO.sh"],
+                check=True,
+                universal_newlines=True,
+                stdout=subprocess.PIPE,
+            ),
             call(
                 ["qsub", "-W", "depend=afterok:43", "deflate_grid.sh"],
+                check=True,
                 universal_newlines=True,
+                stdout=subprocess.PIPE,
             ),
             call(
                 ["qsub", "-W", "depend=afterok:43", "deflate_ptrc.sh"],
+                check=True,
                 universal_newlines=True,
+                stdout=subprocess.PIPE,
             ),
             call(
                 ["qsub", "-W", "depend=afterok:43", "deflate_dia.sh"],
+                check=True,
                 universal_newlines=True,
+                stdout=subprocess.PIPE,
             ),
         ]
 
