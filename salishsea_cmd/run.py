@@ -277,7 +277,9 @@ def run(
     else:
         cmd = "{submit_cmd} SalishSeaNEMO.sh".format(submit_cmd=queue_job_cmd)
     results_dir.mkdir(parents=True, exist_ok=True)
-    submit_job_msg = subprocess.check_output(shlex.split(cmd), universal_newlines=True)
+    submit_job_msg = subprocess.run(
+        shlex.split(cmd), check=True, universal_newlines=True, stdout=subprocess.PIPE
+    ).stdout
     if separate_deflate:
         log.info(
             "SalishSeaNEMO.sh queued as {submit_job_msg}".format(
@@ -294,9 +296,12 @@ def run(
                 nemo_job_no=nemo_job_no,
                 deflate_script=deflate_script,
             )
-            deflate_job_msg = subprocess.check_output(
-                shlex.split(cmd), universal_newlines=True
-            )
+            deflate_job_msg = subprocess.run(
+                shlex.split(cmd),
+                check=True,
+                universal_newlines=True,
+                stdout=subprocess.PIPE,
+            ).stdout
             log.info(
                 "{deflate_script} queued after {submit_job_msg} as "
                 "{deflate_job_msg}".format(
