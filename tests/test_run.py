@@ -113,8 +113,8 @@ class TestTakeAction:
 
 
 @patch("salishsea_cmd.run.subprocess.check_output", return_value="43.orca2.ibb")
-@patch("salishsea_cmd.run._build_deflate_script", return_value=u"deflate script")
-@patch("salishsea_cmd.run._build_batch_script", return_value=u"batch script")
+@patch("salishsea_cmd.run._build_deflate_script", return_value="deflate script")
+@patch("salishsea_cmd.run._build_batch_script", return_value="batch script")
 @patch("salishsea_cmd.run.get_n_processors", return_value=144)
 @patch("salishsea_cmd.run.load_run_desc")
 @patch("salishsea_cmd.run.api.prepare")
@@ -456,7 +456,7 @@ class TestBuildBatchScript:
     )
     def test_cedar(self, cedar_broadwell, constraint, nodes, ntasks, mem, deflate):
         desc_file = StringIO(
-            u"run_id: foo\n" u"walltime: 01:02:03\n" u"email: me@example.com"
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.load(desc_file)
         script = salishsea_cmd.run._build_batch_script(
@@ -473,73 +473,73 @@ class TestBuildBatchScript:
             cedar_broadwell=cedar_broadwell,
         )
         expected = (
-            u"#!/bin/bash\n"
-            u"\n"
-            u"#SBATCH --job-name=foo\n"
-            u"#SBATCH --constraint={constraint}\n"
-            u"#SBATCH --nodes={nodes}\n"
-            u"#SBATCH --ntasks-per-node={ntasks}\n"
-            u"#SBATCH --mem={mem}\n"
-            u"#SBATCH --time=1:02:03\n"
-            u"#SBATCH --mail-user=me@example.com\n"
-            u"#SBATCH --mail-type=ALL\n"
-            u"#SBATCH --account=rrg-allen\n"
-            u"# stdout and stderr file paths/names\n"
-            u"#SBATCH --output=results_dir/stdout\n"
-            u"#SBATCH --error=results_dir/stderr\n"
-            u"\n"
-            u"\n"
-            u'RUN_ID="foo"\n'
-            u'RUN_DESC="SalishSea.yaml"\n'
-            u'WORK_DIR="."\n'
-            u'RESULTS_DIR="results_dir"\n'
-            u'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
+            "#!/bin/bash\n"
+            "\n"
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --constraint={constraint}\n"
+            "#SBATCH --nodes={nodes}\n"
+            "#SBATCH --ntasks-per-node={ntasks}\n"
+            "#SBATCH --mem={mem}\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account=rrg-allen\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=results_dir/stdout\n"
+            "#SBATCH --error=results_dir/stderr\n"
+            "\n"
+            "\n"
+            'RUN_ID="foo"\n'
+            'RUN_DESC="SalishSea.yaml"\n'
+            'WORK_DIR="."\n'
+            'RESULTS_DIR="results_dir"\n'
+            'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
         ).format(constraint=constraint, nodes=nodes, ntasks=ntasks, mem=mem)
         if deflate:
-            expected += u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
+            expected += 'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
         expected += (
-            u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
-            u"\n"
-            u"module load netcdf-fortran-mpi/4.4.4\n"
-            u"module load python/3.7.0\n"
-            u"\n"
-            u"mkdir -p ${RESULTS_DIR}\n"
-            u"cd ${WORK_DIR}\n"
-            u'echo "working dir: $(pwd)"\n'
-            u"\n"
-            u'echo "Starting run at $(date)"\n'
-            u"mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
-            u"MPIRUN_EXIT_CODE=$?\n"
-            u'echo "Ended run at $(date)"\n'
-            u"\n"
-            u'echo "Results combining started at $(date)"\n'
-            u"${COMBINE} ${RUN_DESC} --debug\n"
-            u'echo "Results combining ended at $(date)"\n'
+            'GATHER="${HOME}/.local/bin/salishsea gather"\n'
+            "\n"
+            "module load netcdf-fortran-mpi/4.4.4\n"
+            "module load python/3.7.0\n"
+            "\n"
+            "mkdir -p ${RESULTS_DIR}\n"
+            "cd ${WORK_DIR}\n"
+            'echo "working dir: $(pwd)"\n'
+            "\n"
+            'echo "Starting run at $(date)"\n'
+            "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
+            "MPIRUN_EXIT_CODE=$?\n"
+            'echo "Ended run at $(date)"\n'
+            "\n"
+            'echo "Results combining started at $(date)"\n'
+            "${COMBINE} ${RUN_DESC} --debug\n"
+            'echo "Results combining ended at $(date)"\n'
         )
         if deflate:
             expected += (
-                u"\n"
-                u'echo "Results deflation started at $(date)"\n'
-                u"module load nco/4.6.6\n"
-                u"${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                u"  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                u"  --jobs 4 --debug\n"
-                u'echo "Results deflation ended at $(date)"\n'
+                "\n"
+                'echo "Results deflation started at $(date)"\n'
+                "module load nco/4.6.6\n"
+                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
+                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
+                "  --jobs 4 --debug\n"
+                'echo "Results deflation ended at $(date)"\n'
             )
         expected += (
-            u"\n"
-            u'echo "Results gathering started at $(date)"\n'
-            u"${GATHER} ${RESULTS_DIR} --debug\n"
-            u'echo "Results gathering ended at $(date)"\n'
-            u"\n"
-            u"chmod go+rx ${RESULTS_DIR}\n"
-            u"chmod g+rw ${RESULTS_DIR}/*\n"
-            u"chmod o+r ${RESULTS_DIR}/*\n"
-            u"\n"
-            u'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            u"rmdir $(pwd)\n"
-            u'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            u"exit ${MPIRUN_EXIT_CODE}\n"
+            "\n"
+            'echo "Results gathering started at $(date)"\n'
+            "${GATHER} ${RESULTS_DIR} --debug\n"
+            'echo "Results gathering ended at $(date)"\n'
+            "\n"
+            "chmod go+rx ${RESULTS_DIR}\n"
+            "chmod g+rw ${RESULTS_DIR}/*\n"
+            "chmod o+r ${RESULTS_DIR}/*\n"
+            "\n"
+            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+            "rmdir $(pwd)\n"
+            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+            "exit ${MPIRUN_EXIT_CODE}\n"
         )
         assert script == expected
 
@@ -548,7 +548,7 @@ class TestBuildBatchScript:
     )
     def test_graham(self, account, deflate):
         desc_file = StringIO(
-            u"run_id: foo\n" u"walltime: 01:02:03\n" u"email: me@example.com"
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.load(desc_file)
         script = salishsea_cmd.run._build_batch_script(
@@ -565,79 +565,79 @@ class TestBuildBatchScript:
             cedar_broadwell=False,
         )
         expected = (
-            u"#!/bin/bash\n"
-            u"\n"
-            u"#SBATCH --job-name=foo\n"
-            u"#SBATCH --nodes=2\n"
-            u"#SBATCH --ntasks-per-node=32\n"
-            u"#SBATCH --mem=125G\n"
-            u"#SBATCH --time=1:02:03\n"
-            u"#SBATCH --mail-user=me@example.com\n"
-            u"#SBATCH --mail-type=ALL\n"
-            u"#SBATCH --account={account}\n"
-            u"# stdout and stderr file paths/names\n"
-            u"#SBATCH --output=results_dir/stdout\n"
-            u"#SBATCH --error=results_dir/stderr\n"
-            u"\n"
-            u"\n"
-            u'RUN_ID="foo"\n'
-            u'RUN_DESC="SalishSea.yaml"\n'
-            u'WORK_DIR="."\n'
-            u'RESULTS_DIR="results_dir"\n'
-            u'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
+            "#!/bin/bash\n"
+            "\n"
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --nodes=2\n"
+            "#SBATCH --ntasks-per-node=32\n"
+            "#SBATCH --mem=125G\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account={account}\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=results_dir/stdout\n"
+            "#SBATCH --error=results_dir/stderr\n"
+            "\n"
+            "\n"
+            'RUN_ID="foo"\n'
+            'RUN_DESC="SalishSea.yaml"\n'
+            'WORK_DIR="."\n'
+            'RESULTS_DIR="results_dir"\n'
+            'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
         ).format(account=account)
         if deflate:
-            expected += u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
+            expected += 'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
         expected += (
-            u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
-            u"\n"
-            u"module load netcdf-fortran-mpi/4.4.4\n"
-            u"module load python/3.7.0\n"
-            u"\n"
-            u"mkdir -p ${RESULTS_DIR}\n"
-            u"cd ${WORK_DIR}\n"
-            u'echo "working dir: $(pwd)"\n'
-            u"\n"
-            u'echo "Starting run at $(date)"\n'
-            u"mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
-            u"MPIRUN_EXIT_CODE=$?\n"
-            u'echo "Ended run at $(date)"\n'
-            u"\n"
-            u'echo "Results combining started at $(date)"\n'
-            u"${COMBINE} ${RUN_DESC} --debug\n"
-            u'echo "Results combining ended at $(date)"\n'
+            'GATHER="${HOME}/.local/bin/salishsea gather"\n'
+            "\n"
+            "module load netcdf-fortran-mpi/4.4.4\n"
+            "module load python/3.7.0\n"
+            "\n"
+            "mkdir -p ${RESULTS_DIR}\n"
+            "cd ${WORK_DIR}\n"
+            'echo "working dir: $(pwd)"\n'
+            "\n"
+            'echo "Starting run at $(date)"\n'
+            "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
+            "MPIRUN_EXIT_CODE=$?\n"
+            'echo "Ended run at $(date)"\n'
+            "\n"
+            'echo "Results combining started at $(date)"\n'
+            "${COMBINE} ${RUN_DESC} --debug\n"
+            'echo "Results combining ended at $(date)"\n'
         )
         if deflate:
             expected += (
-                u"\n"
-                u'echo "Results deflation started at $(date)"\n'
-                u"module load nco/4.6.6\n"
-                u"${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                u"  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                u"  --jobs 4 --debug\n"
-                u'echo "Results deflation ended at $(date)"\n'
+                "\n"
+                'echo "Results deflation started at $(date)"\n'
+                "module load nco/4.6.6\n"
+                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
+                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
+                "  --jobs 4 --debug\n"
+                'echo "Results deflation ended at $(date)"\n'
             )
         expected += (
-            u"\n"
-            u'echo "Results gathering started at $(date)"\n'
-            u"${GATHER} ${RESULTS_DIR} --debug\n"
-            u'echo "Results gathering ended at $(date)"\n'
-            u"\n"
-            u"chmod go+rx ${RESULTS_DIR}\n"
-            u"chmod g+rw ${RESULTS_DIR}/*\n"
-            u"chmod o+r ${RESULTS_DIR}/*\n"
-            u"\n"
-            u'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            u"rmdir $(pwd)\n"
-            u'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            u"exit ${MPIRUN_EXIT_CODE}\n"
+            "\n"
+            'echo "Results gathering started at $(date)"\n'
+            "${GATHER} ${RESULTS_DIR} --debug\n"
+            'echo "Results gathering ended at $(date)"\n'
+            "\n"
+            "chmod go+rx ${RESULTS_DIR}\n"
+            "chmod g+rw ${RESULTS_DIR}/*\n"
+            "chmod o+r ${RESULTS_DIR}/*\n"
+            "\n"
+            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+            "rmdir $(pwd)\n"
+            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+            "exit ${MPIRUN_EXIT_CODE}\n"
         )
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
     def test_orcinus(self, deflate):
         desc_file = StringIO(
-            u"run_id: foo\n" u"walltime: 01:02:03\n" u"email: me@example.com"
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.load(desc_file)
         script = salishsea_cmd.run._build_batch_script(
@@ -654,84 +654,84 @@ class TestBuildBatchScript:
             cedar_broadwell=False,
         )
         expected = (
-            u"#!/bin/bash\n"
-            u"\n"
-            u"#PBS -N foo\n"
-            u"#PBS -S /bin/bash\n"
-            u"#PBS -l procs=43\n"
-            u"# memory per processor\n"
-            u"#PBS -l pmem=2000mb\n"
-            u"#PBS -l walltime=1:02:03\n"
-            u"# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            u"#PBS -m bea\n"
-            u"#PBS -M me@example.com\n"
-            u"# stdout and stderr file paths/names\n"
-            u"#PBS -o results_dir/stdout\n"
-            u"#PBS -e results_dir/stderr\n"
-            u"\n"
-            u"#PBS -l partition=QDR\n"
-            u"\n"
-            u'RUN_ID="foo"\n'
-            u'RUN_DESC="SalishSea.yaml"\n'
-            u'WORK_DIR="."\n'
-            u'RESULTS_DIR="results_dir"\n'
-            u'COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"\n'
+            "#!/bin/bash\n"
+            "\n"
+            "#PBS -N foo\n"
+            "#PBS -S /bin/bash\n"
+            "#PBS -l procs=43\n"
+            "# memory per processor\n"
+            "#PBS -l pmem=2000mb\n"
+            "#PBS -l walltime=1:02:03\n"
+            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
+            "#PBS -m bea\n"
+            "#PBS -M me@example.com\n"
+            "# stdout and stderr file paths/names\n"
+            "#PBS -o results_dir/stdout\n"
+            "#PBS -e results_dir/stderr\n"
+            "\n"
+            "#PBS -l partition=QDR\n"
+            "\n"
+            'RUN_ID="foo"\n'
+            'RUN_DESC="SalishSea.yaml"\n'
+            'WORK_DIR="."\n'
+            'RESULTS_DIR="results_dir"\n'
+            'COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"\n'
         )
         if deflate:
-            expected += u'DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"\n'
+            expected += 'DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"\n'
         expected += (
-            u'GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"\n'
-            u"\n"
-            u"module load intel\n"
-            u"module load intel/14.0/netcdf-4.3.3.1_mpi\n"
-            u"module load intel/14.0/netcdf-fortran-4.4.0_mpi\n"
-            u"module load intel/14.0/hdf5-1.8.15p1_mpi\n"
-            u"module load intel/14.0/nco-4.5.2\n"
-            u"module load python\n"
-            u"\n"
-            u"mkdir -p ${RESULTS_DIR}\n"
-            u"cd ${WORK_DIR}\n"
-            u'echo "working dir: $(pwd)"\n'
-            u"\n"
-            u'echo "Starting run at $(date)"\n'
-            u"mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
-            u"MPIRUN_EXIT_CODE=$?\n"
-            u'echo "Ended run at $(date)"\n'
-            u"\n"
-            u'echo "Results combining started at $(date)"\n'
-            u"${COMBINE} ${RUN_DESC} --debug\n"
-            u'echo "Results combining ended at $(date)"\n'
+            'GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"\n'
+            "\n"
+            "module load intel\n"
+            "module load intel/14.0/netcdf-4.3.3.1_mpi\n"
+            "module load intel/14.0/netcdf-fortran-4.4.0_mpi\n"
+            "module load intel/14.0/hdf5-1.8.15p1_mpi\n"
+            "module load intel/14.0/nco-4.5.2\n"
+            "module load python\n"
+            "\n"
+            "mkdir -p ${RESULTS_DIR}\n"
+            "cd ${WORK_DIR}\n"
+            'echo "working dir: $(pwd)"\n'
+            "\n"
+            'echo "Starting run at $(date)"\n'
+            "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
+            "MPIRUN_EXIT_CODE=$?\n"
+            'echo "Ended run at $(date)"\n'
+            "\n"
+            'echo "Results combining started at $(date)"\n'
+            "${COMBINE} ${RUN_DESC} --debug\n"
+            'echo "Results combining ended at $(date)"\n'
         )
         if deflate:
             expected += (
-                u"\n"
-                u'echo "Results deflation started at $(date)"\n'
-                u"${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                u"  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                u"  --jobs 4 --debug\n"
-                u'echo "Results deflation ended at $(date)"\n'
+                "\n"
+                'echo "Results deflation started at $(date)"\n'
+                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
+                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
+                "  --jobs 4 --debug\n"
+                'echo "Results deflation ended at $(date)"\n'
             )
         expected += (
-            u"\n"
-            u'echo "Results gathering started at $(date)"\n'
-            u"${GATHER} ${RESULTS_DIR} --debug\n"
-            u'echo "Results gathering ended at $(date)"\n'
-            u"\n"
-            u"chmod go+rx ${RESULTS_DIR}\n"
-            u"chmod g+rw ${RESULTS_DIR}/*\n"
-            u"chmod o+r ${RESULTS_DIR}/*\n"
-            u"\n"
-            u'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            u"rmdir $(pwd)\n"
-            u'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            u"exit ${MPIRUN_EXIT_CODE}\n"
+            "\n"
+            'echo "Results gathering started at $(date)"\n'
+            "${GATHER} ${RESULTS_DIR} --debug\n"
+            'echo "Results gathering ended at $(date)"\n'
+            "\n"
+            "chmod go+rx ${RESULTS_DIR}\n"
+            "chmod g+rw ${RESULTS_DIR}/*\n"
+            "chmod o+r ${RESULTS_DIR}/*\n"
+            "\n"
+            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+            "rmdir $(pwd)\n"
+            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+            "exit ${MPIRUN_EXIT_CODE}\n"
         )
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
     def test_salish(self, deflate):
         desc_file = StringIO(
-            u"run_id: foo\n" u"walltime: 01:02:03\n" u"email: me@example.com"
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.load(desc_file)
         script = salishsea_cmd.run._build_batch_script(
@@ -748,70 +748,70 @@ class TestBuildBatchScript:
             cedar_broadwell=False,
         )
         expected = (
-            u"#!/bin/bash\n"
-            u"\n"
-            u"#PBS -N foo\n"
-            u"#PBS -S /bin/bash\n"
-            u"#PBS -l procs=7\n"
-            u"# memory per processor\n"
-            u"#PBS -l pmem=2000mb\n"
-            u"#PBS -l walltime=1:02:03\n"
-            u"# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            u"#PBS -m bea\n"
-            u"#PBS -M me@example.com\n"
-            u"# stdout and stderr file paths/names\n"
-            u"#PBS -o results_dir/stdout\n"
-            u"#PBS -e results_dir/stderr\n"
-            u"\n"
-            u"\n"
-            u'RUN_ID="foo"\n'
-            u'RUN_DESC="SalishSea.yaml"\n'
-            u'WORK_DIR="."\n'
-            u'RESULTS_DIR="results_dir"\n'
-            u'COMBINE="${HOME}/.local/bin/salishsea combine"\n'
+            "#!/bin/bash\n"
+            "\n"
+            "#PBS -N foo\n"
+            "#PBS -S /bin/bash\n"
+            "#PBS -l procs=7\n"
+            "# memory per processor\n"
+            "#PBS -l pmem=2000mb\n"
+            "#PBS -l walltime=1:02:03\n"
+            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
+            "#PBS -m bea\n"
+            "#PBS -M me@example.com\n"
+            "# stdout and stderr file paths/names\n"
+            "#PBS -o results_dir/stdout\n"
+            "#PBS -e results_dir/stderr\n"
+            "\n"
+            "\n"
+            'RUN_ID="foo"\n'
+            'RUN_DESC="SalishSea.yaml"\n'
+            'WORK_DIR="."\n'
+            'RESULTS_DIR="results_dir"\n'
+            'COMBINE="${HOME}/.local/bin/salishsea combine"\n'
         )
         if deflate:
-            expected += u'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
+            expected += 'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
         expected += (
-            u'GATHER="${HOME}/.local/bin/salishsea gather"\n'
-            u"\n"
-            u"\n"
-            u"mkdir -p ${RESULTS_DIR}\n"
-            u"cd ${WORK_DIR}\n"
-            u'echo "working dir: $(pwd)"\n'
-            u"\n"
-            u'echo "Starting run at $(date)"\n'
-            u"/usr/bin/mpirun -np 6 ./nemo.exe : -np 1 ./xios_server.exe\n"
-            u"MPIRUN_EXIT_CODE=$?\n"
-            u'echo "Ended run at $(date)"\n'
-            u"\n"
-            u'echo "Results combining started at $(date)"\n'
-            u"${COMBINE} ${RUN_DESC} --debug\n"
-            u'echo "Results combining ended at $(date)"\n'
+            'GATHER="${HOME}/.local/bin/salishsea gather"\n'
+            "\n"
+            "\n"
+            "mkdir -p ${RESULTS_DIR}\n"
+            "cd ${WORK_DIR}\n"
+            'echo "working dir: $(pwd)"\n'
+            "\n"
+            'echo "Starting run at $(date)"\n'
+            "/usr/bin/mpirun -np 6 ./nemo.exe : -np 1 ./xios_server.exe\n"
+            "MPIRUN_EXIT_CODE=$?\n"
+            'echo "Ended run at $(date)"\n'
+            "\n"
+            'echo "Results combining started at $(date)"\n'
+            "${COMBINE} ${RUN_DESC} --debug\n"
+            'echo "Results combining ended at $(date)"\n'
         )
         if deflate:
             expected += (
-                u"\n"
-                u'echo "Results deflation started at $(date)"\n'
-                u"${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                u"  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                u"  --jobs 4 --debug\n"
-                u'echo "Results deflation ended at $(date)"\n'
+                "\n"
+                'echo "Results deflation started at $(date)"\n'
+                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
+                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
+                "  --jobs 4 --debug\n"
+                'echo "Results deflation ended at $(date)"\n'
             )
         expected += (
-            u"\n"
-            u'echo "Results gathering started at $(date)"\n'
-            u"${GATHER} ${RESULTS_DIR} --debug\n"
-            u'echo "Results gathering ended at $(date)"\n'
-            u"\n"
-            u"chmod go+rx ${RESULTS_DIR}\n"
-            u"chmod g+rw ${RESULTS_DIR}/*\n"
-            u"chmod o+r ${RESULTS_DIR}/*\n"
-            u"\n"
-            u'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            u"rmdir $(pwd)\n"
-            u'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            u"exit ${MPIRUN_EXIT_CODE}\n"
+            "\n"
+            'echo "Results gathering started at $(date)"\n'
+            "${GATHER} ${RESULTS_DIR} --debug\n"
+            'echo "Results gathering ended at $(date)"\n'
+            "\n"
+            "chmod go+rx ${RESULTS_DIR}\n"
+            "chmod g+rw ${RESULTS_DIR}/*\n"
+            "chmod o+r ${RESULTS_DIR}/*\n"
+            "\n"
+            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+            "rmdir $(pwd)\n"
+            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+            "exit ${MPIRUN_EXIT_CODE}\n"
         )
         assert script == expected
 
@@ -831,24 +831,24 @@ class TestSbatchDirectives:
     def test_sbatch_directives(
         self, m_logger, system, account, cedar_broadwell, constraint, nodes, ntasks, mem
     ):
-        desc_file = StringIO(u"run_id: foo\n" u"walltime: 01:02:03\n")
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.load(desc_file)
         slurm_directives = salishsea_cmd.run._sbatch_directives(
             run_desc, system, 43, cedar_broadwell, "me@example.com", Path("foo")
         )
         expected = (
-            u"#SBATCH --job-name=foo\n"
-            u"#SBATCH --constraint={constraint}\n"
-            u"#SBATCH --nodes={nodes}\n"
-            u"#SBATCH --ntasks-per-node={ntasks}\n"
-            u"#SBATCH --mem={mem}\n"
-            u"#SBATCH --time=1:02:03\n"
-            u"#SBATCH --mail-user=me@example.com\n"
-            u"#SBATCH --mail-type=ALL\n"
-            u"#SBATCH --account={account}\n"
-            u"# stdout and stderr file paths/names\n"
-            u"#SBATCH --output=foo/stdout\n"
-            u"#SBATCH --error=foo/stderr\n"
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --constraint={constraint}\n"
+            "#SBATCH --nodes={nodes}\n"
+            "#SBATCH --ntasks-per-node={ntasks}\n"
+            "#SBATCH --mem={mem}\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account={account}\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=foo/stdout\n"
+            "#SBATCH --error=foo/stderr\n"
         ).format(
             constraint=constraint, nodes=nodes, ntasks=ntasks, mem=mem, account=account
         )
@@ -856,7 +856,7 @@ class TestSbatchDirectives:
         assert m_logger.info.called
 
     def test_graham_sbatch_directives(self, m_logger):
-        desc_file = StringIO(u"run_id: foo\n" u"walltime: 01:02:03\n")
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.load(desc_file)
         slurm_directives = salishsea_cmd.run._sbatch_directives(
             run_desc,
@@ -867,24 +867,24 @@ class TestSbatchDirectives:
             results_dir=Path("foo"),
         )
         expected = (
-            u"#SBATCH --job-name=foo\n"
-            u"#SBATCH --nodes=2\n"
-            u"#SBATCH --ntasks-per-node=32\n"
-            u"#SBATCH --mem=125G\n"
-            u"#SBATCH --time=1:02:03\n"
-            u"#SBATCH --mail-user=me@example.com\n"
-            u"#SBATCH --mail-type=ALL\n"
-            u"#SBATCH --account=def-allen\n"
-            u"# stdout and stderr file paths/names\n"
-            u"#SBATCH --output=foo/stdout\n"
-            u"#SBATCH --error=foo/stderr\n"
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --nodes=2\n"
+            "#SBATCH --ntasks-per-node=32\n"
+            "#SBATCH --mem=125G\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account=def-allen\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=foo/stdout\n"
+            "#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
         assert m_logger.info.called
 
     def test_account_directive_from_yaml(self, m_logger):
         desc_file = StringIO(
-            u"run_id: foo\n" u"walltime: 01:02:03\n" u"account: def-sverdrup\n"
+            "run_id: foo\n" "walltime: 01:02:03\n" "account: def-sverdrup\n"
         )
         run_desc = yaml.load(desc_file)
         slurm_directives = salishsea_cmd.run._sbatch_directives(
@@ -895,7 +895,7 @@ class TestSbatchDirectives:
             email="me@example.com",
             results_dir=Path("foo"),
         )
-        assert u"#SBATCH --account=def-sverdrup\n" in slurm_directives
+        assert "#SBATCH --account=def-sverdrup\n" in slurm_directives
         assert not m_logger.info.called
 
 
@@ -904,29 +904,29 @@ class TestPbsDirectives:
     """
 
     def test_pbs_directives_run(self):
-        desc_file = StringIO(u"run_id: foo\n" u"walltime: 01:02:03\n")
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.load(desc_file)
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc, 42, "me@example.com", Path("foo")
         )
         expected = (
-            u"#PBS -N foo\n"
-            u"#PBS -S /bin/bash\n"
-            u"#PBS -l procs=42\n"
-            u"# memory per processor\n"
-            u"#PBS -l pmem=2000mb\n"
-            u"#PBS -l walltime=1:02:03\n"
-            u"# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            u"#PBS -m bea\n"
-            u"#PBS -M me@example.com\n"
-            u"# stdout and stderr file paths/names\n"
-            u"#PBS -o foo/stdout\n"
-            u"#PBS -e foo/stderr\n"
+            "#PBS -N foo\n"
+            "#PBS -S /bin/bash\n"
+            "#PBS -l procs=42\n"
+            "# memory per processor\n"
+            "#PBS -l pmem=2000mb\n"
+            "#PBS -l walltime=1:02:03\n"
+            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
+            "#PBS -m bea\n"
+            "#PBS -M me@example.com\n"
+            "# stdout and stderr file paths/names\n"
+            "#PBS -o foo/stdout\n"
+            "#PBS -e foo/stderr\n"
         )
         assert pbs_directives == expected
 
     def test_pbs_directives_deflate(self):
-        desc_file = StringIO(u"run_id: foo\n" u"walltime: 01:02:03\n")
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.load(desc_file)
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc,
@@ -938,18 +938,18 @@ class TestPbsDirectives:
             result_type="ptrc",
         )
         expected = (
-            u"#PBS -N ptrc_foo_deflate\n"
-            u"#PBS -S /bin/bash\n"
-            u"#PBS -l procs=1\n"
-            u"# memory per processor\n"
-            u"#PBS -l pmem=2500mb\n"
-            u"#PBS -l walltime=1:02:03\n"
-            u"# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            u"#PBS -m bea\n"
-            u"#PBS -M me@example.com\n"
-            u"# stdout and stderr file paths/names\n"
-            u"#PBS -o foo/stdout_deflate_ptrc\n"
-            u"#PBS -e foo/stderr_deflate_ptrc\n"
+            "#PBS -N ptrc_foo_deflate\n"
+            "#PBS -S /bin/bash\n"
+            "#PBS -l procs=1\n"
+            "# memory per processor\n"
+            "#PBS -l pmem=2500mb\n"
+            "#PBS -l walltime=1:02:03\n"
+            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
+            "#PBS -m bea\n"
+            "#PBS -M me@example.com\n"
+            "# stdout and stderr file paths/names\n"
+            "#PBS -o foo/stdout_deflate_ptrc\n"
+            "#PBS -e foo/stderr_deflate_ptrc\n"
         )
         assert pbs_directives == expected
 
@@ -962,7 +962,7 @@ class TestPbsDirectives:
         re: issue#16
         """
         desc_file = StringIO(
-            u"run_id: foo\n" u"walltime: {walltime}\n".format(walltime=walltime)
+            "run_id: foo\n" "walltime: {walltime}\n".format(walltime=walltime)
         )
         run_desc = yaml.load(desc_file)
         pbs_directives = salishsea_cmd.run._pbs_directives(
@@ -990,7 +990,7 @@ class TestDefinitions:
         ],
     )
     def test_definitions(self, system, home, deflate):
-        desc_file = StringIO(u"run_id: foo\n")
+        desc_file = StringIO("run_id: foo\n")
         run_desc = yaml.load(desc_file)
         defns = salishsea_cmd.run._definitions(
             run_desc,
@@ -1001,17 +1001,17 @@ class TestDefinitions:
             deflate,
         )
         expected = (
-            u'RUN_ID="foo"\n'
-            u'RUN_DESC="SalishSea.yaml"\n'
-            u'WORK_DIR="run_dir"\n'
-            u'RESULTS_DIR="results_dir"\n'
-            u'COMBINE="{home}/.local/bin/salishsea combine"\n'
+            'RUN_ID="foo"\n'
+            'RUN_DESC="SalishSea.yaml"\n'
+            'WORK_DIR="run_dir"\n'
+            'RESULTS_DIR="results_dir"\n'
+            'COMBINE="{home}/.local/bin/salishsea combine"\n'
         ).format(home=home)
         if deflate:
-            expected += (u'DEFLATE="{home}/.local/bin/salishsea deflate"\n').format(
+            expected += ('DEFLATE="{home}/.local/bin/salishsea deflate"\n').format(
                 home=home
             )
-        expected += u'GATHER="{home}/.local/bin/salishsea gather"\n'.format(home=home)
+        expected += 'GATHER="{home}/.local/bin/salishsea gather"\n'.format(home=home)
         assert defns == expected
 
 
@@ -1021,25 +1021,23 @@ class TestModules:
 
     def test_unknown_system(self):
         modules = salishsea_cmd.run._modules("salish")
-        assert modules == u""
+        assert modules == ""
 
     @pytest.mark.parametrize("system", ["cedar", "graham"])
     def test_cedar_graham(self, system):
         modules = salishsea_cmd.run._modules(system)
-        expected = (
-            u"module load netcdf-fortran-mpi/4.4.4\n" u"module load python/3.7.0\n"
-        )
+        expected = "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
         assert modules == expected
 
     def test_orcinus(self):
         modules = salishsea_cmd.run._modules("orcinus")
         expected = (
-            u"module load intel\n"
-            u"module load intel/14.0/netcdf-4.3.3.1_mpi\n"
-            u"module load intel/14.0/netcdf-fortran-4.4.0_mpi\n"
-            u"module load intel/14.0/hdf5-1.8.15p1_mpi\n"
-            u"module load intel/14.0/nco-4.5.2\n"
-            u"module load python\n"
+            "module load intel\n"
+            "module load intel/14.0/netcdf-4.3.3.1_mpi\n"
+            "module load intel/14.0/netcdf-fortran-4.4.0_mpi\n"
+            "module load intel/14.0/hdf5-1.8.15p1_mpi\n"
+            "module load intel/14.0/nco-4.5.2\n"
+            "module load python\n"
         )
         assert modules == expected
 

@@ -361,16 +361,16 @@ def _build_batch_script(
     :returns: Bash script to execute the run.
     :rtype: str
     """
-    script = u"#!/bin/bash\n"
+    script = "#!/bin/bash\n"
     try:
         email = get_run_desc_value(run_desc, ("email",), fatal=False)
     except KeyError:
-        email = u"{user}@eoas.ubc.ca".format(user=os.getenv("USER"))
+        email = "{user}@eoas.ubc.ca".format(user=os.getenv("USER"))
     if system in {"cedar", "graham"}:
-        script = u"\n".join(
+        script = "\n".join(
             (
                 script,
-                u"{sbatch_directives}\n".format(
+                "{sbatch_directives}\n".format(
                     sbatch_directives=_sbatch_directives(
                         run_desc,
                         system,
@@ -383,10 +383,10 @@ def _build_batch_script(
             )
         )
     else:
-        script = u"\n".join(
+        script = "\n".join(
             (
                 script,
-                u"{pbs_directives}\n".format(
+                "{pbs_directives}\n".format(
                     pbs_directives=_pbs_directives(
                         run_desc,
                         nemo_processors + xios_processors,
@@ -397,15 +397,15 @@ def _build_batch_script(
             )
         )
     if system == "orcinus":
-        script += u"#PBS -l partition=QDR\n"
-    script = u"\n".join(
+        script += "#PBS -l partition=QDR\n"
+    script = "\n".join(
         (
             script,
-            u"{defns}\n"
-            u"{modules}\n"
-            u"{execute}\n"
-            u"{fix_permissions}\n"
-            u"{cleanup}".format(
+            "{defns}\n"
+            "{modules}\n"
+            "{execute}\n"
+            "{fix_permissions}\n"
+            "{cleanup}".format(
                 defns=_definitions(
                     run_desc, desc_file, run_dir, results_dir, system, deflate
                 ),
@@ -490,17 +490,17 @@ def _sbatch_directives(
     walltime = _td2hms(td)
     if system == "cedar":
         sbatch_directives = (
-            u"#SBATCH --job-name={run_id}\n" u"#SBATCH --constraint={constraint}\n"
+            "#SBATCH --job-name={run_id}\n" "#SBATCH --constraint={constraint}\n"
         ).format(run_id=run_id, constraint=constraint)
     else:
-        sbatch_directives = (u"#SBATCH --job-name={run_id}\n").format(run_id=run_id)
+        sbatch_directives = ("#SBATCH --job-name={run_id}\n").format(run_id=run_id)
     sbatch_directives += (
-        u"#SBATCH --nodes={nodes}\n"
-        u"#SBATCH --ntasks-per-node={processors_per_node}\n"
-        u"#SBATCH --mem={mem}\n"
-        u"#SBATCH --time={walltime}\n"
-        u"#SBATCH --mail-user={email}\n"
-        u"#SBATCH --mail-type=ALL\n"
+        "#SBATCH --nodes={nodes}\n"
+        "#SBATCH --ntasks-per-node={processors_per_node}\n"
+        "#SBATCH --mem={mem}\n"
+        "#SBATCH --time={walltime}\n"
+        "#SBATCH --mail-user={email}\n"
+        "#SBATCH --mail-type=ALL\n"
     ).format(
         nodes=int(nodes),
         processors_per_node=processors_per_node,
@@ -510,10 +510,10 @@ def _sbatch_directives(
     )
     try:
         account = get_run_desc_value(run_desc, ("account",), fatal=False)
-        sbatch_directives += u"#SBATCH --account={account}\n".format(account=account)
+        sbatch_directives += "#SBATCH --account={account}\n".format(account=account)
     except KeyError:
         account = "rrg-allen" if system == "cedar" else "def-allen"
-        sbatch_directives += u"#SBATCH --account={account}\n".format(account=account)
+        sbatch_directives += "#SBATCH --account={account}\n".format(account=account)
         log.info(
             (
                 "No account found in run description YAML file, "
@@ -532,9 +532,9 @@ def _sbatch_directives(
         else "stderr"
     )
     sbatch_directives += (
-        u"# stdout and stderr file paths/names\n"
-        u"#SBATCH --output={stdout}\n"
-        u"#SBATCH --error={stderr}\n"
+        "# stdout and stderr file paths/names\n"
+        "#SBATCH --output={stdout}\n"
+        "#SBATCH --error={stderr}\n"
     ).format(stdout=results_dir / stdout, stderr=results_dir / stderr)
     return sbatch_directives
 
@@ -592,16 +592,16 @@ def _pbs_directives(
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td2hms(td)
     pbs_directives = (
-        u"#PBS -N {run_id}\n"
-        u"#PBS -S /bin/bash\n"
-        u"#PBS -l procs={procs}\n"
-        u"# memory per processor\n"
-        u"#PBS -l pmem={pmem}\n"
-        u"#PBS -l walltime={walltime}\n"
-        u"# email when the job [b]egins and [e]nds, or is [a]borted\n"
-        u"#PBS -m bea\n"
-        u"#PBS -M {email}\n"
-        u"# stdout and stderr file paths/names\n"
+        "#PBS -N {run_id}\n"
+        "#PBS -S /bin/bash\n"
+        "#PBS -l procs={procs}\n"
+        "# memory per processor\n"
+        "#PBS -l pmem={pmem}\n"
+        "#PBS -l walltime={walltime}\n"
+        "# email when the job [b]egins and [e]nds, or is [a]borted\n"
+        "#PBS -m bea\n"
+        "#PBS -M {email}\n"
+        "# stdout and stderr file paths/names\n"
     ).format(
         run_id=run_id, procs=n_processors, pmem=pmem, walltime=walltime, email=email
     )
@@ -616,7 +616,7 @@ def _pbs_directives(
         else "stderr"
     )
     pbs_directives += (
-        u"#PBS -o {results_dir}/{stdout}\n" u"#PBS -e {results_dir}/{stderr}\n"
+        "#PBS -o {results_dir}/{stdout}\n" "#PBS -e {results_dir}/{stderr}\n"
     ).format(results_dir=results_dir, stdout=stdout, stderr=stderr)
     return pbs_directives
 
@@ -637,18 +637,18 @@ def _td2hms(timedelta):
     for period_name, period_seconds in periods:
         period_value, seconds = divmod(seconds, period_seconds)
         hms.append(period_value)
-    return u"{0[0]}:{0[1]:02d}:{0[2]:02d}".format(hms)
+    return "{0[0]}:{0[1]:02d}:{0[2]:02d}".format(hms)
 
 
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, system, deflate):
-    home = u"${PBS_O_HOME}" if system == "orcinus" else u"${HOME}"
+    home = "${PBS_O_HOME}" if system == "orcinus" else "${HOME}"
     salishsea_cmd = os.path.join(home, ".local/bin/salishsea")
     defns = (
-        u'RUN_ID="{run_id}"\n'
-        u'RUN_DESC="{run_desc_file}"\n'
-        u'WORK_DIR="{run_dir}"\n'
-        u'RESULTS_DIR="{results_dir}"\n'
-        u'COMBINE="{salishsea_cmd} combine"\n'
+        'RUN_ID="{run_id}"\n'
+        'RUN_DESC="{run_desc_file}"\n'
+        'WORK_DIR="{run_dir}"\n'
+        'RESULTS_DIR="{results_dir}"\n'
+        'COMBINE="{salishsea_cmd} combine"\n'
     ).format(
         run_id=get_run_desc_value(run_desc, ("run_id",)),
         run_desc_file=run_desc_file,
@@ -657,35 +657,35 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, system, deflate)
         salishsea_cmd=salishsea_cmd,
     )
     if deflate:
-        defns += u'DEFLATE="{salishsea_cmd} deflate"\n'.format(
+        defns += 'DEFLATE="{salishsea_cmd} deflate"\n'.format(
             salishsea_cmd=salishsea_cmd
         )
-    defns += u'GATHER="{salishsea_cmd} gather"\n'.format(salishsea_cmd=salishsea_cmd)
+    defns += 'GATHER="{salishsea_cmd} gather"\n'.format(salishsea_cmd=salishsea_cmd)
     return defns
 
 
 def _modules(system):
     modules = {
         "cedar": (
-            u"module load netcdf-fortran-mpi/4.4.4\n" u"module load python/3.7.0\n"
+            "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
         ),
         "graham": (
-            u"module load netcdf-fortran-mpi/4.4.4\n" u"module load python/3.7.0\n"
+            "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
         ),
         "orcinus": (
-            u"module load intel\n"
-            u"module load intel/14.0/netcdf-4.3.3.1_mpi\n"
-            u"module load intel/14.0/netcdf-fortran-4.4.0_mpi\n"
-            u"module load intel/14.0/hdf5-1.8.15p1_mpi\n"
-            u"module load intel/14.0/nco-4.5.2\n"
-            u"module load python\n"
+            "module load intel\n"
+            "module load intel/14.0/netcdf-4.3.3.1_mpi\n"
+            "module load intel/14.0/netcdf-fortran-4.4.0_mpi\n"
+            "module load intel/14.0/hdf5-1.8.15p1_mpi\n"
+            "module load intel/14.0/nco-4.5.2\n"
+            "module load python\n"
         ),
     }
     system_key = system
     try:
         modules_block = modules[system_key]
     except KeyError:
-        modules_block = u""
+        modules_block = ""
     return modules_block
 
 
@@ -697,27 +697,27 @@ def _execute(
     separate_deflate,
     system,
 ):
-    mpirun = u"/usr/bin/mpirun" if system == "salish" else u"mpirun"
-    mpirun = u" ".join((mpirun, "-np", str(nemo_processors), "./nemo.exe"))
+    mpirun = "/usr/bin/mpirun" if system == "salish" else "mpirun"
+    mpirun = " ".join((mpirun, "-np", str(nemo_processors), "./nemo.exe"))
     if xios_processors:
-        mpirun = u" ".join(
+        mpirun = " ".join(
             (mpirun, ":", "-np", str(xios_processors), "./xios_server.exe")
         )
     script = (
-        u"mkdir -p ${RESULTS_DIR}\n"
-        u"cd ${WORK_DIR}\n"
-        u'echo "working dir: $(pwd)"\n'
-        u"\n"
-        u'echo "Starting run at $(date)"\n'
+        "mkdir -p ${RESULTS_DIR}\n"
+        "cd ${WORK_DIR}\n"
+        'echo "working dir: $(pwd)"\n'
+        "\n"
+        'echo "Starting run at $(date)"\n'
     )
-    script += u"{mpirun}\n".format(mpirun=mpirun)
+    script += "{mpirun}\n".format(mpirun=mpirun)
     script += (
-        u"MPIRUN_EXIT_CODE=$?\n"
-        u'echo "Ended run at $(date)"\n'
-        u"\n"
-        u'echo "Results combining started at $(date)"\n'
-        u"${COMBINE} ${RUN_DESC} --debug\n"
-        u'echo "Results combining ended at $(date)"\n'
+        "MPIRUN_EXIT_CODE=$?\n"
+        'echo "Ended run at $(date)"\n'
+        "\n"
+        'echo "Results combining started at $(date)"\n'
+        "${COMBINE} ${RUN_DESC} --debug\n"
+        'echo "Results combining ended at $(date)"\n'
     )
     if deflate and not separate_deflate:
         if system in {"cedar", "graham"}:
@@ -725,63 +725,62 @@ def _execute(
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
             script += (
-                u"\n"
-                u'echo "Results deflation started at $(date)"\n'
-                u"module load nco/4.6.6\n"
-                u"${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                u"  *_turb_T*.nc *_dia[12n]_T*.nc "
-                u"FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                u"  --jobs {max_deflate_jobs} --debug\n"
-                u'echo "Results deflation ended at $(date)"\n'
+                "\n"
+                'echo "Results deflation started at $(date)"\n'
+                "module load nco/4.6.6\n"
+                "${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
+                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
+                "  --jobs {max_deflate_jobs} --debug\n"
+                'echo "Results deflation ended at $(date)"\n'
             ).format(max_deflate_jobs=max_deflate_jobs)
         else:
             script += (
-                u"\n"
-                u'echo "Results deflation started at $(date)"\n'
-                u"${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                u"  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                u"  --jobs {max_deflate_jobs} --debug\n"
-                u'echo "Results deflation ended at $(date)"\n'
+                "\n"
+                'echo "Results deflation started at $(date)"\n'
+                "${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
+                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
+                "  --jobs {max_deflate_jobs} --debug\n"
+                'echo "Results deflation ended at $(date)"\n'
             ).format(max_deflate_jobs=max_deflate_jobs)
     script += (
-        u"\n"
-        u'echo "Results gathering started at $(date)"\n'
-        u"${GATHER} ${RESULTS_DIR} --debug\n"
-        u'echo "Results gathering ended at $(date)"\n'
+        "\n"
+        'echo "Results gathering started at $(date)"\n'
+        "${GATHER} ${RESULTS_DIR} --debug\n"
+        'echo "Results gathering ended at $(date)"\n'
     )
     return script
 
 
 def _fix_permissions():
     script = (
-        u"chmod go+rx ${RESULTS_DIR}\n"
-        u"chmod g+rw ${RESULTS_DIR}/*\n"
-        u"chmod o+r ${RESULTS_DIR}/*\n"
+        "chmod go+rx ${RESULTS_DIR}\n"
+        "chmod g+rw ${RESULTS_DIR}/*\n"
+        "chmod o+r ${RESULTS_DIR}/*\n"
     )
     return script
 
 
 def _cleanup():
     script = (
-        u'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-        u"rmdir $(pwd)\n"
-        u'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-        u"exit ${MPIRUN_EXIT_CODE}\n"
+        'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+        "rmdir $(pwd)\n"
+        'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+        "exit ${MPIRUN_EXIT_CODE}\n"
     )
     return script
 
 
 def _build_deflate_script(run_desc, pattern, result_type, results_dir, system):
-    script = u"#!/bin/bash\n"
+    script = "#!/bin/bash\n"
     try:
         email = get_run_desc_value(run_desc, ("email",))
     except KeyError:
-        email = u"{user}@eos.ubc.ca".format(user=os.getenv("USER"))
+        email = "{user}@eos.ubc.ca".format(user=os.getenv("USER"))
     pmem = "2500mb" if result_type == "ptrc" else "2000mb"
-    script = u"\n".join(
+    script = "\n".join(
         (
             script,
-            u"{pbs_directives}\n".format(
+            "{pbs_directives}\n".format(
                 pbs_directives=_pbs_directives(
                     run_desc,
                     1,
@@ -795,19 +794,19 @@ def _build_deflate_script(run_desc, pattern, result_type, results_dir, system):
         )
     )
     script += (
-        u'RESULTS_DIR="{results_dir}"\n'
-        u'DEFLATE="${{PBS_O_HOME}}/.local/bin/salishsea deflate"\n'
-        u"\n"
-        u"{modules}\n"
-        u"cd ${{RESULTS_DIR}}\n"
-        u'echo "Results deflation started at $(date)"\n'
-        u"${{DEFLATE}} {pattern} --jobs 1 --debug\n"
-        u"DEFLATE_EXIT_CODE=$?\n"
-        u'echo "Results deflation ended at $(date)"\n'
-        u"\n"
-        u"chmod g+rw ${{RESULTS_DIR}}/*\n"
-        u"chmod o+r ${{RESULTS_DIR}}/*\n"
-        u"\n"
-        u"exit ${{DEFLATE_EXIT_CODE}}\n"
+        'RESULTS_DIR="{results_dir}"\n'
+        'DEFLATE="${{PBS_O_HOME}}/.local/bin/salishsea deflate"\n'
+        "\n"
+        "{modules}\n"
+        "cd ${{RESULTS_DIR}}\n"
+        'echo "Results deflation started at $(date)"\n'
+        "${{DEFLATE}} {pattern} --jobs 1 --debug\n"
+        "DEFLATE_EXIT_CODE=$?\n"
+        'echo "Results deflation ended at $(date)"\n'
+        "\n"
+        "chmod g+rw ${{RESULTS_DIR}}/*\n"
+        "chmod o+r ${{RESULTS_DIR}}/*\n"
+        "\n"
+        "exit ${{DEFLATE_EXIT_CODE}}\n"
     ).format(results_dir=results_dir, modules=_modules(system), pattern=pattern)
     return script
