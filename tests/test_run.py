@@ -14,21 +14,9 @@
 # limitations under the License.
 """SalishSeaCmd run sub-command plug-in unit tests
 """
-try:
-    from io import StringIO
-except ImportError:
-    # Python 2.7
-    from cStringIO import StringIO
-try:
-    from pathlib import Path
-except ImportError:
-    # Python 2.7
-    from pathlib2 import Path
-try:
-    from unittest.mock import call, Mock, patch
-except ImportError:
-    # Python 2.7
-    from mock import call, Mock, patch
+from io import StringIO
+from pathlib import Path
+from unittest.mock import call, Mock, patch
 
 import cliff.app
 import pytest

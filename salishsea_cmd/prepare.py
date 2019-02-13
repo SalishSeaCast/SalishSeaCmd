@@ -17,20 +17,9 @@
 Sets up the necessary symbolic links for a Salish Sea NEMO run
 in a specified directory and changes the pwd to that directory.
 """
-import functools
 import logging
-import os
+from pathlib import Path
 
-try:
-    from pathlib import Path
-except ImportError:
-    # Python 2.7
-    from pathlib2 import Path
-import shutil
-import time
-import xml.etree.ElementTree
-
-import arrow
 import cliff.command
 import nemo_cmd
 import nemo_cmd.api
