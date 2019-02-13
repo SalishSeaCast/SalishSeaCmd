@@ -44,7 +44,7 @@ class TestParser:
         parser = run_cmd.get_parser("salishsea run")
         parsed_args = parser.parse_args(["foo", "baz"])
         assert parsed_args.desc_file == Path("foo")
-        assert parsed_args.results_dir == "baz"
+        assert parsed_args.results_dir == Path("baz")
         assert not parsed_args.cedar_broadwell
         assert not parsed_args.deflate
         assert parsed_args.max_deflate_jobs == 4
@@ -145,7 +145,9 @@ class TestRun:
             }
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
-            qsb_msg = salishsea_cmd.run.run(Path("SalishSea.yaml"), str(p_results_dir))
+            qsb_msg = salishsea_cmd.run.run(
+                Path("SalishSea.yaml"), Path(str(p_results_dir))
+            )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
         m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
@@ -192,7 +194,7 @@ class TestRun:
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
             qsb_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), str(p_results_dir), waitjob=42
+                Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
         m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
@@ -242,7 +244,7 @@ class TestRun:
         m_sco.return_value = "43"
         with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
             qsb_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), str(p_results_dir), waitjob=42
+                Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
         m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
@@ -290,7 +292,7 @@ class TestRun:
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
             qsb_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), str(p_results_dir), no_submit=True
+                Path("SalishSea.yaml"), Path(str(p_results_dir)), no_submit=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
         m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
@@ -321,7 +323,7 @@ class TestRun:
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
             qsb_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), str(p_results_dir), deflate=True
+                Path("SalishSea.yaml"), Path(str(p_results_dir)), deflate=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
         m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
@@ -357,7 +359,7 @@ class TestRun:
         m_sco.return_value = "43"
         with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
             qsb_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), str(p_results_dir), cedar_broadwell=True
+                Path("SalishSea.yaml"), Path(str(p_results_dir)), cedar_broadwell=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
         m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
@@ -389,7 +391,7 @@ class TestRun:
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
             qsb_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), str(p_results_dir), separate_deflate=True
+                Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
         m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
