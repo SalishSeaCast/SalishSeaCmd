@@ -73,7 +73,7 @@ class TestParser:
 
 
 @patch("salishsea_cmd.run.log")
-@patch("salishsea_cmd.run.run", return_value="qsub message")
+@patch("salishsea_cmd.run.run", return_value="job submitted message")
 class TestTakeAction:
     """Unit tests for `salishsea run` sub-command take_action() method.
     """
@@ -104,7 +104,7 @@ class TestTakeAction:
             waitjob=0,
             quiet=False,
         )
-        m_log.info.assert_called_once_with("qsub message")
+        m_log.info.assert_called_once_with("job submitted message")
 
     def test_take_action_quiet(self, m_run, m_log, run_cmd):
         parsed_args = Mock(desc_file="desc file", results_dir="results dir", quiet=True)
@@ -145,7 +145,7 @@ class TestRun:
             }
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
-            qsb_msg = salishsea_cmd.run.run(
+            submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir))
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
@@ -168,7 +168,7 @@ class TestRun:
             ["qsub", "SalishSeaNEMO.sh"], universal_newlines=True
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert qsb_msg == "43.orca2.ibb"
+        assert submit_job_msg == "43.orca2.ibb"
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_qsub_waitjob(
@@ -193,7 +193,7 @@ class TestRun:
             }
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
-            qsb_msg = salishsea_cmd.run.run(
+            submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
@@ -217,7 +217,7 @@ class TestRun:
             universal_newlines=True,
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert qsb_msg == "43.orca2.ibb"
+        assert submit_job_msg == "43.orca2.ibb"
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_sbatch_waitjob(
@@ -243,7 +243,7 @@ class TestRun:
         }
         m_sco.return_value = "43"
         with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
-            qsb_msg = salishsea_cmd.run.run(
+            submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
@@ -266,7 +266,7 @@ class TestRun:
             ["sbatch", "-d", "afterok:42", "SalishSeaNEMO.sh"], universal_newlines=True
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert qsb_msg == "43"
+        assert submit_job_msg == "43"
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_no_submit(
@@ -291,7 +291,7 @@ class TestRun:
             }
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
-            qsb_msg = salishsea_cmd.run.run(
+            submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), no_submit=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
@@ -312,7 +312,7 @@ class TestRun:
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert not m_sco.called
-        assert qsb_msg is None
+        assert submit_job_msg is None
 
     def test_run_deflate(self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, tmpdir):
         p_run_dir = tmpdir.ensure_dir("run_dir")
@@ -322,7 +322,7 @@ class TestRun:
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
-            qsb_msg = salishsea_cmd.run.run(
+            submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), deflate=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
@@ -345,7 +345,7 @@ class TestRun:
             ["qsub", "SalishSeaNEMO.sh"], universal_newlines=True
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert qsb_msg == "43.orca2.ibb"
+        assert submit_job_msg == "43.orca2.ibb"
 
     def test_run_cedar_broadwell(
         self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, tmpdir
@@ -358,7 +358,7 @@ class TestRun:
         }
         m_sco.return_value = "43"
         with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
-            qsb_msg = salishsea_cmd.run.run(
+            submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), cedar_broadwell=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
@@ -378,7 +378,7 @@ class TestRun:
             True,
         )
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert qsb_msg == "43"
+        assert submit_job_msg == "43"
 
     def test_run_separate_deflate(
         self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_sco, tmpdir
@@ -390,7 +390,7 @@ class TestRun:
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
-            qsb_msg = salishsea_cmd.run.run(
+            submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
