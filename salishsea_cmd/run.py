@@ -54,7 +54,10 @@ class Run(cliff.command.Command):
             help="run description YAML file",
         )
         parser.add_argument(
-            "results_dir", metavar="RESULTS_DIR", help="directory to store results into"
+            "results_dir",
+            metavar="RESULTS_DIR",
+            type=Path,
+            help="directory to store results into",
         )
         parser.add_argument(
             "--cedar-broadwell",
@@ -184,9 +187,9 @@ def run(
     :param desc_file: File path/name of the YAML run description file.
     :type desc_file: :py:class:`pathlib.Path`
 
-    :param str results_dir: Path of the directory in which to store the run
-                            results;
-                            it will be created if it does not exist.
+    :param results_dir: Path of the directory in which to store the run results;
+                        it will be created if it does not exist.
+    :type results_dir: :py:class:`pathlib.Path`
 
     :param boolean cedar_broadwell: Use broadwell (32 cores/node) on cedar.
 
@@ -230,7 +233,6 @@ def run(
         xios_processors = get_run_desc_value(run_desc, ("output", "XIOS servers"))
     else:
         xios_processors = 0
-    results_dir = Path(results_dir)
     system = (
         os.getenv("WGSYSTEM")
         or os.getenv("CC_CLUSTER")
