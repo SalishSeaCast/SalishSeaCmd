@@ -51,7 +51,7 @@ Python Versions
 
 The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.7 or later.
 However,
-the package must also run under `Python`_ 2.7 for use on the Westgrid HPC platform.
+the package must also run under `Python`_ 3.5 for use on the Westgrid :kbd:`orcinus` HPC platform.
 
 .. _Python: https://www.python.org/
 

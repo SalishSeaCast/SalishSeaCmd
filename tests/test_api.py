@@ -14,11 +14,7 @@
 # limitations under the License.
 """SalishSeaCmd combine sub-command plug-in unit tests
 """
-try:
-    from unittest.mock import Mock, patch
-except ImportError:
-    # Python 2.7
-    from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 import cliff.app
 import cliff.command

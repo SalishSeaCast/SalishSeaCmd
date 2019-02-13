@@ -14,18 +14,9 @@
 # limitations under the License.
 """SalishSeaCmd prepare sub-command plug-in unit tests
 """
-try:
-    from pathlib import Path
-except ImportError:
-    # Python 2.7
-    from pathlib2 import Path
-try:
-    from unittest.mock import call, Mock, patch
-except ImportError:
-    # Python 2.7
-    from mock import call, Mock, patch
+from pathlib import Path
+from unittest.mock import call, Mock, patch
 
-import arrow
 import cliff.app
 import nemo_cmd.prepare
 import pytest
