@@ -1,0 +1,13 @@
+image: douglatornell/salishsea:salishsea-cmd-test
+
+pipelines:
+  default:
+    - step:
+        name: pytest package
+        script:
+          # update NEMO-Cmd dependency
+          - /opt/conda/envs/hg/bin/hg pull -u -R /home/NEMO-Cmd
+          - /opt/conda/envs/salishsea-cmd-test/bin/python3 -m pip install -e /home/NEMO-Cmd
+          # run test suite and display coverage report
+          - /opt/conda/envs/salishsea-cmd-test/bin/coverage run -m pytest --junitxml=./test-reports/junit.xml
+          - /opt/conda/envs/salishsea-cmd-test/bin/coverage report
