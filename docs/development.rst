@@ -272,8 +272,33 @@ or
 
 to produce an HTML report that you can view in your browser by opening :file:`SalishSeaCmd/htmlcov/index.html`.
 
-The run the test suite under Python 2.7,
-create a Python 2.7 :ref:`SalishSeaCmdDevelopmentEnvironment`.
+
+Continuous Integration
+----------------------
+
+The :kbd:`SalishSeaCmd` package unit test suite is run and a coverage report is generated whenever changes are pushed to Bitbucket.
+The results are visible on the `repo pipelines page`_,
+from the :guilabel:`Builds` column on the `repo commits page`_,
+or from a link in the build status area on the right side of the `repo summary page`_ .
+
+.. _repo pipelines page: https://bitbucket.org/salishsea/salishseacmd/addon/pipelines/home
+.. _repo commits page: https://bitbucket.org/salishsea/salishseacmd/commits/all
+.. _repo summary page: https://bitbucket.org/salishsea/salishseacmd/
+
+
+Pipelines Container Image
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The Bitbucket pipelines configuration in :file:`bitbucket-pipelines.yml` uses a custom image that includes a :command:`conda` environment for running the test wuite with coverage analysis.
+The image is defined and maintained using the :file:`Dockerfile` and :file:`environment-test.yaml` files in the :file:`pipelines-test-env/` directory.
+
+To build or update the image and push it to Docker Hub use:
+
+.. code-block:: bash
+
+    docker build -t salishsea-cmd-test pipelines-test-env/
+    docker tag salishsea-cmd-test:latest douglatornell/salishsea:salishsea-cmd-test
+    docker push douglatornell/salishsea:salishsea-cmd-test
 
 
 .. _SalishSeaCmdVersionControlRepository:
