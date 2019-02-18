@@ -267,28 +267,33 @@ def run(
                 f.write(deflate_script)
     if no_submit:
         return
-    starting_dir = Path.cwd()
-    os.chdir(fspath(run_dir))
     if waitjob:
         depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
-        cmd = "{submit_cmd} {depend_opt}:{waitjob} SalishSeaNEMO.sh".format(
-            submit_cmd=queue_job_cmd, depend_opt=depend_opt, waitjob=waitjob
+        cmd = "{submit_cmd} {depend_opt}:{waitjob} {batch_file}".format(
+            submit_cmd=queue_job_cmd,
+            batch_file=batch_file,
+            depend_opt=depend_opt,
+            waitjob=waitjob,
         )
     else:
-        cmd = "{submit_cmd} SalishSeaNEMO.sh".format(submit_cmd=queue_job_cmd)
+        cmd = "{submit_cmd} {batch_file}".format(
+            submit_cmd=queue_job_cmd, batch_file=batch_file
+        )
     results_dir.mkdir(parents=True, exist_ok=True)
     submit_job_msg = subprocess.run(
         shlex.split(cmd), check=True, universal_newlines=True, stdout=subprocess.PIPE
     ).stdout
     if separate_deflate:
         log.info(
-            "SalishSeaNEMO.sh queued as {submit_job_msg}".format(
-                submit_job_msg=submit_job_msg
+            "{batch_file} queued as {submit_job_msg}".format(
+                batch_file=batch_file, submit_job_msg=submit_job_msg
             )
         )
         nemo_job_no = int(submit_job_msg.split(".")[0])
         for result_type in result_types:
-            deflate_script = "deflate_{result_type}.sh".format(result_type=result_type)
+            deflate_script = "{run_dir}/deflate_{result_type}.sh".format(
+                run_dir=run_dir, result_type=result_type
+            )
             cmd = (
                 "{submit_cmd} -W depend=afterok:{nemo_job_no} " + deflate_script
             ).format(
@@ -303,14 +308,14 @@ def run(
                 stdout=subprocess.PIPE,
             ).stdout
             log.info(
-                "{deflate_script} queued after {submit_job_msg} as "
+                "{run_dir}/{deflate_script} queued after {submit_job_msg} as "
                 "{deflate_job_msg}".format(
+                    run_dir=run_dir,
                     deflate_script=deflate_script,
                     submit_job_msg=submit_job_msg,
                     deflate_job_msg=deflate_job_msg,
                 )
             )
-    os.chdir(fspath(starting_dir))
     return submit_job_msg
 
 
