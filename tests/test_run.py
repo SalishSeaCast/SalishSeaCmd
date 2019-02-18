@@ -167,7 +167,7 @@ class TestRun:
             False,
         )
         assert m_run.call_args_list[1] == call(
-            ["qsub", "SalishSeaNEMO.sh"],
+            ["qsub", "{run_dir}/SalishSeaNEMO.sh".format(run_dir=str(p_run_dir))],
             check=True,
             universal_newlines=True,
             stdout=subprocess.PIPE,
@@ -219,7 +219,12 @@ class TestRun:
             False,
         )
         assert m_run.call_args_list[1] == call(
-            ["qsub", "-W", "depend=afterok:42", "SalishSeaNEMO.sh"],
+            [
+                "qsub",
+                "-W",
+                "depend=afterok:42",
+                "{run_dir}/SalishSeaNEMO.sh".format(run_dir=str(p_run_dir)),
+            ],
             check=True,
             universal_newlines=True,
             stdout=subprocess.PIPE,
@@ -271,7 +276,12 @@ class TestRun:
             False,
         )
         assert m_run.call_args_list[1] == call(
-            ["sbatch", "-d", "afterok:42", "SalishSeaNEMO.sh"],
+            [
+                "sbatch",
+                "-d",
+                "afterok:42",
+                "{run_dir}/SalishSeaNEMO.sh".format(run_dir=str(p_run_dir)),
+            ],
             check=True,
             universal_newlines=True,
             stdout=subprocess.PIPE,
@@ -419,7 +429,7 @@ class TestRun:
             False,
         )
         assert m_run.call_args_list[1] == call(
-            ["qsub", "SalishSeaNEMO.sh"],
+            ["qsub", "{run_dir}/SalishSeaNEMO.sh".format(run_dir=str(p_run_dir))],
             check=True,
             universal_newlines=True,
             stdout=subprocess.PIPE,
@@ -509,25 +519,40 @@ class TestRun:
         assert p_run_dir.join("deflate_dia.sh").check(file=True)
         assert m_run.call_args_list[1:] == [
             call(
-                ["qsub", "SalishSeaNEMO.sh"],
+                ["qsub", "{run_dir}/SalishSeaNEMO.sh".format(run_dir=str(p_run_dir))],
                 check=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
             ),
             call(
-                ["qsub", "-W", "depend=afterok:43", "deflate_grid.sh"],
+                [
+                    "qsub",
+                    "-W",
+                    "depend=afterok:43",
+                    "{run_dir}/deflate_grid.sh".format(run_dir=str(p_run_dir)),
+                ],
                 check=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
             ),
             call(
-                ["qsub", "-W", "depend=afterok:43", "deflate_ptrc.sh"],
+                [
+                    "qsub",
+                    "-W",
+                    "depend=afterok:43",
+                    "{run_dir}/deflate_ptrc.sh".format(run_dir=str(p_run_dir)),
+                ],
                 check=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
             ),
             call(
-                ["qsub", "-W", "depend=afterok:43", "deflate_dia.sh"],
+                [
+                    "qsub",
+                    "-W",
+                    "depend=afterok:43",
+                    "{run_dir}/deflate_dia.sh".format(run_dir=str(p_run_dir)),
+                ],
                 check=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
