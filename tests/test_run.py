@@ -325,6 +325,71 @@ class TestRun:
         assert not m_run.called
         assert submit_job_msg is None
 
+    @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
+    def test_run_no_submit_w_separate_deflate(
+        self,
+        m_prepare,
+        m_lrd,
+        m_gnp,
+        m_bbs,
+        m_bds,
+        m_run,
+        sep_xios_server,
+        xios_servers,
+        tmpdir,
+    ):
+        p_run_dir = tmpdir.ensure_dir("run_dir")
+        m_prepare.return_value = Path(str(p_run_dir))
+        p_results_dir = tmpdir.ensure_dir("results_dir")
+        m_lrd.return_value = {
+            "output": {
+                "separate XIOS server": sep_xios_server,
+                "XIOS servers": xios_servers,
+            }
+        }
+        with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
+            submit_job_msg = salishsea_cmd.run.run(
+                Path("SalishSea.yaml"),
+                Path(str(p_results_dir)),
+                no_submit=True,
+                separate_deflate=True,
+            )
+        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
+        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
+        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
+        m_bbs.assert_called_once_with(
+            m_lrd(),
+            "SalishSea.yaml",
+            144,
+            xios_servers,
+            4,
+            Path(str(p_results_dir)),
+            Path(str(p_run_dir)),
+            "orcinus",
+            False,
+            True,
+            False,
+        )
+        assert m_bds.call_args_list == [
+            call(
+                m_lrd(),
+                "*_grid_[TUVW]*.nc",
+                "grid",
+                Path(str(p_results_dir)),
+                "orcinus",
+            ),
+            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir)), "orcinus"),
+            call(
+                m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir)), "orcinus"
+            ),
+        ]
+        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
+        assert p_run_dir.join("deflate_grid.sh").check(file=True)
+        assert p_run_dir.join("deflate_ptrc.sh").check(file=True)
+        assert p_run_dir.join("deflate_dia.sh").check(file=True)
+        assert not m_run.called
+        assert submit_job_msg is None
+
     def test_run_deflate(self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_run, tmpdir):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         m_prepare.return_value = Path(str(p_run_dir))

@@ -255,8 +255,6 @@ def run(
     batch_file = run_dir / "SalishSeaNEMO.sh"
     with batch_file.open("wt") as f:
         f.write(batch_script)
-    if no_submit:
-        return
     if separate_deflate:
         patterns = ("*_grid_[TUVW]*.nc", "*_ptrc_T*.nc", "*_dia[12]_T*.nc")
         result_types = ("grid", "ptrc", "dia")
@@ -267,6 +265,8 @@ def run(
             script_file = run_dir / "deflate_{}.sh".format(result_type)
             with script_file.open("wt") as f:
                 f.write(deflate_script)
+    if no_submit:
+        return
     starting_dir = Path.cwd()
     os.chdir(fspath(run_dir))
     if waitjob:
