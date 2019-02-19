@@ -271,8 +271,8 @@ def run(
         depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
         cmd = "{submit_cmd} {depend_opt}:{waitjob} {batch_file}".format(
             submit_cmd=queue_job_cmd,
-            batch_file=batch_file,
             depend_opt=depend_opt,
+            batch_file=batch_file,
             waitjob=waitjob,
         )
     else:
@@ -289,15 +289,20 @@ def run(
                 batch_file=batch_file, submit_job_msg=submit_job_msg
             )
         )
-        nemo_job_no = int(submit_job_msg.split(".")[0])
+        try:
+            # TORQUE job submission messages look like "43.orca2.ibb"
+            nemo_job_no = int(submit_job_msg.split(".")[0])
+        except ValueError:
+            # SLURM job submission messages look like "Submitted batch job 43"
+            nemo_job_no = int(submit_job_msg.split()[3])
+        depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
         for result_type in result_types:
             deflate_script = "{run_dir}/deflate_{result_type}.sh".format(
                 run_dir=run_dir, result_type=result_type
             )
-            cmd = (
-                "{submit_cmd} -W depend=afterok:{nemo_job_no} " + deflate_script
-            ).format(
+            cmd = ("{submit_cmd} {depend_opt}:{nemo_job_no} {deflate_script}").format(
                 submit_cmd=queue_job_cmd,
+                depend_opt=depend_opt,
                 nemo_job_no=nemo_job_no,
                 deflate_script=deflate_script,
             )
