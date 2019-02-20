@@ -172,11 +172,11 @@ they are appended to the :file:`grid/` directory of the :kbd:`forcing` path.
   or path to,
   the MPI-LPE mapping CSV file that corresponds to the bathymetry to use for the run.
   That file contains the information necessary to configure NEMO-3.6 to perform calculations only on the MPI subdomains that contain water.
-  Please see :ref:`LandProcessorElimination` for a detailed explanation,
-  and use the :ref:`Preferred-MPI-LPE-Decompositions` table to guide your choice of value for :kbd:`MPI decomposition`.
+  Please see :ref:`salishseadocs:LandProcessorElimination` for a detailed explanation,
+  and use the :ref:`salishseadocs:Preferred-MPI-LPE-Decompositions` table to guide your choice of value for :kbd:`MPI decomposition`.
   The :ref:`SalishSeaCmdProcessor` takes care of setting the correct number of processors based on your chosen :kbd:`MPI decomposition`.
 
-  A value of :py:obj:`False` disables :ref:`LandProcessorElimination`
+  A value of :py:obj:`False` disables :ref:`salishseadocs:LandProcessorElimination`
 
   If the :kbd:`land processor elimination` key is missing,
   a warning message is printed to let you know that the run is proceeding on the assumption that you want to run without land processor elimination.
