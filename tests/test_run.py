@@ -155,7 +155,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(),
-            "SalishSea.yaml",
+            Path("SalishSea.yaml"),
             144,
             xios_servers,
             4,
@@ -207,7 +207,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(),
-            "SalishSea.yaml",
+            Path("SalishSea.yaml"),
             144,
             xios_servers,
             4,
@@ -264,7 +264,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(),
-            "SalishSea.yaml",
+            Path("SalishSea.yaml"),
             144,
             xios_servers,
             4,
@@ -320,7 +320,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(),
-            "SalishSea.yaml",
+            Path("SalishSea.yaml"),
             144,
             xios_servers,
             4,
@@ -369,7 +369,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(),
-            "SalishSea.yaml",
+            Path("SalishSea.yaml"),
             144,
             xios_servers,
             4,
@@ -417,7 +417,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(),
-            "SalishSea.yaml",
+            Path("SalishSea.yaml"),
             144,
             1,
             4,
@@ -456,7 +456,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(),
-            "SalishSea.yaml",
+            Path("SalishSea.yaml"),
             144,
             1,
             4,
@@ -489,7 +489,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(),
-            "SalishSea.yaml",
+            Path("SalishSea.yaml"),
             144,
             1,
             4,
@@ -578,7 +578,7 @@ class TestRun:
         m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
         m_bbs.assert_called_once_with(
             m_lrd(),
-            "SalishSea.yaml",
+            Path("SalishSea.yaml"),
             144,
             1,
             4,
