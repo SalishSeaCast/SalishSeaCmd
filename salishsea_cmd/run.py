@@ -33,6 +33,13 @@ from salishsea_cmd import api
 
 log = logging.getLogger(__name__)
 
+SEPARATE_DEFLATE_JOBS = {
+    # deflate job type: file pattern
+    "grid": "*_grid_[TUVW]*.nc",
+    "ptrc": "*_ptrc_T*.nc",
+    "dia": "*_dia[12]_T*.nc",
+}
+
 
 class Run(cliff.command.Command):
     """Prepare, execute, and gather results from a Salish Sea NEMO model run.
@@ -257,13 +264,11 @@ def run(
     with batch_file.open("wt") as f:
         f.write(batch_script)
     if separate_deflate:
-        patterns = ("*_grid_[TUVW]*.nc", "*_ptrc_T*.nc", "*_dia[12]_T*.nc")
-        result_types = ("grid", "ptrc", "dia")
-        for pattern, result_type in zip(patterns, result_types):
+        for deflate_job, pattern in SEPARATE_DEFLATE_JOBS.items():
             deflate_script = _build_deflate_script(
-                run_desc, pattern, result_type, results_dir, system
+                run_desc, pattern, deflate_job, results_dir, system
             )
-            script_file = run_dir / "deflate_{}.sh".format(result_type)
+            script_file = run_dir / "deflate_{}.sh".format(deflate_job)
             with script_file.open("wt") as f:
                 f.write(deflate_script)
     if no_submit:
@@ -297,9 +302,9 @@ def run(
             # SLURM job submission messages look like "Submitted batch job 43"
             nemo_job_no = int(submit_job_msg.split()[3])
         depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
-        for result_type in result_types:
-            deflate_script = "{run_dir}/deflate_{result_type}.sh".format(
-                run_dir=run_dir, result_type=result_type
+        for deflate_job in SEPARATE_DEFLATE_JOBS:
+            deflate_script = "{run_dir}/deflate_{deflate_job}.sh".format(
+                run_dir=run_dir, deflate_job=deflate_job
             )
             cmd = "{submit_cmd} {depend_opt}:{nemo_job_no} {deflate_script}".format(
                 submit_cmd=queue_job_cmd,
