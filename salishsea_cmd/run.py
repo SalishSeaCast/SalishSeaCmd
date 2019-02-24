@@ -26,7 +26,6 @@ import socket
 import subprocess
 
 import cliff.command
-from nemo_cmd.fspath import fspath
 from nemo_cmd.prepare import get_n_processors, get_run_desc_value, load_run_desc
 
 from salishsea_cmd import api
@@ -241,7 +240,7 @@ def run(
     queue_job_cmd = "sbatch" if system in {"cedar", "graham"} else "qsub"
     batch_script = _build_batch_script(
         run_desc,
-        fspath(desc_file),
+        desc_file,
         nemo_processors,
         xios_processors,
         max_deflate_jobs,
@@ -341,7 +340,8 @@ def _build_batch_script(
 
     :param dict run_desc: Run description dictionary.
 
-    :param str desc_file: File path/name of the YAML run description file.
+    :param desc_file: File path/name of the YAML run description file.
+    :type desc_file: :py:class:`pathlib.Path`
 
     :param int nemo_processors: Number of processors that NEMO will be executed
                                 on.
