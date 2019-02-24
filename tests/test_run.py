@@ -481,7 +481,7 @@ class TestRun:
         }
         m_run().stdout = "43.orca2.ibb"
         with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
-            submit_job_msg = salishsea_cmd.run.run(
+            salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
@@ -570,7 +570,7 @@ class TestRun:
         }
         m_run().stdout = "Submitted batch job 43"
         with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
-            submit_job_msg = salishsea_cmd.run.run(
+            salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
             )
         m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
@@ -1208,7 +1208,7 @@ class TestDefinitions:
             'COMBINE="{home}/.local/bin/salishsea combine"\n'
         ).format(home=home)
         if deflate:
-            expected += ('DEFLATE="{home}/.local/bin/salishsea deflate"\n').format(
+            expected += 'DEFLATE="{home}/.local/bin/salishsea deflate"\n'.format(
                 home=home
             )
         expected += 'GATHER="{home}/.local/bin/salishsea gather"\n'.format(home=home)

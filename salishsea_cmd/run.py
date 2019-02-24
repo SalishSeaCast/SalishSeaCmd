@@ -300,7 +300,7 @@ def run(
             deflate_script = "{run_dir}/deflate_{result_type}.sh".format(
                 run_dir=run_dir, result_type=result_type
             )
-            cmd = ("{submit_cmd} {depend_opt}:{nemo_job_no} {deflate_script}").format(
+            cmd = "{submit_cmd} {depend_opt}:{nemo_job_no} {deflate_script}".format(
                 submit_cmd=queue_job_cmd,
                 depend_opt=depend_opt,
                 nemo_job_no=nemo_job_no,
@@ -403,10 +403,7 @@ def _build_batch_script(
                 script,
                 "{pbs_directives}\n".format(
                     pbs_directives=_pbs_directives(
-                        run_desc,
-                        nemo_processors + xios_processors,
-                        email,
-                        fspath(results_dir),
+                        run_desc, nemo_processors + xios_processors, email, results_dir
                     )
                 ),
             )
@@ -508,7 +505,7 @@ def _sbatch_directives(
             "#SBATCH --job-name={run_id}\n" "#SBATCH --constraint={constraint}\n"
         ).format(run_id=run_id, constraint=constraint)
     else:
-        sbatch_directives = ("#SBATCH --job-name={run_id}\n").format(run_id=run_id)
+        sbatch_directives = "#SBATCH --job-name={run_id}\n".format(run_id=run_id)
     sbatch_directives += (
         "#SBATCH --nodes={nodes}\n"
         "#SBATCH --ntasks-per-node={processors_per_node}\n"
@@ -800,7 +797,7 @@ def _build_deflate_script(run_desc, pattern, result_type, results_dir, system):
                     run_desc,
                     1,
                     email,
-                    fspath(results_dir),
+                    results_dir,
                     pmem=pmem,
                     deflate=True,
                     result_type=result_type,
