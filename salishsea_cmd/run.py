@@ -26,6 +26,7 @@ import socket
 import subprocess
 
 import cliff.command
+import nemo_cmd
 from nemo_cmd.prepare import get_n_processors, get_run_desc_value, load_run_desc
 
 from salishsea_cmd import api
@@ -238,6 +239,7 @@ def run(
         or socket.gethostname().split(".")[0]
     )
     queue_job_cmd = "sbatch" if system in {"cedar", "graham"} else "qsub"
+    results_dir = nemo_cmd.resolved_path(results_dir)
     batch_script = _build_batch_script(
         run_desc,
         desc_file,
