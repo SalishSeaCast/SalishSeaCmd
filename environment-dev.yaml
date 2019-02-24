@@ -24,7 +24,7 @@ channels:
 
 dependencies:
   - pip
-  - python=3
+  - python>=3.5
   - pyyaml
 
   # For coding style
