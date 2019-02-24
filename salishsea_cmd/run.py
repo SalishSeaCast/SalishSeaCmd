@@ -290,17 +290,12 @@ def run(
         shlex.split(cmd), check=True, universal_newlines=True, stdout=subprocess.PIPE
     ).stdout
     if separate_deflate:
+        nemo_job_no = _parse_submit_job_msg(submit_job_msg)
         log.info(
-            "{batch_file} queued as {submit_job_msg}".format(
-                batch_file=batch_file, submit_job_msg=submit_job_msg
+            "{batch_file} queued as job {nemo_job_no}".format(
+                batch_file=batch_file, nemo_job_no=nemo_job_no
             )
         )
-        try:
-            # TORQUE job submission messages look like "43.orca2.ibb"
-            nemo_job_no = int(submit_job_msg.split(".")[0])
-        except ValueError:
-            # SLURM job submission messages look like "Submitted batch job 43"
-            nemo_job_no = int(submit_job_msg.split()[3])
         depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
         for deflate_job in SEPARATE_DEFLATE_JOBS:
             deflate_script = "{run_dir}/deflate_{deflate_job}.sh".format(
@@ -318,16 +313,27 @@ def run(
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
             ).stdout
+            deflate_job_no = _parse_submit_job_msg(deflate_job_msg)
             log.info(
-                "{run_dir}/{deflate_script} queued after {submit_job_msg} as "
-                "{deflate_job_msg}".format(
+                "{run_dir}/{deflate_script} queued after job {nemo_job_no} as job "
+                "{deflate_job_no}".format(
                     run_dir=run_dir,
                     deflate_script=deflate_script,
-                    submit_job_msg=submit_job_msg,
-                    deflate_job_msg=deflate_job_msg,
+                    nemo_job_no=nemo_job_no,
+                    deflate_job_no=deflate_job_no,
                 )
             )
     return submit_job_msg
+
+
+def _parse_submit_job_msg(submit_job_msg):
+    try:
+        # TORQUE job submission messages look like "43.orca2.ibb"
+        job_no = int(submit_job_msg.split(".")[0])
+    except ValueError:
+        # SLURM job submission messages look like "Submitted batch job 43"
+        job_no = int(submit_job_msg.split()[3])
+    return job_no
 
 
 def _build_batch_script(
