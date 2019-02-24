@@ -146,7 +146,7 @@ class TestRun:
             }
         }
         m_run().stdout = "43.orca2.ibb"
-        with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
+        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir))
             )
@@ -161,7 +161,6 @@ class TestRun:
             4,
             Path(str(p_results_dir)),
             Path(str(p_run_dir)),
-            "orcinus",
             False,
             False,
             False,
@@ -198,7 +197,7 @@ class TestRun:
             }
         }
         m_run().stdout = "43.orca2.ibb"
-        with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
+        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
             )
@@ -213,7 +212,6 @@ class TestRun:
             4,
             Path(str(p_results_dir)),
             Path(str(p_run_dir)),
-            "orcinus",
             False,
             False,
             False,
@@ -255,7 +253,7 @@ class TestRun:
             }
         }
         m_run().stdout = "Submitted batch job 43"
-        with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
+        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
             )
@@ -270,7 +268,6 @@ class TestRun:
             4,
             Path(str(p_results_dir)),
             Path(str(p_run_dir)),
-            "cedar",
             False,
             False,
             False,
@@ -311,7 +308,7 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
-        with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
+        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), no_submit=True
             )
@@ -326,7 +323,6 @@ class TestRun:
             4,
             Path(str(p_results_dir)),
             Path(str(p_run_dir)),
-            "orcinus",
             False,
             False,
             False,
@@ -357,7 +353,7 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
-        with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
+        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"),
                 Path(str(p_results_dir)),
@@ -375,23 +371,14 @@ class TestRun:
             4,
             Path(str(p_results_dir)),
             Path(str(p_run_dir)),
-            "orcinus",
             False,
             True,
             False,
         )
         assert m_bds.call_args_list == [
-            call(
-                m_lrd(),
-                "*_grid_[TUVW]*.nc",
-                "grid",
-                Path(str(p_results_dir)),
-                "orcinus",
-            ),
-            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir)), "orcinus"),
-            call(
-                m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir)), "orcinus"
-            ),
+            call(m_lrd(), "*_grid_[TUVW]*.nc", "grid", Path(str(p_results_dir))),
+            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir))),
+            call(m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir))),
         ]
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert p_run_dir.join("deflate_grid.sh").check(file=True)
@@ -408,7 +395,7 @@ class TestRun:
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
         m_run().stdout = "43.orca2.ibb"
-        with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
+        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), deflate=True
             )
@@ -423,7 +410,6 @@ class TestRun:
             4,
             Path(str(p_results_dir)),
             Path(str(p_run_dir)),
-            "orcinus",
             True,
             False,
             False,
@@ -447,7 +433,7 @@ class TestRun:
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
         m_run().stdout = "Submitted batch job 43"
-        with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
+        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), cedar_broadwell=True
             )
@@ -462,7 +448,6 @@ class TestRun:
             4,
             Path(str(p_results_dir)),
             Path(str(p_run_dir)),
-            "cedar",
             False,
             False,
             True,
@@ -480,7 +465,7 @@ class TestRun:
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
         m_run().stdout = "43.orca2.ibb"
-        with patch("salishsea_cmd.run.os.getenv", return_value="orcinus"):
+        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
             )
@@ -495,23 +480,14 @@ class TestRun:
             4,
             Path(str(p_results_dir)),
             Path(str(p_run_dir)),
-            "orcinus",
             False,
             True,
             False,
         )
         assert m_bds.call_args_list == [
-            call(
-                m_lrd(),
-                "*_grid_[TUVW]*.nc",
-                "grid",
-                Path(str(p_results_dir)),
-                "orcinus",
-            ),
-            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir)), "orcinus"),
-            call(
-                m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir)), "orcinus"
-            ),
+            call(m_lrd(), "*_grid_[TUVW]*.nc", "grid", Path(str(p_results_dir))),
+            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir))),
+            call(m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir))),
         ]
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert p_run_dir.join("deflate_grid.sh").check(file=True)
@@ -569,7 +545,7 @@ class TestRun:
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
         m_run().stdout = "Submitted batch job 43"
-        with patch("salishsea_cmd.run.os.getenv", return_value="cedar"):
+        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
             salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
             )
@@ -584,17 +560,14 @@ class TestRun:
             4,
             Path(str(p_results_dir)),
             Path(str(p_run_dir)),
-            "cedar",
             False,
             True,
             False,
         )
         assert m_bds.call_args_list == [
-            call(
-                m_lrd(), "*_grid_[TUVW]*.nc", "grid", Path(str(p_results_dir)), "cedar"
-            ),
-            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir)), "cedar"),
-            call(m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir)), "cedar"),
+            call(m_lrd(), "*_grid_[TUVW]*.nc", "grid", Path(str(p_results_dir))),
+            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir))),
+            call(m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir))),
         ]
         assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert p_run_dir.join("deflate_grid.sh").check(file=True)
@@ -659,19 +632,19 @@ class TestBuildBatchScript:
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.load(desc_file)
-        script = salishsea_cmd.run._build_batch_script(
-            run_desc,
-            "SalishSea.yaml",
-            nemo_processors=42,
-            xios_processors=1,
-            max_deflate_jobs=4,
-            results_dir=Path("results_dir"),
-            run_dir=Path(),
-            system="cedar",
-            deflate=deflate,
-            separate_deflate=False,
-            cedar_broadwell=cedar_broadwell,
-        )
+        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
+            script = salishsea_cmd.run._build_batch_script(
+                run_desc,
+                Path("SalishSea.yaml"),
+                nemo_processors=42,
+                xios_processors=1,
+                max_deflate_jobs=4,
+                results_dir=Path("results_dir"),
+                run_dir=Path(),
+                deflate=deflate,
+                separate_deflate=False,
+                cedar_broadwell=cedar_broadwell,
+            )
         expected = (
             "#!/bin/bash\n"
             "\n"
@@ -751,19 +724,19 @@ class TestBuildBatchScript:
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.load(desc_file)
-        script = salishsea_cmd.run._build_batch_script(
-            run_desc,
-            "SalishSea.yaml",
-            nemo_processors=42,
-            xios_processors=1,
-            max_deflate_jobs=4,
-            results_dir=Path("results_dir"),
-            run_dir=Path(),
-            system="graham",
-            deflate=deflate,
-            separate_deflate=False,
-            cedar_broadwell=False,
-        )
+        with patch("salishsea_cmd.run.SYSTEM", "graham"):
+            script = salishsea_cmd.run._build_batch_script(
+                run_desc,
+                Path("SalishSea.yaml"),
+                nemo_processors=42,
+                xios_processors=1,
+                max_deflate_jobs=4,
+                results_dir=Path("results_dir"),
+                run_dir=Path(),
+                deflate=deflate,
+                separate_deflate=False,
+                cedar_broadwell=False,
+            )
         expected = (
             "#!/bin/bash\n"
             "\n"
@@ -840,19 +813,19 @@ class TestBuildBatchScript:
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.load(desc_file)
-        script = salishsea_cmd.run._build_batch_script(
-            run_desc,
-            "SalishSea.yaml",
-            nemo_processors=42,
-            xios_processors=1,
-            max_deflate_jobs=4,
-            results_dir=Path("results_dir"),
-            run_dir=Path(),
-            system="orcinus",
-            deflate=deflate,
-            separate_deflate=False,
-            cedar_broadwell=False,
-        )
+        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
+            script = salishsea_cmd.run._build_batch_script(
+                run_desc,
+                Path("SalishSea.yaml"),
+                nemo_processors=42,
+                xios_processors=1,
+                max_deflate_jobs=4,
+                results_dir=Path("results_dir"),
+                run_dir=Path(),
+                deflate=deflate,
+                separate_deflate=False,
+                cedar_broadwell=False,
+            )
         expected = (
             "#!/bin/bash\n"
             "\n"
@@ -934,19 +907,19 @@ class TestBuildBatchScript:
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.load(desc_file)
-        script = salishsea_cmd.run._build_batch_script(
-            run_desc,
-            "SalishSea.yaml",
-            nemo_processors=6,
-            xios_processors=1,
-            max_deflate_jobs=4,
-            results_dir=Path("results_dir"),
-            run_dir=Path(),
-            system="salish",
-            deflate=deflate,
-            separate_deflate=False,
-            cedar_broadwell=False,
-        )
+        with patch("salishsea_cmd.run.SYSTEM", "salish"):
+            script = salishsea_cmd.run._build_batch_script(
+                run_desc,
+                Path("SalishSea.yaml"),
+                nemo_processors=6,
+                xios_processors=1,
+                max_deflate_jobs=4,
+                results_dir=Path("results_dir"),
+                run_dir=Path(),
+                deflate=deflate,
+                separate_deflate=False,
+                cedar_broadwell=False,
+            )
         expected = (
             "#!/bin/bash\n"
             "\n"
@@ -1028,14 +1001,15 @@ class TestSbatchDirectives:
             ("cedar", "rrg-allen", False, "skylake", 1, 48, "0"),
         ],
     )
-    def test_sbatch_directives(
+    def test_cedar_sbatch_directives(
         self, m_logger, system, account, cedar_broadwell, constraint, nodes, ntasks, mem
     ):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.load(desc_file)
-        slurm_directives = salishsea_cmd.run._sbatch_directives(
-            run_desc, system, 43, cedar_broadwell, "me@example.com", Path("foo")
-        )
+        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
+            slurm_directives = salishsea_cmd.run._sbatch_directives(
+                run_desc, 43, cedar_broadwell, "me@example.com", Path("foo")
+            )
         expected = (
             "#SBATCH --job-name=foo\n"
             "#SBATCH --constraint={constraint}\n"
@@ -1058,14 +1032,14 @@ class TestSbatchDirectives:
     def test_graham_sbatch_directives(self, m_logger):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.load(desc_file)
-        slurm_directives = salishsea_cmd.run._sbatch_directives(
-            run_desc,
-            system="graham",
-            n_processors=43,
-            cedar_broadwell=False,
-            email="me@example.com",
-            results_dir=Path("foo"),
-        )
+        with patch("salishsea_cmd.run.SYSTEM", "graham"):
+            slurm_directives = salishsea_cmd.run._sbatch_directives(
+                run_desc,
+                n_processors=43,
+                cedar_broadwell=False,
+                email="me@example.com",
+                results_dir=Path("foo"),
+            )
         expected = (
             "#SBATCH --job-name=foo\n"
             "#SBATCH --nodes=2\n"
@@ -1089,7 +1063,6 @@ class TestSbatchDirectives:
         run_desc = yaml.load(desc_file)
         slurm_directives = salishsea_cmd.run._sbatch_directives(
             run_desc,
-            "graham",
             43,
             cedar_broadwell=False,
             email="me@example.com",
@@ -1192,14 +1165,14 @@ class TestDefinitions:
     def test_definitions(self, system, home, deflate):
         desc_file = StringIO("run_id: foo\n")
         run_desc = yaml.load(desc_file)
-        defns = salishsea_cmd.run._definitions(
-            run_desc,
-            "SalishSea.yaml",
-            Path("run_dir"),
-            Path("results_dir"),
-            system,
-            deflate,
-        )
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            defns = salishsea_cmd.run._definitions(
+                run_desc,
+                "SalishSea.yaml",
+                Path("run_dir"),
+                Path("results_dir"),
+                deflate,
+            )
         expected = (
             'RUN_ID="foo"\n'
             'RUN_DESC="SalishSea.yaml"\n'
@@ -1220,17 +1193,19 @@ class TestModules:
     """
 
     def test_unknown_system(self):
-        modules = salishsea_cmd.run._modules("salish")
+        modules = salishsea_cmd.run._modules()
         assert modules == ""
 
     @pytest.mark.parametrize("system", ["cedar", "graham"])
     def test_cedar_graham(self, system):
-        modules = salishsea_cmd.run._modules(system)
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            modules = salishsea_cmd.run._modules()
         expected = "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
         assert modules == expected
 
     def test_orcinus(self):
-        modules = salishsea_cmd.run._modules("orcinus")
+        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
+            modules = salishsea_cmd.run._modules()
         expected = (
             "module load intel\n"
             "module load intel/14.0/netcdf-4.3.3.1_mpi\n"
@@ -1248,14 +1223,14 @@ class TestExecute:
 
     @pytest.mark.parametrize("system", ["cedar", "graham", "orcinus", "salish"])
     def test_execute_with_deflate(self, system):
-        script = salishsea_cmd.run._execute(
-            nemo_processors=42,
-            xios_processors=1,
-            deflate=True,
-            max_deflate_jobs=4,
-            separate_deflate=False,
-            system=system,
-        )
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            script = salishsea_cmd.run._execute(
+                nemo_processors=42,
+                xios_processors=1,
+                deflate=True,
+                max_deflate_jobs=4,
+                separate_deflate=False,
+            )
         expected = """mkdir -p ${RESULTS_DIR}
         cd ${WORK_DIR}
         echo "working dir: $(pwd)"
@@ -1304,7 +1279,6 @@ class TestExecute:
             deflate=deflate,
             max_deflate_jobs=4,
             separate_deflate=separate_deflate,
-            system="cedar",
         )
         expected = """mkdir -p ${RESULTS_DIR}
         cd ${WORK_DIR}
@@ -1328,14 +1302,14 @@ class TestExecute:
             assert line.strip() == expected[i].strip()
 
     def test_salish_execute(self):
-        script = salishsea_cmd.run._execute(
-            nemo_processors=42,
-            xios_processors=1,
-            deflate=True,
-            max_deflate_jobs=4,
-            separate_deflate=False,
-            system="salish",
-        )
+        with patch("salishsea_cmd.run.SYSTEM", "salish"):
+            script = salishsea_cmd.run._execute(
+                nemo_processors=42,
+                xios_processors=1,
+                deflate=True,
+                max_deflate_jobs=4,
+                separate_deflate=False,
+            )
         expected = """mkdir -p ${RESULTS_DIR}
         cd ${WORK_DIR}
         echo "working dir: $(pwd)"
@@ -1402,9 +1376,10 @@ class TestBuildDeflateScript:
             "email": "test@example.com",
         }
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        script = salishsea_cmd.run._build_deflate_script(
-            run_desc, pattern, result_type, Path(str(p_results_dir)), "orcinus"
-        )
+        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
+            script = salishsea_cmd.run._build_deflate_script(
+                run_desc, pattern, result_type, Path(str(p_results_dir))
+            )
         expected = """#!/bin/bash
         
         #PBS -N {result_type}_19sep14_hindcast_deflate
@@ -1458,7 +1433,7 @@ class TestBuildDeflateScript:
         }
         p_results_dir = tmpdir.ensure_dir("results_dir")
         script = salishsea_cmd.run._build_deflate_script(
-            run_desc, pattern, result_type, Path(str(p_results_dir)), "jasper"
+            run_desc, pattern, result_type, Path(str(p_results_dir))
         )
         if result_type == "ptrc":
             assert "#PBS -l pmem=2500mb" in script

@@ -33,6 +33,12 @@ from salishsea_cmd import api
 
 log = logging.getLogger(__name__)
 
+SYSTEM = (
+    os.getenv("WGSYSTEM")
+    or os.getenv("CC_CLUSTER")
+    or socket.gethostname().split(".")[0]
+)
+
 SEPARATE_DEFLATE_JOBS = {
     # deflate job type: file pattern
     "grid": "*_grid_[TUVW]*.nc",
@@ -240,12 +246,7 @@ def run(
         xios_processors = get_run_desc_value(run_desc, ("output", "XIOS servers"))
     else:
         xios_processors = 0
-    system = (
-        os.getenv("WGSYSTEM")
-        or os.getenv("CC_CLUSTER")
-        or socket.gethostname().split(".")[0]
-    )
-    queue_job_cmd = "sbatch" if system in {"cedar", "graham"} else "qsub"
+    queue_job_cmd = "sbatch" if SYSTEM in {"cedar", "graham"} else "qsub"
     results_dir = nemo_cmd.resolved_path(results_dir)
     batch_script = _build_batch_script(
         run_desc,
@@ -255,7 +256,6 @@ def run(
         max_deflate_jobs,
         results_dir,
         run_dir,
-        system,
         deflate,
         separate_deflate,
         cedar_broadwell,
@@ -266,7 +266,7 @@ def run(
     if separate_deflate:
         for deflate_job, pattern in SEPARATE_DEFLATE_JOBS.items():
             deflate_script = _build_deflate_script(
-                run_desc, pattern, deflate_job, results_dir, system
+                run_desc, pattern, deflate_job, results_dir
             )
             script_file = run_dir / "deflate_{}.sh".format(deflate_job)
             with script_file.open("wt") as f:
@@ -344,7 +344,6 @@ def _build_batch_script(
     max_deflate_jobs,
     results_dir,
     run_dir,
-    system,
     deflate,
     separate_deflate,
     cedar_broadwell,
@@ -373,9 +372,6 @@ def _build_batch_script(
     :param run_dir: Path of the temporary run directory.
     :type run_dir: :py:class:`pathlib.Path`
 
-    :param str system: Name of the system that the run will be executed on;
-                       e.g. :kbd:`salish`, :kbd:`orcinus`
-
     :param boolean deflate: Include "salishsea deflate" command in the bash
                             script.
 
@@ -394,14 +390,13 @@ def _build_batch_script(
         email = get_run_desc_value(run_desc, ("email",), fatal=False)
     except KeyError:
         email = "{user}@eoas.ubc.ca".format(user=os.getenv("USER"))
-    if system in {"cedar", "graham"}:
+    if SYSTEM in {"cedar", "graham"}:
         script = "\n".join(
             (
                 script,
                 "{sbatch_directives}\n".format(
                     sbatch_directives=_sbatch_directives(
                         run_desc,
-                        system,
                         nemo_processors + xios_processors,
                         cedar_broadwell,
                         email,
@@ -421,7 +416,7 @@ def _build_batch_script(
                 ),
             )
         )
-    if system == "orcinus":
+    if SYSTEM == "orcinus":
         script += "#PBS -l partition=QDR\n"
     script = "\n".join(
         (
@@ -431,17 +426,14 @@ def _build_batch_script(
             "{execute}\n"
             "{fix_permissions}\n"
             "{cleanup}".format(
-                defns=_definitions(
-                    run_desc, desc_file, run_dir, results_dir, system, deflate
-                ),
-                modules=_modules(system),
+                defns=_definitions(run_desc, desc_file, run_dir, results_dir, deflate),
+                modules=_modules(),
                 execute=_execute(
                     nemo_processors,
                     xios_processors,
                     deflate,
                     max_deflate_jobs,
                     separate_deflate,
-                    system,
                 ),
                 fix_permissions=_fix_permissions(),
                 cleanup=_cleanup(),
@@ -453,7 +445,6 @@ def _build_batch_script(
 
 def _sbatch_directives(
     run_desc,
-    system,
     n_processors,
     cedar_broadwell,
     email,
@@ -470,8 +461,6 @@ def _sbatch_directives(
     :command:`sbatch` command.
 
     :param dict run_desc: Run description dictionary.
-
-    :param str system: Name of the HPC system on which to execute the run.
 
     :param int n_processors: Number of processors that the run will be
                              executed on; the sum of NEMO and XIOS processors.
@@ -497,10 +486,10 @@ def _sbatch_directives(
     :rtype: Unicode str
     """
     run_id = get_run_desc_value(run_desc, ("run_id",))
-    constraint = "broadwell" if system == "cedar" and cedar_broadwell else "skylake"
-    processors_per_node = 48 if system == "cedar" and not cedar_broadwell else 32
+    constraint = "broadwell" if SYSTEM == "cedar" and cedar_broadwell else "skylake"
+    processors_per_node = 48 if SYSTEM == "cedar" and not cedar_broadwell else 32
     nodes = math.ceil(n_processors / processors_per_node)
-    mem = "0" if system == "cedar" and not cedar_broadwell else mem
+    mem = "0" if SYSTEM == "cedar" and not cedar_broadwell else mem
     if deflate:
         run_id = "{result_type}_{run_id}_deflate".format(
             run_id=run_id, result_type=result_type
@@ -513,7 +502,7 @@ def _sbatch_directives(
         ).time()
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td2hms(td)
-    if system == "cedar":
+    if SYSTEM == "cedar":
         sbatch_directives = (
             "#SBATCH --job-name={run_id}\n" "#SBATCH --constraint={constraint}\n"
         ).format(run_id=run_id, constraint=constraint)
@@ -537,7 +526,7 @@ def _sbatch_directives(
         account = get_run_desc_value(run_desc, ("account",), fatal=False)
         sbatch_directives += "#SBATCH --account={account}\n".format(account=account)
     except KeyError:
-        account = "rrg-allen" if system == "cedar" else "def-allen"
+        account = "rrg-allen" if SYSTEM == "cedar" else "def-allen"
         sbatch_directives += "#SBATCH --account={account}\n".format(account=account)
         log.info(
             (
@@ -665,8 +654,8 @@ def _td2hms(timedelta):
     return "{0[0]}:{0[1]:02d}:{0[2]:02d}".format(hms)
 
 
-def _definitions(run_desc, run_desc_file, run_dir, results_dir, system, deflate):
-    home = "${PBS_O_HOME}" if system == "orcinus" else "${HOME}"
+def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
+    home = "${PBS_O_HOME}" if SYSTEM == "orcinus" else "${HOME}"
     salishsea_cmd = os.path.join(home, ".local/bin/salishsea")
     defns = (
         'RUN_ID="{run_id}"\n'
@@ -689,7 +678,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, system, deflate)
     return defns
 
 
-def _modules(system):
+def _modules():
     modules = {
         "cedar": (
             "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
@@ -706,7 +695,7 @@ def _modules(system):
             "module load python\n"
         ),
     }
-    system_key = system
+    system_key = SYSTEM
     try:
         modules_block = modules[system_key]
     except KeyError:
@@ -715,14 +704,9 @@ def _modules(system):
 
 
 def _execute(
-    nemo_processors,
-    xios_processors,
-    deflate,
-    max_deflate_jobs,
-    separate_deflate,
-    system,
+    nemo_processors, xios_processors, deflate, max_deflate_jobs, separate_deflate
 ):
-    mpirun = "/usr/bin/mpirun" if system == "salish" else "mpirun"
+    mpirun = "/usr/bin/mpirun" if SYSTEM == "salish" else "mpirun"
     mpirun = " ".join((mpirun, "-np", str(nemo_processors), "./nemo.exe"))
     if xios_processors:
         mpirun = " ".join(
@@ -745,7 +729,7 @@ def _execute(
         'echo "Results combining ended at $(date)"\n'
     )
     if deflate and not separate_deflate:
-        if system in {"cedar", "graham"}:
+        if SYSTEM in {"cedar", "graham"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
@@ -795,7 +779,7 @@ def _cleanup():
     return script
 
 
-def _build_deflate_script(run_desc, pattern, result_type, results_dir, system):
+def _build_deflate_script(run_desc, pattern, result_type, results_dir):
     script = "#!/bin/bash\n"
     try:
         email = get_run_desc_value(run_desc, ("email",))
@@ -833,5 +817,5 @@ def _build_deflate_script(run_desc, pattern, result_type, results_dir, system):
         "chmod o+r ${{RESULTS_DIR}}/*\n"
         "\n"
         "exit ${{DEFLATE_EXIT_CODE}}\n"
-    ).format(results_dir=results_dir, modules=_modules(system), pattern=pattern)
+    ).format(results_dir=results_dir, modules=_modules(), pattern=pattern)
     return script
