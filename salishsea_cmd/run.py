@@ -267,39 +267,7 @@ def run(
         shlex.split(cmd), check=True, universal_newlines=True, stdout=subprocess.PIPE
     ).stdout
     if separate_deflate:
-        nemo_job_no = _parse_submit_job_msg(submit_job_msg)
-        log.info(
-            "{batch_file} queued as job {nemo_job_no}".format(
-                batch_file=batch_file, nemo_job_no=nemo_job_no
-            )
-        )
-        depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
-        for deflate_job in SEPARATE_DEFLATE_JOBS:
-            deflate_script = "{run_dir}/deflate_{deflate_job}.sh".format(
-                run_dir=run_dir, deflate_job=deflate_job
-            )
-            cmd = "{submit_cmd} {depend_opt}:{nemo_job_no} {deflate_script}".format(
-                submit_cmd=queue_job_cmd,
-                depend_opt=depend_opt,
-                nemo_job_no=nemo_job_no,
-                deflate_script=deflate_script,
-            )
-            deflate_job_msg = subprocess.run(
-                shlex.split(cmd),
-                check=True,
-                universal_newlines=True,
-                stdout=subprocess.PIPE,
-            ).stdout
-            deflate_job_no = _parse_submit_job_msg(deflate_job_msg)
-            log.info(
-                "{run_dir}/{deflate_script} queued after job {nemo_job_no} as job "
-                "{deflate_job_no}".format(
-                    run_dir=run_dir,
-                    deflate_script=deflate_script,
-                    nemo_job_no=nemo_job_no,
-                    deflate_job_no=deflate_job_no,
-                )
-            )
+        _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd)
     return submit_job_msg
 
 
@@ -349,6 +317,43 @@ def _build_tmp_run_dir(
             with script_file.open("wt") as f:
                 f.write(deflate_script)
     return run_dir, batch_file
+
+
+def _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd):
+    nemo_job_no = _parse_submit_job_msg(submit_job_msg)
+    log.info(
+        "{batch_file} queued as job {nemo_job_no}".format(
+            batch_file=batch_file, nemo_job_no=nemo_job_no
+        )
+    )
+    run_dir = batch_file.parent
+    depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
+    for deflate_job in SEPARATE_DEFLATE_JOBS:
+        deflate_script = "{run_dir}/deflate_{deflate_job}.sh".format(
+            run_dir=run_dir, deflate_job=deflate_job
+        )
+        cmd = "{submit_cmd} {depend_opt}:{nemo_job_no} {deflate_script}".format(
+            submit_cmd=queue_job_cmd,
+            depend_opt=depend_opt,
+            nemo_job_no=nemo_job_no,
+            deflate_script=deflate_script,
+        )
+        deflate_job_msg = subprocess.run(
+            shlex.split(cmd),
+            check=True,
+            universal_newlines=True,
+            stdout=subprocess.PIPE,
+        ).stdout
+        deflate_job_no = _parse_submit_job_msg(deflate_job_msg)
+        log.info(
+            "{run_dir}/{deflate_script} queued after job {nemo_job_no} as job "
+            "{deflate_job_no}".format(
+                run_dir=run_dir,
+                deflate_script=deflate_script,
+                nemo_job_no=nemo_job_no,
+                deflate_job_no=deflate_job_no,
+            )
+        )
 
 
 def _parse_submit_job_msg(submit_job_msg):
