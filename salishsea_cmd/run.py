@@ -241,31 +241,17 @@ def run(
         run_desc,
         desc_file,
         results_dir,
-        cedar_broadwell=cedar_broadwell,
-        deflate=deflate,
-        max_deflate_jobs=max_deflate_jobs,
-        separate_deflate=separate_deflate,
-        nocheck_init=nocheck_init,
-        quiet=quiet,
+        cedar_broadwell,
+        deflate,
+        max_deflate_jobs,
+        separate_deflate,
+        nocheck_init,
+        quiet,
     )
     if no_submit:
         return
-    if waitjob:
-        depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
-        cmd = "{submit_cmd} {depend_opt}:{waitjob} {batch_file}".format(
-            submit_cmd=queue_job_cmd,
-            depend_opt=depend_opt,
-            batch_file=batch_file,
-            waitjob=waitjob,
-        )
-    else:
-        cmd = "{submit_cmd} {batch_file}".format(
-            submit_cmd=queue_job_cmd, batch_file=batch_file
-        )
     results_dir.mkdir(parents=True, exist_ok=True)
-    submit_job_msg = subprocess.run(
-        shlex.split(cmd), check=True, universal_newlines=True, stdout=subprocess.PIPE
-    ).stdout
+    submit_job_msg = _submit_job(batch_file, queue_job_cmd, waitjob=waitjob)
     if separate_deflate:
         _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd)
     return submit_job_msg
@@ -317,6 +303,25 @@ def _build_tmp_run_dir(
             with script_file.open("wt") as f:
                 f.write(deflate_script)
     return run_dir, batch_file
+
+
+def _submit_job(batch_file, queue_job_cmd, waitjob):
+    if waitjob:
+        depend_opt = "-W depend=afterok" if queue_job_cmd == "qsub" else "-d afterok"
+        cmd = "{submit_cmd} {depend_opt}:{waitjob} {batch_file}".format(
+            submit_cmd=queue_job_cmd,
+            depend_opt=depend_opt,
+            batch_file=batch_file,
+            waitjob=waitjob,
+        )
+    else:
+        cmd = "{submit_cmd} {batch_file}".format(
+            submit_cmd=queue_job_cmd, batch_file=batch_file
+        )
+    submit_job_msg = subprocess.run(
+        shlex.split(cmd), check=True, universal_newlines=True, stdout=subprocess.PIPE
+    ).stdout
+    return submit_job_msg
 
 
 def _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd):
