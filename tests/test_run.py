@@ -115,29 +115,17 @@ class TestTakeAction:
 
 @patch("salishsea_cmd.run.subprocess.run")
 @patch("salishsea_cmd.run._build_deflate_script", return_value="deflate script")
-@patch("salishsea_cmd.run._build_batch_script", return_value="batch script")
-@patch("salishsea_cmd.run.get_n_processors", return_value=144)
+@patch("salishsea_cmd.run._build_tmp_run_dir")
 @patch("salishsea_cmd.run.load_run_desc")
-@patch("salishsea_cmd.run.api.prepare")
 class TestRun:
     """Unit tests for `salishsea run` run() function.
     """
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_submit(
-        self,
-        m_prepare,
-        m_lrd,
-        m_gnp,
-        m_bbs,
-        m_bds,
-        m_run,
-        sep_xios_server,
-        xios_servers,
-        tmpdir,
+        self, m_lrd, m_btrd, m_bds, m_run, sep_xios_server, xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_lrd.return_value = {
             "output": {
@@ -145,50 +133,28 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
+        m_btrd.return_value = (
+            Path(str(p_run_dir)),
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"),
+        )
         m_run().stdout = "43.orca2.ibb"
         with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir))
             )
-        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
-        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(),
-            Path("SalishSea.yaml"),
-            144,
-            xios_servers,
-            4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)),
-            False,
-            False,
-            False,
-        )
         assert m_run.call_args_list[1] == call(
             ["qsub", "{run_dir}/SalishSeaNEMO.sh".format(run_dir=str(p_run_dir))],
             check=True,
             universal_newlines=True,
             stdout=subprocess.PIPE,
         )
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert submit_job_msg == "43.orca2.ibb"
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_qsub_waitjob(
-        self,
-        m_prepare,
-        m_lrd,
-        m_gnp,
-        m_bbs,
-        m_bds,
-        m_run,
-        sep_xios_server,
-        xios_servers,
-        tmpdir,
+        self, m_lrd, m_btrd, m_bds, m_run, sep_xios_server, xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_lrd.return_value = {
             "output": {
@@ -196,26 +162,15 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
+        m_btrd.return_value = (
+            Path(str(p_run_dir)),
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"),
+        )
         m_run().stdout = "43.orca2.ibb"
         with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
             )
-        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
-        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(),
-            Path("SalishSea.yaml"),
-            144,
-            xios_servers,
-            4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)),
-            False,
-            False,
-            False,
-        )
         assert m_run.call_args_list[1] == call(
             [
                 "qsub",
@@ -227,24 +182,13 @@ class TestRun:
             universal_newlines=True,
             stdout=subprocess.PIPE,
         )
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert submit_job_msg == "43.orca2.ibb"
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_sbatch_waitjob(
-        self,
-        m_prepare,
-        m_lrd,
-        m_gnp,
-        m_bbs,
-        m_bds,
-        m_run,
-        sep_xios_server,
-        xios_servers,
-        tmpdir,
+        self, m_lrd, m_btrd, m_bds, m_run, sep_xios_server, xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_lrd.return_value = {
             "output": {
@@ -252,26 +196,15 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
+        m_btrd.return_value = (
+            Path(str(p_run_dir)),
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"),
+        )
         m_run().stdout = "Submitted batch job 43"
         with patch("salishsea_cmd.run.SYSTEM", "cedar"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
             )
-        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
-        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(),
-            Path("SalishSea.yaml"),
-            144,
-            xios_servers,
-            4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)),
-            False,
-            False,
-            False,
-        )
         assert m_run.call_args_list[1] == call(
             [
                 "sbatch",
@@ -283,24 +216,13 @@ class TestRun:
             universal_newlines=True,
             stdout=subprocess.PIPE,
         )
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert submit_job_msg == "Submitted batch job 43"
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_no_submit(
-        self,
-        m_prepare,
-        m_lrd,
-        m_gnp,
-        m_bbs,
-        m_bds,
-        m_run,
-        sep_xios_server,
-        xios_servers,
-        tmpdir,
+        self, m_lrd, m_btrd, m_bds, m_run, sep_xios_server, xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_lrd.return_value = {
             "output": {
@@ -308,44 +230,22 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
+        m_btrd.return_value = (
+            Path(str(p_run_dir)),
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"),
+        )
         with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), no_submit=True
             )
-        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
-        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(),
-            Path("SalishSea.yaml"),
-            144,
-            xios_servers,
-            4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)),
-            False,
-            False,
-            False,
-        )
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
         assert not m_run.called
         assert submit_job_msg is None
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_no_submit_w_separate_deflate(
-        self,
-        m_prepare,
-        m_lrd,
-        m_gnp,
-        m_bbs,
-        m_bds,
-        m_run,
-        sep_xios_server,
-        xios_servers,
-        tmpdir,
+        self, m_lrd, m_btrd, m_bds, m_run, sep_xios_server, xios_servers, tmpdir
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_lrd.return_value = {
             "output": {
@@ -353,6 +253,10 @@ class TestRun:
                 "XIOS servers": xios_servers,
             }
         }
+        m_btrd.return_value = (
+            Path(str(p_run_dir)),
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"),
+        )
         with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             submit_job_msg = salishsea_cmd.run.run(
                 Path("SalishSea.yaml"),
@@ -360,139 +264,24 @@ class TestRun:
                 no_submit=True,
                 separate_deflate=True,
             )
-        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
-        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(),
-            Path("SalishSea.yaml"),
-            144,
-            xios_servers,
-            4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)),
-            False,
-            True,
-            False,
-        )
-        assert m_bds.call_args_list == [
-            call(m_lrd(), "*_grid_[TUVW]*.nc", "grid", Path(str(p_results_dir))),
-            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir))),
-            call(m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir))),
-        ]
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert p_run_dir.join("deflate_grid.sh").check(file=True)
-        assert p_run_dir.join("deflate_ptrc.sh").check(file=True)
-        assert p_run_dir.join("deflate_dia.sh").check(file=True)
         assert not m_run.called
         assert submit_job_msg is None
 
-    def test_run_deflate(self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_run, tmpdir):
+    def test_run_qsub_separate_deflate(self, m_lrd, m_btrd, m_bds, m_run, tmpdir):
         p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_lrd.return_value = {
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
-        m_run().stdout = "43.orca2.ibb"
-        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir)), deflate=True
-            )
-        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
-        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(),
-            Path("SalishSea.yaml"),
-            144,
-            1,
-            4,
-            Path(str(p_results_dir)),
+        m_btrd.return_value = (
             Path(str(p_run_dir)),
-            True,
-            False,
-            False,
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
-        assert m_run.call_args_list[1] == call(
-            ["qsub", "{run_dir}/SalishSeaNEMO.sh".format(run_dir=str(p_run_dir))],
-            check=True,
-            universal_newlines=True,
-            stdout=subprocess.PIPE,
-        )
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert submit_job_msg == "43.orca2.ibb"
-
-    def test_run_cedar_broadwell(
-        self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_run, tmpdir
-    ):
-        p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
-        p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_lrd.return_value = {
-            "output": {"separate XIOS server": True, "XIOS servers": 1}
-        }
-        m_run().stdout = "Submitted batch job 43"
-        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir)), cedar_broadwell=True
-            )
-        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
-        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(),
-            Path("SalishSea.yaml"),
-            144,
-            1,
-            4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)),
-            False,
-            False,
-            True,
-        )
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert submit_job_msg == "Submitted batch job 43"
-
-    def test_run_qsub_separate_deflate(
-        self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_run, tmpdir
-    ):
-        p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
-        p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_lrd.return_value = {
-            "output": {"separate XIOS server": True, "XIOS servers": 1}
-        }
         m_run().stdout = "43.orca2.ibb"
         with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
             )
-        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
-        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(),
-            Path("SalishSea.yaml"),
-            144,
-            1,
-            4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)),
-            False,
-            True,
-            False,
-        )
-        assert m_bds.call_args_list == [
-            call(m_lrd(), "*_grid_[TUVW]*.nc", "grid", Path(str(p_results_dir))),
-            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir))),
-            call(m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir))),
-        ]
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert p_run_dir.join("deflate_grid.sh").check(file=True)
-        assert p_run_dir.join("deflate_ptrc.sh").check(file=True)
-        assert p_run_dir.join("deflate_dia.sh").check(file=True)
         assert m_run.call_args_list[1:] == [
             call(
                 ["qsub", "{run_dir}/SalishSeaNEMO.sh".format(run_dir=str(p_run_dir))],
@@ -535,44 +324,21 @@ class TestRun:
             ),
         ]
 
-    def test_run_sbatch_separate_deflate(
-        self, m_prepare, m_lrd, m_gnp, m_bbs, m_bds, m_run, tmpdir
-    ):
+    def test_run_sbatch_separate_deflate(self, m_lrd, m_btrd, m_bds, m_run, tmpdir):
         p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
         p_results_dir = tmpdir.ensure_dir("results_dir")
         m_lrd.return_value = {
             "output": {"separate XIOS server": True, "XIOS servers": 1}
         }
+        m_btrd.return_value = (
+            Path(str(p_run_dir)),
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"),
+        )
         m_run().stdout = "Submitted batch job 43"
         with patch("salishsea_cmd.run.SYSTEM", "cedar"):
             salishsea_cmd.run.run(
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
             )
-        m_prepare.assert_called_once_with(Path("SalishSea.yaml"), False)
-        m_lrd.assert_called_once_with(Path("SalishSea.yaml"))
-        m_gnp.assert_called_once_with(m_lrd(), Path(m_prepare()))
-        m_bbs.assert_called_once_with(
-            m_lrd(),
-            Path("SalishSea.yaml"),
-            144,
-            1,
-            4,
-            Path(str(p_results_dir)),
-            Path(str(p_run_dir)),
-            False,
-            True,
-            False,
-        )
-        assert m_bds.call_args_list == [
-            call(m_lrd(), "*_grid_[TUVW]*.nc", "grid", Path(str(p_results_dir))),
-            call(m_lrd(), "*_ptrc_T*.nc", "ptrc", Path(str(p_results_dir))),
-            call(m_lrd(), "*_dia[12]_T*.nc", "dia", Path(str(p_results_dir))),
-        ]
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert p_run_dir.join("deflate_grid.sh").check(file=True)
-        assert p_run_dir.join("deflate_ptrc.sh").check(file=True)
-        assert p_run_dir.join("deflate_dia.sh").check(file=True)
         assert m_run.call_args_list[1:] == [
             call(
                 ["sbatch", "{run_dir}/SalishSeaNEMO.sh".format(run_dir=str(p_run_dir))],
@@ -614,6 +380,123 @@ class TestRun:
                 stdout=subprocess.PIPE,
             ),
         ]
+
+
+@patch("salishsea_cmd.run.log", autospec=True)
+@patch("salishsea_cmd.run._build_deflate_script", return_value="deflate script")
+@patch("salishsea_cmd.run._build_batch_script", return_value="batch script")
+@patch("salishsea_cmd.run.get_n_processors", return_value=144)
+@patch("salishsea_cmd.run.api.prepare")
+@pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
+class TestBuildTmpRunDir:
+    """Unit tests for _build_tmp_run_dir() function.
+    """
+
+    def test_build_tmp_run_dir(
+        self,
+        m_prepare,
+        m_gnp,
+        m_bbs,
+        m_bds,
+        m_log,
+        sep_xios_server,
+        xios_servers,
+        tmpdir,
+    ):
+        p_run_dir = tmpdir.ensure_dir("run_dir")
+        m_prepare.return_value = Path(str(p_run_dir))
+        run_desc = {
+            "output": {
+                "separate XIOS server": sep_xios_server,
+                "XIOS servers": xios_servers,
+            }
+        }
+        run_dir, batch_file = salishsea_cmd.run._build_tmp_run_dir(
+            run_desc,
+            Path("SalishSea.yaml"),
+            Path("results_dir"),
+            cedar_broadwell=False,
+            deflate=False,
+            max_deflate_jobs=4,
+            separate_deflate=False,
+            nocheck_init=False,
+            quiet=False,
+        )
+        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
+        assert run_dir == Path(str(p_run_dir))
+        assert batch_file == Path(str(p_run_dir)) / "SalishSeaNEMO.sh"
+
+    def test_build_tmp_run_dir_quiet(
+        self,
+        m_prepare,
+        m_gnp,
+        m_bbs,
+        m_bds,
+        m_log,
+        sep_xios_server,
+        xios_servers,
+        tmpdir,
+    ):
+        p_run_dir = tmpdir.ensure_dir("run_dir")
+        m_prepare.return_value = Path(str(p_run_dir))
+        run_desc = {
+            "output": {
+                "separate XIOS server": sep_xios_server,
+                "XIOS servers": xios_servers,
+            }
+        }
+        run_dir, batch_file = salishsea_cmd.run._build_tmp_run_dir(
+            run_desc,
+            Path("SalishSea.yaml"),
+            Path("results_dir"),
+            cedar_broadwell=False,
+            deflate=False,
+            max_deflate_jobs=4,
+            separate_deflate=False,
+            nocheck_init=False,
+            quiet=True,
+        )
+        assert not m_log.info.called
+        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
+        assert run_dir == Path(str(p_run_dir))
+        assert batch_file == Path(str(p_run_dir)) / "SalishSeaNEMO.sh"
+
+    def test_build_tmp_run_dir_separate_deflate(
+        self,
+        m_prepare,
+        m_gnp,
+        m_bbs,
+        m_bds,
+        m_log,
+        sep_xios_server,
+        xios_servers,
+        tmpdir,
+    ):
+        p_run_dir = tmpdir.ensure_dir("run_dir")
+        m_prepare.return_value = Path(str(p_run_dir))
+        run_desc = {
+            "output": {
+                "separate XIOS server": sep_xios_server,
+                "XIOS servers": xios_servers,
+            }
+        }
+        run_dir, batch_file = salishsea_cmd.run._build_tmp_run_dir(
+            run_desc,
+            Path("SalishSea.yaml"),
+            Path("results_dir"),
+            cedar_broadwell=False,
+            deflate=False,
+            max_deflate_jobs=4,
+            separate_deflate=True,
+            nocheck_init=False,
+            quiet=False,
+        )
+        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
+        assert p_run_dir.join("deflate_grid.sh").check(file=True)
+        assert p_run_dir.join("deflate_ptrc.sh").check(file=True)
+        assert p_run_dir.join("deflate_dia.sh").check(file=True)
+        assert run_dir == Path(str(p_run_dir))
+        assert batch_file == Path(str(p_run_dir)) / "SalishSeaNEMO.sh"
 
 
 class TestBuildBatchScript:

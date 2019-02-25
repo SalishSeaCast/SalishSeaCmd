@@ -234,43 +234,20 @@ def run(
               run script.
     :rtype: str
     """
-    run_dir = api.prepare(desc_file, nocheck_init)
-    if not quiet:
-        log.info("Created run directory {}".format(run_dir))
-    run_desc = load_run_desc(desc_file)
-    nemo_processors = get_n_processors(run_desc, run_dir)
-    separate_xios_server = get_run_desc_value(
-        run_desc, ("output", "separate XIOS server")
-    )
-    if separate_xios_server:
-        xios_processors = get_run_desc_value(run_desc, ("output", "XIOS servers"))
-    else:
-        xios_processors = 0
     queue_job_cmd = "sbatch" if SYSTEM in {"cedar", "graham"} else "qsub"
     results_dir = nemo_cmd.resolved_path(results_dir)
-    batch_script = _build_batch_script(
+    run_desc = load_run_desc(desc_file)
+    run_dir, batch_file = _build_tmp_run_dir(
         run_desc,
         desc_file,
-        nemo_processors,
-        xios_processors,
-        max_deflate_jobs,
         results_dir,
-        run_dir,
-        deflate,
-        separate_deflate,
-        cedar_broadwell,
+        cedar_broadwell=cedar_broadwell,
+        deflate=deflate,
+        max_deflate_jobs=max_deflate_jobs,
+        separate_deflate=separate_deflate,
+        nocheck_init=nocheck_init,
+        quiet=quiet,
     )
-    batch_file = run_dir / "SalishSeaNEMO.sh"
-    with batch_file.open("wt") as f:
-        f.write(batch_script)
-    if separate_deflate:
-        for deflate_job, pattern in SEPARATE_DEFLATE_JOBS.items():
-            deflate_script = _build_deflate_script(
-                run_desc, pattern, deflate_job, results_dir
-            )
-            script_file = run_dir / "deflate_{}.sh".format(deflate_job)
-            with script_file.open("wt") as f:
-                f.write(deflate_script)
     if no_submit:
         return
     if waitjob:
@@ -324,6 +301,54 @@ def run(
                 )
             )
     return submit_job_msg
+
+
+def _build_tmp_run_dir(
+    run_desc,
+    desc_file,
+    results_dir,
+    cedar_broadwell,
+    deflate,
+    max_deflate_jobs,
+    separate_deflate,
+    nocheck_init,
+    quiet,
+):
+    run_dir = api.prepare(desc_file, nocheck_init)
+    if not quiet:
+        log.info("Created run directory {}".format(run_dir))
+    nemo_processors = get_n_processors(run_desc, run_dir)
+    separate_xios_server = get_run_desc_value(
+        run_desc, ("output", "separate XIOS server")
+    )
+    if separate_xios_server:
+        xios_processors = get_run_desc_value(run_desc, ("output", "XIOS servers"))
+    else:
+        xios_processors = 0
+    batch_script = _build_batch_script(
+        run_desc,
+        desc_file,
+        nemo_processors,
+        xios_processors,
+        max_deflate_jobs,
+        results_dir,
+        run_dir,
+        deflate,
+        separate_deflate,
+        cedar_broadwell,
+    )
+    batch_file = run_dir / "SalishSeaNEMO.sh"
+    with batch_file.open("wt") as f:
+        f.write(batch_script)
+    if separate_deflate:
+        for deflate_job, pattern in SEPARATE_DEFLATE_JOBS.items():
+            deflate_script = _build_deflate_script(
+                run_desc, pattern, deflate_job, results_dir
+            )
+            script_file = run_dir / "deflate_{}.sh".format(deflate_job)
+            with script_file.open("wt") as f:
+                f.write(deflate_script)
+    return run_dir, batch_file
 
 
 def _parse_submit_job_msg(submit_job_msg):
