@@ -14,6 +14,7 @@
 # limitations under the License.
 """SalishSeaCmd run sub-command plug-in unit tests
 """
+import shlex
 import subprocess
 from io import StringIO
 from pathlib import Path
@@ -125,10 +126,18 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
-            (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
-            (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             (False, 0, "cedar", "sbatch", "Submitted batch job 43"),
             (True, 4, "cedar", "sbatch", "Submitted batch job 43"),
+            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "graham", "sbatch", "Submitted batch job 43"),
+            (True, 4, "graham", "sbatch", "Submitted batch job 43"),
+            (False, 0, "salish", "qsub", "43.master"),
+            (True, 4, "salish", "qsub", "43.master"),
+            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
+            (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
         ],
     )
     def test_run_submit(
@@ -170,10 +179,18 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
-            (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
-            (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             (False, 0, "cedar", "sbatch", "Submitted batch job 43"),
             (True, 4, "cedar", "sbatch", "Submitted batch job 43"),
+            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "graham", "sbatch", "Submitted batch job 43"),
+            (True, 4, "graham", "sbatch", "Submitted batch job 43"),
+            (False, 0, "salish", "qsub", "43.master"),
+            (True, 4, "salish", "qsub", "43.master"),
+            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
+            (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
         ],
     )
     def test_run_waitjob(
@@ -264,10 +281,18 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
-            (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
-            (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             (False, 0, "cedar", "sbatch", "Submitted batch job 43"),
             (True, 4, "cedar", "sbatch", "Submitted batch job 43"),
+            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "graham", "sbatch", "Submitted batch job 43"),
+            (True, 4, "graham", "sbatch", "Submitted batch job 43"),
+            (False, 0, "salish", "qsub", "43.master"),
+            (True, 4, "salish", "qsub", "43.master"),
+            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
+            (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
         ],
     )
     def test_run_separate_deflate(
@@ -428,6 +453,7 @@ class TestBuildTmpRunDir:
     [
         ("sbatch", "-d", "afterok", "Submitted batch job 43"),
         ("qsub", "-W", "depend=afterok", "43.orca2.ibb"),
+        ("qsub -q mpi", "-W", "depend=afterok", "43.admin.default.domain"),
     ],
 )
 class TestSubmitJob:
@@ -441,10 +467,11 @@ class TestSubmitJob:
             Path("run_dir", "SalishSeaNEMO.sh"), queue_job_cmd, 0
         )
         m_run.assert_called_once_with(
-            [
-                queue_job_cmd,
-                "{run_dir}/SalishSeaNEMO.sh".format(run_dir=Path("run_dir")),
-            ],
+            shlex.split(
+                "{queue_job_cmd} {run_dir}/SalishSeaNEMO.sh".format(
+                    queue_job_cmd=queue_job_cmd, run_dir=Path("run_dir")
+                )
+            ),
             check=True,
             universal_newlines=True,
             stdout=subprocess.PIPE,
@@ -458,12 +485,14 @@ class TestSubmitJob:
             Path("run_dir", "SalishSeaNEMO.sh"), queue_job_cmd, 42
         )
         m_run.assert_called_once_with(
-            [
-                queue_job_cmd,
-                depend_flag,
-                "{depend_option}:42".format(depend_option=depend_option),
-                "{run_dir}/SalishSeaNEMO.sh".format(run_dir=Path("run_dir")),
-            ],
+            shlex.split(
+                "{queue_job_cmd} {depend_flag} {depend_option}:42 {run_dir}/SalishSeaNEMO.sh".format(
+                    queue_job_cmd=queue_job_cmd,
+                    depend_flag=depend_flag,
+                    depend_option=depend_option,
+                    run_dir=Path("run_dir"),
+                )
+            ),
             check=True,
             universal_newlines=True,
             stdout=subprocess.PIPE,
@@ -478,6 +507,7 @@ class TestSubmitJob:
     [
         ("Submitted batch job 43", "sbatch", "-d", "afterok"),
         ("43.orca2.ibb", "qsub", "-W", "depend=afterok"),
+        ("43.admin.default.domain", "qsub -q mpi", "-W", "depend=afterok"),
     ],
 )
 class TestSubmitSeparateDeflateJobs:
@@ -500,34 +530,40 @@ class TestSubmitSeparateDeflateJobs:
         )
         assert m_run.call_args_list == [
             call(
-                [
-                    queue_job_cmd,
-                    depend_flag,
-                    "{depend_option}:43".format(depend_option=depend_option),
-                    "{run_dir}/deflate_grid.sh".format(run_dir=str(p_run_dir)),
-                ],
+                shlex.split(
+                    "{queue_job_cmd} {depend_flag} {depend_option}:43 {run_dir}/deflate_grid.sh".format(
+                        queue_job_cmd=queue_job_cmd,
+                        depend_flag=depend_flag,
+                        depend_option=depend_option,
+                        run_dir=str(p_run_dir),
+                    )
+                ),
                 check=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
             ),
             call(
-                [
-                    queue_job_cmd,
-                    depend_flag,
-                    "{depend_option}:43".format(depend_option=depend_option),
-                    "{run_dir}/deflate_ptrc.sh".format(run_dir=str(p_run_dir)),
-                ],
+                shlex.split(
+                    "{queue_job_cmd} {depend_flag} {depend_option}:43 {run_dir}/deflate_ptrc.sh".format(
+                        queue_job_cmd=queue_job_cmd,
+                        depend_flag=depend_flag,
+                        depend_option=depend_option,
+                        run_dir=str(p_run_dir),
+                    )
+                ),
                 check=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
             ),
             call(
-                [
-                    queue_job_cmd,
-                    depend_flag,
-                    "{depend_option}:43".format(depend_option=depend_option),
-                    "{run_dir}/deflate_dia.sh".format(run_dir=str(p_run_dir)),
-                ],
+                shlex.split(
+                    "{queue_job_cmd} {depend_flag} {depend_option}:43 {run_dir}/deflate_dia.sh".format(
+                        queue_job_cmd=queue_job_cmd,
+                        depend_flag=depend_flag,
+                        depend_option=depend_option,
+                        run_dir=str(p_run_dir),
+                    )
+                ),
                 check=True,
                 universal_newlines=True,
                 stdout=subprocess.PIPE,
@@ -704,6 +740,98 @@ class TestBuildBatchScript:
                 "\n"
                 'echo "Results deflation started at $(date)"\n'
                 "module load nco/4.6.6\n"
+                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
+                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
+                "  --jobs 4 --debug\n"
+                'echo "Results deflation ended at $(date)"\n'
+            )
+        expected += (
+            "\n"
+            'echo "Results gathering started at $(date)"\n'
+            "${GATHER} ${RESULTS_DIR} --debug\n"
+            'echo "Results gathering ended at $(date)"\n'
+            "\n"
+            "chmod go+rx ${RESULTS_DIR}\n"
+            "chmod g+rw ${RESULTS_DIR}/*\n"
+            "chmod o+r ${RESULTS_DIR}/*\n"
+            "\n"
+            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+            "rmdir $(pwd)\n"
+            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+            "exit ${MPIRUN_EXIT_CODE}\n"
+        )
+        assert script == expected
+
+    @pytest.mark.parametrize(
+        "system, deflate",
+        [("delta", True), ("delta", False), ("sigma", True), ("sigma", False)],
+    )
+    def test_optimum(self, system, deflate):
+        desc_file = StringIO(
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
+        )
+        run_desc = yaml.load(desc_file)
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            script = salishsea_cmd.run._build_batch_script(
+                run_desc,
+                Path("SalishSea.yaml"),
+                nemo_processors=278,
+                xios_processors=1,
+                max_deflate_jobs=4,
+                results_dir=Path("results_dir"),
+                run_dir=Path(),
+                deflate=deflate,
+                separate_deflate=False,
+                cedar_broadwell=False,
+            )
+        expected = (
+            "#!/bin/bash\n"
+            "\n"
+            "#PBS -N foo\n"
+            "#PBS -S /bin/bash\n"
+            "#PBS -l nodes=14:ppn=20\n"
+            "# memory per processor\n"
+            "#PBS -l pmem=2000mb\n"
+            "#PBS -l walltime=1:02:03\n"
+            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
+            "#PBS -m bea\n"
+            "#PBS -M me@example.com\n"
+            "# stdout and stderr file paths/names\n"
+            "#PBS -o results_dir/stdout\n"
+            "#PBS -e results_dir/stderr\n"
+            "\n"
+            "\n"
+            'RUN_ID="foo"\n'
+            'RUN_DESC="SalishSea.yaml"\n'
+            'WORK_DIR="."\n'
+            'RESULTS_DIR="results_dir"\n'
+            'COMBINE="${PBS_O_HOME}/bin/salishsea combine"\n'
+        )
+        if deflate:
+            expected += 'DEFLATE="${PBS_O_HOME}/bin/salishsea deflate"\n'
+        expected += (
+            'GATHER="${PBS_O_HOME}/bin/salishsea gather"\n'
+            "\n"
+            "module load Miniconda/3\n"
+            "module load OpenMPI/2.1.6/GCC/SYSTEM\n"
+            "\n"
+            "mkdir -p ${RESULTS_DIR}\n"
+            "cd ${WORK_DIR}\n"
+            'echo "working dir: $(pwd)"\n'
+            "\n"
+            'echo "Starting run at $(date)"\n'
+            "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 278 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n"
+            "MPIRUN_EXIT_CODE=$?\n"
+            'echo "Ended run at $(date)"\n'
+            "\n"
+            'echo "Results combining started at $(date)"\n'
+            "${COMBINE} ${RUN_DESC} --debug\n"
+            'echo "Results combining ended at $(date)"\n'
+        )
+        if deflate:
+            expected += (
+                "\n"
+                'echo "Results deflation started at $(date)"\n'
                 "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
                 "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
                 "  --jobs 4 --debug\n"
@@ -995,16 +1123,20 @@ class TestPbsDirectives:
     """Unit tests for `salishsea run` _pbs_directives() function.
     """
 
-    def test_pbs_directives_run(self):
+    @pytest.mark.parametrize(
+        "procs_per_node, procs_directive",
+        [(0, "#PBS -l procs=42"), (20, "#PBS -l nodes=3:ppn=20")],
+    )
+    def test_pbs_directives_run(self, procs_per_node, procs_directive):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.load(desc_file)
         pbs_directives = salishsea_cmd.run._pbs_directives(
-            run_desc, 42, "me@example.com", Path("foo")
+            run_desc, 42, "me@example.com", Path("foo"), procs_per_node
         )
         expected = (
             "#PBS -N foo\n"
             "#PBS -S /bin/bash\n"
-            "#PBS -l procs=42\n"
+            "{procs_directive}\n"
             "# memory per processor\n"
             "#PBS -l pmem=2000mb\n"
             "#PBS -l walltime=1:02:03\n"
@@ -1014,7 +1146,7 @@ class TestPbsDirectives:
             "# stdout and stderr file paths/names\n"
             "#PBS -o foo/stdout\n"
             "#PBS -e foo/stderr\n"
-        )
+        ).format(procs_directive=procs_directive)
         assert pbs_directives == expected
 
     def test_pbs_directives_deflate(self):
@@ -1071,14 +1203,18 @@ class TestDefinitions:
     @pytest.mark.parametrize(
         "system, home, deflate",
         [
-            ("cedar", "${HOME}", True),
-            ("cedar", "${HOME}", False),
-            ("graham", "${HOME}", True),
-            ("graham", "${HOME}", False),
-            ("orcinus", "${PBS_O_HOME}", True),
-            ("orcinus", "${PBS_O_HOME}", False),
-            ("salish", "${HOME}", True),
-            ("salish", "${HOME}", False),
+            ("cedar", "${HOME}/.local", True),
+            ("cedar", "${HOME}/.local", False),
+            ("delta", "${PBS_O_HOME}", True),
+            ("delta", "${PBS_O_HOME}", False),
+            ("graham", "${HOME}/.local", True),
+            ("graham", "${HOME}/.local", False),
+            ("orcinus", "${PBS_O_HOME}/.local", True),
+            ("orcinus", "${PBS_O_HOME}/.local", False),
+            ("salish", "${HOME}/.local", True),
+            ("salish", "${HOME}/.local", False),
+            ("sigma", "${PBS_O_HOME}", True),
+            ("sigma", "${PBS_O_HOME}", False),
         ],
     )
     def test_definitions(self, system, home, deflate):
@@ -1097,13 +1233,11 @@ class TestDefinitions:
             'RUN_DESC="SalishSea.yaml"\n'
             'WORK_DIR="run_dir"\n'
             'RESULTS_DIR="results_dir"\n'
-            'COMBINE="{home}/.local/bin/salishsea combine"\n'
+            'COMBINE="{home}/bin/salishsea combine"\n'
         ).format(home=home)
         if deflate:
-            expected += 'DEFLATE="{home}/.local/bin/salishsea deflate"\n'.format(
-                home=home
-            )
-        expected += 'GATHER="{home}/.local/bin/salishsea gather"\n'.format(home=home)
+            expected += 'DEFLATE="{home}/bin/salishsea deflate"\n'.format(home=home)
+        expected += 'GATHER="{home}/bin/salishsea gather"\n'.format(home=home)
         assert defns == expected
 
 
@@ -1135,13 +1269,36 @@ class TestModules:
         )
         assert modules == expected
 
+    @pytest.mark.parametrize("system", ["delta", "sigma"])
+    def test_optimum(self, system):
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            modules = salishsea_cmd.run._modules()
+        expected = "module load Miniconda/3\n" "module load OpenMPI/2.1.6/GCC/SYSTEM\n"
+        assert modules == expected
+
 
 class TestExecute:
     """Unit test for _execute function.
     """
 
-    @pytest.mark.parametrize("system", ["cedar", "graham", "orcinus", "salish"])
-    def test_execute_with_deflate(self, system):
+    @pytest.mark.parametrize(
+        "system, mpirun_cmd",
+        [
+            ("cedar", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"),
+            (
+                "delta",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+            ),
+            ("graham", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"),
+            ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"),
+            ("salish", "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"),
+            (
+                "sigma",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+            ),
+        ],
+    )
+    def test_execute_with_deflate(self, system, mpirun_cmd):
         with patch("salishsea_cmd.run.SYSTEM", system):
             script = salishsea_cmd.run._execute(
                 nemo_processors=42,
@@ -1156,12 +1313,7 @@ class TestExecute:
 
         echo "Starting run at $(date)"
         """
-        if system == "salish":
-            expected += """/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
-            """
-        else:
-            expected += """mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
-            """
+        expected += mpirun_cmd
         expected += """MPIRUN_EXIT_CODE=$?
         echo "Ended run at $(date)"
 
@@ -1189,68 +1341,143 @@ class TestExecute:
             assert line.strip() == expected[i].strip()
 
     @pytest.mark.parametrize(
-        "deflate, separate_deflate", [(False, True), (False, False), (True, True)]
+        "system, mpirun_cmd, deflate, separate_deflate",
+        [
+            (
+                "cedar",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                False,
+                True,
+            ),
+            (
+                "cedar",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                False,
+                False,
+            ),
+            (
+                "cedar",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                True,
+                True,
+            ),
+            (
+                "delta",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                False,
+                True,
+            ),
+            (
+                "delta",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                False,
+                False,
+            ),
+            (
+                "delta",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                True,
+                True,
+            ),
+            (
+                "graham",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                False,
+                True,
+            ),
+            (
+                "graham",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                False,
+                False,
+            ),
+            (
+                "graham",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                True,
+                True,
+            ),
+            (
+                "orcinus",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                False,
+                True,
+            ),
+            (
+                "orcinus",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                False,
+                False,
+            ),
+            (
+                "orcinus",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                True,
+                True,
+            ),
+            (
+                "salish",
+                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                False,
+                True,
+            ),
+            (
+                "salish",
+                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                False,
+                False,
+            ),
+            (
+                "salish",
+                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                True,
+                True,
+            ),
+            (
+                "sigma",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                False,
+                True,
+            ),
+            (
+                "sigma",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                False,
+                False,
+            ),
+            (
+                "sigma",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                True,
+                True,
+            ),
+        ],
     )
-    def test_execute_without_deflate(self, deflate, separate_deflate):
-        script = salishsea_cmd.run._execute(
-            nemo_processors=42,
-            xios_processors=1,
-            deflate=deflate,
-            max_deflate_jobs=4,
-            separate_deflate=separate_deflate,
-        )
-        expected = """mkdir -p ${RESULTS_DIR}
-        cd ${WORK_DIR}
-        echo "working dir: $(pwd)"
-
-        echo "Starting run at $(date)"
-        mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
-        MPIRUN_EXIT_CODE=$?
-        echo "Ended run at $(date)"
-
-        echo "Results combining started at $(date)"
-        ${COMBINE} ${RUN_DESC} --debug
-        echo "Results combining ended at $(date)"
-        
-        echo "Results gathering started at $(date)"
-        ${GATHER} ${RESULTS_DIR} --debug
-        echo "Results gathering ended at $(date)"
-        """
-        expected = expected.splitlines()
-        for i, line in enumerate(script.splitlines()):
-            assert line.strip() == expected[i].strip()
-
-    def test_salish_execute(self):
-        with patch("salishsea_cmd.run.SYSTEM", "salish"):
+    def test_execute_without_deflate(
+        self, system, mpirun_cmd, deflate, separate_deflate
+    ):
+        with patch("salishsea_cmd.run.SYSTEM", system):
             script = salishsea_cmd.run._execute(
                 nemo_processors=42,
                 xios_processors=1,
-                deflate=True,
+                deflate=deflate,
                 max_deflate_jobs=4,
-                separate_deflate=False,
+                separate_deflate=separate_deflate,
             )
         expected = """mkdir -p ${RESULTS_DIR}
         cd ${WORK_DIR}
         echo "working dir: $(pwd)"
 
         echo "Starting run at $(date)"
-        /usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
-        MPIRUN_EXIT_CODE=$?
+        """
+        expected += mpirun_cmd
+        expected += """MPIRUN_EXIT_CODE=$?
         echo "Ended run at $(date)"
 
         echo "Results combining started at $(date)"
         ${COMBINE} ${RUN_DESC} --debug
         echo "Results combining ended at $(date)"
-
-        echo "Results deflation started at $(date)"
-        """
-        expected += (
-            "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-            "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-            "  --jobs 4 --debug\n"
-            'echo "Results deflation ended at $(date)"\n'
-        )
-        expected += """
+        
         echo "Results gathering started at $(date)"
         ${GATHER} ${RESULTS_DIR} --debug
         echo "Results gathering ended at $(date)"
