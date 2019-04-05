@@ -838,7 +838,7 @@ def _modules():
         "cedar": (
             "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
         ),
-        "delta": "module load Miniconda/3\n" "module load OpenMPI/2.1.6/GCC/SYSTEM\n",
+        "delta": "module load Miniconda/3\n" "module load OpenMPI/4.0.0/GCC/SYSTEM\n",
         "graham": (
             "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
         ),
@@ -851,7 +851,7 @@ def _modules():
             "module load python\n"
         ),
         "salish": "",
-        "sigma": "module load Miniconda/3\n" "module load OpenMPI/2.1.6/GCC/SYSTEM\n",
+        "sigma": "module load Miniconda/3\n" "module load OpenMPI/4.0.0/GCC/SYSTEM\n",
     }.get(SYSTEM, "")
     return modules
 
