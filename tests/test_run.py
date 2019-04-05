@@ -1156,7 +1156,7 @@ class TestBuildBatchScript:
             'GATHER="${PBS_O_HOME}/bin/salishsea gather"\n'
             "\n"
             "module load Miniconda/3\n"
-            "module load OpenMPI/2.1.6/GCC/SYSTEM\n"
+            "module load OpenMPI/4.0.0/GCC/SYSTEM\n"
             "\n"
             "mkdir -p ${RESULTS_DIR}\n"
             "cd ${WORK_DIR}\n"
@@ -1616,7 +1616,7 @@ class TestModules:
     def test_optimum(self, system):
         with patch("salishsea_cmd.run.SYSTEM", system):
             modules = salishsea_cmd.run._modules()
-        expected = "module load Miniconda/3\n" "module load OpenMPI/2.1.6/GCC/SYSTEM\n"
+        expected = "module load Miniconda/3\n" "module load OpenMPI/4.0.0/GCC/SYSTEM\n"
         assert modules == expected
 
 
