@@ -25,7 +25,9 @@ import shlex
 import socket
 import subprocess
 
+import arrow
 import cliff.command
+import f90nml
 import nemo_cmd
 from nemo_cmd.prepare import get_n_processors, get_run_desc_value, load_run_desc
 
@@ -243,25 +245,105 @@ def run(
         "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
     }.get(SYSTEM, "qsub")
     results_dir = nemo_cmd.resolved_path(results_dir)
-    run_desc = load_run_desc(desc_file)
-    run_dir, batch_file = _build_tmp_run_dir(
-        run_desc,
-        desc_file,
-        results_dir,
-        cedar_broadwell,
-        deflate,
-        max_deflate_jobs,
-        separate_deflate,
-        nocheck_init,
-        quiet,
-    )
-    if no_submit:
-        return
-    results_dir.mkdir(parents=True, exist_ok=True)
-    submit_job_msg = _submit_job(batch_file, queue_job_cmd, waitjob=waitjob)
-    if separate_deflate:
-        _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd)
+    run_segments = _calc_run_segments(desc_file, results_dir)
+    submit_job_msg = "Submitted jobs"
+    for run_desc, desc_file, results_dir, namelist_time_patch in run_segments:
+        run_dir, batch_file = _build_tmp_run_dir(
+            run_desc,
+            desc_file,
+            results_dir,
+            cedar_broadwell,
+            deflate,
+            max_deflate_jobs,
+            separate_deflate,
+            nocheck_init,
+            quiet,
+        )
+        if no_submit:
+            return
+        results_dir.mkdir(parents=True, exist_ok=True)
+        submit_job_msg = _submit_job(batch_file, queue_job_cmd, waitjob=waitjob)
+        if separate_deflate:
+            _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd)
+        submit_job_msg = (
+            submit_job_msg
+            if len(run_segments) == 1
+            else f"{submit_job_msg} {_parse_submit_job_msg(submit_job_msg)}"
+        )
     return submit_job_msg
+
+
+def _calc_run_segments(desc_file, results_dir):
+    run_desc = load_run_desc(desc_file)
+    if "segmented run" not in run_desc:
+        return [(run_desc, desc_file, results_dir, {})]
+    base_run_id = get_run_desc_value(run_desc, ("run_id",))
+    start_date = arrow.get(
+        get_run_desc_value(run_desc, ("segmented run", "start date"))
+    )
+    start_timestep = get_run_desc_value(run_desc, ("segmented run", "start time step"))
+    end_date = arrow.get(get_run_desc_value(run_desc, ("segmented run", "end date")))
+    days_per_segment = get_run_desc_value(
+        run_desc, ("segmented run", "days per segment")
+    )
+    namelist_namdom = get_run_desc_value(
+        run_desc, ("segmented run", "namelists", "namdom"), expand_path=True
+    )
+    rn_rdt = f90nml.read(namelist_namdom)["namdom"]["rn_rdt"]
+    timesteps_per_day = 24 * 60 * 60 / rn_rdt
+    n_segments = _calc_n_segments(run_desc)
+    run_segments = []
+    for i in range(n_segments):
+        segment_run_id = "{i}_{base_run_id}".format(i=i, base_run_id=base_run_id)
+        segment_run_desc = run_desc.copy()
+        segment_run_desc["run_id"] = segment_run_id
+        nn_it000 = int(start_timestep + i * days_per_segment * timesteps_per_day)
+        date0 = min(start_date.shift(days=+i * days_per_segment), end_date)
+        segment_days = min(
+            days_per_segment,
+            (end_date - start_date.shift(days=+i * days_per_segment)).days,
+        )
+        nn_itend = int(nn_it000 + segment_days * timesteps_per_day - 1)
+        run_segments.append(
+            (
+                # Run description dict for the segment
+                segment_run_desc,
+                # Run description YAML file name for the segment
+                "{file_stem}_{i}{suffix}".format(
+                    file_stem=desc_file.stem, i=i, suffix=desc_file.suffix
+                ),
+                # Results directory for the segment
+                results_dir.parent
+                / "{dir_name}_{i}".format(dir_name=results_dir.name, i=i),
+                # f90nml namelist patch for namelist.time for the segment
+                {
+                    "namrun": {
+                        "nn_it000": nn_it000,
+                        "nn_itend": nn_itend,
+                        "nn_date0": int(date0.format("YYYYMMDD")),
+                    }
+                },
+            )
+        )
+    return run_segments
+
+
+def _calc_n_segments(run_desc):
+    run_start_date = arrow.get(
+        get_run_desc_value(run_desc, ("segmented run", "start date"))
+    )
+    run_end_date = arrow.get(
+        get_run_desc_value(run_desc, ("segmented run", "end date"))
+    )
+    days_per_segment = get_run_desc_value(
+        run_desc, ("segmented run", "days per segment")
+    )
+
+    n_segments_delta = (run_end_date - run_start_date) / days_per_segment
+    n_segments = n_segments_delta.days + math.ceil(
+        n_segments_delta.seconds / (60 * 60 * 24)
+    )
+    return n_segments
 
 
 def _build_tmp_run_dir(
@@ -784,7 +866,7 @@ def _execute(
         "orcinus": "mpirun",
         "salish": "/usr/bin/mpirun",
         "sigma": "mpiexec -hostfile $(openmpi_nodefile)",
-    }[SYSTEM]
+    }.get(SYSTEM, "mpirun")
     mpirun = {
         "cedar": "{mpirun} -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
@@ -804,7 +886,9 @@ def _execute(
         "sigma": "{mpirun} -bind-to core -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
-    }[SYSTEM]
+    }.get(
+        SYSTEM, "{mpirun} -np {np} ./nemo.exe".format(mpirun=mpirun, np=nemo_processors)
+    )
     if xios_processors:
         mpirun = {
             "cedar": "{mpirun} : -np {np} ./xios_server.exe".format(
@@ -825,7 +909,12 @@ def _execute(
             "sigma": "{mpirun} : -bind-to core -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
-        }[SYSTEM]
+        }.get(
+            SYSTEM,
+            "{mpirun} : -np {np} ./xios_server.exe".format(
+                mpirun=mpirun, np=xios_processors
+            ),
+        )
     script = (
         "mkdir -p ${RESULTS_DIR}\n"
         "cd ${WORK_DIR}\n"
