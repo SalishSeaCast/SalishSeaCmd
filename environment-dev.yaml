@@ -25,6 +25,7 @@ channels:
 dependencies:
   - arrow
   - cliff!=2.9.0
+  - f90nml
   - pip
   - python>=3.5
   - pyyaml
