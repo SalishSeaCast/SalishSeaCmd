@@ -126,6 +126,8 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
+            (False, 0, "beluga", "sbatch", "Submitted batch job 43"),
+            (True, 4, "beluga", "sbatch", "Submitted batch job 43"),
             (False, 0, "cedar", "sbatch", "Submitted batch job 43"),
             (True, 4, "cedar", "sbatch", "Submitted batch job 43"),
             (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
@@ -186,6 +188,8 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
+            (False, 0, "beluga", "sbatch", "Submitted batch job 43"),
+            (True, 4, "beluga", "sbatch", "Submitted batch job 43"),
             (False, 0, "cedar", "sbatch", "Submitted batch job 43"),
             (True, 4, "cedar", "sbatch", "Submitted batch job 43"),
             (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
@@ -309,6 +313,8 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
+            (False, 0, "beluga", "sbatch", "Submitted batch job 43"),
+            (True, 4, "beluga", "sbatch", "Submitted batch job 43"),
             (False, 0, "cedar", "sbatch", "Submitted batch job 43"),
             (True, 4, "cedar", "sbatch", "Submitted batch job 43"),
             (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
@@ -919,11 +925,99 @@ class TestBuildBatchScript:
     """
 
     @pytest.mark.parametrize(
+        "account, deflate", [("rrg-allen", True), ("rrg-allen", False)]
+    )
+    def test_beluga(self, account, deflate):
+        desc_file = StringIO(
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
+        )
+        run_desc = yaml.safe_load(desc_file)
+        with patch("salishsea_cmd.run.SYSTEM", "beluga"):
+            script = salishsea_cmd.run._build_batch_script(
+                run_desc,
+                Path("SalishSea.yaml"),
+                nemo_processors=42,
+                xios_processors=1,
+                max_deflate_jobs=4,
+                results_dir=Path("results_dir"),
+                run_dir=Path(),
+                deflate=deflate,
+                separate_deflate=False,
+                cedar_broadwell=False,
+            )
+        expected = (
+            "#!/bin/bash\n"
+            "\n"
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --nodes=2\n"
+            "#SBATCH --ntasks-per-node=40\n"
+            "#SBATCH --mem=92G\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account={account}\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=results_dir/stdout\n"
+            "#SBATCH --error=results_dir/stderr\n"
+            "\n"
+            "\n"
+            'RUN_ID="foo"\n'
+            'RUN_DESC="SalishSea.yaml"\n'
+            'WORK_DIR="."\n'
+            'RESULTS_DIR="results_dir"\n'
+            'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
+        ).format(account=account)
+        if deflate:
+            expected += 'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
+        expected += (
+            'GATHER="${HOME}/.local/bin/salishsea gather"\n'
+            "\n"
+            "module load netcdf-fortran-mpi/4.4.4\n"
+            "module load python/3.7.0\n"
+            "\n"
+            "mkdir -p ${RESULTS_DIR}\n"
+            "cd ${WORK_DIR}\n"
+            'echo "working dir: $(pwd)"\n'
+            "\n"
+            'echo "Starting run at $(date)"\n'
+            "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
+            "MPIRUN_EXIT_CODE=$?\n"
+            'echo "Ended run at $(date)"\n'
+            "\n"
+            'echo "Results combining started at $(date)"\n'
+            "${COMBINE} ${RUN_DESC} --debug\n"
+            'echo "Results combining ended at $(date)"\n'
+        )
+        if deflate:
+            expected += (
+                "\n"
+                'echo "Results deflation started at $(date)"\n'
+                "module load nco/4.6.6\n"
+                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
+                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
+                "  --jobs 4 --debug\n"
+                'echo "Results deflation ended at $(date)"\n'
+            )
+        expected += (
+            "\n"
+            'echo "Results gathering started at $(date)"\n'
+            "${GATHER} ${RESULTS_DIR} --debug\n"
+            'echo "Results gathering ended at $(date)"\n'
+            "\n"
+            "chmod go+rx ${RESULTS_DIR}\n"
+            "chmod g+rw ${RESULTS_DIR}/*\n"
+            "chmod o+r ${RESULTS_DIR}/*\n"
+            "\n"
+            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+            "rmdir $(pwd)\n"
+            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+            "exit ${MPIRUN_EXIT_CODE}\n"
+        )
+        assert script == expected
+
+    @pytest.mark.parametrize(
         "cedar_broadwell, constraint, nodes, ntasks, mem, deflate",
-        [
-            (True, "broadwell", 2, 32, "125G", True),
-            (False, "skylake", 1, 48, "0", True),
-        ],
+        [(True, "broadwell", 2, 32, "0", True), (False, "skylake", 1, 48, "0", True)],
     )
     def test_cedar(self, cedar_broadwell, constraint, nodes, ntasks, mem, deflate):
         desc_file = StringIO(
@@ -1384,10 +1478,52 @@ class TestSbatchDirectives:
     """Unit tests for _sbatch_directives() function.
     """
 
+    def test_unknown_system(self, m_logger):
+        desc_file = StringIO(
+            "run_id: foo\n" "walltime: 01:02:03\n" "account: def-sverdrup\n"
+        )
+        run_desc = yaml.safe_load(desc_file)
+        with pytest.raises(SystemExit):
+            slurm_directives = salishsea_cmd.run._sbatch_directives(
+                run_desc,
+                43,
+                cedar_broadwell=False,
+                email="me@example.com",
+                results_dir=Path("foo"),
+            )
+        assert m_logger.error.called
+
+    def test_beluga_sbatch_directives(self, m_logger):
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
+        run_desc = yaml.safe_load(desc_file)
+        with patch("salishsea_cmd.run.SYSTEM", "beluga"):
+            slurm_directives = salishsea_cmd.run._sbatch_directives(
+                run_desc,
+                n_processors=43,
+                cedar_broadwell=False,
+                email="me@example.com",
+                results_dir=Path("foo"),
+            )
+        expected = (
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --nodes=2\n"
+            "#SBATCH --ntasks-per-node=40\n"
+            "#SBATCH --mem=92G\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account=rrg-allen\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=foo/stdout\n"
+            "#SBATCH --error=foo/stderr\n"
+        )
+        assert slurm_directives == expected
+        assert m_logger.info.called
+
     @pytest.mark.parametrize(
         "system, account, cedar_broadwell, constraint, nodes, ntasks, mem",
         [
-            ("cedar", "rrg-allen", True, "broadwell", 2, 32, "125G"),
+            ("cedar", "rrg-allen", True, "broadwell", 2, 32, "0"),
             ("cedar", "rrg-allen", False, "skylake", 1, 48, "0"),
         ],
     )
@@ -1446,18 +1582,20 @@ class TestSbatchDirectives:
         assert slurm_directives == expected
         assert m_logger.info.called
 
-    def test_account_directive_from_yaml(self, m_logger):
+    @pytest.mark.parametrize("system", ("beluga", "cedar", "graham"))
+    def test_account_directive_from_yaml(self, m_logger, system):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "account: def-sverdrup\n"
         )
         run_desc = yaml.safe_load(desc_file)
-        slurm_directives = salishsea_cmd.run._sbatch_directives(
-            run_desc,
-            43,
-            cedar_broadwell=False,
-            email="me@example.com",
-            results_dir=Path("foo"),
-        )
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            slurm_directives = salishsea_cmd.run._sbatch_directives(
+                run_desc,
+                43,
+                cedar_broadwell=False,
+                email="me@example.com",
+                results_dir=Path("foo"),
+            )
         assert "#SBATCH --account=def-sverdrup\n" in slurm_directives
         assert not m_logger.info.called
 
@@ -1592,8 +1730,8 @@ class TestModules:
         modules = salishsea_cmd.run._modules()
         assert modules == ""
 
-    @pytest.mark.parametrize("system", ["cedar", "graham"])
-    def test_cedar_graham(self, system):
+    @pytest.mark.parametrize("system", ["beluga", "cedar", "graham"])
+    def test_beluga_cedar_graham(self, system):
         with patch("salishsea_cmd.run.SYSTEM", system):
             modules = salishsea_cmd.run._modules()
         expected = "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
@@ -1666,7 +1804,7 @@ class TestExecute:
         
         echo "Results deflation started at $(date)"
         """
-        if system in {"cedar", "graham"}:
+        if system in {"beluga", "cedar", "graham"}:
             expected += "module load nco/4.6.6\n"
         expected += (
             "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
