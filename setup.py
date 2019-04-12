@@ -44,6 +44,7 @@ install_requires = [
     # see environment-dev.yaml for versions most recently used in development
     "arrow",
     "cliff!=2.9.0",
+    "f90nml",
     "python-hglib",
     "PyYAML",
     # 'NEMO-Cmd',  # use cd tools; pip install -e NEMO-Cmd
