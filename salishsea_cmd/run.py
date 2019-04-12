@@ -237,6 +237,7 @@ def run(
     :rtype: str
     """
     queue_job_cmd = {
+        "beluga": "sbatch",
         "cedar": "sbatch",
         "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "graham": "sbatch",
@@ -518,7 +519,7 @@ def _build_batch_script(
         email = get_run_desc_value(run_desc, ("email",), fatal=False)
     except KeyError:
         email = "{user}@eoas.ubc.ca".format(user=os.getenv("USER"))
-    if SYSTEM in {"cedar", "graham"}:
+    if SYSTEM in {"beluga", "cedar", "graham"}:
         script = "\n".join(
             (
                 script,
@@ -620,9 +621,15 @@ def _sbatch_directives(
     """
     run_id = get_run_desc_value(run_desc, ("run_id",))
     constraint = "broadwell" if SYSTEM == "cedar" and cedar_broadwell else "skylake"
-    processors_per_node = 48 if SYSTEM == "cedar" and not cedar_broadwell else 32
+    try:
+        processors_per_node = {"beluga": 40, "cedar": 48, "graham": 32}[SYSTEM]
+    except KeyError:
+        log.error("unknown system: {system}".format(system=SYSTEM))
+        raise SystemExit(2)
+    if SYSTEM == "cedar" and cedar_broadwell:
+        processors_per_node = 32
     nodes = math.ceil(n_processors / processors_per_node)
-    mem = "0" if SYSTEM == "cedar" and not cedar_broadwell else mem
+    mem = {"beluga": "92G", "cedar": "0", "graham": "125G"}.get(SYSTEM, mem)
     if deflate:
         run_id = "{result_type}_{run_id}_deflate".format(
             run_id=run_id, result_type=result_type
@@ -659,7 +666,7 @@ def _sbatch_directives(
         account = get_run_desc_value(run_desc, ("account",), fatal=False)
         sbatch_directives += "#SBATCH --account={account}\n".format(account=account)
     except KeyError:
-        account = "rrg-allen" if SYSTEM == "cedar" else "def-allen"
+        account = "rrg-allen" if SYSTEM in {"beluga", "cedar"} else "def-allen"
         sbatch_directives += "#SBATCH --account={account}\n".format(account=account)
         log.info(
             (
@@ -835,6 +842,9 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
 
 def _modules():
     modules = {
+        "beluga": (
+            "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
+        ),
         "cedar": (
             "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
         ),
@@ -932,7 +942,7 @@ def _execute(
         'echo "Results combining ended at $(date)"\n'
     )
     if deflate and not separate_deflate:
-        if SYSTEM in {"cedar", "graham"}:
+        if SYSTEM in {"beluga", "cedar", "graham"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
