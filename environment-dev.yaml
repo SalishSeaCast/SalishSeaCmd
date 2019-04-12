@@ -23,6 +23,8 @@ channels:
   - defaults
 
 dependencies:
+  - arrow
+  - cliff!=2.9.0
   - pip
   - python>=3.5
   - pyyaml
@@ -39,6 +41,4 @@ dependencies:
   - sphinx_rtd_theme
 
   - pip:
-    - arrow
-    - cliff!=2.9.0
     - python-hglib
