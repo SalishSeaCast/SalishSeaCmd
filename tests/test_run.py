@@ -384,7 +384,7 @@ class TestCalcRunSegments:
         ]
 
     def test_no_run_id(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.load(
+        m_lrd.return_value = yaml.safe_load(
             StringIO(
                 """
             segmented run:
@@ -402,7 +402,7 @@ class TestCalcRunSegments:
             )
 
     def test_no_start_date(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.load(
+        m_lrd.return_value = yaml.safe_load(
             StringIO(
                 """
             run_id: sensitivity
@@ -425,7 +425,7 @@ class TestCalcRunSegments:
             )
 
     def test_no_start_time_step(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.load(
+        m_lrd.return_value = yaml.safe_load(
             StringIO(
                 """
             run_id: sensitivity
@@ -448,7 +448,7 @@ class TestCalcRunSegments:
             )
 
     def test_no_end_date(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.load(
+        m_lrd.return_value = yaml.safe_load(
             StringIO(
                 """
             run_id: sensitivity
@@ -471,7 +471,7 @@ class TestCalcRunSegments:
             )
 
     def test_no_days_per_segment(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.load(
+        m_lrd.return_value = yaml.safe_load(
             StringIO(
                 """
             run_id: sensitivity
@@ -494,7 +494,7 @@ class TestCalcRunSegments:
             )
 
     def test_no_namdom_namelist(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.load(
+        m_lrd.return_value = yaml.safe_load(
             StringIO(
                 """
             run_id: sensitivity
@@ -517,7 +517,7 @@ class TestCalcRunSegments:
             )
 
     def test_run_segments(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.load(
+        m_lrd.return_value = yaml.safe_load(
             StringIO(
                 """
             run_id: sensitivity
@@ -539,7 +539,7 @@ class TestCalcRunSegments:
         )
         expected = [
             (
-                yaml.load(
+                yaml.safe_load(
                     StringIO(
                         """
                     run_id: 0_sensitivity
@@ -567,7 +567,7 @@ class TestCalcRunSegments:
                 },
             ),
             (
-                yaml.load(
+                yaml.safe_load(
                     StringIO(
                         """
                     run_id: 1_sensitivity
@@ -929,7 +929,7 @@ class TestBuildBatchScript:
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         with patch("salishsea_cmd.run.SYSTEM", "cedar"):
             script = salishsea_cmd.run._build_batch_script(
                 run_desc,
@@ -1021,7 +1021,7 @@ class TestBuildBatchScript:
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         with patch("salishsea_cmd.run.SYSTEM", "graham"):
             script = salishsea_cmd.run._build_batch_script(
                 run_desc,
@@ -1113,7 +1113,7 @@ class TestBuildBatchScript:
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         with patch("salishsea_cmd.run.SYSTEM", system):
             script = salishsea_cmd.run._build_batch_script(
                 run_desc,
@@ -1202,7 +1202,7 @@ class TestBuildBatchScript:
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             script = salishsea_cmd.run._build_batch_script(
                 run_desc,
@@ -1296,7 +1296,7 @@ class TestBuildBatchScript:
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         with patch("salishsea_cmd.run.SYSTEM", "salish"):
             script = salishsea_cmd.run._build_batch_script(
                 run_desc,
@@ -1395,7 +1395,7 @@ class TestSbatchDirectives:
         self, m_logger, system, account, cedar_broadwell, constraint, nodes, ntasks, mem
     ):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         with patch("salishsea_cmd.run.SYSTEM", "cedar"):
             slurm_directives = salishsea_cmd.run._sbatch_directives(
                 run_desc, 43, cedar_broadwell, "me@example.com", Path("foo")
@@ -1421,7 +1421,7 @@ class TestSbatchDirectives:
 
     def test_graham_sbatch_directives(self, m_logger):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         with patch("salishsea_cmd.run.SYSTEM", "graham"):
             slurm_directives = salishsea_cmd.run._sbatch_directives(
                 run_desc,
@@ -1450,7 +1450,7 @@ class TestSbatchDirectives:
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "account: def-sverdrup\n"
         )
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         slurm_directives = salishsea_cmd.run._sbatch_directives(
             run_desc,
             43,
@@ -1472,7 +1472,7 @@ class TestPbsDirectives:
     )
     def test_pbs_directives_run(self, procs_per_node, procs_directive):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc, 42, "me@example.com", Path("foo"), procs_per_node
         )
@@ -1494,7 +1494,7 @@ class TestPbsDirectives:
 
     def test_pbs_directives_deflate(self):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc,
             1,
@@ -1531,7 +1531,7 @@ class TestPbsDirectives:
         desc_file = StringIO(
             "run_id: foo\n" "walltime: {walltime}\n".format(walltime=walltime)
         )
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc, 42, "me@example.com", Path("")
         )
@@ -1562,7 +1562,7 @@ class TestDefinitions:
     )
     def test_definitions(self, system, home, deflate):
         desc_file = StringIO("run_id: foo\n")
-        run_desc = yaml.load(desc_file)
+        run_desc = yaml.safe_load(desc_file)
         with patch("salishsea_cmd.run.SYSTEM", system):
             defns = salishsea_cmd.run._definitions(
                 run_desc,
