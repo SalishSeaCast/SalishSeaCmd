@@ -260,9 +260,9 @@ def run(
             nocheck_init,
             quiet,
         )
+        results_dir.mkdir(parents=True, exist_ok=True)
         if no_submit:
             return
-        results_dir.mkdir(parents=True, exist_ok=True)
         submit_job_msg = _submit_job(batch_file, queue_job_cmd, waitjob=waitjob)
         if separate_deflate:
             _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd)
