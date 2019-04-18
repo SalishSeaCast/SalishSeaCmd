@@ -1,6 +1,11 @@
 # docker container description file for SalishSeaCmd package testing environment
 #
 # Primarily intended for creation of a docker image for use by bitbucket-pipelines.yml.
+#
+# To update the image on Docker Hub:
+#    docker build -t salishsea-cmd-test pipelines-test-env/
+#    docker tag salishsea-cmd-test:latest douglatornell/salishsea:salishsea-cmd-test
+#    docker push douglatornell/salishsea:salishsea-cmd-test
 
 FROM continuumio/miniconda3
 
