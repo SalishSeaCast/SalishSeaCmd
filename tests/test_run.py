@@ -1630,6 +1630,34 @@ class TestPbsDirectives:
         ).format(procs_directive=procs_directive)
         assert pbs_directives == expected
 
+    @pytest.mark.parametrize(
+        "procs_per_node, procs_directive",
+        [(0, "#PBS -l procs=42"), (20, "#PBS -l nodes=3:ppn=20")],
+    )
+    def test_pbs_directives_run_no_stderr_stdout(self, procs_per_node, procs_directive):
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
+        run_desc = yaml.safe_load(desc_file)
+        pbs_directives = salishsea_cmd.run._pbs_directives(
+            run_desc,
+            42,
+            "me@example.com",
+            Path("foo"),
+            procs_per_node,
+            stderr_stdout=False,
+        )
+        expected = (
+            "#PBS -N foo\n"
+            "#PBS -S /bin/bash\n"
+            "{procs_directive}\n"
+            "# memory per processor\n"
+            "#PBS -l pmem=2000mb\n"
+            "#PBS -l walltime=1:02:03\n"
+            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
+            "#PBS -m bea\n"
+            "#PBS -M me@example.com\n"
+        ).format(procs_directive=procs_directive)
+        assert pbs_directives == expected
+
     def test_pbs_directives_deflate(self):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
