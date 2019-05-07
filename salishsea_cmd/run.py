@@ -423,6 +423,11 @@ def _write_segment_desc_file(run_desc, segment_namrun, desc_file, tmp_run_desc_d
         restart_path = path.parent.parent / restart_date.format("DDMMMYY").lower()
         restart_path = restart_path / f"SalishSea_{restart_timestep:08d}_{name_tail}"
         run_desc["restart"][name] = os.fspath(restart_path)
+    # walltime for segment
+    segment_walltime = get_run_desc_value(
+        run_desc, ("segmented run", "segment walltime")
+    )
+    run_desc["walltime"] = segment_walltime
     # write temporary run description file for segment
     with (tmp_run_desc_dir / desc_file).open("wt") as f:
         yaml.safe_dump(run_desc, f, default_flow_style=False)
