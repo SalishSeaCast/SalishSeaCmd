@@ -282,8 +282,9 @@ def run(
         if separate_deflate:
             _submit_separate_deflate_jobs(batch_file, msg, queue_job_cmd)
         if len(run_segments) != 1:
-            submit_job_msg = f"{submit_job_msg} {_parse_submit_job_msg(msg)}"
+            submit_job_msg = f"{submit_job_msg} {msg.split()[-1]}"
             nocheck_init = True
+            waitjob = msg
         else:
             submit_job_msg = msg
     return submit_job_msg
@@ -498,7 +499,7 @@ def _submit_job(batch_file, queue_job_cmd, waitjob):
 
 
 def _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd):
-    nemo_job_no = _parse_submit_job_msg(submit_job_msg)
+    nemo_job_no = submit_job_msg.split()[-1]
     log.info(
         "{batch_file} queued as job {nemo_job_no}".format(
             batch_file=batch_file, nemo_job_no=nemo_job_no
@@ -524,7 +525,7 @@ def _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd):
             universal_newlines=True,
             stdout=subprocess.PIPE,
         ).stdout
-        deflate_job_no = _parse_submit_job_msg(deflate_job_msg)
+        deflate_job_no = deflate_job_msg.split()[-1]
         log.info(
             "{run_dir}/{deflate_script} queued after job {nemo_job_no} as job "
             "{deflate_job_no}".format(
@@ -534,16 +535,6 @@ def _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd):
                 deflate_job_no=deflate_job_no,
             )
         )
-
-
-def _parse_submit_job_msg(submit_job_msg):
-    try:
-        # TORQUE job submission messages look like "43.orca2.ibb"
-        job_no = int(submit_job_msg.split(".")[0])
-    except ValueError:
-        # SLURM job submission messages look like "Submitted batch job 43"
-        job_no = int(submit_job_msg.split()[3])
-    return job_no
 
 
 def _build_batch_script(
