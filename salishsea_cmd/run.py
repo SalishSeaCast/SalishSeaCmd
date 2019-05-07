@@ -16,6 +16,7 @@
 
 Prepare for, execute, and gather the results of a run of the Salish Sea NEMO model.
 """
+import copy
 import datetime
 import logging
 import math
@@ -24,12 +25,14 @@ from pathlib import Path
 import shlex
 import socket
 import subprocess
+import tempfile
 
 import arrow
 import cliff.command
 import f90nml
 import nemo_cmd
 from nemo_cmd.prepare import get_n_processors, get_run_desc_value, load_run_desc
+import yaml
 
 from salishsea_cmd import api
 
@@ -248,29 +251,41 @@ def run(
     results_dir = nemo_cmd.resolved_path(results_dir)
     run_segments = _calc_run_segments(desc_file, results_dir)
     submit_job_msg = "Submitted jobs"
-    for run_desc, desc_file, results_dir, namelist_time_patch in run_segments:
-        run_dir, batch_file = _build_tmp_run_dir(
-            run_desc,
-            desc_file,
-            results_dir,
-            cedar_broadwell,
-            deflate,
-            max_deflate_jobs,
-            separate_deflate,
-            nocheck_init,
-            quiet,
-        )
+    for run_desc, desc_file, results_dir, namelist_namrun_patch in run_segments:
+        with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
+            if isinstance(desc_file, str):
+                # Segmented run requires construction of segment YAML files & namelist files
+                # in temporary storage
+                segment_namrun = _write_segment_namrun_namelist(
+                    run_desc, namelist_namrun_patch, Path(tmp_run_desc_dir)
+                )
+                run_desc, segment_desc_file = _write_segment_desc_file(
+                    run_desc, segment_namrun, desc_file, Path(tmp_run_desc_dir)
+                )
+            else:
+                segment_desc_file = desc_file
+            run_dir, batch_file = _build_tmp_run_dir(
+                run_desc,
+                segment_desc_file,
+                results_dir,
+                cedar_broadwell,
+                deflate,
+                max_deflate_jobs,
+                separate_deflate,
+                nocheck_init,
+                quiet,
+            )
         results_dir.mkdir(parents=True, exist_ok=True)
         if no_submit:
             return
-        submit_job_msg = _submit_job(batch_file, queue_job_cmd, waitjob=waitjob)
+        msg = _submit_job(batch_file, queue_job_cmd, waitjob=waitjob)
         if separate_deflate:
-            _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd)
-        submit_job_msg = (
-            submit_job_msg
-            if len(run_segments) == 1
-            else f"{submit_job_msg} {_parse_submit_job_msg(submit_job_msg)}"
-        )
+            _submit_separate_deflate_jobs(batch_file, msg, queue_job_cmd)
+        if len(run_segments) != 1:
+            submit_job_msg = f"{submit_job_msg} {_parse_submit_job_msg(msg)}"
+            nocheck_init = True
+        else:
+            submit_job_msg = msg
     return submit_job_msg
 
 
@@ -296,7 +311,7 @@ def _calc_run_segments(desc_file, results_dir):
     run_segments = []
     for i in range(n_segments):
         segment_run_id = "{i}_{base_run_id}".format(i=i, base_run_id=base_run_id)
-        segment_run_desc = run_desc.copy()
+        segment_run_desc = copy.deepcopy(run_desc)
         segment_run_desc["run_id"] = segment_run_id
         nn_it000 = int(start_timestep + i * days_per_segment * timesteps_per_day)
         date0 = min(start_date.shift(days=+i * days_per_segment), end_date)
@@ -316,7 +331,7 @@ def _calc_run_segments(desc_file, results_dir):
                 # Results directory for the segment
                 results_dir.parent
                 / "{dir_name}_{i}".format(dir_name=results_dir.name, i=i),
-                # f90nml namelist patch for namelist.time for the segment
+                # f90nml namelist patch for the segment for the namelist containing namrum
                 {
                     "namrun": {
                         "nn_it000": nn_it000,
@@ -340,11 +355,77 @@ def _calc_n_segments(run_desc):
         run_desc, ("segmented run", "days per segment")
     )
 
-    n_segments_delta = (run_end_date - run_start_date) / days_per_segment
+    n_segments_delta = (run_end_date.shift(days=+1) - run_start_date) / days_per_segment
     n_segments = n_segments_delta.days + math.ceil(
         n_segments_delta.seconds / (60 * 60 * 24)
     )
     return n_segments
+
+
+def _write_segment_namrun_namelist(run_desc, namelist_namrun_patch, tmp_run_desc_dir):
+    """
+    :param dict run_desc: Run description dictionary.
+
+    :param dict namelist_namrun_patch: f90nml patch for namrun namelist for the segment.
+
+    :param tmp_run_desc_dir: Temporary directory where the namelists and run description
+                             files for segments are stored.
+    :type tmp_run_desc_dir: :py:class:`pathlib.Path`
+
+    :return: File path and name of namelist section file containing namrun namelist
+             for the segment.
+    :rtype: :py:class:`pathlib.Path`
+    """
+    namelist_namrun = get_run_desc_value(
+        run_desc, ("segmented run", "namelists", "namrun"), expand_path=True
+    )
+    f90nml.patch(
+        namelist_namrun, namelist_namrun_patch, tmp_run_desc_dir / namelist_namrun.name
+    )
+    return tmp_run_desc_dir / namelist_namrun.name
+
+
+def _write_segment_desc_file(run_desc, segment_namrun, desc_file, tmp_run_desc_dir):
+    """
+    :param dict run_desc: Run description dictionary.
+
+    :param segment_namrun: File path and name of namelist section file containing
+                           namrun for the segment.
+    :type segment_namrun: :py:class:`pathlib.Path`
+
+    :paramstr  desc_file: Name of the YAML run description file for segment.
+
+    :param tmp_run_desc_dir: Temporary directory where the namelists and run description
+                             files for segments are stored.
+    :type tmp_run_desc_dir: :py:class:`pathlib.Path`
+
+    :return: Run description dict updated with namrun namelist section and
+             restart file(s) paths,
+             File path and name of temporary run description file for the segment.
+    :rtype: 2-tuple
+    """
+    # namrun namelist for segment
+    namelist_namrun = get_run_desc_value(
+        run_desc, ("segmented run", "namelists", "namrun")
+    )
+    namelist_namrun_index = run_desc["namelists"]["namelist_cfg"].index(namelist_namrun)
+    run_desc["namelists"]["namelist_cfg"][namelist_namrun_index] = os.fspath(
+        segment_namrun
+    )
+    # restart file(s) for segment
+    nml = f90nml.read(segment_namrun)
+    restart_timestep = nml["namrun"]["nn_it000"] - 1
+    restart_date = arrow.get(str(nml["namrun"]["nn_date0"] - 1), "YYYYMMDD")
+    for name, path in get_run_desc_value(run_desc, ("restart",)).items():
+        path = Path(path)
+        name_tail = path.name.split("_", 2)[-1]
+        restart_path = path.parent.parent / restart_date.format("DDMMMYY").lower()
+        restart_path = restart_path / f"SalishSea_{restart_timestep:08d}_{name_tail}"
+        run_desc["restart"][name] = os.fspath(restart_path)
+    # write temporary run description file for segment
+    with (tmp_run_desc_dir / desc_file).open("wt") as f:
+        yaml.safe_dump(run_desc, f, default_flow_style=False)
+    return run_desc, tmp_run_desc_dir / desc_file
 
 
 def _build_tmp_run_dir(

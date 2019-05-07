@@ -17,10 +17,13 @@
 import shlex
 import subprocess
 from io import StringIO
+import os
 from pathlib import Path
+import tempfile
 from unittest.mock import call, Mock, patch
 
 import cliff.app
+import f90nml
 import pytest
 import yaml
 
@@ -602,6 +605,7 @@ class TestCalcRunSegments:
             ),
         ]
         assert run_segments == expected
+        assert id(run_segments[0][0]) != id(run_segments[1][0])
 
 
 class TestCalcNSegments:
@@ -611,6 +615,16 @@ class TestCalcNSegments:
     @pytest.mark.parametrize(
         "run_desc, expected",
         [
+            (
+                {
+                    "segmented run": {
+                        "start date": "2014-11-21",
+                        "end date": "2014-11-22",
+                        "days per segment": 1,
+                    }
+                },
+                2,
+            ),
             (
                 {
                     "segmented run": {
@@ -636,16 +650,6 @@ class TestCalcNSegments:
                     "segmented run": {
                         "start date": "2014-11-15",
                         "end date": "2014-11-25",
-                        "days per segment": 10,
-                    }
-                },
-                1,
-            ),
-            (
-                {
-                    "segmented run": {
-                        "start date": "2014-11-15",
-                        "end date": "2014-11-26",
                         "days per segment": 10,
                     }
                 },
@@ -677,6 +681,220 @@ class TestCalcNSegments:
     def test_bad_run_desc(self, run_desc):
         with pytest.raises(SystemExit):
             salishsea_cmd.run._calc_n_segments(run_desc)
+
+
+class TestWriteSegmentNamerunNamelist:
+    """Unit tests for _write_segment_namerun_namelist() function.
+    """
+
+    def test_no_namrun_namelist(self):
+        run_desc = yaml.safe_load(
+            StringIO(
+                """
+            run_id: sensitivity
+
+            segmented run:
+                start date: 2014-11-15
+                start time step: 152634
+                end date: 2014-12-02
+                days per segment: 10
+                walltime: 12:00:00
+                namelists:
+
+                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+            """
+            )
+        )
+        with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
+            with pytest.raises(SystemExit):
+                salishsea_cmd.run._write_segment_namrun_namelist(
+                    run_desc, {}, Path(tmp_run_desc_dir)
+                )
+
+    def test_write_segment_namrun_namelist(self, tmp_path):
+        namelist_time = tmp_path / "namelist.time"
+        namelist_time.write_text(
+            """
+            &namrun
+                nn_it000 = 0
+                nn_itend = 0
+                nn_date0 = 0
+            &end
+            """
+        )
+        run_desc = yaml.safe_load(
+            StringIO(
+                """
+            run_id: sensitivity
+
+            segmented run:
+                start date: 2014-11-15
+                start time step: 152634
+                end date: 2014-12-02
+                days per segment: 10
+                walltime: 12:00:00
+                namelists:
+                    namrun: ./namelist.time
+                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+        """
+            )
+        )
+        run_desc["segmented run"]["namelists"]["namrun"] = os.fspath(namelist_time)
+        namelist_namrun_patch = {
+            "namrun": {
+                "nn_it000": 152634,
+                "nn_itend": 152634 + 2160 * 10 - 1,
+                "nn_date0": 20141115,
+            }
+        }
+        with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
+            segment_namrun = salishsea_cmd.run._write_segment_namrun_namelist(
+                run_desc, namelist_namrun_patch, Path(tmp_run_desc_dir)
+            )
+            assert segment_namrun == Path(tmp_run_desc_dir, "namelist.time")
+            nml = f90nml.read(segment_namrun)
+            assert nml["namrun"]["nn_it000"] == 152634
+            assert nml["namrun"]["nn_itend"] == 152634 + 2160 * 10 - 1
+            assert nml["namrun"]["nn_date0"] == 20141115
+
+
+class TestWriteSegmentDescFile:
+    """Unit test for _write_segment_desc_file() function.
+    """
+
+    def test_run_desc_file(self, tmp_path):
+        run_desc = yaml.safe_load(
+            StringIO(
+                """
+            run_id: sensitivity
+
+            segmented run:
+                start date: 2014-11-15
+                start time step: 152634
+                end date: 2014-12-02
+                days per segment: 10
+                walltime: 12:00:00
+                namelists:
+                    namrun: ./namelist.time
+                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                    
+            namelists:
+                namelist_cfg:
+                    - ./namelist.time
+                    
+            restart:
+                restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
+                restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
+        """
+            )
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
+            segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
+            segment_namrun.write_text(
+                """
+                &namrun
+                    nn_it000 = 174234
+                    nn_itend = 189353
+                    nn_date0 = 20141125
+                &end
+                """
+            )
+            run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
+                run_desc, segment_namrun, "SalishSea_1.yaml", Path(tmp_run_desc_dir)
+            )
+            assert segment_desc_file == Path(tmp_run_desc_dir, "SalishSea_1.yaml")
+            assert Path(tmp_run_desc_dir, "SalishSea_1.yaml").exists()
+
+    def test_namrun_namelist_path(self, tmp_path):
+        run_desc = yaml.safe_load(
+            StringIO(
+                """
+            run_id: sensitivity
+
+            segmented run:
+                start date: 2014-11-15
+                start time step: 152634
+                end date: 2014-12-02
+                days per segment: 10
+                walltime: 12:00:00
+                namelists:
+                    namrun: ./namelist.time
+                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                    
+            namelists:
+                namelist_cfg:
+                    - ./namelist.time
+                    
+            restart:
+                restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
+                restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
+        """
+            )
+        )
+
+        with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
+            segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
+            segment_namrun.write_text(
+                """
+                &namrun
+                    nn_it000 = 174234
+                    nn_itend = 189353
+                    nn_date0 = 20141125
+                &end
+                """
+            )
+            run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
+                run_desc, segment_namrun, "SalishSea_1.yaml", Path(tmp_run_desc_dir)
+            )
+            assert run_desc["namelists"]["namelist_cfg"][0] == os.fspath(segment_namrun)
+
+    def test_restart_files_path(self, tmp_path):
+        run_desc = yaml.safe_load(
+            StringIO(
+                """
+            run_id: sensitivity
+
+            segmented run:
+                start date: 2014-11-15
+                start time step: 152634
+                end date: 2014-12-02
+                days per segment: 10
+                walltime: 12:00:00
+                namelists:
+                    namrun: ./namelist.time
+                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                    
+            namelists:
+                namelist_cfg:
+                    - ./namelist.time
+                    
+            restart:
+                restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
+                restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
+        """
+            )
+        )
+        with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
+            segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
+            segment_namrun.write_text(
+                """
+                &namrun
+                    nn_it000 = 174234
+                    nn_itend = 189353
+                    nn_date0 = 20141125
+                &end
+                """
+            )
+            run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
+                run_desc, segment_namrun, "SalishSea_1.yaml", Path(tmp_run_desc_dir)
+            )
+        expected = "$PROJECT/$USER/MEOPAR/results/24nov14/SalishSea_00174233_restart.nc"
+        assert run_desc["restart"]["restart.nc"] == expected
+        expected = (
+            "$PROJECT/$USER/MEOPAR/results/24nov14/SalishSea_00174233_restart_trc.nc"
+        )
+        assert run_desc["restart"]["restart_trc.nc"] == expected
 
 
 @patch("salishsea_cmd.run.log", autospec=True)
