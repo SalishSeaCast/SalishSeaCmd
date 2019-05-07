@@ -122,6 +122,8 @@ class TestTakeAction:
 @patch("salishsea_cmd.run._build_deflate_script", return_value="deflate script")
 @patch("salishsea_cmd.run._build_tmp_run_dir")
 @patch("salishsea_cmd.run._calc_run_segments")
+@patch("salishsea_cmd.run._write_segment_namrun_namelist")
+@patch("salishsea_cmd.run._write_segment_desc_file", return_value=({}, ""))
 class TestRun:
     """Unit tests for `salishsea run` run() function.
     """
@@ -147,6 +149,8 @@ class TestRun:
     )
     def test_run_submit(
         self,
+        m_wsdf,
+        m_wsnn,
         m_crs,
         m_btrd,
         m_bds,
@@ -209,6 +213,8 @@ class TestRun:
     )
     def test_run_waitjob(
         self,
+        m_wsdf,
+        m_wsnn,
         m_crs,
         m_btrd,
         m_bds,
@@ -252,7 +258,17 @@ class TestRun:
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_no_submit(
-        self, m_crs, m_btrd, m_bds, m_sj, m_ssdj, sep_xios_server, xios_servers, tmpdir
+        self,
+        m_wsdf,
+        m_wsnn,
+        m_crs,
+        m_btrd,
+        m_bds,
+        m_sj,
+        m_ssdj,
+        sep_xios_server,
+        xios_servers,
+        tmpdir,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -282,7 +298,17 @@ class TestRun:
 
     @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
     def test_run_no_submit_w_separate_deflate(
-        self, m_crs, m_btrd, m_bds, m_sj, m_ssdj, sep_xios_server, xios_servers, tmpdir
+        self,
+        m_wsdf,
+        m_wsnn,
+        m_crs,
+        m_btrd,
+        m_bds,
+        m_sj,
+        m_ssdj,
+        sep_xios_server,
+        xios_servers,
+        tmpdir,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -334,6 +360,8 @@ class TestRun:
     )
     def test_run_separate_deflate(
         self,
+        m_wsdf,
+        m_wsnn,
         m_crs,
         m_btrd,
         m_bds,
@@ -375,6 +403,208 @@ class TestRun:
         )
         assert m_ssdj.called
         assert submit_job_msg == submit_job_msg
+
+    @pytest.mark.parametrize(
+        "sep_xios_server, xios_servers, system, queue_job_cmd, job_msgs, submit_job_msg",
+        [
+            (
+                False,
+                0,
+                "beluga",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "beluga",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                False,
+                0,
+                "cedar",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "cedar",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                False,
+                0,
+                "delta",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                True,
+                4,
+                "delta",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                False,
+                0,
+                "graham",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "graham",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (False, 0, "salish", "qsub", ("43.master", "44.master"), "43.master"),
+            (True, 4, "salish", "qsub", ("43.master", "44.master"), "43.master"),
+            (
+                False,
+                0,
+                "sigma",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                True,
+                4,
+                "sigma",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                False,
+                0,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
+            ),
+            (
+                True,
+                4,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
+            ),
+        ],
+    )
+    def test_segmented_run_submits(
+        self,
+        m_wsdf,
+        m_wsnn,
+        m_crs,
+        m_btrd,
+        m_bds,
+        m_sj,
+        m_ssdj,
+        sep_xios_server,
+        xios_servers,
+        system,
+        queue_job_cmd,
+        job_msgs,
+        submit_job_msg,
+        tmpdir,
+    ):
+        p_run_dir = tmpdir.ensure_dir("run_dir")
+        p_results_dir = tmpdir.ensure_dir("results_dir")
+        m_crs.return_value = [
+            (
+                yaml.safe_load(
+                    StringIO(
+                        """
+                    run_id: 0_sensitivity
+                    
+                    segmented run:
+                        start date: 2014-11-15
+                        start time step: 152634
+                        end date: 2014-12-02
+                        days per segment: 10
+                        walltime: 12:00:00
+                        namelists:
+                            namrun: ./namelist.time
+                            namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                """
+                    )
+                ),
+                "SalishSea_0.yaml",
+                Path("results_dir_0"),
+                {
+                    "namrun": {
+                        "nn_it000": 152634,
+                        "nn_itend": 152634 + 2160 * 10 - 1,
+                        "nn_date0": 20141115,
+                    }
+                },
+            ),
+            (
+                yaml.safe_load(
+                    StringIO(
+                        """
+                    run_id: 1_sensitivity
+
+                    segmented run:
+                        start date: 2014-11-15
+                        start time step: 152634
+                        end date: 2014-12-02
+                        days per segment: 10
+                        walltime: 12:00:00
+                        namelists:
+                            namrun: ./namelist.time
+                            namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                """
+                    )
+                ),
+                "SalishSea_1.yaml",
+                Path("results_dir_1"),
+                {
+                    "namrun": {
+                        "nn_it000": 152634 + 2160 * 10,
+                        "nn_itend": 152634 + 2160 * 17 - 1,
+                        "nn_date0": 20141125,
+                    }
+                },
+            ),
+        ]
+        m_btrd.return_value = (
+            Path(str(p_run_dir)),
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"),
+        )
+        m_sj.side_effect = job_msgs
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            submit_job_msg = salishsea_cmd.run.run(
+                Path("SalishSea.yaml"), Path(str(p_results_dir))
+            )
+        assert m_sj.call_args_list == [
+            call(Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob=0),
+            call(
+                Path(str(p_run_dir), "SalishSeaNEMO.sh"),
+                queue_job_cmd,
+                waitjob=job_msgs[0],
+            ),
+        ]
+        expected = "Submitted jobs"
+        for job_msg in job_msgs:
+            expected = " ".join((expected, job_msg.split()[-1]))
+        assert submit_job_msg == expected
 
 
 @patch("salishsea_cmd.run.load_run_desc")
@@ -605,7 +835,6 @@ class TestCalcRunSegments:
             ),
         ]
         assert run_segments == expected
-        assert id(run_segments[0][0]) != id(run_segments[1][0])
 
 
 class TestCalcNSegments:
@@ -1098,10 +1327,11 @@ class TestSubmitSeparateDeflateJobs:
         assert m_run.call_args_list == [
             call(
                 shlex.split(
-                    "{queue_job_cmd} {depend_flag} {depend_option}:43 {run_dir}/deflate_grid.sh".format(
+                    "{queue_job_cmd} {depend_flag} {depend_option}:{job_id} {run_dir}/deflate_grid.sh".format(
                         queue_job_cmd=queue_job_cmd,
                         depend_flag=depend_flag,
                         depend_option=depend_option,
+                        job_id=submit_job_msg.split()[-1],
                         run_dir=str(p_run_dir),
                     )
                 ),
@@ -1111,10 +1341,11 @@ class TestSubmitSeparateDeflateJobs:
             ),
             call(
                 shlex.split(
-                    "{queue_job_cmd} {depend_flag} {depend_option}:43 {run_dir}/deflate_ptrc.sh".format(
+                    "{queue_job_cmd} {depend_flag} {depend_option}:{job_id} {run_dir}/deflate_ptrc.sh".format(
                         queue_job_cmd=queue_job_cmd,
                         depend_flag=depend_flag,
                         depend_option=depend_option,
+                        job_id=submit_job_msg.split()[-1],
                         run_dir=str(p_run_dir),
                     )
                 ),
@@ -1124,10 +1355,11 @@ class TestSubmitSeparateDeflateJobs:
             ),
             call(
                 shlex.split(
-                    "{queue_job_cmd} {depend_flag} {depend_option}:43 {run_dir}/deflate_dia.sh".format(
+                    "{queue_job_cmd} {depend_flag} {depend_option}:{job_id} {run_dir}/deflate_dia.sh".format(
                         queue_job_cmd=queue_job_cmd,
                         depend_flag=depend_flag,
                         depend_option=depend_option,
+                        job_id=submit_job_msg.split()[-1],
                         run_dir=str(p_run_dir),
                     )
                 ),
