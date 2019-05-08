@@ -907,13 +907,13 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
     }.get(SYSTEM, Path("${HOME}", ".local", "bin", "salishsea"))
     defns = (
         'RUN_ID="{run_id}"\n'
-        'RUN_DESC="{run_desc_file}"\n'
+        'RUN_DESC="{run_dir}/{run_desc_file}"\n'
         'WORK_DIR="{run_dir}"\n'
         'RESULTS_DIR="{results_dir}"\n'
         'COMBINE="{salishsea_cmd} combine"\n'
     ).format(
         run_id=get_run_desc_value(run_desc, ("run_id",)),
-        run_desc_file=run_desc_file,
+        run_desc_file=run_desc_file.name,
         run_dir=run_dir,
         results_dir=results_dir,
         salishsea_cmd=salishsea_cmd,

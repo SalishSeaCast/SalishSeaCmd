@@ -1479,7 +1479,7 @@ class TestBuildBatchScript:
                 xios_processors=1,
                 max_deflate_jobs=4,
                 results_dir=Path("results_dir"),
-                run_dir=Path(),
+                run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
@@ -1501,8 +1501,8 @@ class TestBuildBatchScript:
             "\n"
             "\n"
             'RUN_ID="foo"\n'
-            'RUN_DESC="SalishSea.yaml"\n'
-            'WORK_DIR="."\n'
+            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
+            'WORK_DIR="tmp_run_dir"\n'
             'RESULTS_DIR="results_dir"\n'
             'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
         ).format(account=account)
@@ -1571,7 +1571,7 @@ class TestBuildBatchScript:
                 xios_processors=1,
                 max_deflate_jobs=4,
                 results_dir=Path("results_dir"),
-                run_dir=Path(),
+                run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=cedar_broadwell,
@@ -1594,8 +1594,8 @@ class TestBuildBatchScript:
             "\n"
             "\n"
             'RUN_ID="foo"\n'
-            'RUN_DESC="SalishSea.yaml"\n'
-            'WORK_DIR="."\n'
+            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
+            'WORK_DIR="tmp_run_dir"\n'
             'RESULTS_DIR="results_dir"\n'
             'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
         ).format(constraint=constraint, nodes=nodes, ntasks=ntasks, mem=mem)
@@ -1663,7 +1663,7 @@ class TestBuildBatchScript:
                 xios_processors=1,
                 max_deflate_jobs=4,
                 results_dir=Path("results_dir"),
-                run_dir=Path(),
+                run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
@@ -1685,8 +1685,8 @@ class TestBuildBatchScript:
             "\n"
             "\n"
             'RUN_ID="foo"\n'
-            'RUN_DESC="SalishSea.yaml"\n'
-            'WORK_DIR="."\n'
+            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
+            'WORK_DIR="tmp_run_dir"\n'
             'RESULTS_DIR="results_dir"\n'
             'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
         ).format(account=account)
@@ -1755,7 +1755,7 @@ class TestBuildBatchScript:
                 xios_processors=1,
                 max_deflate_jobs=4,
                 results_dir=Path("results_dir"),
-                run_dir=Path(),
+                run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
@@ -1778,8 +1778,8 @@ class TestBuildBatchScript:
             "\n"
             "\n"
             'RUN_ID="foo"\n'
-            'RUN_DESC="SalishSea.yaml"\n'
-            'WORK_DIR="."\n'
+            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
+            'WORK_DIR="tmp_run_dir"\n'
             'RESULTS_DIR="results_dir"\n'
             'COMBINE="${PBS_O_HOME}/bin/salishsea combine"\n'
         )
@@ -1844,7 +1844,7 @@ class TestBuildBatchScript:
                 xios_processors=1,
                 max_deflate_jobs=4,
                 results_dir=Path("results_dir"),
-                run_dir=Path(),
+                run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
@@ -1868,8 +1868,8 @@ class TestBuildBatchScript:
             "#PBS -l partition=QDR\n"
             "\n"
             'RUN_ID="foo"\n'
-            'RUN_DESC="SalishSea.yaml"\n'
-            'WORK_DIR="."\n'
+            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
+            'WORK_DIR="tmp_run_dir"\n'
             'RESULTS_DIR="results_dir"\n'
             'COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"\n'
         )
@@ -1938,7 +1938,7 @@ class TestBuildBatchScript:
                 xios_processors=1,
                 max_deflate_jobs=4,
                 results_dir=Path("results_dir"),
-                run_dir=Path(),
+                run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
@@ -1961,8 +1961,8 @@ class TestBuildBatchScript:
             "\n"
             "\n"
             'RUN_ID="foo"\n'
-            'RUN_DESC="SalishSea.yaml"\n'
-            'WORK_DIR="."\n'
+            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
+            'WORK_DIR="tmp_run_dir"\n'
             'RESULTS_DIR="results_dir"\n'
             'COMBINE="${HOME}/.local/bin/salishsea combine"\n'
         )
@@ -2271,15 +2271,15 @@ class TestDefinitions:
         with patch("salishsea_cmd.run.SYSTEM", system):
             defns = salishsea_cmd.run._definitions(
                 run_desc,
-                "SalishSea.yaml",
-                Path("run_dir"),
+                Path("SS-run-sets", "SalishSea.yaml"),
+                Path("tmp_run_dir"),
                 Path("results_dir"),
                 deflate,
             )
         expected = (
             'RUN_ID="foo"\n'
-            'RUN_DESC="SalishSea.yaml"\n'
-            'WORK_DIR="run_dir"\n'
+            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
+            'WORK_DIR="tmp_run_dir"\n'
             'RESULTS_DIR="results_dir"\n'
             'COMBINE="{home}/bin/salishsea combine"\n'
         ).format(home=home)
