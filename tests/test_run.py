@@ -1031,7 +1031,11 @@ class TestWriteSegmentDescFile:
                 """
             )
             run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
-                run_desc, segment_namrun, "SalishSea_1.yaml", Path(tmp_run_desc_dir)
+                run_desc,
+                "SalishSea_1.yaml",
+                Path("results_dir_0"),
+                segment_namrun,
+                Path(tmp_run_desc_dir),
             )
             assert segment_desc_file == Path(tmp_run_desc_dir, "SalishSea_1.yaml")
             assert Path(tmp_run_desc_dir, "SalishSea_1.yaml").exists()
@@ -1076,9 +1080,65 @@ class TestWriteSegmentDescFile:
                 """
             )
             run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
-                run_desc, segment_namrun, "SalishSea_1.yaml", Path(tmp_run_desc_dir)
+                run_desc,
+                "SalishSea_1.yaml",
+                Path("results_dir_0"),
+                segment_namrun,
+                Path(tmp_run_desc_dir),
             )
             assert run_desc["namelists"]["namelist_cfg"][0] == os.fspath(segment_namrun)
+
+    def test_segment_0_restart_files_path(self, tmp_path):
+        run_desc = yaml.safe_load(
+            StringIO(
+                """
+            run_id: sensitivity
+            walltime: 24:00:00
+
+            segmented run:
+                start date: 2014-11-15
+                start time step: 152634
+                end date: 2014-12-02
+                days per segment: 10
+                segment walltime: 12:00:00
+                namelists:
+                    namrun: ./namelist.time
+                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                    
+            namelists:
+                namelist_cfg:
+                    - ./namelist.time
+                    
+            restart:
+                restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
+                restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
+        """
+            )
+        )
+        with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
+            segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
+            segment_namrun.write_text(
+                """
+                &namrun
+                    nn_it000 = 174234
+                    nn_itend = 189353
+                    nn_date0 = 20141125
+                &end
+                """
+            )
+            run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
+                run_desc,
+                "SalishSea_1.yaml",
+                None,
+                segment_namrun,
+                Path(tmp_run_desc_dir),
+            )
+        expected = "$PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc"
+        assert run_desc["restart"]["restart.nc"] == expected
+        expected = (
+            "$PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc"
+        )
+        assert run_desc["restart"]["restart_trc.nc"] == expected
 
     def test_restart_files_path(self, tmp_path):
         run_desc = yaml.safe_load(
@@ -1119,13 +1179,17 @@ class TestWriteSegmentDescFile:
                 """
             )
             run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
-                run_desc, segment_namrun, "SalishSea_1.yaml", Path(tmp_run_desc_dir)
+                run_desc,
+                "SalishSea_1.yaml",
+                Path("$PROJECT/$USER/MEOPAR/results/results_dir_0"),
+                segment_namrun,
+                Path(tmp_run_desc_dir),
             )
-        expected = "$PROJECT/$USER/MEOPAR/results/24nov14/SalishSea_00174233_restart.nc"
-        assert run_desc["restart"]["restart.nc"] == expected
         expected = (
-            "$PROJECT/$USER/MEOPAR/results/24nov14/SalishSea_00174233_restart_trc.nc"
+            "$PROJECT/$USER/MEOPAR/results/results_dir_0/SalishSea_00174233_restart.nc"
         )
+        assert run_desc["restart"]["restart.nc"] == expected
+        expected = "$PROJECT/$USER/MEOPAR/results/results_dir_0/SalishSea_00174233_restart_trc.nc"
         assert run_desc["restart"]["restart_trc.nc"] == expected
 
     def test_no_segment_walltime(self, tmp_path):
@@ -1167,8 +1231,12 @@ class TestWriteSegmentDescFile:
                 """
             )
             with pytest.raises(SystemExit):
-                run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
-                    run_desc, segment_namrun, "SalishSea_1.yaml", Path(tmp_run_desc_dir)
+                salishsea_cmd.run._write_segment_desc_file(
+                    run_desc,
+                    "SalishSea_1.yaml",
+                    Path("$PROJECT/$USER/MEOPAR/results/results_dir_0"),
+                    segment_namrun,
+                    Path(tmp_run_desc_dir),
                 )
 
     def test_segment_walltime(self, tmp_path):
@@ -1210,7 +1278,11 @@ class TestWriteSegmentDescFile:
                 """
             )
             run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
-                run_desc, segment_namrun, "SalishSea_1.yaml", Path(tmp_run_desc_dir)
+                run_desc,
+                "SalishSea_1.yaml",
+                Path("$PROJECT/$USER/MEOPAR/results/results_dir_0"),
+                segment_namrun,
+                Path(tmp_run_desc_dir),
             )
         assert run_desc["walltime"] == 43200
 
