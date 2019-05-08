@@ -202,7 +202,7 @@ def run(
     in the run directory.
     That script is submitted to the queue manager in a subprocess.
 
-    :param desc_file: File path/name of the YAML run description file.
+    :param desc_file: File path/name of the run description YAML file.
     :type desc_file: :py:class:`pathlib.Path`
 
     :param results_dir: Path of the directory in which to store the run results;
@@ -251,7 +251,9 @@ def run(
     results_dir = nemo_cmd.resolved_path(results_dir)
     run_segments = _calc_run_segments(desc_file, results_dir)
     submit_job_msg = "Submitted jobs"
-    for run_desc, desc_file, results_dir, namelist_namrun_patch in run_segments:
+    for seg_no, (run_desc, desc_file, results_dir, namelist_namrun_patch) in enumerate(
+        run_segments
+    ):
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
             if isinstance(desc_file, str):
                 # Segmented run requires construction of segment YAML files & namelist files
@@ -259,8 +261,13 @@ def run(
                 segment_namrun = _write_segment_namrun_namelist(
                     run_desc, namelist_namrun_patch, Path(tmp_run_desc_dir)
                 )
+                restart_dir = None if seg_no == 0 else run_segments[seg_no - 1][2]
                 run_desc, segment_desc_file = _write_segment_desc_file(
-                    run_desc, segment_namrun, desc_file, Path(tmp_run_desc_dir)
+                    run_desc,
+                    desc_file,
+                    restart_dir,
+                    segment_namrun,
+                    Path(tmp_run_desc_dir),
                 )
             else:
                 segment_desc_file = desc_file
@@ -386,15 +393,23 @@ def _write_segment_namrun_namelist(run_desc, namelist_namrun_patch, tmp_run_desc
     return tmp_run_desc_dir / namelist_namrun.name
 
 
-def _write_segment_desc_file(run_desc, segment_namrun, desc_file, tmp_run_desc_dir):
+def _write_segment_desc_file(
+    run_desc, desc_file, restart_dir, segment_namrun, tmp_run_desc_dir
+):
     """
     :param dict run_desc: Run description dictionary.
+
+    :param str desc_file: Name of the run description YAML file for segment.
+
+    :param restart_dir: Directory path in which to find the restart file(s)
+                        for the segments.
+                        Use :py:obj:`None` for segment 0 to avoid replacing the
+                        restart directory path in the base run description YAML file.
+    :type restart_dir: :py:class:`pathlib.Path`
 
     :param segment_namrun: File path and name of namelist section file containing
                            namrun for the segment.
     :type segment_namrun: :py:class:`pathlib.Path`
-
-    :paramstr  desc_file: Name of the YAML run description file for segment.
 
     :param tmp_run_desc_dir: Temporary directory where the namelists and run description
                              files for segments are stored.
@@ -414,15 +429,14 @@ def _write_segment_desc_file(run_desc, segment_namrun, desc_file, tmp_run_desc_d
         segment_namrun
     )
     # restart file(s) for segment
-    nml = f90nml.read(segment_namrun)
-    restart_timestep = nml["namrun"]["nn_it000"] - 1
-    restart_date = arrow.get(str(nml["namrun"]["nn_date0"] - 1), "YYYYMMDD")
-    for name, path in get_run_desc_value(run_desc, ("restart",)).items():
-        path = Path(path)
-        name_tail = path.name.split("_", 2)[-1]
-        restart_path = path.parent.parent / restart_date.format("DDMMMYY").lower()
-        restart_path = restart_path / f"SalishSea_{restart_timestep:08d}_{name_tail}"
-        run_desc["restart"][name] = os.fspath(restart_path)
+    if restart_dir is not None:
+        nml = f90nml.read(segment_namrun)
+        restart_timestep = nml["namrun"]["nn_it000"] - 1
+        for name, path in get_run_desc_value(run_desc, ("restart",)).items():
+            path = Path(path)
+            name_tail = path.name.split("_", 2)[-1]
+            restart_path = restart_dir / f"SalishSea_{restart_timestep:08d}_{name_tail}"
+            run_desc["restart"][name] = os.fspath(restart_path)
     # walltime for segment
     segment_walltime = get_run_desc_value(
         run_desc, ("segmented run", "segment walltime")
