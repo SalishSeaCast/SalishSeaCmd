@@ -14,12 +14,13 @@
 # limitations under the License.
 """SalishSeaCmd run sub-command plug-in unit tests
 """
-import shlex
-import subprocess
 from io import StringIO
 import os
 from pathlib import Path
+import shlex
+import subprocess
 import tempfile
+import textwrap
 from unittest.mock import call, Mock, patch
 
 import cliff.app
@@ -2373,19 +2374,26 @@ class TestModules:
     def test_beluga_cedar_graham(self, system):
         with patch("salishsea_cmd.run.SYSTEM", system):
             modules = salishsea_cmd.run._modules()
-        expected = "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
+        expected = textwrap.dedent(
+            """\
+            module load netcdf-fortran-mpi/4.4.4
+            module load python/3.7.0
+            """
+        )
         assert modules == expected
 
     def test_orcinus(self):
         with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
             modules = salishsea_cmd.run._modules()
-        expected = (
-            "module load intel\n"
-            "module load intel/14.0/netcdf-4.3.3.1_mpi\n"
-            "module load intel/14.0/netcdf-fortran-4.4.0_mpi\n"
-            "module load intel/14.0/hdf5-1.8.15p1_mpi\n"
-            "module load intel/14.0/nco-4.5.2\n"
-            "module load python\n"
+        expected = textwrap.dedent(
+            """\
+            module load intel
+            module load intel/14.0/netcdf-4.3.3.1_mpi
+            module load intel/14.0/netcdf-fortran-4.4.0_mpi
+            module load intel/14.0/hdf5-1.8.15p1_mpi
+            module load intel/14.0/nco-4.5.2
+            module load python
+            """
         )
         assert modules == expected
 
@@ -2393,7 +2401,12 @@ class TestModules:
     def test_optimum(self, system):
         with patch("salishsea_cmd.run.SYSTEM", system):
             modules = salishsea_cmd.run._modules()
-        expected = "module load Miniconda/3\n" "module load OpenMPI/4.0.0/GCC/SYSTEM\n"
+        expected = textwrap.dedent(
+            """\
+            module load Miniconda/3
+            module load OpenMPI/4.0.0/GCC/SYSTEM
+            """
+        )
         assert modules == expected
 
 
