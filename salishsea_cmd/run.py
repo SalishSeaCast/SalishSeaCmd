@@ -26,6 +26,7 @@ import shlex
 import socket
 import subprocess
 import tempfile
+import textwrap
 
 import arrow
 import cliff.command
@@ -942,26 +943,47 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
 
 def _modules():
     modules = {
-        "beluga": (
-            "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
+        "beluga": textwrap.dedent(
+            """\
+            module load netcdf-fortran-mpi/4.4.4
+            module load python/3.7.0
+            """
         ),
-        "cedar": (
-            "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
+        "cedar": textwrap.dedent(
+            """\
+            module load netcdf-fortran-mpi/4.4.4
+            module load python/3.7.0
+            """
         ),
-        "delta": "module load Miniconda/3\n" "module load OpenMPI/4.0.0/GCC/SYSTEM\n",
-        "graham": (
-            "module load netcdf-fortran-mpi/4.4.4\n" "module load python/3.7.0\n"
+        "delta": textwrap.dedent(
+            """\
+            module load Miniconda/3
+            module load OpenMPI/4.0.0/GCC/SYSTEM
+            """
         ),
-        "orcinus": (
-            "module load intel\n"
-            "module load intel/14.0/netcdf-4.3.3.1_mpi\n"
-            "module load intel/14.0/netcdf-fortran-4.4.0_mpi\n"
-            "module load intel/14.0/hdf5-1.8.15p1_mpi\n"
-            "module load intel/14.0/nco-4.5.2\n"
-            "module load python\n"
+        "graham": textwrap.dedent(
+            """\
+            module load netcdf-fortran-mpi/4.4.4
+            module load python/3.7.0
+            """
+        ),
+        "orcinus": textwrap.dedent(
+            """\
+            module load intel
+            module load intel/14.0/netcdf-4.3.3.1_mpi
+            module load intel/14.0/netcdf-fortran-4.4.0_mpi
+            module load intel/14.0/hdf5-1.8.15p1_mpi
+            module load intel/14.0/nco-4.5.2
+            module load python
+            """
         ),
         "salish": "",
-        "sigma": "module load Miniconda/3\n" "module load OpenMPI/4.0.0/GCC/SYSTEM\n",
+        "sigma": textwrap.dedent(
+            """\
+            module load Miniconda/3
+            module load OpenMPI/4.0.0/GCC/SYSTEM
+            """
+        ),
     }.get(SYSTEM, "")
     return modules
 
