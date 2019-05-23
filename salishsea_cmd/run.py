@@ -1047,69 +1047,80 @@ def _execute(
                 mpirun=mpirun, np=xios_processors
             ),
         )
-    script = (
-        "mkdir -p ${RESULTS_DIR}\n"
-        "cd ${WORK_DIR}\n"
-        'echo "working dir: $(pwd)"\n'
-        "\n"
-        'echo "Starting run at $(date)"\n'
-    )
-    script += "{mpirun}\n".format(mpirun=mpirun)
-    script += (
-        "MPIRUN_EXIT_CODE=$?\n"
-        'echo "Ended run at $(date)"\n'
-        "\n"
-        'echo "Results combining started at $(date)"\n'
-        "${COMBINE} ${RUN_DESC} --debug\n"
-        'echo "Results combining ended at $(date)"\n'
+    script = textwrap.dedent(
+        """\
+        mkdir -p ${{RESULTS_DIR}}
+        cd ${{WORK_DIR}}
+        echo "working dir: $(pwd)"
+        
+        echo "Starting run at $(date)"
+        {mpirun}
+        MPIRUN_EXIT_CODE=$?
+        echo "Ended run at $(date)"
+        
+        echo "Results combining started at $(date)"
+        ${{COMBINE}} ${{RUN_DESC}} --debug
+        echo "Results combining ended at $(date)"
+        """.format(
+            mpirun=mpirun
+        )
     )
     if deflate and not separate_deflate:
+        script += textwrap.dedent(
+            """\
+                
+            echo "Results deflation started at $(date)"
+            """
+        )
         if SYSTEM in {"beluga", "cedar", "graham"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
-            script += (
-                "\n"
-                'echo "Results deflation started at $(date)"\n'
-                "module load nco/4.6.6\n"
-                "${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                "  --jobs {max_deflate_jobs} --debug\n"
-                'echo "Results deflation ended at $(date)"\n'
-            ).format(max_deflate_jobs=max_deflate_jobs)
-        else:
-            script += (
-                "\n"
-                'echo "Results deflation started at $(date)"\n'
-                "${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                "  --jobs {max_deflate_jobs} --debug\n"
-                'echo "Results deflation ended at $(date)"\n'
-            ).format(max_deflate_jobs=max_deflate_jobs)
-    script += (
-        "\n"
-        'echo "Results gathering started at $(date)"\n'
-        "${GATHER} ${RESULTS_DIR} --debug\n"
-        'echo "Results gathering ended at $(date)"\n'
+            script += textwrap.dedent(
+                """\
+                module load nco/4.6.6
+                """
+            )
+        script += textwrap.dedent(
+            """\
+            ${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+              *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+              --jobs {max_deflate_jobs} --debug
+            echo "Results deflation ended at $(date)"
+            """.format(
+                max_deflate_jobs=max_deflate_jobs
+            )
+        )
+    script += textwrap.dedent(
+        """\
+        
+        echo "Results gathering started at $(date)"
+        ${GATHER} ${RESULTS_DIR} --debug
+        echo "Results gathering ended at $(date)"
+        """
     )
     return script
 
 
 def _fix_permissions():
-    script = (
-        "chmod go+rx ${RESULTS_DIR}\n"
-        "chmod g+rw ${RESULTS_DIR}/*\n"
-        "chmod o+r ${RESULTS_DIR}/*\n"
+    script = textwrap.dedent(
+        """\
+        chmod go+rx ${RESULTS_DIR}
+        chmod g+rw ${RESULTS_DIR}/*
+        chmod o+r ${RESULTS_DIR}/*
+        """
     )
     return script
 
 
 def _cleanup():
-    script = (
-        'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-        "rmdir $(pwd)\n"
-        'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-        "exit ${MPIRUN_EXIT_CODE}\n"
+    script = textwrap.dedent(
+        """\
+        echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+        rmdir $(pwd)
+        echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+        exit ${MPIRUN_EXIT_CODE}
+        """
     )
     return script
 
