@@ -1557,73 +1557,87 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
             )
-        expected = (
-            "#!/bin/bash\n"
-            "\n"
-            "#SBATCH --job-name=foo\n"
-            "#SBATCH --nodes=2\n"
-            "#SBATCH --ntasks-per-node=40\n"
-            "#SBATCH --mem=92G\n"
-            "#SBATCH --time=1:02:03\n"
-            "#SBATCH --mail-user=me@example.com\n"
-            "#SBATCH --mail-type=ALL\n"
-            "#SBATCH --account={account}\n"
-            "# stdout and stderr file paths/names\n"
-            "#SBATCH --output=results_dir/stdout\n"
-            "#SBATCH --error=results_dir/stderr\n"
-            "\n"
-            "\n"
-            'RUN_ID="foo"\n'
-            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
-            'WORK_DIR="tmp_run_dir"\n'
-            'RESULTS_DIR="results_dir"\n'
-            'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
-        ).format(account=account)
-        if deflate:
-            expected += 'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
-        expected += (
-            'GATHER="${HOME}/.local/bin/salishsea gather"\n'
-            "\n"
-            "module load netcdf-fortran-mpi/4.4.4\n"
-            "module load python/3.7.0\n"
-            "\n"
-            "mkdir -p ${RESULTS_DIR}\n"
-            "cd ${WORK_DIR}\n"
-            'echo "working dir: $(pwd)"\n'
-            "\n"
-            'echo "Starting run at $(date)"\n'
-            "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
-            "MPIRUN_EXIT_CODE=$?\n"
-            'echo "Ended run at $(date)"\n'
-            "\n"
-            'echo "Results combining started at $(date)"\n'
-            "${COMBINE} ${RUN_DESC} --debug\n"
-            'echo "Results combining ended at $(date)"\n'
+        expected = textwrap.dedent(
+            """\
+            #!/bin/bash
+            
+            #SBATCH --job-name=foo
+            #SBATCH --nodes=2
+            #SBATCH --ntasks-per-node=40
+            #SBATCH --mem=92G
+            #SBATCH --time=1:02:03
+            #SBATCH --mail-user=me@example.com
+            #SBATCH --mail-type=ALL
+            #SBATCH --account={account}
+            # stdout and stderr file paths/names
+            #SBATCH --output=results_dir/stdout
+            #SBATCH --error=results_dir/stderr
+            
+            
+            RUN_ID="foo"
+            RUN_DESC="tmp_run_dir/SalishSea.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            COMBINE="${{HOME}}/.local/bin/salishsea combine"
+            """.format(
+                account=account
+            )
         )
         if deflate:
-            expected += (
-                "\n"
-                'echo "Results deflation started at $(date)"\n'
-                "module load nco/4.6.6\n"
-                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                "  --jobs 4 --debug\n"
-                'echo "Results deflation ended at $(date)"\n'
+            expected += textwrap.dedent(
+                """\
+                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                """
             )
-        expected += (
-            "\n"
-            'echo "Results gathering started at $(date)"\n'
-            "${GATHER} ${RESULTS_DIR} --debug\n"
-            'echo "Results gathering ended at $(date)"\n'
-            "\n"
-            "chmod go+rx ${RESULTS_DIR}\n"
-            "chmod g+rw ${RESULTS_DIR}/*\n"
-            "chmod o+r ${RESULTS_DIR}/*\n"
-            "\n"
-            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            "rmdir $(pwd)\n"
-            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            "exit ${MPIRUN_EXIT_CODE}\n"
+        expected += textwrap.dedent(
+            """\
+            GATHER="${HOME}/.local/bin/salishsea gather"
+            
+            module load netcdf-fortran-mpi/4.4.4
+            module load python/3.7.0
+            
+            mkdir -p ${RESULTS_DIR}
+            cd ${WORK_DIR}
+            echo "working dir: $(pwd)"
+            
+            echo "Starting run at $(date)"
+            mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+            
+            echo "Results combining started at $(date)"
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+                
+                echo "Results deflation started at $(date)"
+                module load nco/4.6.6
+                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+                  --jobs 4 --debug
+                echo "Results deflation ended at $(date)"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+            
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+            
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
         )
         assert script == expected
 
@@ -1649,74 +1663,88 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=cedar_broadwell,
             )
-        expected = (
-            "#!/bin/bash\n"
-            "\n"
-            "#SBATCH --job-name=foo\n"
-            "#SBATCH --constraint={constraint}\n"
-            "#SBATCH --nodes={nodes}\n"
-            "#SBATCH --ntasks-per-node={ntasks}\n"
-            "#SBATCH --mem={mem}\n"
-            "#SBATCH --time=1:02:03\n"
-            "#SBATCH --mail-user=me@example.com\n"
-            "#SBATCH --mail-type=ALL\n"
-            "#SBATCH --account=rrg-allen\n"
-            "# stdout and stderr file paths/names\n"
-            "#SBATCH --output=results_dir/stdout\n"
-            "#SBATCH --error=results_dir/stderr\n"
-            "\n"
-            "\n"
-            'RUN_ID="foo"\n'
-            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
-            'WORK_DIR="tmp_run_dir"\n'
-            'RESULTS_DIR="results_dir"\n'
-            'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
-        ).format(constraint=constraint, nodes=nodes, ntasks=ntasks, mem=mem)
-        if deflate:
-            expected += 'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
-        expected += (
-            'GATHER="${HOME}/.local/bin/salishsea gather"\n'
-            "\n"
-            "module load netcdf-fortran-mpi/4.4.4\n"
-            "module load python/3.7.0\n"
-            "\n"
-            "mkdir -p ${RESULTS_DIR}\n"
-            "cd ${WORK_DIR}\n"
-            'echo "working dir: $(pwd)"\n'
-            "\n"
-            'echo "Starting run at $(date)"\n'
-            "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
-            "MPIRUN_EXIT_CODE=$?\n"
-            'echo "Ended run at $(date)"\n'
-            "\n"
-            'echo "Results combining started at $(date)"\n'
-            "${COMBINE} ${RUN_DESC} --debug\n"
-            'echo "Results combining ended at $(date)"\n'
+        expected = textwrap.dedent(
+            """\
+            #!/bin/bash
+            
+            #SBATCH --job-name=foo
+            #SBATCH --constraint={constraint}
+            #SBATCH --nodes={nodes}
+            #SBATCH --ntasks-per-node={ntasks}
+            #SBATCH --mem={mem}
+            #SBATCH --time=1:02:03
+            #SBATCH --mail-user=me@example.com
+            #SBATCH --mail-type=ALL
+            #SBATCH --account=rrg-allen
+            # stdout and stderr file paths/names
+            #SBATCH --output=results_dir/stdout
+            #SBATCH --error=results_dir/stderr
+            
+            
+            RUN_ID="foo"
+            RUN_DESC="tmp_run_dir/SalishSea.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            COMBINE="${{HOME}}/.local/bin/salishsea combine"
+            """.format(
+                constraint=constraint, nodes=nodes, ntasks=ntasks, mem=mem
+            )
         )
         if deflate:
-            expected += (
-                "\n"
-                'echo "Results deflation started at $(date)"\n'
-                "module load nco/4.6.6\n"
-                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                "  --jobs 4 --debug\n"
-                'echo "Results deflation ended at $(date)"\n'
+            expected += textwrap.dedent(
+                """\
+                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                """
             )
-        expected += (
-            "\n"
-            'echo "Results gathering started at $(date)"\n'
-            "${GATHER} ${RESULTS_DIR} --debug\n"
-            'echo "Results gathering ended at $(date)"\n'
-            "\n"
-            "chmod go+rx ${RESULTS_DIR}\n"
-            "chmod g+rw ${RESULTS_DIR}/*\n"
-            "chmod o+r ${RESULTS_DIR}/*\n"
-            "\n"
-            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            "rmdir $(pwd)\n"
-            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            "exit ${MPIRUN_EXIT_CODE}\n"
+        expected += textwrap.dedent(
+            """\
+            GATHER="${HOME}/.local/bin/salishsea gather"
+            
+            module load netcdf-fortran-mpi/4.4.4
+            module load python/3.7.0
+            
+            mkdir -p ${RESULTS_DIR}
+            cd ${WORK_DIR}
+            echo "working dir: $(pwd)"
+            
+            echo "Starting run at $(date)"
+            mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+            
+            echo "Results combining started at $(date)"
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+                
+                echo "Results deflation started at $(date)"
+                module load nco/4.6.6
+                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+                  --jobs 4 --debug
+                echo "Results deflation ended at $(date)"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+            
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+            
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
         )
         assert script == expected
 
@@ -1741,73 +1769,87 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
             )
-        expected = (
-            "#!/bin/bash\n"
-            "\n"
-            "#SBATCH --job-name=foo\n"
-            "#SBATCH --nodes=2\n"
-            "#SBATCH --ntasks-per-node=32\n"
-            "#SBATCH --mem=125G\n"
-            "#SBATCH --time=1:02:03\n"
-            "#SBATCH --mail-user=me@example.com\n"
-            "#SBATCH --mail-type=ALL\n"
-            "#SBATCH --account={account}\n"
-            "# stdout and stderr file paths/names\n"
-            "#SBATCH --output=results_dir/stdout\n"
-            "#SBATCH --error=results_dir/stderr\n"
-            "\n"
-            "\n"
-            'RUN_ID="foo"\n'
-            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
-            'WORK_DIR="tmp_run_dir"\n'
-            'RESULTS_DIR="results_dir"\n'
-            'COMBINE="${{HOME}}/.local/bin/salishsea combine"\n'
-        ).format(account=account)
-        if deflate:
-            expected += 'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
-        expected += (
-            'GATHER="${HOME}/.local/bin/salishsea gather"\n'
-            "\n"
-            "module load netcdf-fortran-mpi/4.4.4\n"
-            "module load python/3.7.0\n"
-            "\n"
-            "mkdir -p ${RESULTS_DIR}\n"
-            "cd ${WORK_DIR}\n"
-            'echo "working dir: $(pwd)"\n'
-            "\n"
-            'echo "Starting run at $(date)"\n'
-            "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
-            "MPIRUN_EXIT_CODE=$?\n"
-            'echo "Ended run at $(date)"\n'
-            "\n"
-            'echo "Results combining started at $(date)"\n'
-            "${COMBINE} ${RUN_DESC} --debug\n"
-            'echo "Results combining ended at $(date)"\n'
+        expected = textwrap.dedent(
+            """\
+            #!/bin/bash
+            
+            #SBATCH --job-name=foo
+            #SBATCH --nodes=2
+            #SBATCH --ntasks-per-node=32
+            #SBATCH --mem=125G
+            #SBATCH --time=1:02:03
+            #SBATCH --mail-user=me@example.com
+            #SBATCH --mail-type=ALL
+            #SBATCH --account={account}
+            # stdout and stderr file paths/names
+            #SBATCH --output=results_dir/stdout
+            #SBATCH --error=results_dir/stderr
+            
+            
+            RUN_ID="foo"
+            RUN_DESC="tmp_run_dir/SalishSea.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            COMBINE="${{HOME}}/.local/bin/salishsea combine"
+            """.format(
+                account=account
+            )
         )
         if deflate:
-            expected += (
-                "\n"
-                'echo "Results deflation started at $(date)"\n'
-                "module load nco/4.6.6\n"
-                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                "  --jobs 4 --debug\n"
-                'echo "Results deflation ended at $(date)"\n'
+            expected += textwrap.dedent(
+                """\
+                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                """
             )
-        expected += (
-            "\n"
-            'echo "Results gathering started at $(date)"\n'
-            "${GATHER} ${RESULTS_DIR} --debug\n"
-            'echo "Results gathering ended at $(date)"\n'
-            "\n"
-            "chmod go+rx ${RESULTS_DIR}\n"
-            "chmod g+rw ${RESULTS_DIR}/*\n"
-            "chmod o+r ${RESULTS_DIR}/*\n"
-            "\n"
-            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            "rmdir $(pwd)\n"
-            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            "exit ${MPIRUN_EXIT_CODE}\n"
+        expected += textwrap.dedent(
+            """\
+            GATHER="${HOME}/.local/bin/salishsea gather"
+            
+            module load netcdf-fortran-mpi/4.4.4
+            module load python/3.7.0
+            
+            mkdir -p ${RESULTS_DIR}
+            cd ${WORK_DIR}
+            echo "working dir: $(pwd)"
+            
+            echo "Starting run at $(date)"
+            mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+            
+            echo "Results combining started at $(date)"
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+                
+                echo "Results deflation started at $(date)"
+                module load nco/4.6.6
+                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+                  --jobs 4 --debug
+                echo "Results deflation ended at $(date)"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+            
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+            
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
         )
         assert script == expected
 
@@ -1833,73 +1875,85 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
             )
-        expected = (
-            "#!/bin/bash\n"
-            "\n"
-            "#PBS -N foo\n"
-            "#PBS -S /bin/bash\n"
-            "#PBS -l nodes=14:ppn=20\n"
-            "# memory per processor\n"
-            "#PBS -l pmem=2000mb\n"
-            "#PBS -l walltime=1:02:03\n"
-            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            "#PBS -m bea\n"
-            "#PBS -M me@example.com\n"
-            "# stdout and stderr file paths/names\n"
-            "#PBS -o results_dir/stdout\n"
-            "#PBS -e results_dir/stderr\n"
-            "\n"
-            "\n"
-            'RUN_ID="foo"\n'
-            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
-            'WORK_DIR="tmp_run_dir"\n'
-            'RESULTS_DIR="results_dir"\n'
-            'COMBINE="${PBS_O_HOME}/bin/salishsea combine"\n'
+        expected = textwrap.dedent(
+            """\
+            #!/bin/bash
+            
+            #PBS -N foo
+            #PBS -S /bin/bash
+            #PBS -l nodes=14:ppn=20
+            # memory per processor
+            #PBS -l pmem=2000mb
+            #PBS -l walltime=1:02:03
+            # email when the job [b]egins and [e]nds, or is [a]borted
+            #PBS -m bea
+            #PBS -M me@example.com
+            # stdout and stderr file paths/names
+            #PBS -o results_dir/stdout
+            #PBS -e results_dir/stderr
+            
+            
+            RUN_ID="foo"
+            RUN_DESC="tmp_run_dir/SalishSea.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            COMBINE="${PBS_O_HOME}/bin/salishsea combine"
+            """
         )
         if deflate:
-            expected += 'DEFLATE="${PBS_O_HOME}/bin/salishsea deflate"\n'
-        expected += (
-            'GATHER="${PBS_O_HOME}/bin/salishsea gather"\n'
-            "\n"
-            "module load Miniconda/3\n"
-            "module load OpenMPI/4.0.0/GCC/SYSTEM\n"
-            "\n"
-            "mkdir -p ${RESULTS_DIR}\n"
-            "cd ${WORK_DIR}\n"
-            'echo "working dir: $(pwd)"\n'
-            "\n"
-            'echo "Starting run at $(date)"\n'
-            "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 278 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n"
-            "MPIRUN_EXIT_CODE=$?\n"
-            'echo "Ended run at $(date)"\n'
-            "\n"
-            'echo "Results combining started at $(date)"\n'
-            "${COMBINE} ${RUN_DESC} --debug\n"
-            'echo "Results combining ended at $(date)"\n'
-        )
-        if deflate:
-            expected += (
-                "\n"
-                'echo "Results deflation started at $(date)"\n'
-                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                "  --jobs 4 --debug\n"
-                'echo "Results deflation ended at $(date)"\n'
+            expected += textwrap.dedent(
+                """\
+                DEFLATE="${PBS_O_HOME}/bin/salishsea deflate"
+                """
             )
-        expected += (
-            "\n"
-            'echo "Results gathering started at $(date)"\n'
-            "${GATHER} ${RESULTS_DIR} --debug\n"
-            'echo "Results gathering ended at $(date)"\n'
-            "\n"
-            "chmod go+rx ${RESULTS_DIR}\n"
-            "chmod g+rw ${RESULTS_DIR}/*\n"
-            "chmod o+r ${RESULTS_DIR}/*\n"
-            "\n"
-            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            "rmdir $(pwd)\n"
-            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            "exit ${MPIRUN_EXIT_CODE}\n"
+        expected += textwrap.dedent(
+            """\
+            GATHER="${PBS_O_HOME}/bin/salishsea gather"
+            
+            module load Miniconda/3
+            module load OpenMPI/4.0.0/GCC/SYSTEM
+            
+            mkdir -p ${RESULTS_DIR}
+            cd ${WORK_DIR}
+            echo "working dir: $(pwd)"
+            
+            echo "Starting run at $(date)"
+            mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 278 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+            
+            echo "Results combining started at $(date)"
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+                
+                echo "Results deflation started at $(date)"
+                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+                  --jobs 4 --debug
+                echo "Results deflation ended at $(date)"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+            
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+            
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
         )
         assert script == expected
 
@@ -1922,78 +1976,90 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
             )
-        expected = (
-            "#!/bin/bash\n"
-            "\n"
-            "#PBS -N foo\n"
-            "#PBS -S /bin/bash\n"
-            "#PBS -l procs=43\n"
-            "# memory per processor\n"
-            "#PBS -l pmem=2000mb\n"
-            "#PBS -l walltime=1:02:03\n"
-            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            "#PBS -m bea\n"
-            "#PBS -M me@example.com\n"
-            "# stdout and stderr file paths/names\n"
-            "#PBS -o results_dir/stdout\n"
-            "#PBS -e results_dir/stderr\n"
-            "\n"
-            "#PBS -l partition=QDR\n"
-            "\n"
-            'RUN_ID="foo"\n'
-            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
-            'WORK_DIR="tmp_run_dir"\n'
-            'RESULTS_DIR="results_dir"\n'
-            'COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"\n'
+        expected = textwrap.dedent(
+            """\
+            #!/bin/bash
+            
+            #PBS -N foo
+            #PBS -S /bin/bash
+            #PBS -l procs=43
+            # memory per processor
+            #PBS -l pmem=2000mb
+            #PBS -l walltime=1:02:03
+            # email when the job [b]egins and [e]nds, or is [a]borted
+            #PBS -m bea
+            #PBS -M me@example.com
+            # stdout and stderr file paths/names
+            #PBS -o results_dir/stdout
+            #PBS -e results_dir/stderr
+            
+            #PBS -l partition=QDR
+            
+            RUN_ID="foo"
+            RUN_DESC="tmp_run_dir/SalishSea.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"
+            """
         )
         if deflate:
-            expected += 'DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"\n'
-        expected += (
-            'GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"\n'
-            "\n"
-            "module load intel\n"
-            "module load intel/14.0/netcdf-4.3.3.1_mpi\n"
-            "module load intel/14.0/netcdf-fortran-4.4.0_mpi\n"
-            "module load intel/14.0/hdf5-1.8.15p1_mpi\n"
-            "module load intel/14.0/nco-4.5.2\n"
-            "module load python\n"
-            "\n"
-            "mkdir -p ${RESULTS_DIR}\n"
-            "cd ${WORK_DIR}\n"
-            'echo "working dir: $(pwd)"\n'
-            "\n"
-            'echo "Starting run at $(date)"\n'
-            "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"
-            "MPIRUN_EXIT_CODE=$?\n"
-            'echo "Ended run at $(date)"\n'
-            "\n"
-            'echo "Results combining started at $(date)"\n'
-            "${COMBINE} ${RUN_DESC} --debug\n"
-            'echo "Results combining ended at $(date)"\n'
-        )
-        if deflate:
-            expected += (
-                "\n"
-                'echo "Results deflation started at $(date)"\n'
-                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                "  --jobs 4 --debug\n"
-                'echo "Results deflation ended at $(date)"\n'
+            expected += textwrap.dedent(
+                """\
+                DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"
+                """
             )
-        expected += (
-            "\n"
-            'echo "Results gathering started at $(date)"\n'
-            "${GATHER} ${RESULTS_DIR} --debug\n"
-            'echo "Results gathering ended at $(date)"\n'
-            "\n"
-            "chmod go+rx ${RESULTS_DIR}\n"
-            "chmod g+rw ${RESULTS_DIR}/*\n"
-            "chmod o+r ${RESULTS_DIR}/*\n"
-            "\n"
-            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            "rmdir $(pwd)\n"
-            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            "exit ${MPIRUN_EXIT_CODE}\n"
+        expected += textwrap.dedent(
+            """\
+            GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"
+            
+            module load intel
+            module load intel/14.0/netcdf-4.3.3.1_mpi
+            module load intel/14.0/netcdf-fortran-4.4.0_mpi
+            module load intel/14.0/hdf5-1.8.15p1_mpi
+            module load intel/14.0/nco-4.5.2
+            module load python
+            
+            mkdir -p ${RESULTS_DIR}
+            cd ${WORK_DIR}
+            echo "working dir: $(pwd)"
+            
+            echo "Starting run at $(date)"
+            mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+            
+            echo "Results combining started at $(date)"
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+                
+                echo "Results deflation started at $(date)"
+                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+                  --jobs 4 --debug
+                echo "Results deflation ended at $(date)"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+            
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+            
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
         )
         assert script == expected
 
@@ -2016,71 +2082,83 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
             )
-        expected = (
-            "#!/bin/bash\n"
-            "\n"
-            "#PBS -N foo\n"
-            "#PBS -S /bin/bash\n"
-            "#PBS -l procs=7\n"
-            "# memory per processor\n"
-            "#PBS -l pmem=2000mb\n"
-            "#PBS -l walltime=1:02:03\n"
-            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            "#PBS -m bea\n"
-            "#PBS -M me@example.com\n"
-            "# stdout and stderr file paths/names\n"
-            "#PBS -o results_dir/stdout\n"
-            "#PBS -e results_dir/stderr\n"
-            "\n"
-            "\n"
-            'RUN_ID="foo"\n'
-            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
-            'WORK_DIR="tmp_run_dir"\n'
-            'RESULTS_DIR="results_dir"\n'
-            'COMBINE="${HOME}/.local/bin/salishsea combine"\n'
+        expected = textwrap.dedent(
+            """\
+            #!/bin/bash
+            
+            #PBS -N foo
+            #PBS -S /bin/bash
+            #PBS -l procs=7
+            # memory per processor
+            #PBS -l pmem=2000mb
+            #PBS -l walltime=1:02:03
+            # email when the job [b]egins and [e]nds, or is [a]borted
+            #PBS -m bea
+            #PBS -M me@example.com
+            # stdout and stderr file paths/names
+            #PBS -o results_dir/stdout
+            #PBS -e results_dir/stderr
+            
+            
+            RUN_ID="foo"
+            RUN_DESC="tmp_run_dir/SalishSea.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            COMBINE="${HOME}/.local/bin/salishsea combine"
+            """
         )
         if deflate:
-            expected += 'DEFLATE="${HOME}/.local/bin/salishsea deflate"\n'
-        expected += (
-            'GATHER="${HOME}/.local/bin/salishsea gather"\n'
-            "\n"
-            "\n"
-            "mkdir -p ${RESULTS_DIR}\n"
-            "cd ${WORK_DIR}\n"
-            'echo "working dir: $(pwd)"\n'
-            "\n"
-            'echo "Starting run at $(date)"\n'
-            "/usr/bin/mpirun -np 6 ./nemo.exe : -np 1 ./xios_server.exe\n"
-            "MPIRUN_EXIT_CODE=$?\n"
-            'echo "Ended run at $(date)"\n'
-            "\n"
-            'echo "Results combining started at $(date)"\n'
-            "${COMBINE} ${RUN_DESC} --debug\n"
-            'echo "Results combining ended at $(date)"\n'
-        )
-        if deflate:
-            expected += (
-                "\n"
-                'echo "Results deflation started at $(date)"\n'
-                "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-                "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-                "  --jobs 4 --debug\n"
-                'echo "Results deflation ended at $(date)"\n'
+            expected += textwrap.dedent(
+                """\
+                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                """
             )
-        expected += (
-            "\n"
-            'echo "Results gathering started at $(date)"\n'
-            "${GATHER} ${RESULTS_DIR} --debug\n"
-            'echo "Results gathering ended at $(date)"\n'
-            "\n"
-            "chmod go+rx ${RESULTS_DIR}\n"
-            "chmod g+rw ${RESULTS_DIR}/*\n"
-            "chmod o+r ${RESULTS_DIR}/*\n"
-            "\n"
-            'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
-            "rmdir $(pwd)\n"
-            'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
-            "exit ${MPIRUN_EXIT_CODE}\n"
+        expected += textwrap.dedent(
+            """\
+            GATHER="${HOME}/.local/bin/salishsea gather"
+            
+            
+            mkdir -p ${RESULTS_DIR}
+            cd ${WORK_DIR}
+            echo "working dir: $(pwd)"
+            
+            echo "Starting run at $(date)"
+            /usr/bin/mpirun -np 6 ./nemo.exe : -np 1 ./xios_server.exe
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+            
+            echo "Results combining started at $(date)"
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+                
+                echo "Results deflation started at $(date)"
+                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+                  --jobs 4 --debug
+                echo "Results deflation ended at $(date)"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+            
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+            
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
         )
         assert script == expected
 
@@ -2417,17 +2495,17 @@ class TestExecute:
     @pytest.mark.parametrize(
         "system, mpirun_cmd",
         [
-            ("cedar", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"),
+            ("cedar", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             (
                 "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
             ),
-            ("graham", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"),
-            ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"),
-            ("salish", "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n"),
+            ("graham", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
+            ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
+            ("salish", "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             (
                 "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
             ),
         ],
     )
@@ -2440,147 +2518,153 @@ class TestExecute:
                 max_deflate_jobs=4,
                 separate_deflate=False,
             )
-        expected = """mkdir -p ${RESULTS_DIR}
-        cd ${WORK_DIR}
-        echo "working dir: $(pwd)"
+        expected = textwrap.dedent(
+            """\
+            mkdir -p ${{RESULTS_DIR}}
+            cd ${{WORK_DIR}}
+            echo "working dir: $(pwd)"
 
-        echo "Starting run at $(date)"
-        """
-        expected += mpirun_cmd
-        expected += """MPIRUN_EXIT_CODE=$?
-        echo "Ended run at $(date)"
-
-        echo "Results combining started at $(date)"
-        ${COMBINE} ${RUN_DESC} --debug
-        echo "Results combining ended at $(date)"
-        
-        echo "Results deflation started at $(date)"
-        """
-        if system in {"beluga", "cedar", "graham"}:
-            expected += "module load nco/4.6.6\n"
-        expected += (
-            "${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\"
-            "  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\"
-            "  --jobs 4 --debug\n"
-            'echo "Results deflation ended at $(date)"\n'
+            echo "Starting run at $(date)"
+            {mpirun_cmd}
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+    
+            echo "Results combining started at $(date)"
+            ${{COMBINE}} ${{RUN_DESC}} --debug
+            echo "Results combining ended at $(date)"
+            
+            echo "Results deflation started at $(date)"
+            """.format(
+                mpirun_cmd=mpirun_cmd
+            )
         )
-        expected += """
-        echo "Results gathering started at $(date)"
-        ${GATHER} ${RESULTS_DIR} --debug
-        echo "Results gathering ended at $(date)"
-        """
-        expected = expected.splitlines()
-        for i, line in enumerate(script.splitlines()):
-            assert line.strip() == expected[i].strip()
+        if system in {"beluga", "cedar", "graham"}:
+            expected += textwrap.dedent(
+                """\
+                module load nco/4.6.6
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+              *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+              --jobs 4 --debug
+            echo "Results deflation ended at $(date)"
+            """
+        )
+        expected += textwrap.dedent(
+            """\
+            
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+            """
+        )
+        assert script == expected
 
     @pytest.mark.parametrize(
         "system, mpirun_cmd, deflate, separate_deflate",
         [
             (
                 "cedar",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "cedar",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
-            (
-                "cedar",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
-                True,
-                True,
-            ),
+            ("cedar", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe", True, True),
             (
                 "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
             (
                 "graham",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "graham",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "graham",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
             (
                 "orcinus",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "orcinus",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "orcinus",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
             (
                 "salish",
-                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "salish",
-                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "salish",
-                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe\n",
+                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
             (
                 "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe\n",
+                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
@@ -2597,27 +2681,29 @@ class TestExecute:
                 max_deflate_jobs=4,
                 separate_deflate=separate_deflate,
             )
-        expected = """mkdir -p ${RESULTS_DIR}
-        cd ${WORK_DIR}
-        echo "working dir: $(pwd)"
-
-        echo "Starting run at $(date)"
-        """
-        expected += mpirun_cmd
-        expected += """MPIRUN_EXIT_CODE=$?
-        echo "Ended run at $(date)"
-
-        echo "Results combining started at $(date)"
-        ${COMBINE} ${RUN_DESC} --debug
-        echo "Results combining ended at $(date)"
-        
-        echo "Results gathering started at $(date)"
-        ${GATHER} ${RESULTS_DIR} --debug
-        echo "Results gathering ended at $(date)"
-        """
-        expected = expected.splitlines()
-        for i, line in enumerate(script.splitlines()):
-            assert line.strip() == expected[i].strip()
+        expected = textwrap.dedent(
+            """\
+            mkdir -p ${{RESULTS_DIR}}
+            cd ${{WORK_DIR}}
+            echo "working dir: $(pwd)"
+    
+            echo "Starting run at $(date)"
+            {mpirun_cmd}
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+    
+            echo "Results combining started at $(date)"
+            ${{COMBINE}} ${{RUN_DESC}} --debug
+            echo "Results combining ended at $(date)"
+            
+            echo "Results gathering started at $(date)"
+            ${{GATHER}} ${{RESULTS_DIR}} --debug
+            echo "Results gathering ended at $(date)"
+            """.format(
+                mpirun_cmd=mpirun_cmd
+            )
+        )
+        assert script == expected
 
 
 class TestCleanup:
@@ -2626,14 +2712,15 @@ class TestCleanup:
 
     def test_cleanup(self):
         script = salishsea_cmd.run._cleanup()
-        expected = """echo "Deleting run directory" >>${RESULTS_DIR}/stdout
-        rmdir $(pwd)
-        echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
-        exit ${MPIRUN_EXIT_CODE}
-        """
-        expected = expected.splitlines()
-        for i, line in enumerate(script.splitlines()):
-            assert line.strip() == expected[i].strip()
+        expected = textwrap.dedent(
+            """\
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
+        )
+        assert script == expected
 
 
 @pytest.mark.parametrize(
