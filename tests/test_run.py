@@ -1923,6 +1923,12 @@ class TestBuildBatchScript:
             echo "Ended run at $(date)"
             
             echo "Results combining started at $(date)"
+            module load GCC/8.3
+            module load OpenMPI/4.0.0/GCC/8.3
+            module load ZLIB/1.2/11
+            module load use.paustin
+            module load HDF5/1.08/20
+            module load NETCDF/4.6/1
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
             """
@@ -2530,13 +2536,28 @@ class TestExecute:
             echo "Ended run at $(date)"
     
             echo "Results combining started at $(date)"
-            ${{COMBINE}} ${{RUN_DESC}} --debug
-            echo "Results combining ended at $(date)"
-            
-            echo "Results deflation started at $(date)"
             """.format(
                 mpirun_cmd=mpirun_cmd
             )
+        )
+        if system in {"delta", "sigma"}:
+            expected += textwrap.dedent(
+                """\
+                module load GCC/8.3
+                module load OpenMPI/4.0.0/GCC/8.3
+                module load ZLIB/1.2/11
+                module load use.paustin
+                module load HDF5/1.08/20
+                module load NETCDF/4.6/1
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            
+            echo "Results deflation started at $(date)"
+            """
         )
         if system in {"beluga", "cedar", "graham"}:
             expected += textwrap.dedent(
@@ -2693,15 +2714,30 @@ class TestExecute:
             echo "Ended run at $(date)"
     
             echo "Results combining started at $(date)"
-            ${{COMBINE}} ${{RUN_DESC}} --debug
-            echo "Results combining ended at $(date)"
-            
-            echo "Results gathering started at $(date)"
-            ${{GATHER}} ${{RESULTS_DIR}} --debug
-            echo "Results gathering ended at $(date)"
             """.format(
                 mpirun_cmd=mpirun_cmd
             )
+        )
+        if system in {"delta", "sigma"}:
+            expected += textwrap.dedent(
+                """\
+                module load GCC/8.3
+                module load OpenMPI/4.0.0/GCC/8.3
+                module load ZLIB/1.2/11
+                module load use.paustin
+                module load HDF5/1.08/20
+                module load NETCDF/4.6/1
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+            """
         )
         assert script == expected
 
