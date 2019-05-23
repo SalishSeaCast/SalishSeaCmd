@@ -1059,11 +1059,29 @@ def _execute(
         echo "Ended run at $(date)"
         
         echo "Results combining started at $(date)"
-        ${{COMBINE}} ${{RUN_DESC}} --debug
-        echo "Results combining ended at $(date)"
         """.format(
             mpirun=mpirun
         )
+    )
+    if SYSTEM in {"delta", "sigma"}:
+        # Load GCC-8.3 modules just before combining because rebuild_nemo on optimum
+        # is built with them, in contrast to XIOS and NEMO which are built with
+        # the system GCC-4.4.7
+        script += textwrap.dedent(
+            """\
+            module load GCC/8.3
+            module load OpenMPI/4.0.0/GCC/8.3
+            module load ZLIB/1.2/11
+            module load use.paustin
+            module load HDF5/1.08/20
+            module load NETCDF/4.6/1
+            """
+        )
+    script += textwrap.dedent(
+        """\
+        ${COMBINE} ${RUN_DESC} --debug
+        echo "Results combining ended at $(date)"
+        """
     )
     if deflate and not separate_deflate:
         script += textwrap.dedent(
