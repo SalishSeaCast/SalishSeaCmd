@@ -1089,7 +1089,8 @@ class TestWriteSegmentDescFile:
             )
             assert run_desc["namelists"]["namelist_cfg"][0] == os.fspath(segment_namrun)
 
-    def test_segment_0_restart_files_path(self, tmp_path):
+    @pytest.mark.parametrize("nemo_exp", ("SalishSea", "SKOG"))
+    def test_segment_0_restart_files_path(self, nemo_exp, tmp_path):
         run_desc = yaml.safe_load(
             StringIO(
                 """
@@ -1111,9 +1112,11 @@ class TestWriteSegmentDescFile:
                     - ./namelist.time
                     
             restart:
-                restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
-                restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
-        """
+                restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc
+                restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc
+        """.format(
+                    nemo_exp=nemo_exp
+                )
             )
         )
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
@@ -1134,14 +1137,17 @@ class TestWriteSegmentDescFile:
                 segment_namrun,
                 Path(tmp_run_desc_dir),
             )
-        expected = "$PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc"
+        expected = "$PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc".format(
+            nemo_exp=nemo_exp
+        )
         assert run_desc["restart"]["restart.nc"] == expected
-        expected = (
-            "$PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc"
+        expected = "$PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc".format(
+            nemo_exp=nemo_exp
         )
         assert run_desc["restart"]["restart_trc.nc"] == expected
 
-    def test_restart_files_path(self, tmp_path):
+    @pytest.mark.parametrize("nemo_exp", ("SalishSea", "SKOG"))
+    def test_restart_files_path(self, nemo_exp, tmp_path):
         run_desc = yaml.safe_load(
             StringIO(
                 """
@@ -1163,9 +1169,11 @@ class TestWriteSegmentDescFile:
                     - ./namelist.time
                     
             restart:
-                restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
-                restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
-        """
+                restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc
+                restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc
+        """.format(
+                    nemo_exp=nemo_exp
+                )
             )
         )
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
@@ -1186,11 +1194,13 @@ class TestWriteSegmentDescFile:
                 segment_namrun,
                 Path(tmp_run_desc_dir),
             )
-        expected = (
-            "$PROJECT/$USER/MEOPAR/results/results_dir_0/SalishSea_00174233_restart.nc"
+        expected = "$PROJECT/$USER/MEOPAR/results/results_dir_0/{nemo_exp}_00174233_restart.nc".format(
+            nemo_exp=nemo_exp
         )
         assert run_desc["restart"]["restart.nc"] == expected
-        expected = "$PROJECT/$USER/MEOPAR/results/results_dir_0/SalishSea_00174233_restart_trc.nc"
+        expected = "$PROJECT/$USER/MEOPAR/results/results_dir_0/{nemo_exp}_00174233_restart_trc.nc".format(
+            nemo_exp=nemo_exp
+        )
         assert run_desc["restart"]["restart_trc.nc"] == expected
 
     def test_no_segment_walltime(self, tmp_path):
