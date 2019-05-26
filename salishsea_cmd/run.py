@@ -435,8 +435,11 @@ def _write_segment_desc_file(
         restart_timestep = nml["namrun"]["nn_it000"] - 1
         for name, path in get_run_desc_value(run_desc, ("restart",)).items():
             path = Path(path)
+            name_head = path.name.split("_")[0]
             name_tail = path.name.split("_", 2)[-1]
-            restart_path = restart_dir / f"SalishSea_{restart_timestep:08d}_{name_tail}"
+            restart_path = (
+                restart_dir / f"{name_head}_{restart_timestep:08d}_{name_tail}"
+            )
             run_desc["restart"][name] = os.fspath(restart_path)
     # walltime for segment
     segment_walltime = get_run_desc_value(
