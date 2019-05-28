@@ -250,10 +250,10 @@ def run(
         "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
     }.get(SYSTEM, "qsub")
     results_dir = nemo_cmd.resolved_path(results_dir)
-    run_segments = _calc_run_segments(desc_file, results_dir)
+    run_segments, first_seg_no = _calc_run_segments(desc_file, results_dir)
     submit_job_msg = "Submitted jobs"
     for seg_no, (run_desc, desc_file, results_dir, namelist_namrun_patch) in enumerate(
-        run_segments
+        run_segments, start=first_seg_no
     ):
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
             if isinstance(desc_file, str):
@@ -262,7 +262,9 @@ def run(
                 segment_namrun = _write_segment_namrun_namelist(
                     run_desc, namelist_namrun_patch, Path(tmp_run_desc_dir)
                 )
-                restart_dir = None if seg_no == 0 else run_segments[seg_no - 1][2]
+                restart_dir = (
+                    None if seg_no == first_seg_no else run_segments[seg_no - 1][2]
+                )
                 run_desc, segment_desc_file = _write_segment_desc_file(
                     run_desc,
                     desc_file,
@@ -301,7 +303,8 @@ def run(
 def _calc_run_segments(desc_file, results_dir):
     run_desc = load_run_desc(desc_file)
     if "segmented run" not in run_desc:
-        return [(run_desc, desc_file, results_dir, {})]
+        first_seg_no = 0
+        return [(run_desc, desc_file, results_dir, {})], first_seg_no
     base_run_id = get_run_desc_value(run_desc, ("run_id",))
     start_date = arrow.get(
         get_run_desc_value(run_desc, ("segmented run", "start date"))
@@ -318,8 +321,13 @@ def _calc_run_segments(desc_file, results_dir):
     timesteps_per_day = 24 * 60 * 60 / rn_rdt
     n_segments = _calc_n_segments(run_desc)
     run_segments = []
-    for i in range(n_segments):
-        segment_run_id = "{i}_{base_run_id}".format(i=i, base_run_id=base_run_id)
+    first_seg_no = get_run_desc_value(
+        run_desc, ("segmented run", "first segment number")
+    )
+    for i, seg_no in enumerate(range(first_seg_no, first_seg_no + n_segments)):
+        segment_run_id = "{seg_no}_{base_run_id}".format(
+            seg_no=seg_no, base_run_id=base_run_id
+        )
         segment_run_desc = copy.deepcopy(run_desc)
         segment_run_desc["run_id"] = segment_run_id
         nn_it000 = int(start_timestep + i * days_per_segment * timesteps_per_day)
@@ -334,12 +342,14 @@ def _calc_run_segments(desc_file, results_dir):
                 # Run description dict for the segment
                 segment_run_desc,
                 # Run description YAML file name for the segment
-                "{file_stem}_{i}{suffix}".format(
-                    file_stem=desc_file.stem, i=i, suffix=desc_file.suffix
+                "{file_stem}_{seg_no}{suffix}".format(
+                    file_stem=desc_file.stem, seg_no=seg_no, suffix=desc_file.suffix
                 ),
                 # Results directory for the segment
                 results_dir.parent
-                / "{dir_name}_{i}".format(dir_name=results_dir.name, i=i),
+                / "{dir_name}_{seg_no}".format(
+                    dir_name=results_dir.name, seg_no=seg_no
+                ),
                 # f90nml namelist patch for the segment for the namelist containing namrum
                 {
                     "namrun": {
@@ -350,7 +360,7 @@ def _calc_run_segments(desc_file, results_dir):
                 },
             )
         )
-    return run_segments
+    return run_segments, first_seg_no
 
 
 def _calc_n_segments(run_desc):
