@@ -166,19 +166,22 @@ class TestRun:
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_crs.return_value = [
-            (
-                {
-                    "output": {
-                        "separate XIOS server": sep_xios_server,
-                        "XIOS servers": xios_servers,
-                    }
-                },
-                Path("SalishSea.yaml"),
-                Path(str(p_run_dir)),
-                {},
-            )
-        ]
+        m_crs.return_value = (
+            [
+                (
+                    {
+                        "output": {
+                            "separate XIOS server": sep_xios_server,
+                            "XIOS servers": xios_servers,
+                        }
+                    },
+                    Path("SalishSea.yaml"),
+                    Path(str(p_run_dir)),
+                    {},
+                )
+            ],
+            0,
+        )
         m_btrd.return_value = (
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
@@ -230,19 +233,22 @@ class TestRun:
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_crs.return_value = [
-            (
-                {
-                    "output": {
-                        "separate XIOS server": sep_xios_server,
-                        "XIOS servers": xios_servers,
-                    }
-                },
-                Path("SalishSea.yaml"),
-                Path(str(p_run_dir)),
-                {},
-            )
-        ]
+        m_crs.return_value = (
+            [
+                (
+                    {
+                        "output": {
+                            "separate XIOS server": sep_xios_server,
+                            "XIOS servers": xios_servers,
+                        }
+                    },
+                    Path("SalishSea.yaml"),
+                    Path(str(p_run_dir)),
+                    {},
+                )
+            ],
+            0,
+        )
         m_btrd.return_value = (
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
@@ -273,19 +279,22 @@ class TestRun:
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_crs.return_value = [
-            (
-                {
-                    "output": {
-                        "separate XIOS server": sep_xios_server,
-                        "XIOS servers": xios_servers,
-                    }
-                },
-                Path("SalishSea.yaml"),
-                Path(str(p_run_dir)),
-                {},
-            )
-        ]
+        m_crs.return_value = (
+            [
+                (
+                    {
+                        "output": {
+                            "separate XIOS server": sep_xios_server,
+                            "XIOS servers": xios_servers,
+                        }
+                    },
+                    Path("SalishSea.yaml"),
+                    Path(str(p_run_dir)),
+                    {},
+                )
+            ],
+            0,
+        )
         m_btrd.return_value = (
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
@@ -313,19 +322,22 @@ class TestRun:
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_crs.return_value = [
-            (
-                {
-                    "output": {
-                        "separate XIOS server": sep_xios_server,
-                        "XIOS servers": xios_servers,
-                    }
-                },
-                Path("SalishSea.yaml"),
-                Path(str(p_run_dir)),
-                {},
-            )
-        ]
+        m_crs.return_value = (
+            [
+                (
+                    {
+                        "output": {
+                            "separate XIOS server": sep_xios_server,
+                            "XIOS servers": xios_servers,
+                        }
+                    },
+                    Path("SalishSea.yaml"),
+                    Path(str(p_run_dir)),
+                    {},
+                )
+            ],
+            0,
+        )
         m_btrd.return_value = (
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
@@ -377,19 +389,22 @@ class TestRun:
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_crs.return_value = [
-            (
-                {
-                    "output": {
-                        "separate XIOS server": sep_xios_server,
-                        "XIOS servers": xios_servers,
-                    }
-                },
-                Path("SalishSea.yaml"),
-                Path(str(p_run_dir)),
-                {},
-            )
-        ]
+        m_crs.return_value = (
+            [
+                (
+                    {
+                        "output": {
+                            "separate XIOS server": sep_xios_server,
+                            "XIOS servers": xios_servers,
+                        }
+                    },
+                    Path("SalishSea.yaml"),
+                    Path(str(p_run_dir)),
+                    {},
+                )
+            ],
+            0,
+        )
         m_btrd.return_value = (
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
@@ -527,64 +542,69 @@ class TestRun:
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        m_crs.return_value = [
-            (
-                yaml.safe_load(
-                    StringIO(
-                        """
-                    run_id: 0_sensitivity
-                    
-                    segmented run:
-                        start date: 2014-11-15
-                        start time step: 152634
-                        end date: 2014-12-02
-                        days per segment: 10
-                        walltime: 12:00:00
-                        namelists:
-                            namrun: ./namelist.time
-                            namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                """
-                    )
+        m_crs.return_value = (
+            [
+                (
+                    yaml.safe_load(
+                        StringIO(
+                            """
+                        run_id: 0_sensitivity
+                        
+                        segmented run:
+                            start date: 2014-11-15
+                            start time step: 152634
+                            end date: 2014-12-02
+                            days per segment: 10
+                            first segment number: 0
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                    """
+                        )
+                    ),
+                    "SalishSea_0.yaml",
+                    Path("results_dir_0"),
+                    {
+                        "namrun": {
+                            "nn_it000": 152634,
+                            "nn_itend": 152634 + 2160 * 10 - 1,
+                            "nn_date0": 20141115,
+                        }
+                    },
                 ),
-                "SalishSea_0.yaml",
-                Path("results_dir_0"),
-                {
-                    "namrun": {
-                        "nn_it000": 152634,
-                        "nn_itend": 152634 + 2160 * 10 - 1,
-                        "nn_date0": 20141115,
-                    }
-                },
-            ),
-            (
-                yaml.safe_load(
-                    StringIO(
-                        """
-                    run_id: 1_sensitivity
-
-                    segmented run:
-                        start date: 2014-11-15
-                        start time step: 152634
-                        end date: 2014-12-02
-                        days per segment: 10
-                        walltime: 12:00:00
-                        namelists:
-                            namrun: ./namelist.time
-                            namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                """
-                    )
+                (
+                    yaml.safe_load(
+                        StringIO(
+                            """
+                        run_id: 1_sensitivity
+    
+                        segmented run:
+                            start date: 2014-11-15
+                            start time step: 152634
+                            end date: 2014-12-02
+                            days per segment: 10
+                            first segment number: 0
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                    """
+                        )
+                    ),
+                    "SalishSea_1.yaml",
+                    Path("results_dir_1"),
+                    {
+                        "namrun": {
+                            "nn_it000": 152634 + 2160 * 10,
+                            "nn_itend": 152634 + 2160 * 17 - 1,
+                            "nn_date0": 20141125,
+                        }
+                    },
                 ),
-                "SalishSea_1.yaml",
-                Path("results_dir_1"),
-                {
-                    "namrun": {
-                        "nn_it000": 152634 + 2160 * 10,
-                        "nn_itend": 152634 + 2160 * 17 - 1,
-                        "nn_date0": 20141125,
-                    }
-                },
-            ),
-        ]
+            ],
+            0,
+        )
         m_btrd.return_value = (
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
@@ -616,12 +636,13 @@ class TestCalcRunSegments:
 
     def test_not_segmented_run(self, m_f90nml_read, m_lrd):
         m_lrd.return_value = {}
-        run_segments = salishsea_cmd.run._calc_run_segments(
+        run_segments, first_seg_no = salishsea_cmd.run._calc_run_segments(
             Path("SalishSea.yaml"), Path("results_dir")
         )
         assert run_segments == [
             (m_lrd(), Path("SalishSea.yaml"), Path("results_dir"), {})
         ]
+        assert first_seg_no == 0
 
     def test_no_run_id(self, m_f90nml_read, m_lrd):
         m_lrd.return_value = yaml.safe_load(
@@ -632,7 +653,11 @@ class TestCalcRunSegments:
                 start time step: 152634
                 end date: 2014-12-02
                 days per segment: 10
-                walltime: 12:00:00
+                first segment number: 0
+                segment walltime: 12:00:00
+                namelists:
+                    namrun: ./namelist.time
+                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
         """
             )
         )
@@ -652,7 +677,8 @@ class TestCalcRunSegments:
                 start time step: 152634
                 end date: 2014-12-02
                 days per segment: 10
-                walltime: 12:00:00
+                first segment number: 0
+                segment walltime: 12:00:00
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
@@ -675,7 +701,8 @@ class TestCalcRunSegments:
 
                 end date: 2014-12-02
                 days per segment: 10
-                walltime: 12:00:00
+                first segment number: 0
+                segment walltime: 12:00:00
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
@@ -698,7 +725,8 @@ class TestCalcRunSegments:
                 start time step: 152634
 
                 days per segment: 10
-                walltime: 12:00:00
+                first segment number: 0
+                segment walltime: 12:00:00
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
@@ -721,7 +749,32 @@ class TestCalcRunSegments:
                 start time step: 152634
                 end date: 2014-12-02
                 
-                walltime: 12:00:00
+                first segment number: 0
+                segment walltime: 12:00:00
+                namelists:
+                    namrun: ./namelist.time
+                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+        """
+            )
+        )
+        with pytest.raises(SystemExit):
+            salishsea_cmd.run._calc_run_segments(
+                Path("SalishSea.yaml"), Path("results_dir")
+            )
+
+    def test_no_first_segment_number(self, m_f90nml_read, m_lrd):
+        m_lrd.return_value = yaml.safe_load(
+            StringIO(
+                """
+            run_id: sensitivity
+
+            segmented run:
+                start date: 2014-11-15
+                start time step: 152634
+                end date: 2014-12-02
+                days per segment: 10
+                
+                segment walltime: 12:00:00
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
@@ -744,7 +797,8 @@ class TestCalcRunSegments:
                 start time step: 152634
                 end date: 2014-12-02
                 days per segment: 10
-                walltime: 12:00:00
+                first segment number: 0
+                segment walltime: 12:00:00
                 namelists:
                     namrun: ./namelist.time
                     
@@ -756,7 +810,8 @@ class TestCalcRunSegments:
                 Path("SalishSea.yaml"), Path("results_dir")
             )
 
-    def test_run_segments(self, m_f90nml_read, m_lrd):
+    @pytest.mark.parametrize("first_seg_no", (0, 3))
+    def test_run_segments(self, m_f90nml_read, m_lrd, first_seg_no):
         m_lrd.return_value = yaml.safe_load(
             StringIO(
                 """
@@ -767,14 +822,17 @@ class TestCalcRunSegments:
                 start time step: 152634
                 end date: 2014-12-02
                 days per segment: 10
-                walltime: 12:00:00
+                first segment number: {first_seg_no}
+                segment walltime: 12:00:00
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """
+        """.format(
+                    first_seg_no=first_seg_no
+                )
             )
         )
-        run_segments = salishsea_cmd.run._calc_run_segments(
+        run_segments, first_seg_no_ = salishsea_cmd.run._calc_run_segments(
             Path("SalishSea.yaml"), Path("results_dir")
         )
         expected = [
@@ -782,22 +840,25 @@ class TestCalcRunSegments:
                 yaml.safe_load(
                     StringIO(
                         """
-                    run_id: 0_sensitivity
+                    run_id: {seg_no}_sensitivity
                     
                     segmented run:
                         start date: 2014-11-15
                         start time step: 152634
                         end date: 2014-12-02
                         days per segment: 10
-                        walltime: 12:00:00
+                        first segment number: {seg_no}
+                        segment walltime: 12:00:00
                         namelists:
                             namrun: ./namelist.time
                             namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                """
+                """.format(
+                            seg_no=first_seg_no
+                        )
                     )
                 ),
-                "SalishSea_0.yaml",
-                Path("results_dir_0"),
+                "SalishSea_{seg_no}.yaml".format(seg_no=first_seg_no),
+                Path("results_dir_{seg_no}".format(seg_no=first_seg_no)),
                 {
                     "namrun": {
                         "nn_it000": 152634,
@@ -810,22 +871,25 @@ class TestCalcRunSegments:
                 yaml.safe_load(
                     StringIO(
                         """
-                    run_id: 1_sensitivity
+                    run_id: {seg_no}_sensitivity
 
                     segmented run:
                         start date: 2014-11-15
                         start time step: 152634
                         end date: 2014-12-02
                         days per segment: 10
-                        walltime: 12:00:00
+                        first segment number: {first_seg_no}
+                        segment walltime: 12:00:00
                         namelists:
                             namrun: ./namelist.time
                             namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                """
+                """.format(
+                            first_seg_no=first_seg_no, seg_no=first_seg_no + 1
+                        )
                     )
                 ),
-                "SalishSea_1.yaml",
-                Path("results_dir_1"),
+                "SalishSea_{seg_no}.yaml".format(seg_no=first_seg_no + 1),
+                Path("results_dir_{seg_no}".format(seg_no=first_seg_no + 1)),
                 {
                     "namrun": {
                         "nn_it000": 152634 + 2160 * 10,
@@ -836,6 +900,7 @@ class TestCalcRunSegments:
             ),
         ]
         assert run_segments == expected
+        assert first_seg_no_ == first_seg_no
 
 
 class TestCalcNSegments:
