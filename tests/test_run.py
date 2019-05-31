@@ -893,7 +893,7 @@ class TestCalcRunSegments:
                 {
                     "namrun": {
                         "nn_it000": 152634 + 2160 * 10,
-                        "nn_itend": 152634 + 2160 * 17 - 1,
+                        "nn_itend": 152634 + 2160 * 18 - 1,
                         "nn_date0": 20141125,
                     }
                 },
@@ -901,6 +901,63 @@ class TestCalcRunSegments:
         ]
         assert run_segments == expected
         assert first_seg_no_ == first_seg_no
+
+    def test_final_run_segment(self, m_f90nml_read, m_lrd):
+        m_lrd.return_value = yaml.safe_load(
+            StringIO(
+                textwrap.dedent(
+                    """\
+                run_id: SKOG_2016_BASE
+                
+                segmented run:
+                  start date: 2016-04-30
+                  start time step: 2730241
+                  end date: 2016-12-31
+                  days per segment: 30
+                  first segment number: 0
+                  segment walltime: 12:00:00
+                  namelists:
+                    namrun: ./namelist.time
+                    namdom: $PROJECT/SalishSeaCast/hindcast-sys/SS-run-sets/v201812/namelist.domain
+                """
+                )
+            )
+        )
+        run_segments, first_seg_no = salishsea_cmd.run._calc_run_segments(
+            Path("BR5_12SKOG2016.yaml"), Path("SKOG_C")
+        )
+        expected = (
+            yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        """\
+                    run_id: 8_SKOG_2016_BASE
+
+                    segmented run:
+                      start date: 2016-04-30
+                      start time step: 2730241
+                      end date: 2016-12-31
+                      days per segment: 30
+                      first segment number: 0
+                      segment walltime: 12:00:00
+                      namelists:
+                        namrun: ./namelist.time
+                        namdom: $PROJECT/SalishSeaCast/hindcast-sys/SS-run-sets/v201812/namelist.domain
+                    """
+                    )
+                )
+            ),
+            "BR5_12SKOG2016_8.yaml",
+            Path("SKOG_C_8"),
+            {
+                "namrun": {
+                    "nn_it000": 3248641,
+                    "nn_itend": 3261600,
+                    "nn_date0": 20161226,
+                }
+            },
+        )
+        assert run_segments[-1] == expected
 
 
 class TestCalcNSegments:
@@ -959,6 +1016,16 @@ class TestCalcNSegments:
                     }
                 },
                 2,
+            ),
+            (
+                {
+                    "segmented run": {
+                        "start date": "2016-04-30",
+                        "end date": "2016-12-31",
+                        "days per segment": 30,
+                    }
+                },
+                9,
             ),
         ],
     )
