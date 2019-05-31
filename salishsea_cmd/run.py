@@ -334,7 +334,7 @@ def _calc_run_segments(desc_file, results_dir):
         date0 = min(start_date.shift(days=+i * days_per_segment), end_date)
         segment_days = min(
             days_per_segment,
-            (end_date - start_date.shift(days=+i * days_per_segment)).days,
+            (end_date - start_date.shift(days=+i * days_per_segment)).days + 1,
         )
         nn_itend = int(nn_it000 + segment_days * timesteps_per_day - 1)
         run_segments.append(
