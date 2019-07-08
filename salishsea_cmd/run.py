@@ -142,8 +142,7 @@ class Run(cliff.command.Command):
         )
         parser.add_argument(
             "--waitjob",
-            type=int,
-            default=0,
+            default="0",
             help="""
             Make this job wait for to start until the successful completion of 
             WAITJOB.  WAITJOB is the queue job number of the job to wait for.
@@ -191,7 +190,7 @@ def run(
     nocheck_init=False,
     no_submit=False,
     separate_deflate=False,
-    waitjob=0,
+    waitjob="0",
     quiet=False,
 ):
     """Create and populate a temporary run directory, and a run script,
@@ -229,7 +228,7 @@ def run(
                                      the run results and qsub them to run as
                                      serial jobs after the NEMO run finishes.
 
-    :param int waitjob: Job number of the job to wait for successful completion
+    :param str waitjob: Job number of the job to wait for successful completion
                         of before starting this job.
 
     :param boolean quiet: Don't show the run directory path message;

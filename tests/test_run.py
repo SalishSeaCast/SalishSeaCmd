@@ -57,7 +57,7 @@ class TestParser:
         assert not parsed_args.nocheck_init
         assert not parsed_args.no_submit
         assert not parsed_args.separate_deflate
-        assert parsed_args.waitjob == 0
+        assert parsed_args.waitjob == "0"
         assert not parsed_args.quiet
 
     @pytest.mark.parametrize(
@@ -192,7 +192,7 @@ class TestRun:
                 Path("SalishSea.yaml"), Path(str(p_results_dir))
             )
         m_sj.assert_called_once_with(
-            Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob=0
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob="0"
         )
         assert submit_job_msg == submit_job_msg
 
@@ -415,7 +415,7 @@ class TestRun:
                 Path("SalishSea.yaml"), Path(str(p_results_dir)), separate_deflate=True
             )
         m_sj.assert_called_once_with(
-            Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob=0
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob="0"
         )
         assert m_ssdj.called
         assert submit_job_msg == submit_job_msg
@@ -615,7 +615,7 @@ class TestRun:
                 Path("SalishSea.yaml"), Path(str(p_results_dir))
             )
         assert m_sj.call_args_list == [
-            call(Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob=0),
+            call(Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob="0"),
             call(
                 Path(str(p_run_dir), "SalishSeaNEMO.sh"),
                 queue_job_cmd,
