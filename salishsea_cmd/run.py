@@ -262,7 +262,9 @@ def run(
                     run_desc, namelist_namrun_patch, Path(tmp_run_desc_dir)
                 )
                 restart_dir = (
-                    None if seg_no == first_seg_no else run_segments[seg_no - 1][2]
+                    None
+                    if seg_no == first_seg_no
+                    else run_segments[seg_no - first_seg_no - 1][2]
                 )
                 run_desc, segment_desc_file = _write_segment_desc_file(
                     run_desc,

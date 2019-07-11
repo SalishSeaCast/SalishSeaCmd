@@ -523,6 +523,202 @@ class TestRun:
             ),
         ],
     )
+    def test_segmented_run_restart_dirs(
+        self,
+        m_wsdf,
+        m_wsnn,
+        m_crs,
+        m_btrd,
+        m_bds,
+        m_sj,
+        m_ssdj,
+        sep_xios_server,
+        xios_servers,
+        system,
+        queue_job_cmd,
+        job_msgs,
+        submit_job_msg,
+        tmpdir,
+    ):
+        p_run_dir = tmpdir.ensure_dir("run_dir")
+        p_results_dir = tmpdir.ensure_dir("results_dir")
+        m_crs.return_value = (
+            [
+                (
+                    yaml.safe_load(
+                        StringIO(
+                            """
+                        run_id: 1_sensitivity
+
+                        segmented run:
+                            start date: 2014-11-25
+                            start time step: 152634
+                            end date: 2014-12-02
+                            days per segment: 10
+                            first segment number: 1
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                    """
+                        )
+                    ),
+                    "SalishSea_1.yaml",
+                    Path("results_dir_1"),
+                    {
+                        "namrun": {
+                            "nn_it000": 152634,
+                            "nn_itend": 152634 + 2160 * 10 - 1,
+                            "nn_date0": 20141115,
+                        }
+                    },
+                ),
+                (
+                    yaml.safe_load(
+                        StringIO(
+                            """
+                        run_id: 2_sensitivity
+
+                        segmented run:
+                            start date: 2014-11-25
+                            start time step: 152634
+                            end date: 2014-12-02
+                            days per segment: 10
+                            first segment number: 1
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                    """
+                        )
+                    ),
+                    "SalishSea_2.yaml",
+                    Path("results_dir_2"),
+                    {
+                        "namrun": {
+                            "nn_it000": 152634 + 2160 * 10,
+                            "nn_itend": 152634 + 2160 * 17 - 1,
+                            "nn_date0": 20141125,
+                        }
+                    },
+                ),
+            ],
+            1,
+        )
+        m_btrd.return_value = (
+            Path(str(p_run_dir)),
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"),
+        )
+        m_sj.side_effect = job_msgs
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            submit_job_msg = salishsea_cmd.run.run(
+                Path("SalishSea.yaml"), Path(str(p_results_dir))
+            )
+        assert m_wsdf.call_args_list[1][0][2] == Path("results_dir_1")
+
+    @pytest.mark.parametrize(
+        "sep_xios_server, xios_servers, system, queue_job_cmd, job_msgs, submit_job_msg",
+        [
+            (
+                False,
+                0,
+                "beluga",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "beluga",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                False,
+                0,
+                "cedar",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "cedar",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                False,
+                0,
+                "delta",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                True,
+                4,
+                "delta",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                False,
+                0,
+                "graham",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "graham",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (False, 0, "salish", "qsub", ("43.master", "44.master"), "43.master"),
+            (True, 4, "salish", "qsub", ("43.master", "44.master"), "43.master"),
+            (
+                False,
+                0,
+                "sigma",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                True,
+                4,
+                "sigma",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                False,
+                0,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
+            ),
+            (
+                True,
+                4,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
+            ),
+        ],
+    )
     def test_segmented_run_submits(
         self,
         m_wsdf,
