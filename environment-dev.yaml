@@ -32,7 +32,6 @@ dependencies:
 
   # For coding style
   - black
-
   # For unit tests
   - coverage
   - pytest
