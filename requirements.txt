@@ -41,7 +41,7 @@ pyOpenSSL==19.0.0
 pyparsing==2.4.0
 pyperclip==1.7.0
 PySocks==1.6.8
-pytest==4.4.0
+pytest==4.4.1
 python-dateutil==2.8.0
 python-hglib==2.6.1
 pytz==2019.1
