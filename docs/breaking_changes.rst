@@ -20,6 +20,37 @@
 :kbd:`SalishSeaCmd` Changes That Break Backward Compatibility
 *************************************************************
 
+.. _BreakingChangesVersion19.1:
+
+Version 19.1
+============
+
+The following changes that were introduced in version 19.1 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
+
+* Dropped support for Python 2.7; minimum version is now 3.5.
+
+* The `f90nml`_ package is now a required dependency.
+  It can be installed with :command:`pip install --user f90nml` or :command:`conda install f90nml` as appropriate for your working environment.
+
+  .. _f90nml: https://f90nml.readthedocs.io/en/latest/
+
+* :kbd:`segmented run` is now an optional key in the run description YAML file.
+  Please see :ref:`SegmentedRuns` for details of how to use it.
+
+* Changed to `CalVer`_ versioning convention.
+  Version identifier format is now :kbd:`yy.n[.devn]`,
+  where :kbd:`yy` is the (post-2000) year of release,
+  and :kbd:`n` is the number of the release within the year, starting at :kbd:`1`.
+  After a release has been made the value of :kbd:`n` is incremented by 1,
+  and :kbd:`.dev0` is appended to the version identifier to indicate changes that will be
+  included in the next release.
+  :kbd:`19.1.dev0` is an exception to that scheme.
+  That version identifies the period of development between the :kbd:`3.5` and :kbd:`19.1`
+  releases.
+
+  .. _CalVer: https://calver.org/
+
+
 Version 3.4
 ===========
 
