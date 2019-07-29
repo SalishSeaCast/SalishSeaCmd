@@ -971,7 +971,6 @@ def _modules():
         ),
         "delta": textwrap.dedent(
             """\
-            module load Miniconda/3
             module load OpenMPI/4.0.0/GCC/SYSTEM
             """
         ),
@@ -994,7 +993,6 @@ def _modules():
         "salish": "",
         "sigma": textwrap.dedent(
             """\
-            module load Miniconda/3
             module load OpenMPI/4.0.0/GCC/SYSTEM
             """
         ),
