@@ -2248,7 +2248,6 @@ class TestBuildBatchScript:
             """\
             GATHER="${PBS_O_HOME}/bin/salishsea gather"
             
-            module load Miniconda/3
             module load OpenMPI/4.0.0/GCC/SYSTEM
             
             mkdir -p ${RESULTS_DIR}
@@ -2825,7 +2824,6 @@ class TestModules:
             modules = salishsea_cmd.run._modules()
         expected = textwrap.dedent(
             """\
-            module load Miniconda/3
             module load OpenMPI/4.0.0/GCC/SYSTEM
             """
         )
