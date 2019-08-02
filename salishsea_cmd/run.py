@@ -512,7 +512,7 @@ def _build_tmp_run_dir(
 
 
 def _submit_job(batch_file, queue_job_cmd, waitjob):
-    if waitjob:
+    if waitjob != "0":
         depend_opt = (
             "-W depend=afterok" if queue_job_cmd.startswith("qsub") else "-d afterok"
         )
