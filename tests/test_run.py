@@ -1760,7 +1760,7 @@ class TestSubmitJob:
         self, m_run, queue_job_cmd, depend_flag, depend_option, submit_job_msg
     ):
         submit_job_msg = salishsea_cmd.run._submit_job(
-            Path("run_dir", "SalishSeaNEMO.sh"), queue_job_cmd, 0
+            Path("run_dir", "SalishSeaNEMO.sh"), queue_job_cmd, "0"
         )
         m_run.assert_called_once_with(
             shlex.split(
