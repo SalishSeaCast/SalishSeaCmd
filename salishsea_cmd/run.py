@@ -971,7 +971,7 @@ def _modules():
         ),
         "delta": textwrap.dedent(
             """\
-            module load OpenMPI/4.0.0/GCC/SYSTEM
+            module load OpenMPI/2.1.6/GCC/SYSTEM
             """
         ),
         "graham": textwrap.dedent(
@@ -993,7 +993,7 @@ def _modules():
         "salish": "",
         "sigma": textwrap.dedent(
             """\
-            module load OpenMPI/4.0.0/GCC/SYSTEM
+            module load OpenMPI/2.1.6/GCC/SYSTEM
             """
         ),
     }.get(SYSTEM, "")
@@ -1082,7 +1082,7 @@ def _execute(
         script += textwrap.dedent(
             """\
             module load GCC/8.3
-            module load OpenMPI/4.0.0/GCC/8.3
+            module load OpenMPI/2.1.6/GCC/8.3
             module load ZLIB/1.2/11
             module load use.paustin
             module load HDF5/1.08/20

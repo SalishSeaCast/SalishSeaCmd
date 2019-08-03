@@ -2248,7 +2248,7 @@ class TestBuildBatchScript:
             """\
             GATHER="${PBS_O_HOME}/bin/salishsea gather"
             
-            module load OpenMPI/4.0.0/GCC/SYSTEM
+            module load OpenMPI/2.1.6/GCC/SYSTEM
             
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -2261,7 +2261,7 @@ class TestBuildBatchScript:
             
             echo "Results combining started at $(date)"
             module load GCC/8.3
-            module load OpenMPI/4.0.0/GCC/8.3
+            module load OpenMPI/2.1.6/GCC/8.3
             module load ZLIB/1.2/11
             module load use.paustin
             module load HDF5/1.08/20
@@ -2824,7 +2824,7 @@ class TestModules:
             modules = salishsea_cmd.run._modules()
         expected = textwrap.dedent(
             """\
-            module load OpenMPI/4.0.0/GCC/SYSTEM
+            module load OpenMPI/2.1.6/GCC/SYSTEM
             """
         )
         assert modules == expected
@@ -2880,7 +2880,7 @@ class TestExecute:
             expected += textwrap.dedent(
                 """\
                 module load GCC/8.3
-                module load OpenMPI/4.0.0/GCC/8.3
+                module load OpenMPI/2.1.6/GCC/8.3
                 module load ZLIB/1.2/11
                 module load use.paustin
                 module load HDF5/1.08/20
@@ -3058,7 +3058,7 @@ class TestExecute:
             expected += textwrap.dedent(
                 """\
                 module load GCC/8.3
-                module load OpenMPI/4.0.0/GCC/8.3
+                module load OpenMPI/2.1.6/GCC/8.3
                 module load ZLIB/1.2/11
                 module load use.paustin
                 module load HDF5/1.08/20
