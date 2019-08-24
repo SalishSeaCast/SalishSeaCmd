@@ -144,6 +144,8 @@ class TestRun:
             (True, 4, "salish", "qsub", "43.master"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "sockeye", "qsub", "43.pbsha"),
+            (True, 4, "sockeye", "qsub", "43.pbsha"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
         ],
@@ -211,6 +213,8 @@ class TestRun:
             (True, 4, "salish", "qsub", "43.master"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "sockeye", "qsub", "43.pbsha"),
+            (True, 4, "sockeye", "qsub", "43.pbsha"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
         ],
@@ -367,6 +371,8 @@ class TestRun:
             (True, 4, "salish", "qsub", "43.master"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "sockeye", "qsub", "43.pbsha"),
+            (True, 4, "sockeye", "qsub", "43.pbsha"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
         ],
@@ -504,6 +510,22 @@ class TestRun:
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
                 "43.admin.default.domain",
+            ),
+            (
+                False,
+                0,
+                "sockeye",
+                "qsub",
+                ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
+                "43.pbsha.ib.sockeye",
+            ),
+            (
+                True,
+                4,
+                "sockeye",
+                "qsub",
+                ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
+                "43.pbsha.ib.sockeye",
             ),
             (
                 False,
@@ -700,6 +722,22 @@ class TestRun:
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
                 "43.admin.default.domain",
+            ),
+            (
+                True,
+                4,
+                "sockeye",
+                "qsub",
+                ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
+                "43.pbsha.ib.sockeye",
+            ),
+            (
+                False,
+                0,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
             ),
             (
                 False,
@@ -2219,13 +2257,13 @@ class TestBuildBatchScript:
             
             #PBS -N foo
             #PBS -S /bin/bash
-            #PBS -l nodes=14:ppn=20
-            # memory per processor
-            #PBS -l pmem=2000mb
             #PBS -l walltime=1:02:03
             # email when the job [b]egins and [e]nds, or is [a]borted
             #PBS -m bea
             #PBS -M me@example.com
+            #PBS -l nodes=14:ppn=20
+            # memory per processor
+            #PBS -l pmem=2000mb
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
@@ -2325,13 +2363,13 @@ class TestBuildBatchScript:
             
             #PBS -N foo
             #PBS -S /bin/bash
-            #PBS -l procs=43
-            # memory per processor
-            #PBS -l pmem=2000mb
             #PBS -l walltime=1:02:03
             # email when the job [b]egins and [e]nds, or is [a]borted
             #PBS -m bea
             #PBS -M me@example.com
+            #PBS -l procs=43
+            # memory per processor
+            #PBS -l pmem=2000mb
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
@@ -2431,13 +2469,13 @@ class TestBuildBatchScript:
             
             #PBS -N foo
             #PBS -S /bin/bash
-            #PBS -l procs=7
-            # memory per processor
-            #PBS -l pmem=2000mb
             #PBS -l walltime=1:02:03
             # email when the job [b]egins and [e]nds, or is [a]borted
             #PBS -m bea
             #PBS -M me@example.com
+            #PBS -l procs=7
+            # memory per processor
+            #PBS -l pmem=2000mb
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
@@ -2505,6 +2543,110 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
+    @pytest.mark.parametrize("deflate", [True, False])
+    def test_sockeye(self, deflate):
+        desc_file = StringIO(
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
+        )
+        run_desc = yaml.safe_load(desc_file)
+        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
+            script = salishsea_cmd.run._build_batch_script(
+                run_desc,
+                Path("SalishSea.yaml"),
+                nemo_processors=42,
+                xios_processors=1,
+                max_deflate_jobs=4,
+                results_dir=Path("results_dir"),
+                run_dir=Path("tmp_run_dir"),
+                deflate=deflate,
+                separate_deflate=False,
+                cedar_broadwell=False,
+            )
+        expected = textwrap.dedent(
+            """\
+            #!/bin/bash
+
+            #PBS -N foo
+            #PBS -S /bin/bash
+            #PBS -l walltime=1:02:03
+            # email when the job [b]egins and [e]nds, or is [a]borted
+            #PBS -m bea
+            #PBS -M me@example.com
+            #PBS -A dri-allen
+            #PBS -l select=2:ncpus=32:mpiprocs=32:mem=64gb
+            # stdout and stderr file paths/names
+            #PBS -o results_dir/stdout
+            #PBS -e results_dir/stderr
+
+
+            RUN_ID="foo"
+            RUN_DESC="tmp_run_dir/SalishSea.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+                DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"
+
+            module load gcc/5.4.0
+            module load openmpi/3.1.4
+            module load netcdf-fortran/4.4.5
+            module load hdf5/1.10.5
+            module load python/3.7.3
+            module load py-setuptools/41.0.1-py3.7.3
+
+            mkdir -p ${RESULTS_DIR}
+            cd ${WORK_DIR}
+            echo "working dir: $(pwd)"
+
+            echo "Starting run at $(date)"
+            mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+
+            echo "Results combining started at $(date)"
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+
+                echo "Results deflation started at $(date)"
+                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+                  --jobs 4 --debug
+                echo "Results deflation ended at $(date)"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
+        )
+        assert script == expected
+
 
 @patch("salishsea_cmd.run.log", autospec=True)
 class TestSbatchDirectives:
@@ -2517,7 +2659,7 @@ class TestSbatchDirectives:
         )
         run_desc = yaml.safe_load(desc_file)
         with pytest.raises(SystemExit):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
+            salishsea_cmd.run._sbatch_directives(
                 run_desc,
                 43,
                 cedar_broadwell=False,
@@ -2638,62 +2780,142 @@ class TestPbsDirectives:
     """
 
     @pytest.mark.parametrize(
-        "procs_per_node, procs_directive",
-        [(0, "#PBS -l procs=42"), (20, "#PBS -l nodes=3:ppn=20")],
+        "system, procs_per_node, procs_directives",
+        (
+            (
+                "delta",
+                20,
+                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
+                "orcinus",
+                0,
+                "#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
+                "salish",
+                0,
+                "#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
+                "sigma",
+                20,
+                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
+                "sockeye",
+                32,
+                "#PBS -A dri-allen\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=64gb",
+            ),
+        ),
     )
-    def test_pbs_directives_run(self, procs_per_node, procs_directive):
-        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
-        run_desc = yaml.safe_load(desc_file)
-        pbs_directives = salishsea_cmd.run._pbs_directives(
-            run_desc, 42, "me@example.com", Path("foo"), procs_per_node
+    def test_pbs_directives_run(self, system, procs_per_node, procs_directives):
+        run_desc = yaml.safe_load(
+            StringIO(
+                textwrap.dedent(
+                    """\
+                    run_id: foo 
+                    walltime: 01:02:03
+                    """
+                )
+            )
         )
-        expected = (
-            "#PBS -N foo\n"
-            "#PBS -S /bin/bash\n"
-            "{procs_directive}\n"
-            "# memory per processor\n"
-            "#PBS -l pmem=2000mb\n"
-            "#PBS -l walltime=1:02:03\n"
-            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            "#PBS -m bea\n"
-            "#PBS -M me@example.com\n"
-            "# stdout and stderr file paths/names\n"
-            "#PBS -o foo/stdout\n"
-            "#PBS -e foo/stderr\n"
-        ).format(procs_directive=procs_directive)
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            pbs_directives = salishsea_cmd.run._pbs_directives(
+                run_desc, 42, "me@example.com", Path("foo"), procs_per_node
+            )
+        expected = textwrap.dedent(
+            """\
+            #PBS -N foo
+            #PBS -S /bin/bash
+            #PBS -l walltime=1:02:03
+            # email when the job [b]egins and [e]nds, or is [a]borted
+            #PBS -m bea
+            #PBS -M me@example.com
+            {procs_directives}
+            # stdout and stderr file paths/names
+            #PBS -o foo/stdout
+            #PBS -e foo/stderr
+            """
+        ).format(procs_directives=procs_directives)
         assert pbs_directives == expected
 
     @pytest.mark.parametrize(
-        "procs_per_node, procs_directive",
-        [(0, "#PBS -l procs=42"), (20, "#PBS -l nodes=3:ppn=20")],
+        "system, procs_per_node, procs_directives",
+        (
+            (
+                "delta",
+                20,
+                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
+                "orcinus",
+                0,
+                "#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
+                "salish",
+                0,
+                "#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
+                "sigma",
+                20,
+                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
+                "sockeye",
+                32,
+                "#PBS -A dri-allen\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=64gb",
+            ),
+        ),
     )
-    def test_pbs_directives_run_no_stderr_stdout(self, procs_per_node, procs_directive):
-        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
-        run_desc = yaml.safe_load(desc_file)
-        pbs_directives = salishsea_cmd.run._pbs_directives(
-            run_desc,
-            42,
-            "me@example.com",
-            Path("foo"),
-            procs_per_node,
-            stderr_stdout=False,
+    def test_pbs_directives_run_no_stderr_stdout(
+        self, system, procs_per_node, procs_directives
+    ):
+        run_desc = yaml.safe_load(
+            StringIO(
+                textwrap.dedent(
+                    """\
+                    run_id: foo 
+                    walltime: 01:02:03
+                    """
+                )
+            )
         )
-        expected = (
-            "#PBS -N foo\n"
-            "#PBS -S /bin/bash\n"
-            "{procs_directive}\n"
-            "# memory per processor\n"
-            "#PBS -l pmem=2000mb\n"
-            "#PBS -l walltime=1:02:03\n"
-            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            "#PBS -m bea\n"
-            "#PBS -M me@example.com\n"
-        ).format(procs_directive=procs_directive)
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            pbs_directives = salishsea_cmd.run._pbs_directives(
+                run_desc,
+                42,
+                "me@example.com",
+                Path("foo"),
+                procs_per_node,
+                stderr_stdout=False,
+            )
+        expected = textwrap.dedent(
+            """\
+            #PBS -N foo
+            #PBS -S /bin/bash
+            #PBS -l walltime=1:02:03
+            # email when the job [b]egins and [e]nds, or is [a]borted
+            #PBS -m bea
+            #PBS -M me@example.com
+            {procs_directives}
+            """
+        ).format(procs_directives=procs_directives)
         assert pbs_directives == expected
 
     def test_pbs_directives_deflate(self):
-        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
-        run_desc = yaml.safe_load(desc_file)
+        run_desc = yaml.safe_load(
+            StringIO(
+                textwrap.dedent(
+                    """\
+                    run_id: foo 
+                    walltime: 01:02:03
+                    """
+                )
+            )
+        )
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc,
             1,
@@ -2703,19 +2925,21 @@ class TestPbsDirectives:
             deflate=True,
             result_type="ptrc",
         )
-        expected = (
-            "#PBS -N ptrc_foo_deflate\n"
-            "#PBS -S /bin/bash\n"
-            "#PBS -l procs=1\n"
-            "# memory per processor\n"
-            "#PBS -l pmem=2500mb\n"
-            "#PBS -l walltime=1:02:03\n"
-            "# email when the job [b]egins and [e]nds, or is [a]borted\n"
-            "#PBS -m bea\n"
-            "#PBS -M me@example.com\n"
-            "# stdout and stderr file paths/names\n"
-            "#PBS -o foo/stdout_deflate_ptrc\n"
-            "#PBS -e foo/stderr_deflate_ptrc\n"
+        expected = textwrap.dedent(
+            """\
+            #PBS -N ptrc_foo_deflate
+            #PBS -S /bin/bash
+            #PBS -l walltime=1:02:03
+            # email when the job [b]egins and [e]nds, or is [a]borted
+            #PBS -m bea
+            #PBS -M me@example.com
+            #PBS -l procs=1
+            # memory per processor
+            #PBS -l pmem=2500mb
+            # stdout and stderr file paths/names
+            #PBS -o foo/stdout_deflate_ptrc
+            #PBS -e foo/stderr_deflate_ptrc
+            """
         )
         assert pbs_directives == expected
 
@@ -2727,15 +2951,56 @@ class TestPbsDirectives:
 
         re: issue#16
         """
-        desc_file = StringIO(
-            "run_id: foo\n" "walltime: {walltime}\n".format(walltime=walltime)
+        run_desc = yaml.safe_load(
+            StringIO(
+                textwrap.dedent(
+                    """\
+                    run_id: foo 
+                    walltime: {walltime}
+                    """
+                ).format(walltime=walltime)
+            )
         )
-        run_desc = yaml.safe_load(desc_file)
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc, 42, "me@example.com", Path("")
         )
         expected = "walltime={expected}".format(expected=expected_walltime)
         assert expected in pbs_directives
+
+    def test_sockeye_account_directive(self):
+        run_desc = yaml.safe_load(
+            StringIO(
+                textwrap.dedent(
+                    """\
+                    run_id: foo 
+                    walltime: 01:02:03
+                    """
+                )
+            )
+        )
+        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
+            pbs_directives = salishsea_cmd.run._pbs_directives(
+                run_desc, 43, email="me@example.com", results_dir=Path("foo")
+            )
+        assert "#PBS -A dri-allen\n" in pbs_directives
+
+    @pytest.mark.parametrize("system", ("delta", "orcinus", "sigma", "salish"))
+    def test_not_sockeye_no_account_directive_from_yaml(self, system):
+        run_desc = yaml.safe_load(
+            StringIO(
+                textwrap.dedent(
+                    """\
+                    run_id: foo 
+                    walltime: 01:02:03
+                    """
+                )
+            )
+        )
+        with patch("salishsea_cmd.run.SYSTEM", system):
+            pbs_directives = salishsea_cmd.run._pbs_directives(
+                run_desc, 43, email="me@example.com", results_dir=Path("foo")
+            )
+        assert "#PBS -A" not in pbs_directives
 
 
 class TestDefinitions:
@@ -2745,6 +3010,8 @@ class TestDefinitions:
     @pytest.mark.parametrize(
         "system, home, deflate",
         [
+            ("beluga", "${HOME}/.local", True),
+            ("beluga", "${HOME}/.local", False),
             ("cedar", "${HOME}/.local", True),
             ("cedar", "${HOME}/.local", False),
             ("delta", "${PBS_O_HOME}", True),
@@ -2757,6 +3024,8 @@ class TestDefinitions:
             ("salish", "${HOME}/.local", False),
             ("sigma", "${PBS_O_HOME}", True),
             ("sigma", "${PBS_O_HOME}", False),
+            ("sockeye", "${PBS_O_HOME}/.local", True),
+            ("sockeye", "${PBS_O_HOME}/.local", False),
         ],
     )
     def test_definitions(self, system, home, deflate):
@@ -2829,6 +3098,21 @@ class TestModules:
         )
         assert modules == expected
 
+    def test_sockeye(self):
+        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
+            modules = salishsea_cmd.run._modules()
+        expected = textwrap.dedent(
+            """\
+            module load gcc/5.4.0
+            module load openmpi/3.1.4
+            module load netcdf-fortran/4.4.5
+            module load hdf5/1.10.5
+            module load python/3.7.3
+            module load py-setuptools/41.0.1-py3.7.3
+            """
+        )
+        assert modules == expected
+
 
 class TestExecute:
     """Unit test for _execute function.
@@ -2837,6 +3121,7 @@ class TestExecute:
     @pytest.mark.parametrize(
         "system, mpirun_cmd",
         [
+            ("beluga", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             ("cedar", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             (
                 "delta",
@@ -2848,6 +3133,10 @@ class TestExecute:
             (
                 "sigma",
                 "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
+            ),
+            (
+                "sockeye",
+                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
         ],
     )
@@ -2922,6 +3211,24 @@ class TestExecute:
     @pytest.mark.parametrize(
         "system, mpirun_cmd, deflate, separate_deflate",
         [
+            (
+                "beluga",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                False,
+                True,
+            ),
+            (
+                "beluga",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                False,
+                False,
+            ),
+            (
+                "beluga",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                True,
+                True,
+            ),
             (
                 "cedar",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
@@ -3025,6 +3332,24 @@ class TestExecute:
                 True,
                 True,
             ),
+            (
+                "sockeye",
+                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                True,
+            ),
+            (
+                "sockeye",
+                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                False,
+            ),
+            (
+                "sockeye",
+                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                True,
+                True,
+            ),
         ],
     )
     def test_execute_without_deflate(
@@ -3122,13 +3447,13 @@ class TestBuildDeflateScript:
         
         #PBS -N {result_type}_19sep14_hindcast_deflate
         #PBS -S /bin/bash
-        #PBS -l procs=1
-        # memory per processor
-        #PBS -l pmem={pmem}
         #PBS -l walltime=3:00:00
         # email when the job [b]egins and [e]nds, or is [a]borted
         #PBS -m bea
         #PBS -M test@example.com
+        #PBS -l procs=1
+        # memory per processor
+        #PBS -l pmem={pmem}
         # stdout and stderr file paths/names
         #PBS -o {results_dir}/stdout_deflate_{result_type}
         #PBS -e {results_dir}/stderr_deflate_{result_type}

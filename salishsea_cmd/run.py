@@ -40,8 +40,9 @@ from salishsea_cmd import api
 log = logging.getLogger(__name__)
 
 SYSTEM = (
-    os.getenv("WGSYSTEM")
-    or os.getenv("CC_CLUSTER")
+    os.getenv("CC_CLUSTER")
+    or os.getenv("UBC_CLUSTER")
+    or os.getenv("WGSYSTEM")
     or socket.gethostname().split(".")[0]
 )
 
@@ -641,7 +642,7 @@ def _build_batch_script(
             )
         )
     else:
-        procs_per_node = 20 if SYSTEM in {"delta", "sigma"} else 0
+        procs_per_node = {"delta": 20, "sigma": 20, "sockeye": 32}.get(SYSTEM, 0)
         script = "\n".join(
             (
                 script,
@@ -855,9 +856,14 @@ def _pbs_directives(
         procs_directive = "#PBS -l procs={procs}".format(procs=n_processors)
     else:
         nodes = math.ceil(n_processors / procs_per_node)
-        procs_directive = "#PBS -l nodes={nodes}:ppn={procs_per_node}".format(
-            nodes=nodes, procs_per_node=procs_per_node
-        )
+        if SYSTEM == "sockeye":
+            procs_directive = "#PBS -l select={nodes}:ncpus={procs_per_node}:mpiprocs={procs_per_node}:mem=64gb".format(
+                nodes=nodes, procs_per_node=procs_per_node
+            )
+        else:
+            procs_directive = "#PBS -l nodes={nodes}:ppn={procs_per_node}".format(
+                nodes=nodes, procs_per_node=procs_per_node
+            )
     if deflate:
         run_id = "{result_type}_{run_id}_deflate".format(
             run_id=run_id, result_type=result_type
@@ -870,23 +876,31 @@ def _pbs_directives(
         ).time()
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td2hms(td)
-    pbs_directives = (
-        "#PBS -N {run_id}\n"
-        "#PBS -S /bin/bash\n"
-        "{procs_directive}\n"
-        "# memory per processor\n"
-        "#PBS -l pmem={pmem}\n"
-        "#PBS -l walltime={walltime}\n"
-        "# email when the job [b]egins and [e]nds, or is [a]borted\n"
-        "#PBS -m bea\n"
-        "#PBS -M {email}\n"
-    ).format(
-        run_id=run_id,
-        procs_directive=procs_directive,
-        pmem=pmem,
-        walltime=walltime,
-        email=email,
-    )
+    pbs_directives = textwrap.dedent(
+        """\
+        #PBS -N {run_id}
+        #PBS -S /bin/bash
+        #PBS -l walltime={walltime}
+        # email when the job [b]egins and [e]nds, or is [a]borted
+        #PBS -m bea
+        #PBS -M {email}
+        """
+    ).format(run_id=run_id, walltime=walltime, email=email)
+    if SYSTEM == "sockeye":
+        pbs_directives += textwrap.dedent(
+            """\
+            #PBS -A dri-allen
+            {procs_directive}
+            """
+        ).format(procs_directive=procs_directive, pmem=pmem)
+    else:
+        pbs_directives += textwrap.dedent(
+            """\
+            {procs_directive}
+            # memory per processor
+            #PBS -l pmem={pmem}
+            """
+        ).format(procs_directive=procs_directive, pmem=pmem)
     if stderr_stdout:
         stdout = (
             "stdout_deflate_{result_type}".format(result_type=result_type)
@@ -927,12 +941,14 @@ def _td2hms(timedelta):
 
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
     salishsea_cmd = {
+        "beluga": Path("${HOME}", ".local", "bin", "salishsea"),
         "cedar": Path("${HOME}", ".local", "bin", "salishsea"),
         "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "graham": Path("${HOME}", ".local", "bin", "salishsea"),
         "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "sigma": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "salish": Path("${HOME}", ".local", "bin", "salishsea"),
+        "sockeye": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
     }.get(SYSTEM, Path("${HOME}", ".local", "bin", "salishsea"))
     defns = (
         'RUN_ID="{run_id}"\n'
@@ -996,6 +1012,16 @@ def _modules():
             module load OpenMPI/2.1.6/GCC/SYSTEM
             """
         ),
+        "sockeye": textwrap.dedent(
+            """\
+            module load gcc/5.4.0
+            module load openmpi/3.1.4
+            module load netcdf-fortran/4.4.5
+            module load hdf5/1.10.5
+            module load python/3.7.3
+            module load py-setuptools/41.0.1-py3.7.3
+            """
+        ),
     }.get(SYSTEM, "")
     return modules
 
@@ -1004,14 +1030,19 @@ def _execute(
     nemo_processors, xios_processors, deflate, max_deflate_jobs, separate_deflate
 ):
     mpirun = {
+        "beluga": "mpirun",
         "cedar": "mpirun",
         "delta": "mpiexec -hostfile $(openmpi_nodefile)",
         "graham": "mpirun",
         "orcinus": "mpirun",
         "salish": "/usr/bin/mpirun",
         "sigma": "mpiexec -hostfile $(openmpi_nodefile)",
+        "sockeye": "mpirun",
     }.get(SYSTEM, "mpirun")
     mpirun = {
+        "beluga": "{mpirun} -np {np} ./nemo.exe".format(
+            mpirun=mpirun, np=nemo_processors
+        ),
         "cedar": "{mpirun} -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
@@ -1030,11 +1061,17 @@ def _execute(
         "sigma": "{mpirun} -bind-to core -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
+        "sockeye": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
+            mpirun=mpirun, np=nemo_processors
+        ),
     }.get(
         SYSTEM, "{mpirun} -np {np} ./nemo.exe".format(mpirun=mpirun, np=nemo_processors)
     )
     if xios_processors:
         mpirun = {
+            "beluga": "{mpirun} : -np {np} ./xios_server.exe".format(
+                mpirun=mpirun, np=xios_processors
+            ),
             "cedar": "{mpirun} : -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
@@ -1051,6 +1088,9 @@ def _execute(
                 mpirun=mpirun, np=xios_processors
             ),
             "sigma": "{mpirun} : -bind-to core -np {np} ./xios_server.exe".format(
+                mpirun=mpirun, np=xios_processors
+            ),
+            "sockeye": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
         }.get(
