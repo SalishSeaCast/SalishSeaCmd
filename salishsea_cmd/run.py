@@ -1046,7 +1046,7 @@ def _execute(
         "cedar": "{mpirun} -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
-        "delta": "{mpirun} -bind-to core -np {np} ./nemo.exe".format(
+        "delta": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
         "graham": "{mpirun} -np {np} ./nemo.exe".format(
@@ -1058,7 +1058,7 @@ def _execute(
         "salish": "{mpirun} -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
-        "sigma": "{mpirun} -bind-to core -np {np} ./nemo.exe".format(
+        "sigma": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
         "sockeye": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
@@ -1075,7 +1075,7 @@ def _execute(
             "cedar": "{mpirun} : -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
-            "delta": "{mpirun} : -bind-to core -np {np} ./xios_server.exe".format(
+            "delta": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
             "graham": "{mpirun} : -np {np} ./xios_server.exe".format(
@@ -1087,7 +1087,7 @@ def _execute(
             "salish": "{mpirun} : -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
-            "sigma": "{mpirun} : -bind-to core -np {np} ./xios_server.exe".format(
+            "sigma": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
             "sockeye": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(
