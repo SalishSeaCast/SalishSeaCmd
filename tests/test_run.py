@@ -2293,7 +2293,7 @@ class TestBuildBatchScript:
             echo "working dir: $(pwd)"
             
             echo "Starting run at $(date)"
-            mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 278 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe
+            mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 278 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
             
@@ -3125,14 +3125,14 @@ class TestExecute:
             ("cedar", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             (
                 "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
             ("graham", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             ("salish", "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             (
                 "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
             (
                 "sockeye",
@@ -3244,19 +3244,19 @@ class TestExecute:
             ("cedar", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe", True, True),
             (
                 "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
@@ -3316,19 +3316,19 @@ class TestExecute:
             ),
             (
                 "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) -bind-to core -np 42 ./nemo.exe : -bind-to core -np 1 ./xios_server.exe",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
