@@ -4,10 +4,16 @@
 # This file is a union of the environment.yaml files in the
 # SalishSeaCmd, SalishSeaNowcast, SalishSeaTools, and Marlin packages.
 
-name: sphinx-build
+name: salishsea-cmd-rtd
 
 channels:
   - defaults
 
 dependencies:
-  - python=3.6
+  - python=3.7
+
+  # RTD packages
+  - mock
+  - pillow
+  - sphinx
+  - sphinx_rtd_theme
