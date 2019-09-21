@@ -14,7 +14,7 @@
 # limitations under the License.
 """SalishSeaCmd application
 
-Salish Sea NEMO Command Processor
+SalishSeaCast NEMO Command Processor
 
 This module is connected to the `salishsea` command via a console_scripts
 entry point in setup.py.
@@ -24,7 +24,7 @@ import sys
 import cliff.app
 import cliff.commandmanager
 
-from salishsea_cmd import __pkg_metadata__
+import salishsea_cmd
 
 
 class SalishSeaApp(cliff.app.App):
@@ -32,8 +32,8 @@ class SalishSeaApp(cliff.app.App):
 
     def __init__(self):
         super(SalishSeaApp, self).__init__(
-            description=__pkg_metadata__.DESCRIPTION,
-            version=__pkg_metadata__.VERSION,
+            description="SalishSeaCast NEMO Command Processor",
+            version=salishsea_cmd.__version__,
             command_manager=cliff.commandmanager.CommandManager(
                 "salishsea.app", convert_underscores=False
             ),
