@@ -1,6 +1,6 @@
-*********************************
-Salish Sea NEMO Command Processor
-*********************************
+************************************
+SalishSeaCast NEMO Command Processor
+************************************
 
 .. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
     :target: https://www.apache.org/licenses/LICENSE-2.0
@@ -21,7 +21,7 @@ Salish Sea NEMO Command Processor
     :target: https://bitbucket.org/salishsea/salishseacmd/issues?status=new&status=open
     :alt: Issue Tracker
 
-The Salish Sea NEMO command processor, ``salishsea``, is a command line tool for doing various operations associated with the `Salish Sea NEMO model`_.
+The SalishSeaCast NEMO command processor, ``salishsea``, is a command line tool for doing various operations associated with the `Salish Sea NEMO model`_.
 
 .. _Salish Sea NEMO model: https://salishsea-meopar-docs.readthedocs.io/en/latest/
 
@@ -52,7 +52,7 @@ License
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 
-The Salish Sea NEMO command processor and documentation are copyright 2013-2019 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
+The SalishSeaCast NEMO command processor and documentation are copyright 2013-2019 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0

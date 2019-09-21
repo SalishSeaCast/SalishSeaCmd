@@ -16,11 +16,11 @@
 
 .. _SalishSeaCmdProcessor:
 
-*********************************
-Salish Sea NEMO Command Processor
-*********************************
+************************************
+SalishSeaCast NEMO Command Processor
+************************************
 
-The Salish Sea NEMO command processor,
+The SalishSeaCast NEMO command processor,
 :program:`salishsea`,
 is a command-line tool for doing various operations associated with the :ref:`SalishSeaNEMO` model.
 

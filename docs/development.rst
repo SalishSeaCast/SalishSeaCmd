@@ -336,7 +336,7 @@ License
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 
-The Salish Sea NEMO command processor and documentation are copyright 2013-2019 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
+The SalishSeaCast NEMO command processor and documentation are copyright 2013-2019 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0
