@@ -1,1 +1,0 @@
-salishsea_cmd/__pkg_metadata__.py
