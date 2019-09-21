@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Salish Sea NEMO command processor API
+"""SalishSeaCast NEMO Command Processor API
 
 Application programming interface for the Salish Sea NEMO command
 processor.

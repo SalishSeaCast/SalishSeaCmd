@@ -24,7 +24,7 @@ The command :kbd:`salishsea help` produces a list of the available :program:`sal
 
   usage: salishsea [--version] [-v | -q] [--log-file LOG_FILE] [-h] [--debug]
 
-  Salish Sea NEMO Command Processor
+  SalishSeaCast NEMO Command Processor
 
   optional arguments:
     --version            show program's version number and exit
