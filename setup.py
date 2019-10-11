@@ -28,6 +28,7 @@ setuptools.setup(
             "gather = nemo_cmd.gather:Gather",
             "prepare = salishsea_cmd.prepare:Prepare",
             "run = salishsea_cmd.run:Run",
+            "split-results = salishsea_cmd.split_results:SplitResults",
         ],
     }
 )

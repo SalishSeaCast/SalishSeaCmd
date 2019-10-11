@@ -35,13 +35,14 @@ The command :kbd:`salishsea help` produces a list of the available :program:`sal
     --debug              Show tracebacks on errors.
 
   Commands:
-    combine        Combine per-processor files from an MPI NEMO run into single files
-    complete       print bash completion command
-    deflate        Deflate variables in netCDF files using Lempel-Ziv compression.
-    gather         Gather results from a NEMO run.
-    help           print detailed help for another command
+    combine        Combine per-processor files from an MPI NEMO run into single files (NEMO-Cmd)
+    complete       print bash completion command (cliff)
+    deflate        Deflate variables in netCDF files using Lempel-Ziv compression. (NEMO-Cmd)
+    gather         Gather results from a NEMO run. (NEMO-Cmd)
+    help           print detailed help for another command (cliff)
     prepare        Prepare a Salish Sea NEMO run.
     run            Prepare, execute, and gather results from a Salish Sea NEMO model run.
+    split-results  Split the results of a multi-day SalishSeaCast NEMO model run (e.g. a hindcast run) into daily results directories.
 
 For details of the arguments and options for a sub-command use
 :command:`salishsea help <sub-command>`.
@@ -420,4 +421,36 @@ and see :ref:`nemocmd:nemo-gather` for more details.
 .. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
 
 If the :command:`gather` sub-command prints an error message,
+you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+
+
+.. _salishsea-split-results:
+
+:kbd:`split-results` Sub-command
+================================
+
+The :command:`split-results` sub-command splits the results of a multi-day SalishSeaCast NEMO model run
+(e.g. a hindcast run)
+into daily results directories.
+The results files are renamed so that they look like they came from a
+single day run so that ERDDAP will accept them
+(i.e. SalishSea_*_yyyymmdd_yyyymmdd_*.nc).
+The run description files are left in the first run day's directory.
+The restart files are moved to the last run day's directory.
+
+::
+
+  usage: salishsea split-results [-h] [-q] SOURCE_DIR
+
+  Split the results of the multi-day SalishSeaCast NEMO model run in SOURCE_DIR
+  into daily results directories.
+
+  positional arguments:
+    SOURCE_DIR   Multi-day results directory to split into daily directories
+
+  optional arguments:
+    -h, --help   show this help message and exit
+    -q, --quiet  Don't show progess messages.
+
+If the :command:`split-results` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
