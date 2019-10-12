@@ -1014,7 +1014,7 @@ def _modules():
         ),
         "sockeye": textwrap.dedent(
             """\
-            module load gcc/9.1.0
+            module load gcc/5.4.0
             module load openmpi/3.1.4
             module load netcdf-fortran/4.4.5
             module load python/3.7.3
