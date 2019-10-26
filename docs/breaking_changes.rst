@@ -20,6 +20,19 @@
 :kbd:`SalishSeaCmd` Changes That Break Backward Compatibility
 *************************************************************
 
+.. _BreakingChangesVersion19.3:
+
+Version 19.3
+============
+
+The following changes that were introduced in version 19.3 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
+
+* The `gitpython`_ package is now a required dependency.
+  It can be installed with :command:`pip install --user gitpython` or :command:`conda install gitpython` as appropriate for your working environment.
+
+  .. _gitpython: https://gitpython.readthedocs.io/en/stable/
+
+
 .. _BreakingChangesVersion19.1:
 
 Version 19.1
