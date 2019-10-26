@@ -462,7 +462,9 @@ The *optional* :kbd:`vcs revisions` section of the run description file contains
     and :file:`XIOS` Mercurial repositories listed in the :ref:`NEMO-3.6-Paths` section are always generated,
     so those repository paths should not be included in the :kbd:`vcs revisions` section.
 
-An example :kbd:`vcs revisions` section:
+Here is a
+(somewhat contrived)
+example :kbd:`vcs revisions` section:
 
 .. code-block:: yaml
 
@@ -476,15 +478,19 @@ An example :kbd:`vcs revisions` section:
         - $HOME/MEOPAR/NEMO-Cmd
         - $HOME/MEOPAR/SalishSeaCmd
         - $HOME/MEOPAR/XIOS-ARCH
+      git:
+        - $HOME/MEOPAR/FVCOM-VHFR-config
 
 The sub-section keys
-(:kbd:`hg` above)
+(:kbd:`hg` and :kbd:`git` above)
 are the names of the version control tools to use for the repositories listed below them.
 At present only Mercurial
 (:kbd:`hg`)
-is supported.
+and Git
+(:kbd:`git`)
+are supported.
 
-The paths listed under the version control tool key are the repositories for which the revision and status will be recorded.
+The paths listed under the version control tool keys are the repositories of which the revision and status will be recorded.
 
 The repository paths may be relative or absolute,
 and may contain :kbd:`~` or :envvar:`$HOME` as alternative spellings of the user's home directory,
@@ -507,8 +513,10 @@ the files created will be::
   NEMO-Cmd_rev.txt
   SalishSeaCmd_rev.txt
   XIOS-ARCH_rev.txt
+  FVCOM-VHFR-config_rev.txt
 
-Each file will contain the output of the :command:`hg parents -v` command for the repository.
+For Mercurial repositories,
+each :file:`_rev.txt` file will contain the output of the :command:`hg parents -v` command for the repository.
 That is a record of the last committed revision of the repository that will be in effect for the run.
 For example,
 :file:`SS-run-sets_rev.txt` might contain::
@@ -522,10 +530,43 @@ For example,
   Add 'NEMO code config' key to selected run description YAML files.
 
 If any of the listed repositories contain uncommitted changes,
-the :command:`nemo prepare` command will generate a warning message like::
+the :command:`nemo prepare` command that :command:`salishsea run` uses will generate a warning message like::
 
   nemo_cmd.prepare WARNING: There are uncommitted changes in $HOME/MEOPAR/SS-run-sets/
 
 and the list of uncommitted changes and their status codes,
 the output of the :command:`hg status -mardC` command,
+will be appended to the :file:`_rev.txt` file.
+
+For Git repositories,
+each :file:`_rev.txt` file will contain the output of the commands:
+
+.. code-block:: bash
+
+    git branch --show-current
+    git log -1
+    git show --pretty="" --name-only
+
+for the repository.
+That is a record of the last committed revision of the repository that will be in effect for the run.
+For example,
+:file:`FVCOM-VHFR-config_rev.txt` might contain::
+
+  branch: master
+  commit: 35fc362f3d77866df8c0a8b743aca81359295d59
+  author: Doug Latornell
+  date:   Fri Mar 08 15:08:15 2019 -08:00
+  files:  namelists/namelist.numerics.template
+  message:
+  Change namelist.numerics to a template file.
+
+  re: different time steps for x2 and r12 configuations.
+
+If any of the listed repositories contain uncommitted changes,
+the :command:`nemo prepare` command that :command:`salishsea run` uses will generate a warning message like::
+
+  nemo_cmd.prepare WARNING: There are uncommitted changes in $HOME/MEOPAR/FVCOM-VHFR-config/
+
+and the list of uncommitted changes and their status codes,
+the output of the :command:`git diff --name-status` command,
 will be appended to the :file:`_rev.txt` file.
