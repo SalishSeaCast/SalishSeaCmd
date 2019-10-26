@@ -432,11 +432,15 @@ you can get a Python traceback containing more information about the error by re
 The :command:`split-results` sub-command splits the results of a multi-day SalishSeaCast NEMO model run
 (e.g. a hindcast run)
 into daily results directories.
+It is assumed that the multi-day run output has been split into 1-day files by way of the :kbd:`split_freq="1d"` attribute in the :kbd:`file_group` elements of the run's :file:`file_def.xml` file
+(see `file_def_dailysplit.xml`_ for example).
 The results files are renamed so that they look like they came from a
 single day run so that ERDDAP will accept them
 (i.e. SalishSea_*_yyyymmdd_yyyymmdd_*.nc).
 The run description files are left in the first run day's directory.
 The restart files are moved to the last run day's directory.
+
+_file_def_dailysplit.xml: https://bitbucket.org/salishsea/ss-run-sets/src/tip/v201905/hindcast/file_def_dailysplit.xml
 
 ::
 
