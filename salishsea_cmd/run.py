@@ -889,7 +889,7 @@ def _pbs_directives(
     if SYSTEM == "sockeye":
         pbs_directives += textwrap.dedent(
             """\
-            #PBS -A dri-allen
+            #PBS -A st-sallen1-1
             {procs_directive}
             """
         ).format(procs_directive=procs_directive, pmem=pmem)
