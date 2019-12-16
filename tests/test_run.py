@@ -2572,7 +2572,7 @@ class TestBuildBatchScript:
             # email when the job [b]egins and [e]nds, or is [a]borted
             #PBS -m bea
             #PBS -M me@example.com
-            #PBS -A dri-allen
+            #PBS -A st-sallen1-1
             #PBS -l select=2:ncpus=32:mpiprocs=32:mem=64gb
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
@@ -2804,7 +2804,7 @@ class TestPbsDirectives:
             (
                 "sockeye",
                 32,
-                "#PBS -A dri-allen\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=64gb",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=64gb",
             ),
         ),
     )
@@ -2865,7 +2865,7 @@ class TestPbsDirectives:
             (
                 "sockeye",
                 32,
-                "#PBS -A dri-allen\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=64gb",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=64gb",
             ),
         ),
     )
@@ -2981,7 +2981,7 @@ class TestPbsDirectives:
             pbs_directives = salishsea_cmd.run._pbs_directives(
                 run_desc, 43, email="me@example.com", results_dir=Path("foo")
             )
-        assert "#PBS -A dri-allen\n" in pbs_directives
+        assert "#PBS -A st-sallen1-1\n" in pbs_directives
 
     @pytest.mark.parametrize("system", ("delta", "orcinus", "sigma", "salish"))
     def test_not_sockeye_no_account_directive_from_yaml(self, system):
