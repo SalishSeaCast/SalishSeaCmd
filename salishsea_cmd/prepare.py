@@ -144,7 +144,10 @@ def _record_vcs_revisions(run_desc, run_dir):
         )
     if "vcs revisions" not in run_desc:
         return
-    vcs_funcs = {"hg": nemo_cmd.prepare.get_hg_revision}
+    vcs_funcs = {
+        "git": nemo_cmd.prepare.get_git_revision,
+        "hg": nemo_cmd.prepare.get_hg_revision,
+    }
     vcs_tools = get_run_desc_value(run_desc, ("vcs revisions",), run_dir=run_dir)
     for vcs_tool in vcs_tools:
         repos = get_run_desc_value(
