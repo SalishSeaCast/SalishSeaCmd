@@ -175,3 +175,29 @@ class TestRecordVCSRevisions:
         assert m_write.call_args_list[-1] == call(
             Path(str(ss_run_sets)), Path("run_dir"), nemo_cmd.prepare.get_hg_revision
         )
+
+    @pytest.mark.parametrize(
+        "config_name_key, nemo_code_config_key",
+        [("config name", "NEMO code config"), ("config_name", "NEMO-code-config")],
+    )
+    @patch("nemo_cmd.prepare.write_repo_rev_file")
+    def test_write_repo_rev_file_vcs_revisions_git_call(
+        self, m_write, config_name_key, nemo_code_config_key, tmpdir
+    ):
+        nemo_config = tmpdir.ensure_dir("NEMO-3.6-code", "NEMOGCM", "CONFIG")
+        xios_code_repo = tmpdir.ensure_dir("XIOS")
+        nemo_forcing = tmpdir.ensure_dir("NEMO-forcing")
+        ss_run_sets = tmpdir.ensure_dir("SS-run-sets")
+        run_desc = {
+            config_name_key: "SalishSea",
+            "paths": {
+                nemo_code_config_key: str(nemo_config),
+                "XIOS": str(xios_code_repo),
+                "forcing": str(nemo_forcing),
+            },
+            "vcs revisions": {"git": [str(ss_run_sets)]},
+        }
+        salishsea_cmd.prepare._record_vcs_revisions(run_desc, Path("run_dir"))
+        assert m_write.call_args_list[-1] == call(
+            Path(str(ss_run_sets)), Path("run_dir"), nemo_cmd.prepare.get_git_revision
+        )
