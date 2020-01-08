@@ -105,7 +105,7 @@ and building the documentation with the commands:
 
 .. code-block:: bash
 
-    $ conda env create -f SalishSeaCmd/env/environment-dev.yaml
+    $ conda env create -f SalishSeaCmd/envs/environment-dev.yaml
     $ source activate salishsea-cmd
     (salishsea-cmd)$ pip install --editable NEMO-Cmd
     (salishsea-cmd)$ pip install --editable SalishSeaCmd
