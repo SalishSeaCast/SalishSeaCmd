@@ -294,7 +294,9 @@ def run(
         if separate_deflate:
             _submit_separate_deflate_jobs(batch_file, msg, queue_job_cmd)
         if len(run_segments) != 1:
-            submit_job_msg = f"{submit_job_msg} {msg.split()[-1]}"
+            submit_job_msg = "{submit_job_msg} {msg_tail}".format(
+                submit_job_msg=submit_job_msg, msg_tail=msg.split()[-1]
+            )
             nocheck_init = True
             waitjob = msg
         else:
@@ -450,7 +452,12 @@ def _write_segment_desc_file(
             name_head = path.name.split("_")[0]
             name_tail = path.name.split("_", 2)[-1]
             restart_path = (
-                restart_dir / f"{name_head}_{restart_timestep:08d}_{name_tail}"
+                restart_dir
+                / "{name_head}_{restart_timestep:08d}_{name_tail}".format(
+                    name_head=name_head,
+                    restart_timestep=restart_timestep,
+                    name_tail=name_tail,
+                )
             )
             run_desc["restart"][name] = os.fspath(restart_path)
     # walltime for segment
