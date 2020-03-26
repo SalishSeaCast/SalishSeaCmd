@@ -1003,7 +1003,7 @@ def _modules():
             module load intel/14.0/netcdf-fortran-4.4.0_mpi
             module load intel/14.0/hdf5-1.8.15p1_mpi
             module load intel/14.0/nco-4.5.2
-            module load python
+            module load python/3.5.0
             module load git
             """
         ),
