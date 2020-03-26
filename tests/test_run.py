@@ -2399,6 +2399,7 @@ class TestBuildBatchScript:
             module load intel/14.0/hdf5-1.8.15p1_mpi
             module load intel/14.0/nco-4.5.2
             module load python
+            module load git
             
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -3082,6 +3083,7 @@ class TestModules:
             module load intel/14.0/hdf5-1.8.15p1_mpi
             module load intel/14.0/nco-4.5.2
             module load python
+            module load git
             """
         )
         assert modules == expected
@@ -3465,6 +3467,7 @@ class TestBuildDeflateScript:
         module load intel/14.0/hdf5-1.8.15p1_mpi
         module load intel/14.0/nco-4.5.2
         module load python
+        module load git
 
         cd ${{RESULTS_DIR}}
         echo "Results deflation started at $(date)"
