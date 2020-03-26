@@ -2367,7 +2367,7 @@ class TestBuildBatchScript:
             # email when the job [b]egins and [e]nds, or is [a]borted
             #PBS -m bea
             #PBS -M me@example.com
-            #PBS -l procs=43
+            #PBS -l nodes=4:ppn=12
             # memory per processor
             #PBS -l pmem=2000mb
             # stdout and stderr file paths/names
