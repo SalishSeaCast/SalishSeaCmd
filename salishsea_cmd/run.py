@@ -642,7 +642,9 @@ def _build_batch_script(
             )
         )
     else:
-        procs_per_node = {"delta": 20, "sigma": 20, "sockeye": 32}.get(SYSTEM, 0)
+        procs_per_node = {"delta": 20, "sigma": 20, "sockeye": 32, "orcinus": 12}.get(
+            SYSTEM, 0
+        )
         script = "\n".join(
             (
                 script,
