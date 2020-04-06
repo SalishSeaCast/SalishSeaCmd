@@ -28,14 +28,14 @@ dependencies:
   - f90nml
   - gitpython
   - pip
-  - python>=3.5
+  - python=3.8
   - pyyaml
 
   # For coding style
   - black
   # For unit tests
   - coverage
-  - pytest
+  - pytest-cov
 
   # For documentation
   - sphinx
@@ -43,3 +43,6 @@ dependencies:
 
   - pip:
     - python-hglib
+
+    # For unit tests
+    - pytest-randomly
