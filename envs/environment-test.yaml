@@ -1,0 +1,29 @@
+# conda environment description file for SalishSeaCmd package testing environment
+#
+# Creates a conda environment in which the SalishSeaCmd package unit tests and
+# coverage analysis can be run.
+# Primarily intended for creation of a conda env for use in a GitHub Actions workflow.
+
+name: salishsea-cmd-test
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - arrow
+  - cliff!=2.9.0
+  - f90nml
+  - gitpython
+  - pip
+  - pyyaml
+
+  # For unit tests and coverage monitoring
+  - coverage
+  - pytest-cov
+
+  - pip:
+    - python-hglib
+
+    # For unit tests
+    - pytest-randomly
