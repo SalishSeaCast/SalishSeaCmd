@@ -26,17 +26,23 @@
 .. image:: https://img.shields.io/badge/python-3.5+-blue.svg
     :target: https://docs.python.org/3.8/
     :alt: Python Version
-.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
-    :target: https://bitbucket.org/salishsea/salishseacmd/
-    :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd
+    :alt: Git on GitHub
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 .. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
     :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status
-.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseacmd.svg
-    :target: https://bitbucket.org/salishsea/salishseacmd/issues?status=new&status=open
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
+    :alt: GitHub Workflow Status
+.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
+    :alt: Codecov Testing Coverage Report
+.. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
+    :target: https://github.com/SalishSeaCast/NEMO-Cmd/issues
     :alt: Issue Tracker
 
 
@@ -49,9 +55,11 @@ Python Versions
     :target: https://docs.python.org/3.8/
     :alt: Python Version
 
-The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.7 or later.
+The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.8.
+It is recommended that the package be used under Python>=3.6.
 However,
 the package must also run under `Python`_ 3.5 for use on the Westgrid :kbd:`orcinus` HPC platform.
+The :ref:`SalishSeaCmdContinuousIntegration` workflow on GitHub ensures that the package is tested for all versions of Python>=3.5.
 
 .. _Python: https://www.python.org/
 
@@ -61,27 +69,27 @@ the package must also run under `Python`_ 3.5 for use on the Westgrid :kbd:`orci
 Getting the Code
 ================
 
-.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
-    :target: https://bitbucket.org/salishsea/salishseacmd/
-    :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd
+    :alt: Git on GitHub
 
-Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from Bitbucket with:
+Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from GitHub with:
 
-.. _repository: https://bitbucket.org/salishsea/salishseacmd/
+.. _repository: https://github.com/SalishSeaCast/SalishSeaCmd
 
 .. code-block:: bash
 
-    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
+    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
 
 or
 
 .. code-block:: bash
 
-    $ hg clone https://<your_userid>@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
+    $ git clone https://github.com/SalishSeaCast/SalishSeaCmd.git
 
-if you don't have `ssh key authentication`_ set up on Bitbucket.
+if you don't have `ssh key authentication`_ set up on GitHub.
 
-.. _ssh key authentication: https://confluence.atlassian.com/bitbucket/set-up-ssh-for-mercurial-728138122.html
+.. _ssh key authentication: https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh
 
 
 .. _SalishSeaCmdDevelopmentEnvironment:
@@ -100,23 +108,23 @@ you can create and activate an environment called :kbd:`salishsea-cmd` that will
 testing,
 and building the documentation with the commands:
 
-.. _Conda: http://conda.pydata.org/docs/
-.. _Miniconda3: http://conda.pydata.org/docs/install/quick.html
+.. _Conda: https://conda.io/en/latest/
+.. _Miniconda3: https://docs.conda.io/en/latest/miniconda.html
 
 .. code-block:: bash
 
     $ conda env create -f SalishSeaCmd/envs/environment-dev.yaml
-    $ source activate salishsea-cmd
+    $ conda activate salishsea-cmd
     (salishsea-cmd)$ pip install --editable NEMO-Cmd
     (salishsea-cmd)$ pip install --editable SalishSeaCmd
 
-The :kbd:`--editable` option in the :command:`pip install` commands above installs the :kbd:`NEMO-Cmd` package and the :kbd:`SalishSeaCmd` package via symlinks so that :program:`salishsea` in the :kbd:`salishsea-cmd` environment will be automatically updated as the repos evolve.
+The :kbd:`--editable` option in the :command:`pip install` commands above installs the :kbd:`NEMO-Cmd` package and the :kbd:`SalishSeaCmd` packages via symlinks so that :program:`salishsea` in the :kbd:`salishsea-cmd` environment will be automatically updated as the repos evolve.
 
 To deactivate the environment use:
 
 .. code-block:: bash
 
-    (salishsea-cmd)$ source deactivate
+    (salishsea-cmd)$ conda deactivate
 
 
 .. _SalishSeaCmdCodingStyle:
@@ -165,13 +173,43 @@ Building the Documentation
     :alt: Documentation Status
 
 The documentation for the :kbd:`SalishSeaCmd` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
-Creating a :ref:`SalishSeaCmdDevelopmentEnvironment` as described above includes the installation of Sphinx.
+
+.. _reStructuredText: https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
+.. _Sphinx: https://www.sphinx-doc.org/en/master/
+
+If you have write access to the `repository`_ on GitHub,
+whenever you push changes to GitHub the documentation is automatically re-built and rendered at https://salishseacmd.readthedocs.io/en/latest/.
+
+Additions,
+improvements,
+and corrections to these docs are *always* welcome.
+
+The quickest way to fix typos, etc. on existing pages is to use the :guilabel:`Edit on GitHub` link in the upper right corner of the page to get to the online editor for the page on `GitHub`_.
+
+.. _GitHub: https://github.com/SalishSeaCast/SalishSeaCmd
+
+For more substantial work,
+and to add new pages,
+follow the instructions in the :ref:`SalishSeaCmdDevelopmentEnvironment` section above.
+In the development environment you can build the docs locally instead of having to push commits to GitHub to trigger a `build on readthedocs.org`_ and wait for it to complete.
+Below are instructions that explain how to:
+
+.. _build on readthedocs.org: https://readthedocs.org/projects/salishseacmd/builds/
+
+* build the docs with your changes,
+  and preview them in Firefox
+
+* check the docs for broken links
+
+
+.. _SalishSeaCmdBuildingAndPreviewingTheDocumentation:
+
+Building and Previewing the Documentation
+-----------------------------------------
+
 Building the documentation is driven by :file:`docs/Makefile`.
 With your :kbd:`salishsea-cmd` development environment activated,
 use:
-
-.. _reStructuredText: http://sphinx-doc.org/rest.html
-.. _Sphinx: http://sphinx-doc.org/
 
 .. code-block:: bash
 
@@ -180,29 +218,29 @@ use:
 to do a clean build of the documentation.
 The output looks something like::
 
-  rm -rf _build/*
-  sphinx-build -b html -d _build/doctrees   . _build/html
-  Running Sphinx v1.6.3
-  making output directory...
-  loading pickled environment... not yet created
+  Removing everything under '_build'...
+  Running Sphinx v3.0.0
+  making output directory... done
   loading intersphinx inventory from https://docs.python.org/3/objects.inv...
   loading intersphinx inventory from http://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv...
   loading intersphinx inventory from http://nemo-cmd.readthedocs.io/en/latest/objects.inv...
+  intersphinx inventory has moved: http://nemo-cmd.readthedocs.io/en/latest/objects.inv -> https://nemo-cmd.readthedocs.io/en/latest/objects.inv
+  intersphinx inventory has moved: http://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv -> https://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv
   building [mo]: targets for 0 po files that are out of date
   building [html]: targets for 10 source files that are out of date
-  updating environment: 10 added, 0 changed, 0 removed
+  updating environment: [new config] 10 added, 0 changed, 0 removed
   reading sources... [100%] subcommands
   looking for now-outdated files... none found
   pickling environment... done
   checking consistency... done
   preparing documents... done
   writing output... [100%] subcommands
-  generating indices... genindex
+  generating indices...  genindexdone
   highlighting module code... [100%] salishsea_cmd.api
-  writing additional pages... search
-  copying static files... done
+  writing additional pages...  searchdone
+  copying static files... ... done
   copying extra files... done
-  dumping search index in English (code: en) ... done
+  dumping search index in English (code: en)... done
   dumping object inventory... done
   build succeeded.
 
@@ -210,9 +248,138 @@ The output looks something like::
 
 
 The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
-You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build before committing and pushing your changes to Bitbucket.
+You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build before committing and pushing your changes to GitHub.
 
-Whenever you push changes to the :ref:`SalishSeaCmd-repo` on Bitbucket the documentation is automatically re-built and rendered at https://salishseacmd.readthedocs.org/en/latest/.
+Whenever you push changes to the :ref:`SalishSeaCmd-repo` on GitHub the documentation is automatically re-built and rendered at https://salishseacmd.readthedocs.org/en/latest/.
+
+
+.. _SalishSeaCmdLinkCheckingTheDocumentation:
+
+Link Checking the Documentation
+-------------------------------
+
+Sphinx also provides a link checker utility which can be run to find broken or redirected links in the docs.
+With your :kbd:`salishsea-cmd` environment activated,
+use:
+
+.. code-block:: bash
+
+    (salishsea-cmd)$ cd SalishSeaCmd/docs/
+    (salishsea-cmd) docs$ make linkcheck
+
+The output looks something like::
+
+  Running Sphinx v3.0.0
+  making output directory... done
+  WARNING: html_static_path entry '_static' does not exist
+  WARNING: favicon file '_static/MEOPAR_favicon.ico' does not exist
+  loading pickled environment... done
+  building [mo]: targets for 0 po files that are out of date
+  building [linkcheck]: targets for 10 source files that are out of date
+  updating environment: 0 added, 1 changed, 0 removed
+  reading sources... [100%] development
+  looking for now-outdated files... none found
+  pickling environment... done
+  checking consistency... done
+  preparing documents... done
+  writing output... [ 10%] api
+  (line   21) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
+  (line   21) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
+  (line   21) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
+  (line   21) ok        https://docs.python.org/3/library/functions.html#int
+  (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
+  (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
+  (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
+  (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
+  (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
+  (line   21) ok        https://docs.python.org/3/library/constants.html#None
+  (line   21) ok        https://docs.python.org/3/library/stdtypes.html#dict
+  (line   21) ok        https://docs.python.org/3/library/constants.html#None
+  (line   21) ok        https://docs.python.org/3/library/constants.html#None
+  (line   21) ok        https://docs.python.org/3/library/stdtypes.html#dict
+  (line   21) ok        https://docs.python.org/3/library/stdtypes.html#dict
+  writing output... [ 20%] breaking_changes
+  (line   97) ok        https://docs.python.org/3/library/constants.html#False
+  (line   53) ok        https://calver.org/
+  (line   45) ok        https://f90nml.readthedocs.io/en/latest/
+  (line   91) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#landprocessorelimination
+  (line   30) ok        https://gitpython.readthedocs.io/en/stable/
+  writing output... [ 30%] development
+  (line   21) ok        https://docs.python.org/3.8/
+  (line   21) ok        https://salishseacmd.readthedocs.io/en/latest/
+  (line   21) ok        https://black.readthedocs.io/en/stable/
+  (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
+  (line   58) ok        https://www.python.org/
+  (line   21) ok        https://www.apache.org/licenses/LICENSE-2.0
+  (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd
+  (line   90) ok        https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh
+  (line   21) ok        https://github.com/SalishSeaCast/NEMO-Cmd/issues
+  (line   70) ok        https://github.com/SalishSeaCast/SalishSeaCmd
+  (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
+  (line   76) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseacmd-repo
+  (line  100) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#nemo-cmd-repo
+  (line  100) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseacmd-repo
+  (line  139) ok        https://www.python.org/dev/peps/pep-0008/
+  (line  105) ok        https://conda.io/en/latest/
+  (line  105) ok        https://docs.conda.io/en/latest/miniconda.html
+  (line  105) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/work_env/anaconda_python.html#anacondapythondistro
+  (line  192) ok        https://readthedocs.org/projects/salishseacmd/builds/
+  (line  175) ok        https://www.sphinx-doc.org/en/master/
+  (line  175) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
+  (line  262) ok        https://docs.pytest.org/en/latest/
+  (line  254) ok        https://salishseacmd.readthedocs.io/en/latest/
+  (line  318) ok        https://bitbucket.org/salishsea/salishseacmd/addon/pipelines/home
+  (line  290) ok        https://coverage.readthedocs.io/en/latest/
+  (line  318) ok        https://bitbucket.org/salishsea/salishseacmd/commits/all
+  (line  318) ok        https://bitbucket.org/salishsea/salishseacmd/
+  (line   21) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
+  (line  352) ok        https://www.mercurial-scm.org/
+  (line   21) ok        https://img.shields.io/badge/python-3.5+-blue.svg
+  (line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
+  (line   21) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
+  (line  352) ok        https://bitbucket.org/salishsea/salishseacmd
+  (line  360) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
+  (line   21) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+  (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
+  (line  366) ok        https://bitbucket.org/salishsea/salishseacmd/issues
+  (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
+  (line   21) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
+  (line  360) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
+  writing output... [ 40%] index
+  (line   30) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/index.html#salishseanemo
+  (line   23) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/index.html#salishseanemo
+  (line   30) ok        https://bitbucket.org/salishsea/nemo-cmd
+  (line   63) ok        https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
+  (line   67) ok        http://www.apache.org/licenses/LICENSE-2.0
+  (line   30) ok        https://docs.openstack.org/cliff/latest/
+  writing output... [ 50%] installation
+  (line   63) ok        https://en.wikipedia.org/wiki/Command-line_completion
+  (line   29) ok        https://docs.conda.io/en/latest/miniconda.html
+  (line   28) ok        https://docs.conda.io/en/latest/miniconda.html
+  writing output... [ 60%] run_description_file/3.6_agrif_yaml_file
+  (line   24) ok        https://www-ljk.imag.fr/MOISE/AGRIF/index.html
+  (line   27) ok        https://www-ljk.imag.fr/MOISE/AGRIF/index.html
+  writing output... [ 70%] run_description_file/3.6_yaml_file
+  (line  444) ok        https://docs.python.org/3/library/constants.html#True
+  (line   74) ok        https://slurm.schedmd.com/
+  (line  100) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#xios-repo
+  (line  171) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#preferred-mpi-lpe-decompositions
+  (line   89) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#nemo-3-6-code-repo
+  writing output... [ 80%] run_description_file/
+  (line   23) ok        https://pyyaml.org/wiki/PyYAMLDocumentation
+  (line   28) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#ss-run-sets-repo
+  writing output... [ 90%] run_description_file/segmented_runs
+  writing output... [100%] subcommands
+  (line  285) ok        https://en.wikipedia.org/wiki/Universally_unique_identifier
+  (line  396) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-deflate
+  (line  218) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-deflate
+  (line  418) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-gather
+  (line  374) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-combine
+  (line  443) ok        https://bitbucket.org/salishsea/ss-run-sets/src/tip/v201905/hindcast/file_def_dailysplit.xml
+
+  build succeeded.
+
+  Look for any errors in the above output or in _build/linkcheck/output.txt
 
 
 .. _SalishSeaCmdRuningTheUnitTests:
@@ -231,74 +398,76 @@ use:
 .. code-block:: bash
 
     (salishsea-cmd)$ cd SalishSeaCmd/
-    (salishsea-cmd)$ py.test
+    (salishsea-cmd)$ pytest
 
 to run the test suite.
 The output looks something like::
 
   ============================ test session starts =============================
-  platform linux -- Python 3.6.2, pytest-3.2.1, py-1.4.34, pluggy-0.4.0
-  rootdir: /media/doug/warehouse/MEOPAR/SalishSeaCmd, inifile:
-  collected 182 items
+  platform linux -- Python 3.8.2, pytest-5.4.1, py-1.8.1, pluggy-0.13.1
+  Using --randomly-seed=1586216909
+  rootdir: /media/doug/warehouse/MEOPAR/SalishSeaCmd
+  plugins: randomly-3.2.1, cov-2.8.1
+  collected 279 items
 
-  tests/test_api.py ........
-  tests/test_lib.py .........
-  tests/test_prepare.py ...............................................................................................
-  tests/test_run.py ......................................................................
+  tests/test_run.py ............................................................
+  ..............................................................................
+  ..............................................................................
+  .............................                                           [ 87%]
+  tests/test_api.py ......                                                [ 89%]
+  tests/test_split_results.py ................                            [ 95%]
+  tests/test_prepare.py ............                                      [100%]
 
-  ========================= 182 passed in 1.61 seconds =========================
+  ============================ 279 passed in 1.96s =============================
 
-You can monitor what lines of code the test suite exercises using the `coverage.py`_ tool with the command:
+You can monitor what lines of code the test suite exercises using the `coverage.py`_ and `pytest-cov`_ tools with the command:
 
 .. _coverage.py: https://coverage.readthedocs.org/en/latest/
+.. _pytest-cov: https://pytest-cov.readthedocs.io/en/latest/
 
 .. code-block:: bash
 
     (salishsea-cmd)$ cd SalishSeaCmd/
-    (salishsea-cmd)$ coverage run -m py.test
+    (salishsea-cmd)$ cpytest --cov=./
 
-and generate a test coverage report with:
+The test coverage report will be displayed below the test suite run output.
 
-.. code-block:: bash
-
-    (salishsea-cmd)$ coverage report
-
-to produce a plain text report,
-or
+Alternatively,
+you can use
 
 .. code-block:: bash
 
-    (salishsea-cmd)$ coverage html
+    (salishsea-cmd)$ pytest --cov=./ --cov-report html
 
 to produce an HTML report that you can view in your browser by opening :file:`SalishSeaCmd/htmlcov/index.html`.
 
 
+.. _SalishSeaCmdContinuousIntegration:
+
 Continuous Integration
 ----------------------
 
-The :kbd:`SalishSeaCmd` package unit test suite is run and a coverage report is generated whenever changes are pushed to Bitbucket.
-The results are visible on the `repo pipelines page`_,
-from the :guilabel:`Builds` column on the `repo commits page`_,
-or from a link in the build status area on the right side of the `repo summary page`_ .
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
+    :alt: GitHub Workflow Status
+.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
+    :alt: Codecov Testing Coverage Report
 
-.. _repo pipelines page: https://bitbucket.org/salishsea/salishseacmd/addon/pipelines/home
-.. _repo commits page: https://bitbucket.org/salishsea/salishseacmd/commits/all
-.. _repo summary page: https://bitbucket.org/salishsea/salishseacmd/
+The :kbd:`SalishSeaCmd` package unit test suite is run and a coverage report is generated whenever changes are pushed to GitHub.
+The results are visible on the `repo actions page`_,
+from the green checkmarks beside commits on the `repo commits page`_,
+or from the green checkmark to the left of the "Latest commit" message on the `repo code overview page`_ .
+The testing coverage report is uploaded to `codecov.io`_
 
+.. _repo actions page: https://github.com/SalishSeaCast/SalishSeaCmd/actions
+.. _repo commits page: https://github.com/SalishSeaCast/SalishSeaCmd/commits/master
+.. _repo code overview page: https://github.com/SalishSeaCast/SalishSeaCmd
+.. _codecov.io: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
 
-Pipelines Container Image
-^^^^^^^^^^^^^^^^^^^^^^^^^
+The `GitHub Actions`_ workflow configuration that defines the continuous integration tasks is in the :file:`.github/workflows/pytest-coverage.yaml` file.
 
-The Bitbucket pipelines configuration in :file:`bitbucket-pipelines.yml` uses a custom image that includes a :command:`conda` environment for running the test wuite with coverage analysis.
-The image is defined and maintained using the :file:`Dockerfile` and :file:`environment-test.yaml` files in the :file:`pipelines-test-env/` directory.
-
-To build or update the image and push it to Docker Hub use:
-
-.. code-block:: bash
-
-    docker build -t salishsea-cmd-test pipelines-test-env/
-    docker tag salishsea-cmd-test:latest douglatornell/salishsea:salishsea-cmd-test
-    docker push douglatornell/salishsea:salishsea-cmd-test
+.. _GitHub Actions: https://help.github.com/en/actions
 
 
 .. _SalishSeaCmdVersionControlRepository:
@@ -306,13 +475,13 @@ To build or update the image and push it to Docker Hub use:
 Version Control Repository
 ==========================
 
-.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
-    :target: https://bitbucket.org/salishsea/salishseacmd/
-    :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd
+    :alt: Git on GitHub
 
-The :kbd:`SalishSeaCmd` package code and documentation source files are available in the :ref:`SalishSeaCmd-repo` `Mercurial`_ repository at https://bitbucket.org/salishsea/salishseacmd.
+The :kbd:`SalishSeaCmd` package code and documentation source files are available in the :ref:`SalishSeaCmd-repo` `Git`_ repository at https://github.com/SalishSeaCast/SalishSeaCmd.
 
-.. _Mercurial: https://www.mercurial-scm.org/
+.. _Git: https://git-scm.com/
 
 
 .. _SalishSeaCmdIssueTracker:
@@ -320,13 +489,13 @@ The :kbd:`SalishSeaCmd` package code and documentation source files are availabl
 Issue Tracker
 =============
 
-.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseacmd.svg
-    :target: https://bitbucket.org/salishsea/salishseacmd/issues?status=new&status=open
+.. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/issues
     :alt: Issue Tracker
 
 Development tasks,
 bug reports,
-and enhancement ideas are recorded and managed in the issue tracker at https://bitbucket.org/salishsea/salishseacmd/issues.
+and enhancement ideas are recorded and managed in the issue tracker at https://github.com/SalishSeaCast/SalishSeaCmd/issues.
 
 
 License
@@ -336,7 +505,9 @@ License
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 
-The SalishSeaCast NEMO command processor and documentation are copyright 2013-2020 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
+The SalishSeaCast NEMO command processor and documentation are copyright 2013-2020 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+
+.. _Salish Sea MEOPAR Project Contributors: https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0

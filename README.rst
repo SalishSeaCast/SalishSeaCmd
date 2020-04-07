@@ -8,17 +8,23 @@ SalishSeaCast NEMO Command Processor
 .. image:: https://img.shields.io/badge/python-3.5+-blue.svg
     :target: https://docs.python.org/3.8/
     :alt: Python Version
-.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
-    :target: https://bitbucket.org/salishsea/salishseacmd/
-    :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd
+    :alt: Git on GitHub
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 .. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
     :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status
-.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseacmd.svg
-    :target: https://bitbucket.org/salishsea/salishseacmd/issues?status=new&status=open
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
+    :alt: GitHub Workflow Status
+.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
+    :alt: Codecov Testing Coverage Report
+.. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/issues
     :alt: Issue Tracker
 
 The SalishSeaCast NEMO command processor, ``salishsea``, is a command line tool for doing various operations associated with the `Salish Sea NEMO model`_.
@@ -52,7 +58,9 @@ License
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 
-The SalishSeaCast NEMO command processor and documentation are copyright 2013-2020 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
+The SalishSeaCast NEMO command processor and documentation are copyright 2013-2020 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+
+.. _Salish Sea MEOPAR Project Contributors: https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0
