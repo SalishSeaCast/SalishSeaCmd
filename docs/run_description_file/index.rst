@@ -23,7 +23,7 @@ Run Description File Structure
 :program:`salishsea` run description files are written in YAML_.
 They contain key-value pairs that define the names and locations of files and directories that :program:`salishsea` uses to manage Salish Sea NEMO runs and their results.
 
-.. _YAML: http://pyyaml.org/wiki/PyYAMLDocumentation
+.. _YAML: https://pyyaml.org/wiki/PyYAMLDocumentation
 
 Run description files are typically stored in a sub-directory of your clone of the :ref:`SS-run-sets-repo`.
 

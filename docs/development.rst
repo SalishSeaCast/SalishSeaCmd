@@ -250,7 +250,7 @@ The output looks something like::
 The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
 You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build before committing and pushing your changes to GitHub.
 
-Whenever you push changes to the :ref:`SalishSeaCmd-repo` on GitHub the documentation is automatically re-built and rendered at https://salishseacmd.readthedocs.org/en/latest/.
+Whenever you push changes to the :ref:`SalishSeaCmd-repo` on GitHub the documentation is automatically re-built and rendered at https://salishseacmd.readthedocs.io/en/latest/.
 
 
 .. _SalishSeaCmdLinkCheckingTheDocumentation:
@@ -422,7 +422,7 @@ The output looks something like::
 
 You can monitor what lines of code the test suite exercises using the `coverage.py`_ and `pytest-cov`_ tools with the command:
 
-.. _coverage.py: https://coverage.readthedocs.org/en/latest/
+.. _coverage.py: https://coverage.readthedocs.io/en/latest/
 .. _pytest-cov: https://pytest-cov.readthedocs.io/en/latest/
 
 .. code-block:: bash

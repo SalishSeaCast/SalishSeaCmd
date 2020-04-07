@@ -29,7 +29,7 @@ These instructions assume that:
 * :file:`$HOME/anaconda3/bin` is included in your :envvar:`PATH` environment variable if your are using the :ref:`AnacondaPythonDistro`,
   or :file:`$HOME/miniconda3/bin` is included in your :envvar:`PATH` environment variable if your are using `Miniconda`_
 
-.. _Miniconda: http://conda.pydata.org/miniconda.html
+.. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
 
 To install the :kbd:`SalishSeaCmd` package in your :kbd:`root` Anaconda or Miniconda environment use:
 
@@ -73,4 +73,4 @@ You can do that with the compound command:
 
 Including that line in your :file:`~/.bashrc` file will ensure that completion for :program:`salishsea` is available in every shell you launch.
 
-.. _command-line completion: http://en.wikipedia.org/wiki/Command-line_completion
+.. _command-line completion: https://en.wikipedia.org/wiki/Command-line_completion

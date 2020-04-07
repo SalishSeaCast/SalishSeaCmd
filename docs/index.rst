@@ -32,7 +32,7 @@ This an extensible tool built on the OpenStack ``cliff``
 package.
 It is a NEMO domain-specific command processor tool for the :ref:`SalishSeaNEMO` that uses plug-ins from the `NEMO-Cmd`_ package.
 
-.. _Command Line Interface Formulation Framework: http://docs.openstack.org/developer/cliff/
+.. _Command Line Interface Formulation Framework: https://docs.openstack.org/cliff/latest/
 .. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
 
 
