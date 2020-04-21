@@ -375,7 +375,7 @@ The output looks something like::
   (line  218) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-deflate
   (line  418) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-gather
   (line  374) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-combine
-  (line  443) ok        https://bitbucket.org/salishsea/ss-run-sets/src/tip/v201905/hindcast/file_def_dailysplit.xml
+  (line  443) ok        https://github.com/SalishSeaCast/SS-run-sets/blob/master/v201905/hindcast/file_def_dailysplit.xml
 
   build succeeded.
 

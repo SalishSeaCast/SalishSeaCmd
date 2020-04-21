@@ -440,7 +440,7 @@ single day run so that ERDDAP will accept them
 The run description files are left in the first run day's directory.
 The restart files are moved to the last run day's directory.
 
-_file_def_dailysplit.xml: https://bitbucket.org/salishsea/ss-run-sets/src/tip/v201905/hindcast/file_def_dailysplit.xml
+_file_def_dailysplit.xml: https://github.com/SalishSeaCast/SS-run-sets/blob/master/v201905/hindcast/file_def_dailysplit.xml
 
 ::
 
