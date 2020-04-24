@@ -141,7 +141,7 @@ class TestRecordVCSRevisions:
             call(
                 Path(str(nemo_code_repo)),
                 Path("run_dir"),
-                nemo_cmd.prepare.get_hg_revision,
+                nemo_cmd.prepare.get_git_revision,
             ),
             call(
                 Path(str(xios_code_repo)),

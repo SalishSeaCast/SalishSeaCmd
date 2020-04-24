@@ -138,10 +138,12 @@ def _record_vcs_revisions(run_desc, run_dir):
     xios_code_repo = get_run_desc_value(
         run_desc, ("paths", "XIOS"), resolve_path=True, run_dir=run_dir
     )
-    for repo in (nemo_code_config.parent.parent, xios_code_repo):
-        nemo_cmd.prepare.write_repo_rev_file(
-            repo, run_dir, nemo_cmd.prepare.get_hg_revision
-        )
+    nemo_cmd.prepare.write_repo_rev_file(
+        nemo_code_config.parent.parent, run_dir, nemo_cmd.prepare.get_git_revision
+    )
+    nemo_cmd.prepare.write_repo_rev_file(
+        xios_code_repo, run_dir, nemo_cmd.prepare.get_hg_revision
+    )
     if "vcs revisions" not in run_desc:
         return
     vcs_funcs = {
