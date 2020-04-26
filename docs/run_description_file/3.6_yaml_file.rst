@@ -469,7 +469,7 @@ example :kbd:`vcs revisions` section:
 .. code-block:: yaml
 
     vcs revisions:
-      hg:
+      git:
         - $HOME/MEOPAR/SS-run-sets
         - $HOME/MEOPAR/grid
         - $HOME/MEOPAR/rivers
@@ -478,7 +478,7 @@ example :kbd:`vcs revisions` section:
         - $HOME/MEOPAR/NEMO-Cmd
         - $HOME/MEOPAR/SalishSeaCmd
         - $HOME/MEOPAR/XIOS-ARCH
-      git:
+      hg:
         - $HOME/MEOPAR/FVCOM-VHFR-config
 
 The sub-section keys
@@ -515,29 +515,6 @@ the files created will be::
   XIOS-ARCH_rev.txt
   FVCOM-VHFR-config_rev.txt
 
-For Mercurial repositories,
-each :file:`_rev.txt` file will contain the output of the :command:`hg parents -v` command for the repository.
-That is a record of the last committed revision of the repository that will be in effect for the run.
-For example,
-:file:`SS-run-sets_rev.txt` might contain::
-
-  changset:   950:0ba6750ce999d28c5a3f48a415febb692ba49b86
-  tag:        tip
-  user:       Doug Latornell <djl@douglatornell.ca>
-  date:       Tue Jan 31 14:14:50 2017 -05:00
-  files:      SalishSea/SalishSea.yaml SalishSea/nemo3.6/SalishSea.yaml SalishSea/nemo3.6/SalishSea_orcinus.yaml SalishSea/nemo3.6/nowcast-like/SalishSea_nowcast_green.yaml SalishSea/nemo3.6/nowcast-like/SalishSea_nowcast_green_orcinus.yaml
-  description:
-  Add 'NEMO code config' key to selected run description YAML files.
-
-If any of the listed repositories contain uncommitted changes,
-the :command:`nemo prepare` command that :command:`salishsea run` uses will generate a warning message like::
-
-  nemo_cmd.prepare WARNING: There are uncommitted changes in $HOME/MEOPAR/SS-run-sets/
-
-and the list of uncommitted changes and their status codes,
-the output of the :command:`hg status -mardC` command,
-will be appended to the :file:`_rev.txt` file.
-
 For Git repositories,
 each :file:`_rev.txt` file will contain the output of the commands:
 
@@ -550,17 +527,38 @@ each :file:`_rev.txt` file will contain the output of the commands:
 for the repository.
 That is a record of the last committed revision of the repository that will be in effect for the run.
 For example,
-:file:`FVCOM-VHFR-config_rev.txt` might contain::
+:file:`SS-run-sets_rev.txt` might contain::
 
   branch: master
-  commit: 35fc362f3d77866df8c0a8b743aca81359295d59
+  commit: b43b962a441971def65490620f59a168c2a44a3a
   author: Doug Latornell
-  date:   Fri Mar 08 15:08:15 2019 -08:00
-  files:  namelists/namelist.numerics.template
+  date:   Tue Jan 31 11:14:50 2017 -0800
+  files:  SalishSea/SalishSea.yaml SalishSea/nemo3.6/SalishSea.yaml SalishSea/nemo3.6/SalishSea_orcinus.yaml SalishSea/nemo3.6/nowcast-like/SalishSea_nowcast_green.yaml SalishSea/nemo3.6/nowcast-like/SalishSea_nowcast_green_orcinus.yaml
   message:
-  Change namelist.numerics to a template file.
+  Add 'NEMO code config' key to selected run description YAML files.
 
-  re: different time steps for x2 and r12 configuations.
+If any of the listed repositories contain uncommitted changes,
+the :command:`nemo prepare` command that :command:`salishsea run` uses will generate a warning message like::
+
+  nemo_cmd.prepare WARNING: There are uncommitted changes in $HOME/MEOPAR/SS-run-sets/
+
+and the list of uncommitted changes and their status codes,
+the output of the :command:`git diff --name-status` command,
+will be appended to the :file:`_rev.txt` file.
+
+For Mercurial repositories,
+each :file:`_rev.txt` file will contain the output of the :command:`hg parents -v` command for the repository.
+That is a record of the last committed revision of the repository that will be in effect for the run.
+For example,
+:file:`FVCOM-VHFR-config_rev.txt` might contain::
+
+  changset:   950:35fc362f3d77866df8c0a8b743aca81359295d59
+  tag:        tip
+  user:       Doug Latornell <djl@douglatornell.ca>
+  date:       Fri Mar 08 15:08:15 2019 -08:00
+  files:      namelists/namelist.numerics.template
+  description:
+  Change namelist.numerics to a template file.
 
 If any of the listed repositories contain uncommitted changes,
 the :command:`nemo prepare` command that :command:`salishsea run` uses will generate a warning message like::
@@ -568,5 +566,5 @@ the :command:`nemo prepare` command that :command:`salishsea run` uses will gene
   nemo_cmd.prepare WARNING: There are uncommitted changes in $HOME/MEOPAR/FVCOM-VHFR-config/
 
 and the list of uncommitted changes and their status codes,
-the output of the :command:`git diff --name-status` command,
+the output of the :command:`hg status -mardC` command,
 will be appended to the :file:`_rev.txt` file.
