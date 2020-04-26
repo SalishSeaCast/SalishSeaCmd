@@ -328,27 +328,24 @@ The output looks something like::
   (line  175) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
   (line  262) ok        https://docs.pytest.org/en/latest/
   (line  254) ok        https://salishseacmd.readthedocs.io/en/latest/
-  (line  318) ok        https://bitbucket.org/salishsea/salishseacmd/addon/pipelines/home
   (line  290) ok        https://coverage.readthedocs.io/en/latest/
-  (line  318) ok        https://bitbucket.org/salishsea/salishseacmd/commits/all
-  (line  318) ok        https://bitbucket.org/salishsea/salishseacmd/
+  (line  318) ok        https://github.com/SalishSeaCast/SalishSeaCmd
   (line   21) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
-  (line  352) ok        https://www.mercurial-scm.org/
   (line   21) ok        https://img.shields.io/badge/python-3.5+-blue.svg
   (line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
   (line   21) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
-  (line  352) ok        https://bitbucket.org/salishsea/salishseacmd
+  (line  352) ok        https://github.com/SalishSeaCast/SalishSeaCmd
   (line  360) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
   (line   21) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
   (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
-  (line  366) ok        https://bitbucket.org/salishsea/salishseacmd/issues
+  (line  366) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
   (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
   (line   21) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
   (line  360) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
   writing output... [ 40%] index
   (line   30) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/index.html#salishseanemo
   (line   23) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/index.html#salishseanemo
-  (line   30) ok        https://bitbucket.org/salishsea/nemo-cmd
+  (line   30) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
   (line   63) ok        https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
   (line   67) ok        http://www.apache.org/licenses/LICENSE-2.0
   (line   30) ok        https://docs.openstack.org/cliff/latest/

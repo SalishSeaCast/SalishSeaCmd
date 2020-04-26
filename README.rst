@@ -48,7 +48,7 @@ package.
 It is a NEMO domain-specific command processor tool for the `Salish Sea NEMO model`_ that uses plug-ins from the `NEMO-Cmd`_ package.
 
 .. _Command Line Interface Formulation Framework: http://docs.openstack.org/developer/cliff/
-.. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
+.. _NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
 
 
 License

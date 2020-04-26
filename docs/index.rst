@@ -33,7 +33,7 @@ package.
 It is a NEMO domain-specific command processor tool for the :ref:`SalishSeaNEMO` that uses plug-ins from the `NEMO-Cmd`_ package.
 
 .. _Command Line Interface Formulation Framework: https://docs.openstack.org/cliff/latest/
-.. _NEMO-Cmd: https://bitbucket.org/salishsea/nemo-cmd
+.. _NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
 
 
 Contents
