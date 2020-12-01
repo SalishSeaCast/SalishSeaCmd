@@ -419,7 +419,7 @@ def _write_segment_desc_file(
                         for the segments.
                         Use :py:obj:`None` for segment 0 to avoid replacing the
                         restart directory path in the base run description YAML file.
-    :type restart_dir: :py:class:`pathlib.Path`
+    :type restart_dir: :py:class:`pathlib.Path` or None
 
     :param segment_namrun: File path and name of namelist section file containing
                            namrun for the segment.

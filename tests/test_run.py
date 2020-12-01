@@ -257,10 +257,10 @@ class TestRun:
         m_sj.return_value = submit_job_msg
         with patch("salishsea_cmd.run.SYSTEM", system):
             submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob=42
+                Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob="42"
             )
         m_sj.assert_called_once_with(
-            Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob=42
+            Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob="42"
         )
         assert submit_job_msg == submit_job_msg
 
