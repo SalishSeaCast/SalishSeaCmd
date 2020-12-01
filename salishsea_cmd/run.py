@@ -55,8 +55,7 @@ SEPARATE_DEFLATE_JOBS = {
 
 
 class Run(cliff.command.Command):
-    """Prepare, execute, and gather results from a Salish Sea NEMO model run.
-    """
+    """Prepare, execute, and gather results from a Salish Sea NEMO model run."""
 
     def get_parser(self, prog_name):
         parser = super(Run, self).get_parser(prog_name)

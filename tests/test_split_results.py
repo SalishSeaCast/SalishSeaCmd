@@ -31,8 +31,7 @@ def split_results_cmd():
 
 
 class TestParser:
-    """Unit tests for `salishsea split-results` sub-command command-line parser.
-    """
+    """Unit tests for `salishsea split-results` sub-command command-line parser."""
 
     def test_get_parser(self, split_results_cmd):
         parser = split_results_cmd.get_parser("salishsea split-results")
@@ -74,8 +73,7 @@ class TestParser:
 
 @patch("salishsea_cmd.split_results.split_results", autospec=True)
 class TestTakeAction:
-    """Unit tests for `salishsea split-results` sub-command take_action() method.
-    """
+    """Unit tests for `salishsea split-results` sub-command take_action() method."""
 
     @pytest.mark.parametrize("quiet", (True, False))
     def test_take_action(self, m_split_results, quiet, split_results_cmd):
@@ -90,8 +88,7 @@ class TestTakeAction:
 
 @patch("salishsea_cmd.split_results.log", autospec=True)
 class TestSplitResults:
-    """Unit tests for `salishsea split-results` sub-command split_results() function.
-    """
+    """Unit tests for `salishsea split-results` sub-command split_results() function."""
 
     @patch("salishsea_cmd.split_results.Path.exists", return_value=False, autospec=True)
     def test_source_dir_not_exists(self, m_exists, m_log, split_results_cmd):
@@ -129,8 +126,7 @@ class TestSplitResults:
 
 @patch("salishsea_cmd.split_results.Path.mkdir", autospec=True)
 class TestMkDestDir:
-    """Unit test for `salishsea split-results` sub-command _mk_dest_dir() function.
-    """
+    """Unit test for `salishsea split-results` sub-command _mk_dest_dir() function."""
 
     def test_mk_dest_dir(self, m_mkdir):
         dest_dir = split_results._mk_dest_dir(
@@ -143,8 +139,7 @@ class TestMkDestDir:
 @patch("salishsea_cmd.split_results.log", autospec=True)
 @patch("salishsea_cmd.split_results.shutil.move", autospec=True)
 class TestMoveResultsNcFile:
-    """Unit tests for `salishsea split-results` sub-command _move_results_nc_file() function.
-    """
+    """Unit tests for `salishsea split-results` sub-command _move_results_nc_file() function."""
 
     def test_move_nemo_grid_nc_file(self, m_move, m_log):
         split_results._move_results_nc_file(
@@ -182,8 +177,7 @@ class TestMoveResultsNcFile:
 @patch("salishsea_cmd.split_results.log", autospec=True)
 @patch("salishsea_cmd.split_results.shutil.move", autospec=True)
 class TestMoveRestartFile:
-    """Unit tests for `salishsea split-results` sub-command _move_results_nc_file() function.
-    """
+    """Unit tests for `salishsea split-results` sub-command _move_results_nc_file() function."""
 
     def test_move_restart_file(self, m_move, m_log):
         split_results._move_restart_file(

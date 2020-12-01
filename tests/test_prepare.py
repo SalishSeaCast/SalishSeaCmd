@@ -30,8 +30,7 @@ def prepare_cmd():
 
 
 class TestParser:
-    """Unit tests for `salishsea prepare` sub-command command-line parser.
-    """
+    """Unit tests for `salishsea prepare` sub-command command-line parser."""
 
     def test_get_parser(self, prepare_cmd):
         parser = prepare_cmd.get_parser("salishsea prepare")
@@ -65,8 +64,7 @@ class TestParser:
 @patch("salishsea_cmd.prepare._record_vcs_revisions")
 @patch("nemo_cmd.prepare.add_agrif_files")
 class TestPrepare:
-    """Unit tests for `salishsea prepare` prepare() function.
-    """
+    """Unit tests for `salishsea prepare` prepare() function."""
 
     def test_prepare(
         self,
@@ -110,8 +108,7 @@ class TestPrepare:
 
 
 class TestRecordVCSRevisions:
-    """Unit tests for `salishsea prepare` _record_vcs_revisions() function.
-    """
+    """Unit tests for `salishsea prepare` _record_vcs_revisions() function."""
 
     def test_no_paths_forcing_key(self):
         run_desc = {}

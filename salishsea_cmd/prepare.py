@@ -30,8 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class Prepare(cliff.command.Command):
-    """Prepare a Salish Sea NEMO run.
-    """
+    """Prepare a Salish Sea NEMO run."""
 
     def get_parser(self, prog_name):
         parser = super(Prepare, self).get_parser(prog_name)

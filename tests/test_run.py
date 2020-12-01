@@ -39,8 +39,7 @@ def run_cmd():
 
 
 class TestParser:
-    """Unit tests for `salishsea run` sub-command command-line parser.
-    """
+    """Unit tests for `salishsea run` sub-command command-line parser."""
 
     def test_get_parser(self, run_cmd):
         parser = run_cmd.get_parser("salishsea run")
@@ -81,8 +80,7 @@ class TestParser:
 @patch("salishsea_cmd.run.log")
 @patch("salishsea_cmd.run.run", return_value="job submitted message")
 class TestTakeAction:
-    """Unit tests for `salishsea run` sub-command take_action() method.
-    """
+    """Unit tests for `salishsea run` sub-command take_action() method."""
 
     def test_take_action(self, m_run, m_log, run_cmd):
         parsed_args = Mock(
@@ -126,8 +124,7 @@ class TestTakeAction:
 @patch("salishsea_cmd.run._write_segment_namrun_namelist")
 @patch("salishsea_cmd.run._write_segment_desc_file", return_value=({}, ""))
 class TestRun:
-    """Unit tests for `salishsea run` run() function.
-    """
+    """Unit tests for `salishsea run` run() function."""
 
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
@@ -865,8 +862,7 @@ class TestRun:
 @patch("salishsea_cmd.run.load_run_desc")
 @patch("salishsea_cmd.run.f90nml.read", return_value={"namdom": {"rn_rdt": 40.0}})
 class TestCalcRunSegments:
-    """Unit tests for _calc_run_segments() function.
-    """
+    """Unit tests for _calc_run_segments() function."""
 
     def test_not_segmented_run(self, m_f90nml_read, m_lrd):
         m_lrd.return_value = {}
@@ -1195,8 +1191,7 @@ class TestCalcRunSegments:
 
 
 class TestCalcNSegments:
-    """Unit tests for _calc_n_segments() function.
-    """
+    """Unit tests for _calc_n_segments() function."""
 
     @pytest.mark.parametrize(
         "run_desc, expected",
@@ -1280,8 +1275,7 @@ class TestCalcNSegments:
 
 
 class TestWriteSegmentNamerunNamelist:
-    """Unit tests for _write_segment_namerun_namelist() function.
-    """
+    """Unit tests for _write_segment_namerun_namelist() function."""
 
     def test_no_namrun_namelist(self):
         run_desc = yaml.safe_load(
@@ -1355,8 +1349,7 @@ class TestWriteSegmentNamerunNamelist:
 
 
 class TestWriteSegmentDescFile:
-    """Unit test for _write_segment_desc_file() function.
-    """
+    """Unit test for _write_segment_desc_file() function."""
 
     def test_run_desc_file(self, tmp_path):
         run_desc = yaml.safe_load(
@@ -1671,8 +1664,7 @@ class TestWriteSegmentDescFile:
 @patch("salishsea_cmd.run.api.prepare")
 @pytest.mark.parametrize("sep_xios_server, xios_servers", [(False, 0), (True, 4)])
 class TestBuildTmpRunDir:
-    """Unit tests for _build_tmp_run_dir() function.
-    """
+    """Unit tests for _build_tmp_run_dir() function."""
 
     def test_build_tmp_run_dir(
         self,
@@ -1791,8 +1783,7 @@ class TestBuildTmpRunDir:
     ],
 )
 class TestSubmitJob:
-    """Unit tests for _submit_job() function.
-    """
+    """Unit tests for _submit_job() function."""
 
     def test_submit_job(
         self, m_run, queue_job_cmd, depend_flag, depend_option, submit_job_msg
@@ -1845,8 +1836,7 @@ class TestSubmitJob:
     ],
 )
 class TestSubmitSeparateDeflateJobs:
-    """Unit tests for _submit_separate_deflate_jobs() function.
-    """
+    """Unit tests for _submit_separate_deflate_jobs() function."""
 
     def test_submit_separate_deflate_jobs(
         self,
@@ -1909,8 +1899,7 @@ class TestSubmitSeparateDeflateJobs:
 
 
 class TestBuildBatchScript:
-    """Unit test for _build_batch_script() function.
-    """
+    """Unit test for _build_batch_script() function."""
 
     @pytest.mark.parametrize(
         "account, deflate", [("rrg-allen", True), ("rrg-allen", False)]
@@ -2650,8 +2639,7 @@ class TestBuildBatchScript:
 
 @patch("salishsea_cmd.run.log", autospec=True)
 class TestSbatchDirectives:
-    """Unit tests for _sbatch_directives() function.
-    """
+    """Unit tests for _sbatch_directives() function."""
 
     def test_unknown_system(self, m_logger):
         desc_file = StringIO(
@@ -2776,8 +2764,7 @@ class TestSbatchDirectives:
 
 
 class TestPbsDirectives:
-    """Unit tests for `salishsea run` _pbs_directives() function.
-    """
+    """Unit tests for `salishsea run` _pbs_directives() function."""
 
     @pytest.mark.parametrize(
         "system, procs_per_node, procs_directives",
@@ -3004,8 +2991,7 @@ class TestPbsDirectives:
 
 
 class TestDefinitions:
-    """Unit tests for _definitions function.
-    """
+    """Unit tests for _definitions function."""
 
     @pytest.mark.parametrize(
         "system, home, deflate",
@@ -3053,8 +3039,7 @@ class TestDefinitions:
 
 
 class TestModules:
-    """Unit tests for _modules function.
-    """
+    """Unit tests for _modules function."""
 
     def test_unknown_system(self):
         modules = salishsea_cmd.run._modules()
@@ -3115,8 +3100,7 @@ class TestModules:
 
 
 class TestExecute:
-    """Unit test for _execute function.
-    """
+    """Unit test for _execute function."""
 
     @pytest.mark.parametrize(
         "system, mpirun_cmd",
@@ -3404,8 +3388,7 @@ class TestExecute:
 
 
 class TestCleanup:
-    """Unit test for _cleanup() function.
-    """
+    """Unit test for _cleanup() function."""
 
     def test_cleanup(self):
         script = salishsea_cmd.run._cleanup()
@@ -3429,8 +3412,7 @@ class TestCleanup:
     ],
 )
 class TestBuildDeflateScript:
-    """Unit test for _build_deflate_script() function.
-    """
+    """Unit test for _build_deflate_script() function."""
 
     def test_build_deflate_script_orcinus(self, pattern, result_type, pmem, tmpdir):
         run_desc = {

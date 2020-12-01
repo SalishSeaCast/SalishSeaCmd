@@ -35,7 +35,8 @@ log = logging.getLogger(__name__)
 
 
 class SplitResults(cliff.command.Command):
-    """Split the results of a multi-day SalishSeaCast NEMO model run (e.g. a hindcast run) into daily results directories.
+    """Split the results of a multi-day SalishSeaCast NEMO model run (e.g. a hindcast run)
+    into daily results directories.
     """
 
     def get_parser(self, prog_name):
