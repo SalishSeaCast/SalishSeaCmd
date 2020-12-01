@@ -20,6 +20,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Cache conda pkgs
+        uses: actions/cache@v1
+        env:
+          # Increase this value to reset cache if envs/environment-test.yaml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('envs/environment-test.yaml') }}
+
       - uses: goanpeca/setup-miniconda@v1
         with:
            auto-update-conda: true
