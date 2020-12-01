@@ -273,15 +273,16 @@ use:
 
 The output looks something like::
 
-  Running Sphinx v3.0.0
+  Removing everything under '_build'...
+  Running Sphinx v3.3.1
   making output directory... done
-  WARNING: html_static_path entry '_static' does not exist
-  WARNING: favicon file '_static/MEOPAR_favicon.ico' does not exist
-  loading pickled environment... done
+  loading intersphinx inventory from https://docs.python.org/3/objects.inv...
+  loading intersphinx inventory from https://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv...
+  loading intersphinx inventory from https://nemo-cmd.readthedocs.io/en/latest/objects.inv...
   building [mo]: targets for 0 po files that are out of date
   building [linkcheck]: targets for 10 source files that are out of date
-  updating environment: 0 added, 1 changed, 0 removed
-  reading sources... [100%] development
+  updating environment: [new config] 10 added, 0 changed, 0 removed
+  reading sources... [100%] subcommands
   looking for now-outdated files... none found
   pickling environment... done
   checking consistency... done
@@ -289,94 +290,101 @@ The output looks something like::
   writing output... [ 10%] api
   (line   21) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
   (line   21) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
-  (line   21) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
   (line   21) ok        https://docs.python.org/3/library/functions.html#int
+  (line   21) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
   (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
   (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
   (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
   (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
   (line   21) ok        https://docs.python.org/3/library/stdtypes.html#str
+  (line   21) ok        https://docs.python.org/3/library/constants.html#None
+  (line   21) ok        https://docs.python.org/3/library/constants.html#None
   (line   21) ok        https://docs.python.org/3/library/constants.html#None
   (line   21) ok        https://docs.python.org/3/library/stdtypes.html#dict
-  (line   21) ok        https://docs.python.org/3/library/constants.html#None
-  (line   21) ok        https://docs.python.org/3/library/constants.html#None
   (line   21) ok        https://docs.python.org/3/library/stdtypes.html#dict
   (line   21) ok        https://docs.python.org/3/library/stdtypes.html#dict
   writing output... [ 20%] breaking_changes
   (line   97) ok        https://docs.python.org/3/library/constants.html#False
-  (line   53) ok        https://calver.org/
   (line   45) ok        https://f90nml.readthedocs.io/en/latest/
-  (line   91) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#landprocessorelimination
   (line   30) ok        https://gitpython.readthedocs.io/en/stable/
+  (line   91) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#landprocessorelimination
+  (line   53) ok        https://calver.org/
   writing output... [ 30%] development
-  (line   21) ok        https://docs.python.org/3.8/
-  (line   21) ok        https://salishseacmd.readthedocs.io/en/latest/
+  (line   21) ok        https://docs.python.org/3.9/
   (line   21) ok        https://black.readthedocs.io/en/stable/
-  (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
+  (line   21) ok        https://salishseacmd.readthedocs.io/en/latest/
+  (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
+  (line   21) ok        https://github.com/SalishSeaCast/NEMO-Cmd/issues
+  (line   58) ok        https://www.python.org/
   (line   58) ok        https://www.python.org/
   (line   21) ok        https://www.apache.org/licenses/LICENSE-2.0
+  (line   58) ok        https://nemo-cmd.readthedocs.io/en/latest/development.html#nemo-cmdcontinuousintegration
+  (line   80) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseacmd-repo
   (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd
-  (line   90) ok        https://help.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh
-  (line   21) ok        https://github.com/SalishSeaCast/NEMO-Cmd/issues
-  (line   70) ok        https://github.com/SalishSeaCast/SalishSeaCmd
-  (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
-  (line   76) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseacmd-repo
-  (line  100) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#nemo-cmd-repo
-  (line  100) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseacmd-repo
-  (line  139) ok        https://www.python.org/dev/peps/pep-0008/
-  (line  105) ok        https://conda.io/en/latest/
-  (line  105) ok        https://docs.conda.io/en/latest/miniconda.html
-  (line  105) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/work_env/anaconda_python.html#anacondapythondistro
-  (line  192) ok        https://readthedocs.org/projects/salishseacmd/builds/
-  (line  175) ok        https://www.sphinx-doc.org/en/master/
-  (line  175) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
-  (line  262) ok        https://docs.pytest.org/en/latest/
-  (line  254) ok        https://salishseacmd.readthedocs.io/en/latest/
-  (line  290) ok        https://coverage.readthedocs.io/en/latest/
-  (line  318) ok        https://github.com/SalishSeaCast/SalishSeaCmd
+  (line   94) ok        https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/connecting-to-github-with-ssh
+  (line  104) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#nemo-cmd-repo
+  (line   74) ok        https://github.com/SalishSeaCast/SalishSeaCmd
+  (line  109) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/work_env/anaconda_python.html#anacondapythondistro
+  (line   80) ok        https://github.com/SalishSeaCast/SalishSeaCmd
+  (line  143) ok        https://www.python.org/dev/peps/pep-0008/
+  (line  179) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
+  (line  179) ok        https://www.sphinx-doc.org/en/master/
+  (line  391) ok        https://docs.pytest.org/en/latest/
+  (line  109) ok        https://conda.io/en/latest/
+  (line  109) ok        https://docs.conda.io/en/latest/miniconda.html
+  (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
+  (line  424) ok        https://pytest-cov.readthedocs.io/en/latest/
+  (line  424) ok        https://coverage.readthedocs.io/en/latest/
+  (line  469) ok        https://docs.github.com/en/free-pro-team@latest/actions
+  (line  483) ok        https://git-scm.com/
+  (line  449) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
+  (line  195) ok        https://readthedocs.org/projects/salishseacmd/builds/
+  (line  458) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions
+  (line  497) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
+  (line  491) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
   (line   21) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
   (line   21) ok        https://img.shields.io/badge/python-3.5+-blue.svg
-  (line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
-  (line   21) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
-  (line  352) ok        https://github.com/SalishSeaCast/SalishSeaCmd
-  (line  360) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
   (line   21) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+  (line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
   (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
-  (line  366) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
+  (line  509) ok        https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
   (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
+  (line  458) ok        https://github.com/SalishSeaCast/SalishSeaCmd/commits/master
+  (line   21) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
+  (line  173) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
   (line   21) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
-  (line  360) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
+  (line  491) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
   writing output... [ 40%] index
-  (line   30) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/index.html#salishseanemo
   (line   23) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/index.html#salishseanemo
-  (line   30) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
-  (line   63) ok        https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
-  (line   67) ok        http://www.apache.org/licenses/LICENSE-2.0
+  (line   30) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/index.html#salishseanemo
   (line   30) ok        https://docs.openstack.org/cliff/latest/
+  (line   30) ok        https://github.com/SalishSeaCast/NEMO-Cmd
+  (line   67) ok        http://www.apache.org/licenses/LICENSE-2.0
   writing output... [ 50%] installation
   (line   63) ok        https://en.wikipedia.org/wiki/Command-line_completion
-  (line   29) ok        https://docs.conda.io/en/latest/miniconda.html
-  (line   28) ok        https://docs.conda.io/en/latest/miniconda.html
   writing output... [ 60%] run_description_file/3.6_agrif_yaml_file
   (line   24) ok        https://www-ljk.imag.fr/MOISE/AGRIF/index.html
   (line   27) ok        https://www-ljk.imag.fr/MOISE/AGRIF/index.html
   writing output... [ 70%] run_description_file/3.6_yaml_file
   (line  444) ok        https://docs.python.org/3/library/constants.html#True
-  (line   74) ok        https://slurm.schedmd.com/
-  (line  100) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#xios-repo
-  (line  171) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#preferred-mpi-lpe-decompositions
   (line   89) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#nemo-3-6-code-repo
-  writing output... [ 80%] run_description_file/
+  (line  171) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#preferred-mpi-lpe-decompositions
+  (line  100) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#xios-repo
+  (line   74) ok        https://slurm.schedmd.com/
+  writing output... [ 80%] run_description_file/index
   (line   23) ok        https://pyyaml.org/wiki/PyYAMLDocumentation
   (line   28) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#ss-run-sets-repo
   writing output... [ 90%] run_description_file/segmented_runs
   writing output... [100%] subcommands
-  (line  285) ok        https://en.wikipedia.org/wiki/Universally_unique_identifier
-  (line  396) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-deflate
-  (line  218) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-deflate
-  (line  418) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-gather
   (line  374) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-combine
-  (line  443) ok        https://github.com/SalishSeaCast/SS-run-sets/blob/master/v201905/hindcast/file_def_dailysplit.xml
+  (line  285) ok        https://en.wikipedia.org/wiki/Universally_unique_identifier
+  (line  218) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-deflate
+  (line  396) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-deflate
+  (line  416) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-gather
+  (line  388) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
+  (line  408) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
+  (line  366) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
+  (line  428) ok        https://github.com/SalishSeaCast/SS-run-sets/blob/master/v201905/hindcast/file_def_dailysplit.xml
 
   build succeeded.
 
