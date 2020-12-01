@@ -17,6 +17,9 @@ SalishSeaCast NEMO Command Processor
 .. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
     :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/sphinx-linkcheck/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3A
+    :alt: Sphinx linkcheck
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status

@@ -35,6 +35,9 @@
 .. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
     :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/sphinx-linkcheck/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3A
+    :alt: Sphinx linkcheck
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
@@ -42,7 +45,7 @@
     :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
 .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
-    :target: https://github.com/SalishSeaCast/NEMO-Cmd/issues
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/issues
     :alt: Issue Tracker
 
 
@@ -262,6 +265,10 @@ Whenever you push changes to the :ref:`SalishSeaCmd-repo` on GitHub the document
 Link Checking the Documentation
 -------------------------------
 
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/sphinx-linkcheck/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3A
+    :alt: Sphinx linkcheck
+
 Sphinx also provides a link checker utility which can be run to find broken or redirected links in the docs.
 With your :kbd:`salishsea-cmd` environment activated,
 use:
@@ -389,6 +396,10 @@ The output looks something like::
   build succeeded.
 
   Look for any errors in the above output or in _build/linkcheck/output.txt
+
+:command:`make linkcheck` is run monthly via a `scheduled GitHub Actions workflow`_
+
+.. _scheduled GitHub Actions workflow: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Asphinx-linkcheck
 
 
 .. _SalishSeaCmdRuningTheUnitTests:
