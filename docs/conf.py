@@ -63,8 +63,8 @@ extensions = [
 # Intersphinx configuration
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
-    "salishseadocs": ("http://salishsea-meopar-docs.readthedocs.io/en/latest/", None),
-    "nemocmd": ("http://nemo-cmd.readthedocs.io/en/latest/", None),
+    "salishseadocs": ("https://salishsea-meopar-docs.readthedocs.io/en/latest/", None),
+    "nemocmd": ("https://nemo-cmd.readthedocs.io/en/latest/", None),
 }
 
 todo_include_todos = True
