@@ -396,8 +396,6 @@ Please use:
 to see its usage,
 and see :ref:`nemocmd:nemo-deflate` for more details.
 
-.. _NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd/
-
 If the :command:`deflate` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
 
@@ -417,8 +415,6 @@ Please use:
 
 to see its usage,
 and see :ref:`nemocmd:nemo-gather` for more details.
-
-.. _NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd/
 
 If the :command:`gather` sub-command prints an error message,
 you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
