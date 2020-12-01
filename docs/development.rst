@@ -24,7 +24,7 @@
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 .. image:: https://img.shields.io/badge/python-3.5+-blue.svg
-    :target: https://docs.python.org/3.8/
+    :target: https://docs.python.org/3.9/
     :alt: Python Version
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaCmd
@@ -52,14 +52,18 @@ Python Versions
 ===============
 
 .. image:: https://img.shields.io/badge/python-3.5+-blue.svg
-    :target: https://docs.python.org/3.8/
+    :target: https://docs.python.org/3.9/
     :alt: Python Version
 
-The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.8.
-It is recommended that the package be used under Python>=3.6.
+The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.9.
+It is recommended that the package be used under Python>=3.8.
 However,
 the package must also run under `Python`_ 3.5 for use on the Westgrid :kbd:`orcinus` HPC platform.
-The :ref:`SalishSeaCmdContinuousIntegration` workflow on GitHub ensures that the package is tested for all versions of Python>=3.5.
+Python 3.5 is *not* covered by :ref:`NEMO-CmdContinuousIntegration` and support for it will be dropped as soon as we stop using :kbd:`orcinus`.
+So,
+seriously,
+*don't use this package under Python 3.5!*
+
 
 .. _Python: https://www.python.org/
 
