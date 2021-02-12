@@ -88,16 +88,6 @@ Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from Git
 
     $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
 
-or
-
-.. code-block:: bash
-
-    $ git clone https://github.com/SalishSeaCast/SalishSeaCmd.git
-
-if you don't have `ssh key authentication`_ set up on GitHub.
-
-.. _ssh key authentication: https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/connecting-to-github-with-ssh
-
 
 .. _SalishSeaCmdDevelopmentEnvironment:
 
