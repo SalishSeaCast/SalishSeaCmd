@@ -20,7 +20,6 @@ name: salishsea-cmd
 
 channels:
   - conda-forge
-  - defaults
 
 dependencies:
   - arrow
