@@ -23,7 +23,7 @@ channels:
 
 dependencies:
   - arrow
-  - cliff!=2.9.0
+  - cliff
   - f90nml
   - gitpython
   - pip
