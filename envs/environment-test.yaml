@@ -8,6 +8,7 @@ name: salishsea-cmd-test
 
 channels:
   - conda-forge
+  - nodefaults
 
 dependencies:
   - arrow
