@@ -23,7 +23,7 @@ SalishSeaCast NEMO Command Processor
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
-.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
 .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github

@@ -41,7 +41,7 @@
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
-.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
 .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
@@ -343,10 +343,10 @@ The output looks something like::
   (line   21) ok        https://img.shields.io/badge/python-3.5+-blue.svg
   (line   21) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
   (line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
-  (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
+  (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
   (line  509) ok        https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
   (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
-  (line  458) ok        https://github.com/SalishSeaCast/SalishSeaCmd/commits/master
+  (line  458) ok        https://github.com/SalishSeaCast/SalishSeaCmd/commits/main
   (line   21) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
   (line  173) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
   (line   21) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
@@ -460,7 +460,7 @@ Continuous Integration
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
-.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/master/graph/badge.svg
+.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
 

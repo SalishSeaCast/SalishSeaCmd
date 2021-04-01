@@ -529,7 +529,7 @@ That is a record of the last committed revision of the repository that will be i
 For example,
 :file:`SS-run-sets_rev.txt` might contain::
 
-  branch: master
+  branch: main
   commit: b43b962a441971def65490620f59a168c2a44a3a
   author: Doug Latornell
   date:   Tue Jan 31 11:14:50 2017 -0800
