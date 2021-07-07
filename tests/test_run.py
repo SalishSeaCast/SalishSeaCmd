@@ -14,13 +14,13 @@
 #  limitations under the License.
 """SalishSeaCmd run sub-command plug-in unit tests
 """
-from io import StringIO
 import os
-from pathlib import Path
 import shlex
 import subprocess
 import tempfile
 import textwrap
+from io import StringIO
+from pathlib import Path
 from unittest.mock import call, Mock, patch
 
 import cliff.app
@@ -2356,6 +2356,7 @@ class TestBuildBatchScript:
             # email when the job [b]egins and [e]nds, or is [a]borted
             #PBS -m bea
             #PBS -M me@example.com
+            #PBS -l partition=QDR
             #PBS -l nodes=4:ppn=12
             # memory per processor
             #PBS -l pmem=2000mb
@@ -2777,7 +2778,7 @@ class TestPbsDirectives:
             (
                 "orcinus",
                 0,
-                "#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+                "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "salish",
@@ -2838,7 +2839,7 @@ class TestPbsDirectives:
             (
                 "orcinus",
                 0,
-                "#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+                "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "salish",
@@ -3433,6 +3434,7 @@ class TestBuildDeflateScript:
         # email when the job [b]egins and [e]nds, or is [a]borted
         #PBS -m bea
         #PBS -M test@example.com
+        #PBS -l partition=QDR
         #PBS -l procs=1
         # memory per processor
         #PBS -l pmem={pmem}

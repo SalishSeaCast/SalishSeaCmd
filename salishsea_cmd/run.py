@@ -21,19 +21,19 @@ import datetime
 import logging
 import math
 import os
-from pathlib import Path
 import shlex
 import socket
 import subprocess
 import tempfile
 import textwrap
+from pathlib import Path
 
 import arrow
 import cliff.command
 import f90nml
 import nemo_cmd
-from nemo_cmd.prepare import get_n_processors, get_run_desc_value, load_run_desc
 import yaml
+from nemo_cmd.prepare import get_n_processors, get_run_desc_value, load_run_desc
 
 from salishsea_cmd import api
 
@@ -902,6 +902,12 @@ def _pbs_directives(
             """
         ).format(procs_directive=procs_directive, pmem=pmem)
     else:
+        if SYSTEM == "orcinus":
+            pbs_directives += textwrap.dedent(
+                """\
+                #PBS -l partition=QDR
+                """
+            ).format(procs_directive=procs_directive)
         pbs_directives += textwrap.dedent(
             """\
             {procs_directive}
