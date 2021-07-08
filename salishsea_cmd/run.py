@@ -246,6 +246,9 @@ def run(
         "graham": "sbatch",
         "orcinus": "qsub",
         "salish": "qsub",
+        "seawolf1": "qsub",  # orcinus.westgrid.ca login node
+        "seawolf2": "qsub",  # orcinus.westgrid.ca login node
+        "seawolf3": "qsub",  # orcinus.westgrid.ca login node
         "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
     }.get(SYSTEM, "qsub")
     results_dir = nemo_cmd.resolved_path(results_dir)
@@ -648,9 +651,15 @@ def _build_batch_script(
             )
         )
     else:
-        procs_per_node = {"delta": 20, "sigma": 20, "sockeye": 32, "orcinus": 12}.get(
-            SYSTEM, 0
-        )
+        procs_per_node = {
+            "delta": 20,
+            "sigma": 20,
+            "sockeye": 32,
+            "orcinus": 12,
+            "seawolf1": 12,
+            "seawolf2": 12,
+            "seawolf3": 12,
+        }.get(SYSTEM, 0)
         script = "\n".join(
             (
                 script,
@@ -665,8 +674,6 @@ def _build_batch_script(
                 ),
             )
         )
-    if SYSTEM == "orcinus":
-        script += "#PBS -l partition=QDR\n"
     script = "\n".join(
         (
             script,
@@ -900,14 +907,10 @@ def _pbs_directives(
             #PBS -A st-sallen1-1
             {procs_directive}
             """
-        ).format(procs_directive=procs_directive, pmem=pmem)
+        ).format(procs_directive=procs_directive)
     else:
-        if SYSTEM == "orcinus":
-            pbs_directives += textwrap.dedent(
-                """\
-                #PBS -l partition=QDR
-                """
-            ).format(procs_directive=procs_directive)
+        if SYSTEM == "orcinus" or SYSTEM.startswith("seawolf"):
+            pbs_directives += "#PBS -l partition=QDR\n"
         pbs_directives += textwrap.dedent(
             """\
             {procs_directive}
@@ -962,6 +965,9 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "sigma": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "salish": Path("${HOME}", ".local", "bin", "salishsea"),
+        "seawolf1": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
+        "seawolf2": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
+        "seawolf3": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "sockeye": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
     }.get(SYSTEM, Path("${HOME}", ".local", "bin", "salishsea"))
     defns = (
@@ -1022,6 +1028,39 @@ def _modules():
             """
         ),
         "salish": "",
+        "seawolf1": textwrap.dedent(
+            """\
+            module load intel
+            module load intel/14.0/netcdf-4.3.3.1_mpi
+            module load intel/14.0/netcdf-fortran-4.4.0_mpi
+            module load intel/14.0/hdf5-1.8.15p1_mpi
+            module load intel/14.0/nco-4.5.2
+            module load python/3.5.0
+            module load git
+            """
+        ),
+        "seawolf2": textwrap.dedent(
+            """\
+            module load intel
+            module load intel/14.0/netcdf-4.3.3.1_mpi
+            module load intel/14.0/netcdf-fortran-4.4.0_mpi
+            module load intel/14.0/hdf5-1.8.15p1_mpi
+            module load intel/14.0/nco-4.5.2
+            module load python/3.5.0
+            module load git
+            """
+        ),
+        "seawolf3": textwrap.dedent(
+            """\
+            module load intel
+            module load intel/14.0/netcdf-4.3.3.1_mpi
+            module load intel/14.0/netcdf-fortran-4.4.0_mpi
+            module load intel/14.0/hdf5-1.8.15p1_mpi
+            module load intel/14.0/nco-4.5.2
+            module load python/3.5.0
+            module load git
+            """
+        ),
         "sigma": textwrap.dedent(
             """\
             module load OpenMPI/2.1.6/GCC/SYSTEM
@@ -1050,6 +1089,9 @@ def _execute(
         "graham": "mpirun",
         "orcinus": "mpirun",
         "salish": "/usr/bin/mpirun",
+        "seawolf1": "mpirun",
+        "seawolf2": "mpirun",
+        "seawolf3": "mpirun",
         "sigma": "mpiexec -hostfile $(openmpi_nodefile)",
         "sockeye": "mpirun",
     }.get(SYSTEM, "mpirun")
@@ -1070,6 +1112,15 @@ def _execute(
             mpirun=mpirun, np=nemo_processors
         ),
         "salish": "{mpirun} -np {np} ./nemo.exe".format(
+            mpirun=mpirun, np=nemo_processors
+        ),
+        "seawolf1": "{mpirun} -np {np} ./nemo.exe".format(
+            mpirun=mpirun, np=nemo_processors
+        ),
+        "seawolf2": "{mpirun} -np {np} ./nemo.exe".format(
+            mpirun=mpirun, np=nemo_processors
+        ),
+        "seawolf3": "{mpirun} -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
         "sigma": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
@@ -1099,6 +1150,15 @@ def _execute(
                 mpirun=mpirun, np=xios_processors
             ),
             "salish": "{mpirun} : -np {np} ./xios_server.exe".format(
+                mpirun=mpirun, np=xios_processors
+            ),
+            "seawolf1": "{mpirun} : -np {np} ./xios_server.exe".format(
+                mpirun=mpirun, np=xios_processors
+            ),
+            "seawolf2": "{mpirun} : -np {np} ./xios_server.exe".format(
+                mpirun=mpirun, np=xios_processors
+            ),
+            "seawolf3": "{mpirun} : -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
             "sigma": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(

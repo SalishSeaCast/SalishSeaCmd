@@ -145,6 +145,12 @@ class TestRun:
             (True, 4, "sockeye", "qsub", "43.pbsha"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
+            (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
+            (True, 4, "seawolf1", "qsub", "431.orca2.ibb"),
+            (False, 0, "seawolf2", "qsub", "432.orca2.ibb"),
+            (True, 4, "seawolf2", "qsub", "432.orca2.ibb"),
+            (False, 0, "seawolf3", "qsub", "433.orca2.ibb"),
+            (True, 4, "seawolf3", "qsub", "433.orca2.ibb"),
         ],
     )
     def test_run_submit(
@@ -214,6 +220,12 @@ class TestRun:
             (True, 4, "sockeye", "qsub", "43.pbsha"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
+            (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
+            (True, 4, "seawolf1", "qsub", "431.orca2.ibb"),
+            (False, 0, "seawolf2", "qsub", "432.orca2.ibb"),
+            (True, 4, "seawolf2", "qsub", "432.orca2.ibb"),
+            (False, 0, "seawolf3", "qsub", "433.orca2.ibb"),
+            (True, 4, "seawolf3", "qsub", "433.orca2.ibb"),
         ],
     )
     def test_run_waitjob(
@@ -372,6 +384,12 @@ class TestRun:
             (True, 4, "sockeye", "qsub", "43.pbsha"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
+            (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
+            (True, 4, "seawolf1", "qsub", "431.orca2.ibb"),
+            (False, 0, "seawolf2", "qsub", "432.orca2.ibb"),
+            (True, 4, "seawolf2", "qsub", "432.orca2.ibb"),
+            (False, 0, "seawolf3", "qsub", "433.orca2.ibb"),
+            (True, 4, "seawolf3", "qsub", "433.orca2.ibb"),
         ],
     )
     def test_run_separate_deflate(
@@ -2327,13 +2345,21 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
-    @pytest.mark.parametrize("deflate", [True, False])
-    def test_orcinus(self, deflate):
+    @pytest.mark.parametrize(
+        "system, deflate",
+        (
+            ("orcinus", True),
+            ("seawolf1", False),
+            ("seawolf2", False),
+            ("seawolf3", False),
+        ),
+    )
+    def test_orcinus(self, system, deflate):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
+        with patch("salishsea_cmd.run.SYSTEM", system):
             script = salishsea_cmd.run._build_batch_script(
                 run_desc,
                 Path("SalishSea.yaml"),
@@ -2364,7 +2390,6 @@ class TestBuildBatchScript:
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
             
-            #PBS -l partition=QDR
             
             RUN_ID="foo"
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
@@ -2972,7 +2997,10 @@ class TestPbsDirectives:
             )
         assert "#PBS -A st-sallen1-1\n" in pbs_directives
 
-    @pytest.mark.parametrize("system", ("delta", "orcinus", "sigma", "salish"))
+    @pytest.mark.parametrize(
+        "system",
+        ("delta", "orcinus", "salish", "seawolf1", "seawolf2", "seawolf3", "sigma"),
+    )
     def test_not_sockeye_no_account_directive_from_yaml(self, system):
         run_desc = yaml.safe_load(
             StringIO(
@@ -3009,6 +3037,12 @@ class TestDefinitions:
             ("orcinus", "${PBS_O_HOME}/.local", False),
             ("salish", "${HOME}/.local", True),
             ("salish", "${HOME}/.local", False),
+            ("seawolf1", "${PBS_O_HOME}/.local", True),
+            ("seawolf1", "${PBS_O_HOME}/.local", False),
+            ("seawolf2", "${PBS_O_HOME}/.local", True),
+            ("seawolf2", "${PBS_O_HOME}/.local", False),
+            ("seawolf3", "${PBS_O_HOME}/.local", True),
+            ("seawolf3", "${PBS_O_HOME}/.local", False),
             ("sigma", "${PBS_O_HOME}", True),
             ("sigma", "${PBS_O_HOME}", False),
             ("sockeye", "${PBS_O_HOME}/.local", True),
@@ -3058,8 +3092,9 @@ class TestModules:
         )
         assert modules == expected
 
-    def test_orcinus(self):
-        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
+    @pytest.mark.parametrize("system", ("orcinus", "seawolf1", "seawolf2", "seawolf3"))
+    def test_orcinus(self, system):
+        with patch("salishsea_cmd.run.SYSTEM", system):
             modules = salishsea_cmd.run._modules()
         expected = textwrap.dedent(
             """\
