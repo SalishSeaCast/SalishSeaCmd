@@ -385,7 +385,7 @@ The output looks something like::
 
   build succeeded.
 
-  Look for any errors in the above output or in _build/linkcheck/output.txt
+Look for any errors in the above output or in _build/linkcheck/output.txt
 
 :command:`make linkcheck` is run monthly via a `scheduled GitHub Actions workflow`_
 
