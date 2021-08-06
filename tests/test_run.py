@@ -2159,7 +2159,7 @@ class TestBuildBatchScript:
             #SBATCH --job-name=foo
             #SBATCH --nodes=2
             #SBATCH --ntasks-per-node=32
-            #SBATCH --mem=125G
+            #SBATCH --mem=0
             #SBATCH --time=1:02:03
             #SBATCH --mail-user=me@example.com
             #SBATCH --mail-type=ALL
@@ -2759,7 +2759,7 @@ class TestSbatchDirectives:
             "#SBATCH --job-name=foo\n"
             "#SBATCH --nodes=2\n"
             "#SBATCH --ntasks-per-node=32\n"
-            "#SBATCH --mem=125G\n"
+            "#SBATCH --mem=0\n"
             "#SBATCH --time=1:02:03\n"
             "#SBATCH --mail-user=me@example.com\n"
             "#SBATCH --mail-type=ALL\n"

@@ -705,7 +705,7 @@ def _sbatch_directives(
     cedar_broadwell,
     email,
     results_dir,
-    mem="125G",
+    mem="0",
     deflate=False,
     result_type="",
 ):
@@ -751,7 +751,7 @@ def _sbatch_directives(
     if SYSTEM == "cedar" and cedar_broadwell:
         processors_per_node = 32
     nodes = math.ceil(n_processors / processors_per_node)
-    mem = {"beluga": "92G", "cedar": "0", "graham": "125G"}.get(SYSTEM, mem)
+    mem = {"beluga": "92G", "cedar": "0", "graham": "0"}.get(SYSTEM, mem)
     if deflate:
         run_id = "{result_type}_{run_id}_deflate".format(
             run_id=run_id, result_type=result_type
