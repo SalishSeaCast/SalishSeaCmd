@@ -2589,7 +2589,7 @@ class TestBuildBatchScript:
             #PBS -m bea
             #PBS -M me@example.com
             #PBS -A st-sallen1-1
-            #PBS -l select=2:ncpus=32:mpiprocs=32:mem=64gb
+            #PBS -l select=2:ncpus=40:mpiprocs=40:mem=64gb
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
