@@ -654,7 +654,7 @@ def _build_batch_script(
         procs_per_node = {
             "delta": 20,
             "sigma": 20,
-            "sockeye": 32,
+            "sockeye": 40,
             "orcinus": 12,
             "seawolf1": 12,
             "seawolf2": 12,
