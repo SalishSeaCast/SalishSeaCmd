@@ -2470,7 +2470,7 @@ class TestBuildBatchScript:
             script = salishsea_cmd.run._build_batch_script(
                 run_desc,
                 Path("SalishSea.yaml"),
-                nemo_processors=6,
+                nemo_processors=7,
                 xios_processors=1,
                 max_deflate_jobs=4,
                 results_dir=Path("results_dir"),
@@ -2489,7 +2489,7 @@ class TestBuildBatchScript:
             # email when the job [b]egins and [e]nds, or is [a]borted
             #PBS -m bea
             #PBS -M me@example.com
-            #PBS -l procs=7
+            #PBS -l procs=8
             # total memory for job
             #PBS -l mem=64gb
             # stdout and stderr file paths/names
@@ -2520,7 +2520,7 @@ class TestBuildBatchScript:
             echo "working dir: $(pwd)"
             
             echo "Starting run at $(date)"
-            /usr/bin/mpirun -np 6 ./nemo.exe : -np 1 ./xios_server.exe
+            /usr/bin/mpirun --bind-to none -np 7 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
             
@@ -3149,7 +3149,7 @@ class TestExecute:
             ),
             ("graham", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
-            ("salish", "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
+            ("salish", "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe"),
             (
                 "sigma",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
@@ -3318,19 +3318,19 @@ class TestExecute:
             ),
             (
                 "salish",
-                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "salish",
-                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "salish",
-                "/usr/bin/mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe",
                 True,
                 True,
             ),

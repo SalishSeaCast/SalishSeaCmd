@@ -1120,7 +1120,7 @@ def _execute(
         "orcinus": "{mpirun} -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
-        "salish": "{mpirun} -np {np} ./nemo.exe".format(
+        "salish": "{mpirun} --bind-to none -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
         "seawolf1": "{mpirun} -np {np} ./nemo.exe".format(
@@ -1158,7 +1158,7 @@ def _execute(
             "orcinus": "{mpirun} : -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
-            "salish": "{mpirun} : -np {np} ./xios_server.exe".format(
+            "salish": "{mpirun} : --bind-to none -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
             "seawolf1": "{mpirun} : -np {np} ./xios_server.exe".format(
