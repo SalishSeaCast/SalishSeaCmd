@@ -22,10 +22,13 @@ SalishSeaCast NEMO Command Processor
     :alt: Sphinx linkcheck
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
-    :alt: GitHub Workflow Status
+    :alt: pytest and test coverage analysis
 .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/actions/workflows/codeql-analysis.yaml/badge.svg
+      :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow:codeql-analysis
+      :alt: CodeQL analysis
 .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/issues
     :alt: Issue Tracker
