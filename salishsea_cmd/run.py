@@ -911,13 +911,22 @@ def _pbs_directives(
     else:
         if SYSTEM == "orcinus" or SYSTEM.startswith("seawolf"):
             pbs_directives += "#PBS -l partition=QDR\n"
-        pbs_directives += textwrap.dedent(
-            """\
-            {procs_directive}
-            # memory per processor
-            #PBS -l pmem={pmem}
-            """
-        ).format(procs_directive=procs_directive, pmem=pmem)
+        if SYSTEM == "salish":
+            pbs_directives += textwrap.dedent(
+                """\
+                {procs_directive}
+                # total memory for job
+                #PBS -l mem=64gb
+                """
+            ).format(procs_directive=procs_directive, pmem=pmem)
+        else:
+            pbs_directives += textwrap.dedent(
+                """\
+                {procs_directive}
+                # memory per processor
+                #PBS -l pmem={pmem}
+                """
+            ).format(procs_directive=procs_directive, pmem=pmem)
     if stderr_stdout:
         stdout = (
             "stdout_deflate_{result_type}".format(result_type=result_type)

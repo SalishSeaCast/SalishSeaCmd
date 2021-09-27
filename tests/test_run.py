@@ -2490,8 +2490,8 @@ class TestBuildBatchScript:
             #PBS -m bea
             #PBS -M me@example.com
             #PBS -l procs=7
-            # memory per processor
-            #PBS -l pmem=2000mb
+            # total memory for job
+            #PBS -l mem=64gb
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
@@ -2808,7 +2808,7 @@ class TestPbsDirectives:
             (
                 "salish",
                 0,
-                "#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+                "#PBS -l procs=42\n# total memory for job\n#PBS -l mem=64gb",
             ),
             (
                 "sigma",
@@ -2869,7 +2869,7 @@ class TestPbsDirectives:
             (
                 "salish",
                 0,
-                "#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+                "#PBS -l procs=42\n# total memory for job\n#PBS -l mem=64gb",
             ),
             (
                 "sigma",
