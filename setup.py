@@ -17,18 +17,4 @@
 import setuptools
 
 
-setuptools.setup(
-    entry_points={
-        # The salishsea command:
-        "console_scripts": ["salishsea = salishsea_cmd.main:main"],
-        # Sub-command plug-ins:
-        "salishsea.app": [
-            "combine = nemo_cmd.combine:Combine",
-            "deflate = nemo_cmd.deflate:Deflate",
-            "gather = nemo_cmd.gather:Gather",
-            "prepare = salishsea_cmd.prepare:Prepare",
-            "run = salishsea_cmd.run:Run",
-            "split-results = salishsea_cmd.split_results:SplitResults",
-        ],
-    }
-)
+setuptools.setup()
