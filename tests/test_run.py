@@ -143,6 +143,8 @@ class TestRun:
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "sockeye", "qsub", "43.pbsha"),
             (True, 4, "sockeye", "qsub", "43.pbsha"),
+            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
@@ -218,6 +220,8 @@ class TestRun:
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "sockeye", "qsub", "43.pbsha"),
             (True, 4, "sockeye", "qsub", "43.pbsha"),
+            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
@@ -382,6 +386,8 @@ class TestRun:
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "sockeye", "qsub", "43.pbsha"),
             (True, 4, "sockeye", "qsub", "43.pbsha"),
+            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
@@ -541,6 +547,22 @@ class TestRun:
                 "qsub",
                 ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
                 "43.pbsha.ib.sockeye",
+            ),
+            (
+                False,
+                0,
+                "omega",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                True,
+                4,
+                "omega",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
             ),
             (
                 False,
@@ -745,6 +767,22 @@ class TestRun:
                 "qsub",
                 ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
                 "43.pbsha.ib.sockeye",
+            ),
+            (
+                False,
+                0,
+                "omega",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                True,
+                4,
+                "omega",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
             ),
             (
                 False,
@@ -2241,7 +2279,7 @@ class TestBuildBatchScript:
 
     @pytest.mark.parametrize(
         "system, deflate",
-        [("delta", True), ("delta", False), ("sigma", True), ("sigma", False)],
+        [("delta", True), ("delta", False), ("omega", True), ("omega", False), ("sigma", True), ("sigma", False)],
     )
     def test_optimum(self, system, deflate):
         desc_file = StringIO(
@@ -2804,6 +2842,11 @@ class TestPbsDirectives:
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
+                "omega",
+                20,
+                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
                 "orcinus",
                 0,
                 "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
@@ -2861,6 +2904,11 @@ class TestPbsDirectives:
         (
             (
                 "delta",
+                20,
+                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            (
+                "omega",
                 20,
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
@@ -3002,7 +3050,7 @@ class TestPbsDirectives:
 
     @pytest.mark.parametrize(
         "system",
-        ("delta", "orcinus", "salish", "seawolf1", "seawolf2", "seawolf3", "sigma"),
+        ("delta", "orcinus", "salish", "seawolf1", "seawolf2", "seawolf3", "sigma", "omega"),
     )
     def test_not_sockeye_no_account_directive_from_yaml(self, system):
         run_desc = yaml.safe_load(
@@ -3036,6 +3084,8 @@ class TestDefinitions:
             ("delta", "${PBS_O_HOME}", False),
             ("graham", "${HOME}/.local", True),
             ("graham", "${HOME}/.local", False),
+            ("omega", "${PBS_O_HOME}", True),
+            ("omega", "${PBS_O_HOME}", False),
             ("orcinus", "${PBS_O_HOME}/.local", True),
             ("orcinus", "${PBS_O_HOME}/.local", False),
             ("salish", "${HOME}/.local", True),
@@ -3113,7 +3163,7 @@ class TestModules:
         )
         assert modules == expected
 
-    @pytest.mark.parametrize("system", ["delta", "sigma"])
+    @pytest.mark.parametrize("system", ["delta", "sigma", "omega"])
     def test_optimum(self, system):
         with patch("salishsea_cmd.run.SYSTEM", system):
             modules = salishsea_cmd.run._modules()
@@ -3153,6 +3203,10 @@ class TestExecute:
             ),
             ("graham", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
+            (
+                "omega",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+            ),
             ("salish", "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe"),
             (
                 "sigma",
@@ -3189,7 +3243,7 @@ class TestExecute:
                 mpirun_cmd=mpirun_cmd
             )
         )
-        if system in {"delta", "sigma"}:
+        if system in {"delta", "omega", "sigma"}:
             expected += textwrap.dedent(
                 """\
                 module load GCC/8.3
@@ -3303,6 +3357,24 @@ class TestExecute:
                 True,
             ),
             (
+                "omega",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                True,
+            ),
+            (
+                "omega",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                False,
+            ),
+            (
+                "omega",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                True,
+                True,
+            ),
+            (
                 "orcinus",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
@@ -3403,7 +3475,7 @@ class TestExecute:
                 mpirun_cmd=mpirun_cmd
             )
         )
-        if system in {"delta", "sigma"}:
+        if system in {"delta", "sigma", "omega"}:
             expected += textwrap.dedent(
                 """\
                 module load GCC/8.3

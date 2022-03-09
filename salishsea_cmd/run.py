@@ -244,6 +244,7 @@ def run(
         "cedar": "sbatch",
         "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "graham": "sbatch",
+        "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "orcinus": "qsub",
         "salish": "qsub",
         "seawolf1": "qsub",  # orcinus.westgrid.ca login node
@@ -653,6 +654,7 @@ def _build_batch_script(
     else:
         procs_per_node = {
             "delta": 20,
+            "omega": 20,
             "sigma": 20,
             "sockeye": 40,
             "orcinus": 12,
@@ -971,6 +973,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "cedar": Path("${HOME}", ".local", "bin", "salishsea"),
         "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "graham": Path("${HOME}", ".local", "bin", "salishsea"),
+        "omega": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "sigma": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "salish": Path("${HOME}", ".local", "bin", "salishsea"),
@@ -1026,6 +1029,11 @@ def _modules():
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.5.2
             module load python/3.9.6
+            """
+        ),
+        "omega": textwrap.dedent(
+            """\
+            module load OpenMPI/2.1.6/GCC/SYSTEM
             """
         ),
         "orcinus": textwrap.dedent(
@@ -1099,6 +1107,7 @@ def _execute(
         "cedar": "mpirun",
         "delta": "mpiexec -hostfile $(openmpi_nodefile)",
         "graham": "mpirun",
+        "omega": "mpiexec -hostfile $(openmpi_nodefile)",
         "orcinus": "mpirun",
         "salish": "/usr/bin/mpirun",
         "seawolf1": "mpirun",
@@ -1118,6 +1127,9 @@ def _execute(
             mpirun=mpirun, np=nemo_processors
         ),
         "graham": "{mpirun} -np {np} ./nemo.exe".format(
+            mpirun=mpirun, np=nemo_processors
+        ),
+        "omega": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
             mpirun=mpirun, np=nemo_processors
         ),
         "orcinus": "{mpirun} -np {np} ./nemo.exe".format(
@@ -1156,6 +1168,9 @@ def _execute(
                 mpirun=mpirun, np=xios_processors
             ),
             "graham": "{mpirun} : -np {np} ./xios_server.exe".format(
+                mpirun=mpirun, np=xios_processors
+            ),
+            "omega": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(
                 mpirun=mpirun, np=xios_processors
             ),
             "orcinus": "{mpirun} : -np {np} ./xios_server.exe".format(
@@ -1201,7 +1216,7 @@ def _execute(
             mpirun=mpirun
         )
     )
-    if SYSTEM in {"delta", "sigma"}:
+    if SYSTEM in {"delta", "omega", "sigma"}:
         # Load GCC-8.3 modules just before combining because rebuild_nemo on optimum
         # is built with them, in contrast to XIOS and NEMO which are built with
         # the system GCC-4.4.7
