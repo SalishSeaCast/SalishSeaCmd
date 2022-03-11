@@ -18,20 +18,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache conda pkgs
-        uses: actions/cache@v1
-        env:
-          # Increase this value to reset cache if envs/environment-test.yaml has not changed
-          CACHE_NUMBER: 0
-        with:
-          path: ~/conda_pkgs_dir
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('envs/environment-test.yaml') }}
-
       - uses: conda-incubator/setup-miniconda@v2
         with:
            auto-update-conda: false
            auto-activate-base: false
-           use-only-tar-bz2: true # Required for caching to work properly!
            environment-file: envs/environment-test.yaml
            python-version: ${{ matrix.python-version }}
            activate-environment: salishsea-cmd-test
