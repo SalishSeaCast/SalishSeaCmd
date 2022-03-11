@@ -1,4 +1,4 @@
-#  Copyright 2013-2021 The Salish Sea MEOPAR Contributors
+#  Copyright 2013 – present by the SalishSeaCast Project Contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");

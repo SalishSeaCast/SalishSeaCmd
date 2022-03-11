@@ -1,4 +1,4 @@
-.. Copyright 2013-2021 The Salish Sea MEOPAR contributors
+.. Copyright 2013 – present by the SalishSeaCast Project Contributors
 .. and The University of British Columbia
 ..
 .. Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,9 +60,9 @@ Indices and Tables
 License
 =======
 
-The SalishSeaCmd command processor code and documentation are copyright 2013-2021 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+The SalishSeaCmd command processor code and documentation are copyright 2013 – present by the `SalishSeaCast Project Contributors`_ and The University of British Columbia.
 
-.. _Salish Sea MEOPAR Project Contributors: https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
+.. _SalishSeaCast Project Contributors: https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 http://www.apache.org/licenses/LICENSE-2.0
