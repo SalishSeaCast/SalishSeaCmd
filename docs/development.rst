@@ -26,7 +26,7 @@
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 .. image:: https://img.shields.io/badge/python-3.5+-blue.svg
-    :target: https://docs.python.org/3.9/
+    :target: https://docs.python.org/3.10/
     :alt: Python Version
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaCmd
@@ -60,10 +60,10 @@ Python Versions
 ===============
 
 .. image:: https://img.shields.io/badge/python-3.5+-blue.svg
-    :target: https://docs.python.org/3.9/
+    :target: https://docs.python.org/3.10/
     :alt: Python Version
 
-The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.9.
+The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.10.
 It is recommended that the package be used under Python>=3.8.
 However,
 the package must also run under `Python`_ 3.5 for use on the Westgrid :kbd:`orcinus` HPC platform.
@@ -312,7 +312,7 @@ The output looks something like::
   (line   91) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#landprocessorelimination
   (line   53) ok        https://calver.org/
   writing output... [ 30%] development
-  (line   21) ok        https://docs.python.org/3.9/
+  (line   21) ok        https://docs.python.org/3.10/
   (line   21) ok        https://black.readthedocs.io/en/stable/
   (line   21) ok        https://salishseacmd.readthedocs.io/en/latest/
   (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd

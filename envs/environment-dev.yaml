@@ -28,7 +28,7 @@ dependencies:
   - f90nml
   - gitpython
   - pip
-  - python=3.9
+  - python=3.10
   - pyyaml
 
   # For coding style
