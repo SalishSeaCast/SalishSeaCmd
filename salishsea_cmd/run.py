@@ -878,7 +878,7 @@ def _pbs_directives(
     else:
         nodes = math.ceil(n_processors / procs_per_node)
         if SYSTEM == "sockeye":
-            procs_directive = "#PBS -l select={nodes}:ncpus={procs_per_node}:mpiprocs={procs_per_node}:mem=64gb".format(
+            procs_directive = "#PBS -l select={nodes}:ncpus={procs_per_node}:mpiprocs={procs_per_node}:mem=186gb".format(
                 nodes=nodes, procs_per_node=procs_per_node
             )
         else:
