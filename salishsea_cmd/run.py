@@ -1092,11 +1092,11 @@ def _modules():
         ),
         "sockeye": textwrap.dedent(
             """\
-            module load gcc/5.4.0
-            module load openmpi/3.1.5
-            module load netcdf-fortran/4.4.5
-            module load python/3.7.3
-            module load py-setuptools/41.0.1-py3.7.3
+            module load gcc/5.5.0
+            module load openmpi/4.1.1-cuda11-3
+            module load netcdf-fortran/4.5.3-hdf4-support
+            module load python/3.8.10
+            module load py-setuptools/50.3.2
             """
         ),
     }.get(SYSTEM, "")
