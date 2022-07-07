@@ -83,6 +83,16 @@ class Run(cliff.command.Command):
             help="directory to store results into",
         )
         parser.add_argument(
+            "--cores-per-node",
+            dest="cores_per_node",
+            default="",
+            help="""
+            Number of cores/node to use in PBS or SBATCH directives.
+            Use this option to override the default cores/node that are specified in the code
+            for each HPC cluster.
+            """,
+        )
+        parser.add_argument(
             "--cedar-broadwell",
             dest="cedar_broadwell",
             action="store_true",
@@ -172,6 +182,7 @@ class Run(cliff.command.Command):
         qsub_msg = run(
             parsed_args.desc_file,
             parsed_args.results_dir,
+            cores_per_node=parsed_args.cores_per_node,
             cedar_broadwell=parsed_args.cedar_broadwell,
             deflate=parsed_args.deflate,
             max_deflate_jobs=parsed_args.max_deflate_jobs,
@@ -188,6 +199,7 @@ class Run(cliff.command.Command):
 def run(
     desc_file,
     results_dir,
+    cores_per_node="",
     cedar_broadwell=False,
     deflate=False,
     max_deflate_jobs=4,
@@ -212,6 +224,8 @@ def run(
     :param results_dir: Path of the directory in which to store the run results;
                         it will be created if it does not exist.
     :type results_dir: :py:class:`pathlib.Path`
+
+    :param str cores_per_node: Number of cores/node to use in PBS or SBATCH directives.
 
     :param boolean cedar_broadwell: Use broadwell (32 cores/node) on cedar.
 
@@ -255,6 +269,7 @@ def run(
         "seawolf2": "qsub",  # orcinus.westgrid.ca login node
         "seawolf3": "qsub",  # orcinus.westgrid.ca login node
         "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
+        "sockeye": "qsub",
     }.get(SYSTEM, "qsub")
     results_dir = nemo_cmd.resolved_path(results_dir)
     run_segments, first_seg_no = _calc_run_segments(desc_file, results_dir)
@@ -287,6 +302,7 @@ def run(
                 run_desc,
                 segment_desc_file,
                 results_dir,
+                cores_per_node,
                 cedar_broadwell,
                 deflate,
                 max_deflate_jobs,
@@ -482,6 +498,7 @@ def _build_tmp_run_dir(
     run_desc,
     desc_file,
     results_dir,
+    cores_per_node,
     cedar_broadwell,
     deflate,
     max_deflate_jobs,
@@ -511,6 +528,7 @@ def _build_tmp_run_dir(
         deflate,
         separate_deflate,
         cedar_broadwell,
+        cores_per_node,
     )
     batch_file = run_dir / "SalishSeaNEMO.sh"
     with batch_file.open("wt") as f:
@@ -597,6 +615,7 @@ def _build_batch_script(
     deflate,
     separate_deflate,
     cedar_broadwell,
+    cores_per_node,
 ):
     """Build the Bash script that will execute the run.
 
@@ -632,6 +651,8 @@ def _build_batch_script(
     :param boolean cedar_broadwell: Use broadwell (32 cores/node) nodes on
                                     cedar.
 
+    :param str cores_per_node: Number of cores/node to use in PBS or SBATCH directives.
+
     :returns: Bash script to execute the run.
     :rtype: str
     """
@@ -641,6 +662,11 @@ def _build_batch_script(
     except KeyError:
         email = "{user}@eoas.ubc.ca".format(user=os.getenv("USER"))
     if SYSTEM in {"beluga", "cedar", "graham"}:
+        procs_per_node = {
+            "beluga": 40 if not cores_per_node else int(cores_per_node),
+            "cedar": 48 if not cores_per_node else int(cores_per_node),
+            "graham": 32 if not cores_per_node else int(cores_per_node),
+        }[SYSTEM]
         script = "\n".join(
             (
                 script,
@@ -648,6 +674,7 @@ def _build_batch_script(
                     sbatch_directives=_sbatch_directives(
                         run_desc,
                         nemo_processors + xios_processors,
+                        procs_per_node,
                         cedar_broadwell,
                         email,
                         results_dir,
@@ -656,16 +683,21 @@ def _build_batch_script(
             )
         )
     else:
-        procs_per_node = {
-            "delta": 20,
-            "omega": 20,
-            "sigma": 20,
-            "sockeye": 40,
-            "orcinus": 12,
-            "seawolf1": 12,
-            "seawolf2": 12,
-            "seawolf3": 12,
-        }.get(SYSTEM, 0)
+        try:
+            procs_per_node = {
+                "delta": 20 if not cores_per_node else int(cores_per_node),
+                "omega": 20 if not cores_per_node else int(cores_per_node),
+                "sigma": 20 if not cores_per_node else int(cores_per_node),
+                "sockeye": 40 if not cores_per_node else int(cores_per_node),
+                "orcinus": 12 if not cores_per_node else int(cores_per_node),
+                "salish": 0,  # solish only has 1 node; 0 gets things right
+                "seawolf1": 12 if not cores_per_node else int(cores_per_node),
+                "seawolf2": 12 if not cores_per_node else int(cores_per_node),
+                "seawolf3": 12 if not cores_per_node else int(cores_per_node),
+            }[SYSTEM]
+        except KeyError:
+            log.error("unknown system: {system}".format(system=SYSTEM))
+            raise SystemExit(2)
         script = "\n".join(
             (
                 script,
@@ -708,6 +740,7 @@ def _build_batch_script(
 def _sbatch_directives(
     run_desc,
     n_processors,
+    procs_per_node,
     cedar_broadwell,
     email,
     results_dir,
@@ -726,6 +759,8 @@ def _sbatch_directives(
 
     :param int n_processors: Number of processors that the run will be
                              executed on; the sum of NEMO and XIOS processors.
+
+    :param int procs_per_node: Number of processors per node.
 
     :param boolean cedar_broadwell: Use broadwell (32 cores/node) nodes on
                                     cedar.
@@ -749,14 +784,7 @@ def _sbatch_directives(
     """
     run_id = get_run_desc_value(run_desc, ("run_id",))
     constraint = "broadwell" if SYSTEM == "cedar" and cedar_broadwell else "skylake"
-    try:
-        processors_per_node = {"beluga": 40, "cedar": 48, "graham": 32}[SYSTEM]
-    except KeyError:
-        log.error("unknown system: {system}".format(system=SYSTEM))
-        raise SystemExit(2)
-    if SYSTEM == "cedar" and cedar_broadwell:
-        processors_per_node = 32
-    nodes = math.ceil(n_processors / processors_per_node)
+    nodes = math.ceil(n_processors / procs_per_node)
     mem = {"beluga": "92G", "cedar": "0", "graham": "0"}.get(SYSTEM, mem)
     if deflate:
         run_id = "{result_type}_{run_id}_deflate".format(
@@ -778,14 +806,14 @@ def _sbatch_directives(
         sbatch_directives = "#SBATCH --job-name={run_id}\n".format(run_id=run_id)
     sbatch_directives += (
         "#SBATCH --nodes={nodes}\n"
-        "#SBATCH --ntasks-per-node={processors_per_node}\n"
+        "#SBATCH --ntasks-per-node={procs_per_node}\n"
         "#SBATCH --mem={mem}\n"
         "#SBATCH --time={walltime}\n"
         "#SBATCH --mail-user={email}\n"
         "#SBATCH --mail-type=ALL\n"
     ).format(
         nodes=int(nodes),
-        processors_per_node=processors_per_node,
+        procs_per_node=procs_per_node,
         mem=mem,
         walltime=walltime,
         email=email,

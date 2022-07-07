@@ -54,6 +54,7 @@ class TestParser:
         parsed_args = parser.parse_args(["foo", "baz"])
         assert parsed_args.desc_file == Path("foo")
         assert parsed_args.results_dir == Path("baz")
+        assert parsed_args.cores_per_node == ""
         assert not parsed_args.cedar_broadwell
         assert not parsed_args.deflate
         assert parsed_args.max_deflate_jobs == 4
@@ -90,6 +91,7 @@ class TestTakeAction:
         parsed_args = Mock(
             desc_file="desc file",
             results_dir="results dir",
+            cores_per_node="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -103,6 +105,7 @@ class TestTakeAction:
         m_run.assert_called_once_with(
             "desc file",
             "results dir",
+            cores_per_node="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -1749,6 +1752,7 @@ class TestBuildTmpRunDir:
             run_desc,
             Path("SalishSea.yaml"),
             Path("results_dir"),
+            cores_per_node="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -1783,6 +1787,7 @@ class TestBuildTmpRunDir:
             run_desc,
             Path("SalishSea.yaml"),
             Path("results_dir"),
+            cores_per_node="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -1818,6 +1823,7 @@ class TestBuildTmpRunDir:
             run_desc,
             Path("SalishSea.yaml"),
             Path("results_dir"),
+            cores_per_node="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -1981,6 +1987,7 @@ class TestBuildBatchScript:
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
+                cores_per_node="",
             )
         expected = textwrap.dedent(
             """\
@@ -2068,10 +2075,10 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize(
-        "cedar_broadwell, constraint, nodes, ntasks, mem, deflate",
-        [(True, "broadwell", 2, 32, "0", True), (False, "skylake", 1, 48, "0", True)],
+        "cedar_broadwell, constraint, nodes, cores_per_node, mem, deflate",
+        [(True, "broadwell", 2, "32", "0", True), (False, "skylake", 1, "48", "0", True)],
     )
-    def test_cedar(self, cedar_broadwell, constraint, nodes, ntasks, mem, deflate):
+    def test_cedar(self, cedar_broadwell, constraint, nodes, cores_per_node, mem, deflate):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2088,6 +2095,7 @@ class TestBuildBatchScript:
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=cedar_broadwell,
+                cores_per_node=cores_per_node,
             )
         expected = textwrap.dedent(
             """\
@@ -2096,7 +2104,7 @@ class TestBuildBatchScript:
             #SBATCH --job-name=foo
             #SBATCH --constraint={constraint}
             #SBATCH --nodes={nodes}
-            #SBATCH --ntasks-per-node={ntasks}
+            #SBATCH --ntasks-per-node={cores_per_node}
             #SBATCH --mem={mem}
             #SBATCH --time=1:02:03
             #SBATCH --mail-user=me@example.com
@@ -2113,7 +2121,7 @@ class TestBuildBatchScript:
             RESULTS_DIR="results_dir"
             COMBINE="${{HOME}}/.local/bin/salishsea combine"
             """.format(
-                constraint=constraint, nodes=nodes, ntasks=ntasks, mem=mem
+                constraint=constraint, nodes=nodes, cores_per_node=cores_per_node, mem=mem
             )
         )
         if deflate:
@@ -2195,6 +2203,7 @@ class TestBuildBatchScript:
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
+                cores_per_node="",
             )
         expected = textwrap.dedent(
             """\
@@ -2302,6 +2311,7 @@ class TestBuildBatchScript:
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
+                cores_per_node="",
             )
         expected = textwrap.dedent(
             """\
@@ -2416,6 +2426,7 @@ class TestBuildBatchScript:
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
+                cores_per_node="",
             )
         expected = textwrap.dedent(
             """\
@@ -2523,6 +2534,7 @@ class TestBuildBatchScript:
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
+                cores_per_node="",
             )
         expected = textwrap.dedent(
             """\
@@ -2604,8 +2616,14 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
-    @pytest.mark.parametrize("deflate", [True, False])
-    def test_sockeye(self, deflate):
+    @pytest.mark.parametrize(
+        "cores_per_node, deflate", [
+            ("", True),
+            ("", False),
+            ("32", False),
+        ]
+    )
+    def test_sockeye(self, cores_per_node, deflate):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2622,7 +2640,9 @@ class TestBuildBatchScript:
                 deflate=deflate,
                 separate_deflate=False,
                 cedar_broadwell=False,
+                cores_per_node=cores_per_node,
             )
+        procs = 40 if not cores_per_node else cores_per_node
         expected = textwrap.dedent(
             """\
             #!/bin/bash
@@ -2634,7 +2654,7 @@ class TestBuildBatchScript:
             #PBS -m bea
             #PBS -M me@example.com
             #PBS -A st-sallen1-1
-            #PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb
+            #PBS -l select=2:ncpus={procs}:mpiprocs={procs}:mem=186gb
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
@@ -2644,9 +2664,9 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"
+            COMBINE="${{PBS_O_HOME}}/.local/bin/salishsea combine"
             """
-        )
+        ).format(procs=procs)
         if deflate:
             expected += textwrap.dedent(
                 """\
@@ -2707,25 +2727,33 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
+    @patch("salishsea_cmd.run.log", autospec=True)
+    def test_unknown_system(self, m_logger):
+        desc_file = StringIO(
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
+        )
+        run_desc = yaml.safe_load(desc_file)
+        with patch("salishsea_cmd.run.SYSTEM", "mythical"):
+            with pytest.raises(SystemExit):
+                salishsea_cmd.run._build_batch_script(
+                    run_desc,
+                    Path("SalishSea.yaml"),
+                    nemo_processors=7,
+                    xios_processors=1,
+                    max_deflate_jobs=4,
+                    results_dir=Path("results_dir"),
+                    run_dir=Path("tmp_run_dir"),
+                    deflate=False,
+                    separate_deflate=False,
+                    cedar_broadwell=False,
+                    cores_per_node="",
+                )
+            assert m_logger.error.called
+
 
 @patch("salishsea_cmd.run.log", autospec=True)
 class TestSbatchDirectives:
     """Unit tests for _sbatch_directives() function."""
-
-    def test_unknown_system(self, m_logger):
-        desc_file = StringIO(
-            "run_id: foo\n" "walltime: 01:02:03\n" "account: def-sverdrup\n"
-        )
-        run_desc = yaml.safe_load(desc_file)
-        with pytest.raises(SystemExit):
-            salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                43,
-                cedar_broadwell=False,
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
-        assert m_logger.error.called
 
     def test_beluga_sbatch_directives(self, m_logger):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
@@ -2734,6 +2762,7 @@ class TestSbatchDirectives:
             slurm_directives = salishsea_cmd.run._sbatch_directives(
                 run_desc,
                 n_processors=43,
+                procs_per_node=40,
                 cedar_broadwell=False,
                 email="me@example.com",
                 results_dir=Path("foo"),
@@ -2755,26 +2784,31 @@ class TestSbatchDirectives:
         assert m_logger.info.called
 
     @pytest.mark.parametrize(
-        "system, account, cedar_broadwell, constraint, nodes, ntasks, mem",
+        "system, account, cedar_broadwell, constraint, nodes, procs_per_node, mem",
         [
             ("cedar", "rrg-allen", True, "broadwell", 2, 32, "0"),
             ("cedar", "rrg-allen", False, "skylake", 1, 48, "0"),
         ],
     )
     def test_cedar_sbatch_directives(
-        self, m_logger, system, account, cedar_broadwell, constraint, nodes, ntasks, mem
+        self, m_logger, system, account, cedar_broadwell, constraint, nodes, procs_per_node, mem
     ):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
         with patch("salishsea_cmd.run.SYSTEM", "cedar"):
             slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc, 43, cedar_broadwell, "me@example.com", Path("foo")
+                run_desc,
+                43,
+                procs_per_node=procs_per_node,
+                cedar_broadwell=cedar_broadwell,
+                email="me@example.com",
+                results_dir=Path("foo"),
             )
         expected = (
             "#SBATCH --job-name=foo\n"
             "#SBATCH --constraint={constraint}\n"
             "#SBATCH --nodes={nodes}\n"
-            "#SBATCH --ntasks-per-node={ntasks}\n"
+            "#SBATCH --ntasks-per-node={procs_per_node}\n"
             "#SBATCH --mem={mem}\n"
             "#SBATCH --time=1:02:03\n"
             "#SBATCH --mail-user=me@example.com\n"
@@ -2784,7 +2818,7 @@ class TestSbatchDirectives:
             "#SBATCH --output=foo/stdout\n"
             "#SBATCH --error=foo/stderr\n"
         ).format(
-            constraint=constraint, nodes=nodes, ntasks=ntasks, mem=mem, account=account
+            constraint=constraint, nodes=nodes, procs_per_node=procs_per_node, mem=mem, account=account
         )
         assert slurm_directives == expected
         assert m_logger.info.called
@@ -2796,6 +2830,7 @@ class TestSbatchDirectives:
             slurm_directives = salishsea_cmd.run._sbatch_directives(
                 run_desc,
                 n_processors=43,
+                procs_per_node=32,
                 cedar_broadwell=False,
                 email="me@example.com",
                 results_dir=Path("foo"),
@@ -2816,8 +2851,15 @@ class TestSbatchDirectives:
         assert slurm_directives == expected
         assert m_logger.info.called
 
-    @pytest.mark.parametrize("system", ("beluga", "cedar", "graham"))
-    def test_account_directive_from_yaml(self, m_logger, system):
+    @pytest.mark.parametrize(
+        "system, procs_per_node",
+        (
+            ("beluga", 40),
+            ("cedar", 48),
+            ("graham", 32),
+        )
+    )
+    def test_account_directive_from_yaml(self, m_logger, system, procs_per_node):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "account: def-sverdrup\n"
         )
@@ -2826,6 +2868,7 @@ class TestSbatchDirectives:
             slurm_directives = salishsea_cmd.run._sbatch_directives(
                 run_desc,
                 43,
+                procs_per_node=procs_per_node,
                 cedar_broadwell=False,
                 email="me@example.com",
                 results_dir=Path("foo"),
