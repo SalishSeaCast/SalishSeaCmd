@@ -55,6 +55,7 @@ class TestParser:
         assert parsed_args.desc_file == Path("foo")
         assert parsed_args.results_dir == Path("baz")
         assert parsed_args.cores_per_node == ""
+        assert parsed_args.cpu_arch == ""
         assert not parsed_args.cedar_broadwell
         assert not parsed_args.deflate
         assert parsed_args.max_deflate_jobs == 4
@@ -92,6 +93,7 @@ class TestTakeAction:
             desc_file="desc file",
             results_dir="results dir",
             cores_per_node="",
+            cpu_arch="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -106,6 +108,7 @@ class TestTakeAction:
             "desc file",
             "results dir",
             cores_per_node="",
+            cpu_arch="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -1753,6 +1756,7 @@ class TestBuildTmpRunDir:
             Path("SalishSea.yaml"),
             Path("results_dir"),
             cores_per_node="",
+            cpu_arch="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -1788,6 +1792,7 @@ class TestBuildTmpRunDir:
             Path("SalishSea.yaml"),
             Path("results_dir"),
             cores_per_node="",
+            cpu_arch="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -1824,6 +1829,7 @@ class TestBuildTmpRunDir:
             Path("SalishSea.yaml"),
             Path("results_dir"),
             cores_per_node="",
+            cpu_arch="",
             cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
@@ -1988,6 +1994,7 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
                 cores_per_node="",
+                cpu_arch="",
             )
         expected = textwrap.dedent(
             """\
@@ -2075,10 +2082,10 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize(
-        "cedar_broadwell, constraint, nodes, cores_per_node, mem, deflate",
+        "cedar_broadwell, cpu_arch, nodes, cores_per_node, mem, deflate",
         [(True, "broadwell", 2, "32", "0", True), (False, "skylake", 1, "48", "0", True)],
     )
-    def test_cedar(self, cedar_broadwell, constraint, nodes, cores_per_node, mem, deflate):
+    def test_cedar(self, cedar_broadwell, cpu_arch, nodes, cores_per_node, mem, deflate):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2096,13 +2103,14 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=cedar_broadwell,
                 cores_per_node=cores_per_node,
+                cpu_arch=cpu_arch,
             )
         expected = textwrap.dedent(
             """\
             #!/bin/bash
             
             #SBATCH --job-name=foo
-            #SBATCH --constraint={constraint}
+            #SBATCH --constraint={cpu_arch}
             #SBATCH --nodes={nodes}
             #SBATCH --ntasks-per-node={cores_per_node}
             #SBATCH --mem={mem}
@@ -2121,7 +2129,7 @@ class TestBuildBatchScript:
             RESULTS_DIR="results_dir"
             COMBINE="${{HOME}}/.local/bin/salishsea combine"
             """.format(
-                constraint=constraint, nodes=nodes, cores_per_node=cores_per_node, mem=mem
+                cpu_arch=cpu_arch, nodes=nodes, cores_per_node=cores_per_node, mem=mem
             )
         )
         if deflate:
@@ -2204,6 +2212,7 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
                 cores_per_node="",
+                cpu_arch="",
             )
         expected = textwrap.dedent(
             """\
@@ -2312,6 +2321,7 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
                 cores_per_node="",
+                cpu_arch="",
             )
         expected = textwrap.dedent(
             """\
@@ -2427,6 +2437,7 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
                 cores_per_node="",
+                cpu_arch="",
             )
         expected = textwrap.dedent(
             """\
@@ -2535,6 +2546,7 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
                 cores_per_node="",
+                cpu_arch="",
             )
         expected = textwrap.dedent(
             """\
@@ -2617,13 +2629,14 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize(
-        "cores_per_node, deflate", [
-            ("", True),
-            ("", False),
-            ("32", False),
+        "cores_per_node, cpu_arch, deflate", [
+            ("", "", True),
+            ("", "", False),
+            ("32", "skylake", False),
+            ("40", "cascadelake", False),
         ]
     )
-    def test_sockeye(self, cores_per_node, deflate):
+    def test_sockeye(self, cores_per_node, cpu_arch, deflate):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2641,8 +2654,10 @@ class TestBuildBatchScript:
                 separate_deflate=False,
                 cedar_broadwell=False,
                 cores_per_node=cores_per_node,
+                cpu_arch=cpu_arch,
             )
         procs = 40 if not cores_per_node else cores_per_node
+        arch = "cascadelake" if not cpu_arch else cpu_arch
         expected = textwrap.dedent(
             """\
             #!/bin/bash
@@ -2654,7 +2669,7 @@ class TestBuildBatchScript:
             #PBS -m bea
             #PBS -M me@example.com
             #PBS -A st-sallen1-1
-            #PBS -l select=2:ncpus={procs}:mpiprocs={procs}:mem=186gb
+            #PBS -l select=2:ncpus={procs}:mpiprocs={procs}:mem=186gb:cpu_arch={cpu_arch}
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
@@ -2666,7 +2681,7 @@ class TestBuildBatchScript:
             RESULTS_DIR="results_dir"
             COMBINE="${{PBS_O_HOME}}/.local/bin/salishsea combine"
             """
-        ).format(procs=procs)
+        ).format(procs=procs, cpu_arch=arch)
         if deflate:
             expected += textwrap.dedent(
                 """\
@@ -2747,6 +2762,7 @@ class TestBuildBatchScript:
                     separate_deflate=False,
                     cedar_broadwell=False,
                     cores_per_node="",
+                    cpu_arch="",
                 )
             assert m_logger.error.called
 
@@ -2763,6 +2779,7 @@ class TestSbatchDirectives:
                 run_desc,
                 n_processors=43,
                 procs_per_node=40,
+                cpu_arch="",
                 cedar_broadwell=False,
                 email="me@example.com",
                 results_dir=Path("foo"),
@@ -2784,14 +2801,14 @@ class TestSbatchDirectives:
         assert m_logger.info.called
 
     @pytest.mark.parametrize(
-        "system, account, cedar_broadwell, constraint, nodes, procs_per_node, mem",
+        "system, account, cedar_broadwell, cpu_arch, nodes, procs_per_node, mem",
         [
             ("cedar", "rrg-allen", True, "broadwell", 2, 32, "0"),
             ("cedar", "rrg-allen", False, "skylake", 1, 48, "0"),
         ],
     )
     def test_cedar_sbatch_directives(
-        self, m_logger, system, account, cedar_broadwell, constraint, nodes, procs_per_node, mem
+        self, m_logger, system, account, cedar_broadwell, cpu_arch, nodes, procs_per_node, mem
     ):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
@@ -2800,13 +2817,14 @@ class TestSbatchDirectives:
                 run_desc,
                 43,
                 procs_per_node=procs_per_node,
+                cpu_arch=cpu_arch,
                 cedar_broadwell=cedar_broadwell,
                 email="me@example.com",
                 results_dir=Path("foo"),
             )
         expected = (
             "#SBATCH --job-name=foo\n"
-            "#SBATCH --constraint={constraint}\n"
+            "#SBATCH --constraint={cpu_arch}\n"
             "#SBATCH --nodes={nodes}\n"
             "#SBATCH --ntasks-per-node={procs_per_node}\n"
             "#SBATCH --mem={mem}\n"
@@ -2818,7 +2836,7 @@ class TestSbatchDirectives:
             "#SBATCH --output=foo/stdout\n"
             "#SBATCH --error=foo/stderr\n"
         ).format(
-            constraint=constraint, nodes=nodes, procs_per_node=procs_per_node, mem=mem, account=account
+            cpu_arch=cpu_arch, nodes=nodes, procs_per_node=procs_per_node, mem=mem, account=account
         )
         assert slurm_directives == expected
         assert m_logger.info.called
@@ -2831,6 +2849,7 @@ class TestSbatchDirectives:
                 run_desc,
                 n_processors=43,
                 procs_per_node=32,
+                cpu_arch="",
                 cedar_broadwell=False,
                 email="me@example.com",
                 results_dir=Path("foo"),
@@ -2869,6 +2888,7 @@ class TestSbatchDirectives:
                 run_desc,
                 43,
                 procs_per_node=procs_per_node,
+                cpu_arch="",
                 cedar_broadwell=False,
                 email="me@example.com",
                 results_dir=Path("foo"),
@@ -2881,41 +2901,59 @@ class TestPbsDirectives:
     """Unit tests for `salishsea run` _pbs_directives() function."""
 
     @pytest.mark.parametrize(
-        "system, procs_per_node, procs_directives",
+        "system, procs_per_node, cpu_arch, procs_directives",
         (
             (
                 "delta",
                 20,
+                "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "omega",
                 20,
+                "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "orcinus",
                 0,
+                "",
                 "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "salish",
                 0,
+                "",
                 "#PBS -l procs=42\n# total memory for job\n#PBS -l mem=64gb",
             ),
             (
                 "sigma",
                 20,
+                "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "sockeye",
                 32,
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb",
+                "skylake",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb:cpu_arch=skylake",
+            ),
+            (
+                "sockeye",
+                40,
+                "cascadelake",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascadelake",
+            ),
+            (
+                "sockeye",
+                40,
+                "",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascadelake",
             ),
         ),
     )
-    def test_pbs_directives_run(self, system, procs_per_node, procs_directives):
+    def test_pbs_directives_run(self, system, procs_per_node, cpu_arch, procs_directives):
         run_desc = yaml.safe_load(
             StringIO(
                 textwrap.dedent(
@@ -2928,7 +2966,7 @@ class TestPbsDirectives:
         )
         with patch("salishsea_cmd.run.SYSTEM", system):
             pbs_directives = salishsea_cmd.run._pbs_directives(
-                run_desc, 42, "me@example.com", Path("foo"), procs_per_node
+                run_desc, 42, "me@example.com", Path("foo"), procs_per_node, cpu_arch
             )
         expected = textwrap.dedent(
             """\
@@ -2947,42 +2985,60 @@ class TestPbsDirectives:
         assert pbs_directives == expected
 
     @pytest.mark.parametrize(
-        "system, procs_per_node, procs_directives",
+        "system, procs_per_node, cpu_arch, procs_directives",
         (
             (
                 "delta",
                 20,
+                "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "omega",
                 20,
+                "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "orcinus",
                 0,
+                "",
                 "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "salish",
                 0,
+                "",
                 "#PBS -l procs=42\n# total memory for job\n#PBS -l mem=64gb",
             ),
             (
                 "sigma",
                 20,
+                "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
                 "sockeye",
                 32,
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb",
+                "skylake",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb:cpu_arch=skylake",
+            ),
+            (
+                "sockeye",
+                40,
+                "cascadelake",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascadelake",
+            ),
+            (
+                "sockeye",
+                40,
+                "",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascadelake",
             ),
         ),
     )
     def test_pbs_directives_run_no_stderr_stdout(
-        self, system, procs_per_node, procs_directives
+        self, system, procs_per_node, cpu_arch, procs_directives
     ):
         run_desc = yaml.safe_load(
             StringIO(
@@ -3001,6 +3057,7 @@ class TestPbsDirectives:
                 "me@example.com",
                 Path("foo"),
                 procs_per_node,
+                cpu_arch,
                 stderr_stdout=False,
             )
         expected = textwrap.dedent(

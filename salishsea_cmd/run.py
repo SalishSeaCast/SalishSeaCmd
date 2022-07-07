@@ -102,6 +102,19 @@ class Run(cliff.command.Command):
             """,
         )
         parser.add_argument(
+            "--cpu-arch",
+            dest="cpu_arch",
+            default="",
+            help="""
+            CPU architecture to use in PBS or SBATCH directives.
+            Use this to override the default CPU architecture on HPC clusters that have
+            more than one type of CPU;
+            e.g. sockeye (cascadelake is default, skylake is alternative)
+            or cedar (skylake is default, broadwell is alternative).
+            This option must be used in conjunction with --core-per-node.
+            """,
+        )
+        parser.add_argument(
             "--deflate",
             dest="deflate",
             action="store_true",
@@ -183,6 +196,7 @@ class Run(cliff.command.Command):
             parsed_args.desc_file,
             parsed_args.results_dir,
             cores_per_node=parsed_args.cores_per_node,
+            cpu_arch=parsed_args.cpu_arch,
             cedar_broadwell=parsed_args.cedar_broadwell,
             deflate=parsed_args.deflate,
             max_deflate_jobs=parsed_args.max_deflate_jobs,
@@ -200,6 +214,7 @@ def run(
     desc_file,
     results_dir,
     cores_per_node="",
+    cpu_arch="",
     cedar_broadwell=False,
     deflate=False,
     max_deflate_jobs=4,
@@ -226,6 +241,15 @@ def run(
     :type results_dir: :py:class:`pathlib.Path`
 
     :param str cores_per_node: Number of cores/node to use in PBS or SBATCH directives.
+                               Use this option to override the default cores/node that are
+                               specified in the code for each HPC cluster.
+
+    :param str cores_per_node: CPU architecture to use in PBS or SBATCH directives.
+                               Use this to override the default CPU architecture on
+                               HPC clusters that have more than one type of CPU;
+                               e.g. sockeye (cascadelake is default, skylake is alternative)
+                               or cedar (skylake is default, broadwell is alternative).
+                               This option must be used in conjunction with --core-per-node.
 
     :param boolean cedar_broadwell: Use broadwell (32 cores/node) on cedar.
 
@@ -303,6 +327,7 @@ def run(
                 segment_desc_file,
                 results_dir,
                 cores_per_node,
+                cpu_arch,
                 cedar_broadwell,
                 deflate,
                 max_deflate_jobs,
@@ -499,6 +524,7 @@ def _build_tmp_run_dir(
     desc_file,
     results_dir,
     cores_per_node,
+    cpu_arch,
     cedar_broadwell,
     deflate,
     max_deflate_jobs,
@@ -529,6 +555,7 @@ def _build_tmp_run_dir(
         separate_deflate,
         cedar_broadwell,
         cores_per_node,
+        cpu_arch,
     )
     batch_file = run_dir / "SalishSeaNEMO.sh"
     with batch_file.open("wt") as f:
@@ -616,6 +643,7 @@ def _build_batch_script(
     separate_deflate,
     cedar_broadwell,
     cores_per_node,
+    cpu_arch,
 ):
     """Build the Bash script that will execute the run.
 
@@ -653,6 +681,8 @@ def _build_batch_script(
 
     :param str cores_per_node: Number of cores/node to use in PBS or SBATCH directives.
 
+    :param str cpu_arch: CPU architecture to use in PBS or SBATCH directives.
+
     :returns: Bash script to execute the run.
     :rtype: str
     """
@@ -675,6 +705,7 @@ def _build_batch_script(
                         run_desc,
                         nemo_processors + xios_processors,
                         procs_per_node,
+                        cpu_arch,
                         cedar_broadwell,
                         email,
                         results_dir,
@@ -708,6 +739,7 @@ def _build_batch_script(
                         email,
                         results_dir,
                         procs_per_node,
+                        cpu_arch,
                     )
                 ),
             )
@@ -741,6 +773,7 @@ def _sbatch_directives(
     run_desc,
     n_processors,
     procs_per_node,
+    cpu_arch,
     cedar_broadwell,
     email,
     results_dir,
@@ -761,6 +794,8 @@ def _sbatch_directives(
                              executed on; the sum of NEMO and XIOS processors.
 
     :param int procs_per_node: Number of processors per node.
+
+    :param str cpu_arch: CPU architecture to use in PBS or SBATCH directives.
 
     :param boolean cedar_broadwell: Use broadwell (32 cores/node) nodes on
                                     cedar.
@@ -800,8 +835,8 @@ def _sbatch_directives(
     walltime = _td2hms(td)
     if SYSTEM == "cedar":
         sbatch_directives = (
-            "#SBATCH --job-name={run_id}\n" "#SBATCH --constraint={constraint}\n"
-        ).format(run_id=run_id, constraint=constraint)
+            "#SBATCH --job-name={run_id}\n" f"#SBATCH --constraint={cpu_arch}\n"
+        ).format(run_id=run_id, cpu_arch=cpu_arch)
     else:
         sbatch_directives = "#SBATCH --job-name={run_id}\n".format(run_id=run_id)
     sbatch_directives += (
@@ -855,6 +890,7 @@ def _pbs_directives(
     email,
     results_dir,
     procs_per_node=0,
+    cpu_arch="",
     pmem="2000mb",
     deflate=False,
     result_type="",
@@ -883,6 +919,8 @@ def _pbs_directives(
                                Otherwise produces
                                :kbd:`#PBS -l nodes=n:ppn=procs_per_node` directive.
 
+    :param str cpu_arch: CPU architecture to use in PBS or SBATCH directives.
+
     :param str pmem: Memory per processor.
 
     :param boolean deflate: Return directives for a run results deflation job
@@ -906,8 +944,9 @@ def _pbs_directives(
     else:
         nodes = math.ceil(n_processors / procs_per_node)
         if SYSTEM == "sockeye":
-            procs_directive = "#PBS -l select={nodes}:ncpus={procs_per_node}:mpiprocs={procs_per_node}:mem=186gb".format(
-                nodes=nodes, procs_per_node=procs_per_node
+            arch = "cascadelake" if not cpu_arch else cpu_arch
+            procs_directive = "#PBS -l select={nodes}:ncpus={procs_per_node}:mpiprocs={procs_per_node}:mem=186gb:cpu_arch={cpu_arch}".format(
+                nodes=nodes, procs_per_node=procs_per_node, cpu_arch=arch
             )
         else:
             procs_directive = "#PBS -l nodes={nodes}:ppn={procs_per_node}".format(
