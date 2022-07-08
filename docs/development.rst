@@ -44,7 +44,7 @@
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
     :alt: pytest and test coverage analysis
 .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
-    :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
+    :target: https://app.codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/actions/workflows/codeql-analysis.yaml/badge.svg
       :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow:codeql-analysis
@@ -141,7 +141,7 @@ Coding Style
 The :kbd:`SalishSeaCmd` package uses the `black`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
 
 .. _black: https://black.readthedocs.io/en/stable/
-.. _PEP 8: https://www.python.org/dev/peps/pep-0008/
+.. _PEP 8: https://peps.python.org/pep-0008/
 
 :command:`black` is installed as part of the :ref:`SalishSeaCmdDevelopmentEnvironment` setup.
 
@@ -466,7 +466,7 @@ Continuous Integration
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
 .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
-    :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
+    :target: https://app.codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
 
 The :kbd:`SalishSeaCmd` package unit test suite is run and a coverage report is generated whenever changes are pushed to GitHub.
@@ -478,7 +478,7 @@ The testing coverage report is uploaded to `codecov.io`_
 .. _repo actions page: https://github.com/SalishSeaCast/SalishSeaCmd/actions
 .. _repo commits page: https://github.com/SalishSeaCast/SalishSeaCmd/commits/main
 .. _repo code overview page: https://github.com/SalishSeaCast/SalishSeaCmd
-.. _codecov.io: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
+.. _codecov.io: https://app.codecov.io/gh/SalishSeaCast/SalishSeaCmd
 
 The `GitHub Actions`_ workflow configuration that defines the continuous integration tasks is in the :file:`.github/workflows/pytest-coverage.yaml` file.
 
@@ -520,9 +520,10 @@ License
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 
-The SalishSeaCast NEMO command processor and documentation are copyright 2013 – present by the `SalishSeaCast Project Contributors`_ and The University of British Columbia.
+The SalishSeaCast NEMO command processor and documentation are copyright 2013 – present
+by the `SalishSeaCast Project Contributors`_ and The University of British Columbia.
 
-.. _SalishSeaCast Project Contributors: https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
+.. _SalishSeaCast Project Contributors: https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0
