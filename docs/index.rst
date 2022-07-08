@@ -24,7 +24,8 @@ SalishSeaCast NEMO Command Processor
 
 The SalishSeaCast NEMO command processor,
 :program:`salishsea`,
-is a command-line tool for doing various operations associated with the :ref:`SalishSeaNEMO` model.
+is a command-line tool for doing various operations associated with the
+:ref:`SalishSeaNEMO` model.
 
 The :kbd:`SalishSeaCmd` package is a Python 3 package.
 It is developed and tested under Python 3.7 and should work with Python 3.5 and later.
@@ -32,7 +33,8 @@ It is developed and tested under Python 3.7 and should work with Python 3.5 and 
 This an extensible tool built on the OpenStack ``cliff``
 (`Command Line Interface Formulation Framework`_)
 package.
-It is a NEMO domain-specific command processor tool for the :ref:`SalishSeaNEMO` that uses plug-ins from the `NEMO-Cmd`_ package.
+It is a NEMO domain-specific command processor tool for the :ref:`SalishSeaNEMO`
+that uses plug-ins from the `NEMO-Cmd`_ package.
 
 .. _Command Line Interface Formulation Framework: https://docs.openstack.org/cliff/latest/
 .. _NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
@@ -62,10 +64,11 @@ Indices and Tables
 License
 =======
 
-The SalishSeaCmd command processor code and documentation are copyright 2013 – present by the `SalishSeaCast Project Contributors`_ and The University of British Columbia.
+The SalishSeaCmd command processor code and documentation are copyright 2013 – present
+by the `SalishSeaCast Project Contributors`_ and The University of British Columbia.
 
-.. _SalishSeaCast Project Contributors: https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
+.. _SalishSeaCast Project Contributors: https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Please see the LICENSE file for details of the license.
