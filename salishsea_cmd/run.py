@@ -93,15 +93,6 @@ class Run(cliff.command.Command):
             """,
         )
         parser.add_argument(
-            "--cedar-broadwell",
-            dest="cedar_broadwell",
-            action="store_true",
-            help="""
-            Use broadwell (32 cores/node) nodes on cedar instead of the 
-            default skylake (48 cores/node) nodes.
-            """,
-        )
-        parser.add_argument(
             "--cpu-arch",
             dest="cpu_arch",
             default="",
@@ -197,7 +188,6 @@ class Run(cliff.command.Command):
             parsed_args.results_dir,
             cores_per_node=parsed_args.cores_per_node,
             cpu_arch=parsed_args.cpu_arch,
-            cedar_broadwell=parsed_args.cedar_broadwell,
             deflate=parsed_args.deflate,
             max_deflate_jobs=parsed_args.max_deflate_jobs,
             nocheck_init=parsed_args.nocheck_init,
@@ -215,7 +205,6 @@ def run(
     results_dir,
     cores_per_node="",
     cpu_arch="",
-    cedar_broadwell=False,
     deflate=False,
     max_deflate_jobs=4,
     nocheck_init=False,
@@ -250,8 +239,6 @@ def run(
                                e.g. sockeye (cascadelake is default, skylake is alternative)
                                or cedar (skylake is default, broadwell is alternative).
                                This option must be used in conjunction with --core-per-node.
-
-    :param boolean cedar_broadwell: Use broadwell (32 cores/node) on cedar.
 
     :param boolean deflate: Include "salishsea deflate" command in the bash
                             script.
@@ -328,7 +315,6 @@ def run(
                 results_dir,
                 cores_per_node,
                 cpu_arch,
-                cedar_broadwell,
                 deflate,
                 max_deflate_jobs,
                 separate_deflate,
@@ -525,7 +511,6 @@ def _build_tmp_run_dir(
     results_dir,
     cores_per_node,
     cpu_arch,
-    cedar_broadwell,
     deflate,
     max_deflate_jobs,
     separate_deflate,
@@ -553,7 +538,6 @@ def _build_tmp_run_dir(
         run_dir,
         deflate,
         separate_deflate,
-        cedar_broadwell,
         cores_per_node,
         cpu_arch,
     )
@@ -641,7 +625,6 @@ def _build_batch_script(
     run_dir,
     deflate,
     separate_deflate,
-    cedar_broadwell,
     cores_per_node,
     cpu_arch,
 ):
@@ -676,9 +659,6 @@ def _build_batch_script(
                                      the run results and qsub them to run as
                                      serial jobs after the NEMO run finishes.
 
-    :param boolean cedar_broadwell: Use broadwell (32 cores/node) nodes on
-                                    cedar.
-
     :param str cores_per_node: Number of cores/node to use in PBS or SBATCH directives.
 
     :param str cpu_arch: CPU architecture to use in PBS or SBATCH directives.
@@ -706,7 +686,6 @@ def _build_batch_script(
                         nemo_processors + xios_processors,
                         procs_per_node,
                         cpu_arch,
-                        cedar_broadwell,
                         email,
                         results_dir,
                     )
@@ -774,7 +753,6 @@ def _sbatch_directives(
     n_processors,
     procs_per_node,
     cpu_arch,
-    cedar_broadwell,
     email,
     results_dir,
     mem="0",
@@ -797,9 +775,6 @@ def _sbatch_directives(
 
     :param str cpu_arch: CPU architecture to use in PBS or SBATCH directives.
 
-    :param boolean cedar_broadwell: Use broadwell (32 cores/node) nodes on
-                                    cedar.
-
     :param str email: Email address to send job begin, end & abort
                       notifications to.
 
@@ -818,7 +793,6 @@ def _sbatch_directives(
     :rtype: Unicode str
     """
     run_id = get_run_desc_value(run_desc, ("run_id",))
-    constraint = "broadwell" if SYSTEM == "cedar" and cedar_broadwell else "skylake"
     nodes = math.ceil(n_processors / procs_per_node)
     mem = {"beluga": "92G", "cedar": "0", "graham": "0"}.get(SYSTEM, mem)
     if deflate:
