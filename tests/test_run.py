@@ -56,7 +56,6 @@ class TestParser:
         assert parsed_args.results_dir == Path("baz")
         assert parsed_args.cores_per_node == ""
         assert parsed_args.cpu_arch == ""
-        assert not parsed_args.cedar_broadwell
         assert not parsed_args.deflate
         assert parsed_args.max_deflate_jobs == 4
         assert not parsed_args.nocheck_init
@@ -68,7 +67,6 @@ class TestParser:
     @pytest.mark.parametrize(
         "flag, attr",
         [
-            ("--cedar-broadwell", "cedar_broadwell"),
             ("--deflate", "deflate"),
             ("--nocheck-initial-conditions", "nocheck_init"),
             ("--no-submit", "no_submit"),
@@ -94,7 +92,6 @@ class TestTakeAction:
             results_dir="results dir",
             cores_per_node="",
             cpu_arch="",
-            cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
             nocheck_init=False,
@@ -109,7 +106,6 @@ class TestTakeAction:
             "results dir",
             cores_per_node="",
             cpu_arch="",
-            cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
             nocheck_init=False,
@@ -1757,7 +1753,6 @@ class TestBuildTmpRunDir:
             Path("results_dir"),
             cores_per_node="",
             cpu_arch="",
-            cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
             separate_deflate=False,
@@ -1793,7 +1788,6 @@ class TestBuildTmpRunDir:
             Path("results_dir"),
             cores_per_node="",
             cpu_arch="",
-            cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
             separate_deflate=False,
@@ -1830,7 +1824,6 @@ class TestBuildTmpRunDir:
             Path("results_dir"),
             cores_per_node="",
             cpu_arch="",
-            cedar_broadwell=False,
             deflate=False,
             max_deflate_jobs=4,
             separate_deflate=True,
@@ -1992,7 +1985,6 @@ class TestBuildBatchScript:
                 run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
-                cedar_broadwell=False,
                 cores_per_node="",
                 cpu_arch="",
             )
@@ -2082,10 +2074,10 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize(
-        "cedar_broadwell, cpu_arch, nodes, cores_per_node, mem, deflate",
-        [(True, "broadwell", 2, "32", "0", True), (False, "skylake", 1, "48", "0", True)],
+        "cpu_arch, nodes, cores_per_node, mem, deflate",
+        [("broadwell", 2, "32", "0", True), ("skylake", 1, "48", "0", True)],
     )
-    def test_cedar(self, cedar_broadwell, cpu_arch, nodes, cores_per_node, mem, deflate):
+    def test_cedar(self, cpu_arch, nodes, cores_per_node, mem, deflate):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2101,7 +2093,6 @@ class TestBuildBatchScript:
                 run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
-                cedar_broadwell=cedar_broadwell,
                 cores_per_node=cores_per_node,
                 cpu_arch=cpu_arch,
             )
@@ -2210,7 +2201,6 @@ class TestBuildBatchScript:
                 run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
-                cedar_broadwell=False,
                 cores_per_node="",
                 cpu_arch="",
             )
@@ -2319,7 +2309,6 @@ class TestBuildBatchScript:
                 run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
-                cedar_broadwell=False,
                 cores_per_node="",
                 cpu_arch="",
             )
@@ -2435,7 +2424,6 @@ class TestBuildBatchScript:
                 run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
-                cedar_broadwell=False,
                 cores_per_node="",
                 cpu_arch="",
             )
@@ -2544,7 +2532,6 @@ class TestBuildBatchScript:
                 run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
-                cedar_broadwell=False,
                 cores_per_node="",
                 cpu_arch="",
             )
@@ -2652,7 +2639,6 @@ class TestBuildBatchScript:
                 run_dir=Path("tmp_run_dir"),
                 deflate=deflate,
                 separate_deflate=False,
-                cedar_broadwell=False,
                 cores_per_node=cores_per_node,
                 cpu_arch=cpu_arch,
             )
@@ -2760,7 +2746,6 @@ class TestBuildBatchScript:
                     run_dir=Path("tmp_run_dir"),
                     deflate=False,
                     separate_deflate=False,
-                    cedar_broadwell=False,
                     cores_per_node="",
                     cpu_arch="",
                 )
@@ -2780,7 +2765,6 @@ class TestSbatchDirectives:
                 n_processors=43,
                 procs_per_node=40,
                 cpu_arch="",
-                cedar_broadwell=False,
                 email="me@example.com",
                 results_dir=Path("foo"),
             )
@@ -2801,14 +2785,14 @@ class TestSbatchDirectives:
         assert m_logger.info.called
 
     @pytest.mark.parametrize(
-        "system, account, cedar_broadwell, cpu_arch, nodes, procs_per_node, mem",
+        "system, account, cpu_arch, nodes, procs_per_node, mem",
         [
-            ("cedar", "rrg-allen", True, "broadwell", 2, 32, "0"),
-            ("cedar", "rrg-allen", False, "skylake", 1, 48, "0"),
+            ("cedar", "rrg-allen", "broadwell", 2, 32, "0"),
+            ("cedar", "rrg-allen", "skylake", 1, 48, "0"),
         ],
     )
     def test_cedar_sbatch_directives(
-        self, m_logger, system, account, cedar_broadwell, cpu_arch, nodes, procs_per_node, mem
+        self, m_logger, system, account, cpu_arch, nodes, procs_per_node, mem
     ):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
@@ -2818,7 +2802,6 @@ class TestSbatchDirectives:
                 43,
                 procs_per_node=procs_per_node,
                 cpu_arch=cpu_arch,
-                cedar_broadwell=cedar_broadwell,
                 email="me@example.com",
                 results_dir=Path("foo"),
             )
@@ -2850,7 +2833,6 @@ class TestSbatchDirectives:
                 n_processors=43,
                 procs_per_node=32,
                 cpu_arch="",
-                cedar_broadwell=False,
                 email="me@example.com",
                 results_dir=Path("foo"),
             )
@@ -2889,7 +2871,6 @@ class TestSbatchDirectives:
                 43,
                 procs_per_node=procs_per_node,
                 cpu_arch="",
-                cedar_broadwell=False,
                 email="me@example.com",
                 results_dir=Path("foo"),
             )
