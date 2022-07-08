@@ -22,15 +22,35 @@
 :kbd:`SalishSeaCmd` Changes That Break Backward Compatibility
 *************************************************************
 
+.. _BreakingChangesVersion22.2:
+
+Version 22.2
+============
+
+The following change that was introduced in version 22.2 of the :kbd:`SalishSeaCmd`
+package is incompatible with earlier versions:
+
+* Replaced the :kbd:`salishsea run --cedar-broadwell` command-line flag with
+  more generic :kbd:`--cores-per-node` and :kbd:`cpu-arch` options.
+  This change enables more general control of HPC job configuration on clusters
+  where that is applicable
+  (presently :kbd:`sockeye` and :kbd:`cedar`).
+
+  To reproduce the effect of :kbd:`--cedar-broadwell` now,
+  please use :kbd:`--cores-per-node 32 --cpu-arch broadwell`.
+
+
 .. _BreakingChangesVersion19.3:
 
 Version 19.3
 ============
 
-The following changes that were introduced in version 19.3 of the :kbd:`SalishSeaCmd` package are incompatible with earlier versions:
+The following change that was introduced in version 19.3 of the :kbd:`SalishSeaCmd`
+package is incompatible with earlier versions:
 
 * The `gitpython`_ package is now a required dependency.
-  It can be installed with :command:`pip install --user gitpython` or :command:`conda install gitpython` as appropriate for your working environment.
+  It can be installed with :command:`pip install --user gitpython` or
+  :command:`conda install gitpython` as appropriate for your working environment.
 
   .. _gitpython: https://gitpython.readthedocs.io/en/stable/
 
