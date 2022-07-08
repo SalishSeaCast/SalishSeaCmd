@@ -269,22 +269,25 @@ Example:
 :kbd:`prepare` Sub-command
 ==========================
 
-The :command:`prepare` sub-command sets up a run directory from which to execute the Salish Sea NEMO run described in the specifed run description,
-and IOM server definitions files::
+The :command:`prepare` sub-command sets up a run directory from which to execute the
+Salish Sea NEMO run described in the specified run description,
+and IOM server definitions files:
 
-  usage: salishsea prepare [-h] [--nemo3.4] [-q] DESC_FILE
+.. code-block:: text
 
-  Set up the Salish Sea NEMO described in DESC_FILE and print the path to the
-  run directory.
+    usage: salishsea prepare [-h] [--nemo3.4] [-q] DESC_FILE
 
-  positional arguments:
-    DESC_FILE    run description YAML file
+    Set up the Salish Sea NEMO described in DESC_FILE and print the path to the
+    run directory.
 
-  optional arguments:
-    -h, --help   show this help message and exit
-    --nemo3.4    Prepare a NEMO-3.4 run; the default is to prepare a NEMO-3.6
-                 run
-    -q, --quiet  don't show the run directory path on completion
+    positional arguments:
+      DESC_FILE    run description YAML file
+
+    optional arguments:
+      -h, --help   show this help message and exit
+      --nemo3.4    Prepare a NEMO-3.4 run; the default is to prepare a NEMO-3.6
+                   run
+      -q, --quiet  don't show the run directory path on completion
 
 See the :ref:`RunDescriptionFileStructure` section for details of the run description file.
 
@@ -453,19 +456,20 @@ The restart files are moved to the last run day's directory.
 
 .. _file_def_dailysplit.xml: https://github.com/SalishSeaCast/SS-run-sets/blob/master/v201905/hindcast/file_def_dailysplit.xml
 
-::
+.. code-block:: text
 
-  usage: salishsea split-results [-h] [-q] SOURCE_DIR
+    usage: salishsea split-results [-h] [-q] SOURCE_DIR
 
-  Split the results of the multi-day SalishSeaCast NEMO model run in SOURCE_DIR
-  into daily results directories.
+    Split the results of the multi-day SalishSeaCast NEMO model run in SOURCE_DIR
+    into daily results directories.
 
-  positional arguments:
-    SOURCE_DIR   Multi-day results directory to split into daily directories
+    positional arguments:
+      SOURCE_DIR   Multi-day results directory to split into daily directories
 
-  optional arguments:
-    -h, --help   show this help message and exit
-    -q, --quiet  Don't show progess messages.
+    optional arguments:
+      -h, --help   show this help message and exit
+      -q, --quiet  Don't show progess messages.
 
 If the :command:`split-results` sub-command prints an error message,
-you can get a Python traceback containing more information about the error by re-running the command with the :kbd:`--debug` flag.
+you can get a Python traceback containing more information about the error by re-running
+the command with the :kbd:`--debug` flag.
