@@ -22,7 +22,10 @@
 :command:`salishsea` Sub-Commands
 *********************************
 
-The command :kbd:`salishsea help` produces a list of the available :program:`salishsea` options and sub-commands::
+The command :kbd:`salishsea help` produces a list of the available :program:`salishsea`
+options and sub-commands:
+
+.. code-block:: text
 
   usage: salishsea [--version] [-v | -q] [--log-file LOG_FILE] [-h] [--debug]
 
@@ -44,7 +47,8 @@ The command :kbd:`salishsea help` produces a list of the available :program:`sal
     help           print detailed help for another command (cliff)
     prepare        Prepare a Salish Sea NEMO run.
     run            Prepare, execute, and gather results from a Salish Sea NEMO model run.
-    split-results  Split the results of a multi-day SalishSeaCast NEMO model run (e.g. a hindcast run) into daily results directories.
+    split-results  Split the results of a multi-day SalishSeaCast NEMO model run
+                   (e.g. a hindcast run) into daily results directories.
 
 For details of the arguments and options for a sub-command use
 :command:`salishsea help <sub-command>`.
@@ -54,34 +58,41 @@ For example:
 
     $ salishsea help run
 
-::
+.. code-block:: text
 
-    usage: salishsea run [-h] [--cedar-broadwell] [--deflate]
-                         [--max-deflate-jobs MAX_DEFLATE_JOBS]
+    usage: salishsea run [-h] [--cores-per-node CORES_PER_NODE] [--cpu-arch CPU_ARCH]
+                         [--deflate] [--max-deflate-jobs MAX_DEFLATE_JOBS]
                          [--nocheck-initial-conditions] [--no-submit]
                          [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
-    described in DESC_FILE. The results files from the run are gathered in
-    RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
+    described in DESC_FILE. The results files from the run are gathered in RESULTS_DIR.
+    If RESULTS_DIR does not exist it will be created.
 
     positional arguments:
-      DESC_FILE             run description YAML file
-      RESULTS_DIR           directory to store results into
+      DESC_FILE     run description YAML file
+      RESULTS_DIR   directory to store results into
 
-    optional arguments:
+    options:
       -h, --help            show this help message and exit
-      --cedar-broadwell     Use broadwell (32 cores/node) nodes on cedar instead
-                            of the
-                            default skylake (48 cores/node) nodes.
-      --deflate             Include "salishsea deflate" command in the bash
-                            script.
+      --cores-per-node CORES_PER_NODE
+                            Number of cores/node to use in PBS or SBATCH directives.
+                            Use this option to override the default cores/node that are
+                            specified in the code for each HPC cluster.
+      --cpu-arch CPU_ARCH
+                            CPU architecture to use in PBS or SBATCH directives.
+                            Use this to override the default CPU architecture on
+                            HPC clusters that have more than one type of CPU;
+                            e.g. sockeye (cascadelake is default, skylake is alternative)
+                            or cedar (skylake is default, broadwell is alternative).
+                            This option must be used in conjunction with --core-per-node.
+      --deflate
+                            Include "salishsea deflate" command in the bash script.
                             Use this option, or the --separate-deflate option
                             if you are *not* using on-the-fly deflation in XIOS-2;
                             i.e. you are using more than 1 XIOS-2 process and/or
-                            do not have the compression_level="4" attribute set in
-                            all of
+                            do not have the compression_level="4" attribute set in all of
                             the file_group definitions in your file_def.xml file.
       --max-deflate-jobs MAX_DEFLATE_JOBS
                             Maximum number of concurrent sub-processes to
@@ -90,25 +101,22 @@ For example:
                             Suppress checking of the initial conditions link.
                             Useful if you are submitting a job to wait on a
                             previous job
-      --no-submit           Prepare the temporary run directory, and the bash
-                            script to execute
-                            the NEMO run, but don't submit the run to the queue.
-                            This is useful during development runs when you want
-                            to hack on the
-                            bash script and/or use the same temporary run
-                            directory more than
-                            once.
-      --separate-deflate    Produce separate bash scripts to deflate the run
-                            results and submit
-                            them to run as serial jobs after the NEMO run finishes
-                            via the
-                            queue manager's job chaining feature.
-      --waitjob WAITJOB     Make this job wait for to start until the successful
-                            completion of
-                            WAITJOB. WAITJOB is the queue job number of the job to
-                            wait for.
-      -q, --quiet           Don't show the run directory path or job submission
-                            message.
+      --no-submit
+                            Prepare the temporary run directory, and the bash script
+                            to execute the NEMO run, but don't submit the run to the queue.
+                            This is useful during development runs when you want to
+                            hack on the bash script and/or use the same temporary run
+                            directory more than once.
+      --separate-deflate
+                            Produce separate bash scripts to deflate the run results
+                            and submit them to run as serial jobs after the NEMO run
+                            finishes via the queue manager's job chaining feature.
+      --waitjob WAITJOB
+                            Make this job wait for to start until the successful
+                            completion of WAITJOB. WAITJOB is the queue job number of
+                            the job to wait for.
+      -q, --quiet
+                            Don't show the run directory path or job submission message.
 
 You can check what version of :program:`salishsea` you have installed with:
 
@@ -124,37 +132,45 @@ You can check what version of :program:`salishsea` you have installed with:
 
 The :command:`run` sub-command prepares,
 executes,
-and gathers the results from the Salish Sea NEMO run described in the specified run description file.
+and gathers the results from the Salish Sea NEMO run described in the specified run
+description file.
 The results are gathered in the specified results directory.
 
-::
+.. code-block:: text
 
-    usage: salishsea run [-h] [--cedar-broadwell] [--deflate]
-                         [--max-deflate-jobs MAX_DEFLATE_JOBS]
+    usage: salishsea run [-h] [--cores-per-node CORES_PER_NODE] [--cpu-arch CPU_ARCH]
+                         [--deflate] [--max-deflate-jobs MAX_DEFLATE_JOBS]
                          [--nocheck-initial-conditions] [--no-submit]
                          [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
     Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
-    described in DESC_FILE. The results files from the run are gathered in
-    RESULTS_DIR. If RESULTS_DIR does not exist it will be created.
+    described in DESC_FILE. The results files from the run are gathered in RESULTS_DIR.
+    If RESULTS_DIR does not exist it will be created.
 
     positional arguments:
-      DESC_FILE             run description YAML file
-      RESULTS_DIR           directory to store results into
+      DESC_FILE     run description YAML file
+      RESULTS_DIR   directory to store results into
 
-    optional arguments:
+    options:
       -h, --help            show this help message and exit
-      --cedar-broadwell     Use broadwell (32 cores/node) nodes on cedar instead
-                            of the
-                            default skylake (48 cores/node) nodes.
-      --deflate             Include "salishsea deflate" command in the bash
-                            script.
+      --cores-per-node CORES_PER_NODE
+                            Number of cores/node to use in PBS or SBATCH directives.
+                            Use this option to override the default cores/node that are
+                            specified in the code for each HPC cluster.
+      --cpu-arch CPU_ARCH
+                            CPU architecture to use in PBS or SBATCH directives.
+                            Use this to override the default CPU architecture on
+                            HPC clusters that have more than one type of CPU;
+                            e.g. sockeye (cascadelake is default, skylake is alternative)
+                            or cedar (skylake is default, broadwell is alternative).
+                            This option must be used in conjunction with --core-per-node.
+      --deflate
+                            Include "salishsea deflate" command in the bash script.
                             Use this option, or the --separate-deflate option
                             if you are *not* using on-the-fly deflation in XIOS-2;
                             i.e. you are using more than 1 XIOS-2 process and/or
-                            do not have the compression_level="4" attribute set in
-                            all of
+                            do not have the compression_level="4" attribute set in all of
                             the file_group definitions in your file_def.xml file.
       --max-deflate-jobs MAX_DEFLATE_JOBS
                             Maximum number of concurrent sub-processes to
@@ -163,25 +179,22 @@ The results are gathered in the specified results directory.
                             Suppress checking of the initial conditions link.
                             Useful if you are submitting a job to wait on a
                             previous job
-      --no-submit           Prepare the temporary run directory, and the bash
-                            script to execute
-                            the NEMO run, but don't submit the run to the queue.
-                            This is useful during development runs when you want
-                            to hack on the
-                            bash script and/or use the same temporary run
-                            directory more than
-                            once.
-      --separate-deflate    Produce separate bash scripts to deflate the run
-                            results and submit
-                            them to run as serial jobs after the NEMO run finishes
-                            via the
-                            queue manager's job chaining feature.
-      --waitjob WAITJOB     Make this job wait for to start until the successful
-                            completion of
-                            WAITJOB. WAITJOB is the queue job number of the job to
-                            wait for.
-      -q, --quiet           Don't show the run directory path or job submission
-                            message.
+      --no-submit
+                            Prepare the temporary run directory, and the bash script
+                            to execute the NEMO run, but don't submit the run to the queue.
+                            This is useful during development runs when you want to
+                            hack on the bash script and/or use the same temporary run
+                            directory more than once.
+      --separate-deflate
+                            Produce separate bash scripts to deflate the run results
+                            and submit them to run as serial jobs after the NEMO run
+                            finishes via the queue manager's job chaining feature.
+      --waitjob WAITJOB
+                            Make this job wait for to start until the successful
+                            completion of WAITJOB. WAITJOB is the queue job number of
+                            the job to wait for.
+      -q, --quiet
+                            Don't show the run directory path or job submission message.
 
 The path to the run directory,
 and the response from the job queue manager
