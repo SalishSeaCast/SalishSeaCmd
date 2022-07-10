@@ -84,7 +84,7 @@ For example:
                             CPU architecture to use in PBS or SBATCH directives.
                             Use this to override the default CPU architecture on
                             HPC clusters that have more than one type of CPU;
-                            e.g. sockeye (cascadelake is default, skylake is alternative)
+                            e.g. sockeye (cascade is default, skylake is alternative)
                             or cedar (skylake is default, broadwell is alternative).
                             This option must be used in conjunction with --core-per-node.
       --deflate
@@ -162,7 +162,7 @@ The results are gathered in the specified results directory.
                             CPU architecture to use in PBS or SBATCH directives.
                             Use this to override the default CPU architecture on
                             HPC clusters that have more than one type of CPU;
-                            e.g. sockeye (cascadelake is default, skylake is alternative)
+                            e.g. sockeye (cascade is default, skylake is alternative)
                             or cedar (skylake is default, broadwell is alternative).
                             This option must be used in conjunction with --core-per-node.
       --deflate

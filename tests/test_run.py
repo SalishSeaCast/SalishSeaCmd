@@ -2620,7 +2620,7 @@ class TestBuildBatchScript:
             ("", "", True),
             ("", "", False),
             ("32", "skylake", False),
-            ("40", "cascadelake", False),
+            ("40", "cascade", False),
         ]
     )
     def test_sockeye(self, cores_per_node, cpu_arch, deflate):
@@ -2643,7 +2643,7 @@ class TestBuildBatchScript:
                 cpu_arch=cpu_arch,
             )
         procs = 40 if not cores_per_node else cores_per_node
-        arch = "cascadelake" if not cpu_arch else cpu_arch
+        arch = "cascade" if not cpu_arch else cpu_arch
         expected = textwrap.dedent(
             """\
             #!/bin/bash
@@ -2923,14 +2923,14 @@ class TestPbsDirectives:
             (
                 "sockeye",
                 40,
-                "cascadelake",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascadelake",
+                "cascade",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
             ),
             (
                 "sockeye",
                 40,
                 "",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascadelake",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
             ),
         ),
     )
@@ -3007,14 +3007,14 @@ class TestPbsDirectives:
             (
                 "sockeye",
                 40,
-                "cascadelake",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascadelake",
+                "cascade",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
             ),
             (
                 "sockeye",
                 40,
                 "",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascadelake",
+                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
             ),
         ),
     )

@@ -100,7 +100,7 @@ class Run(cliff.command.Command):
             CPU architecture to use in PBS or SBATCH directives.
             Use this to override the default CPU architecture on HPC clusters that have
             more than one type of CPU;
-            e.g. sockeye (cascadelake is default, skylake is alternative)
+            e.g. sockeye (cascade is default, skylake is alternative)
             or cedar (skylake is default, broadwell is alternative).
             This option must be used in conjunction with --core-per-node.
             """,
@@ -236,7 +236,7 @@ def run(
     :param str cores_per_node: CPU architecture to use in PBS or SBATCH directives.
                                Use this to override the default CPU architecture on
                                HPC clusters that have more than one type of CPU;
-                               e.g. sockeye (cascadelake is default, skylake is alternative)
+                               e.g. sockeye (cascade is default, skylake is alternative)
                                or cedar (skylake is default, broadwell is alternative).
                                This option must be used in conjunction with --core-per-node.
 
@@ -918,7 +918,7 @@ def _pbs_directives(
     else:
         nodes = math.ceil(n_processors / procs_per_node)
         if SYSTEM == "sockeye":
-            arch = "cascadelake" if not cpu_arch else cpu_arch
+            arch = "cascade" if not cpu_arch else cpu_arch
             procs_directive = "#PBS -l select={nodes}:ncpus={procs_per_node}:mpiprocs={procs_per_node}:mem=186gb:cpu_arch={cpu_arch}".format(
                 nodes=nodes, procs_per_node=procs_per_node, cpu_arch=arch
             )
