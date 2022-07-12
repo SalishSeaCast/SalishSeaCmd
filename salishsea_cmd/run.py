@@ -919,8 +919,11 @@ def _pbs_directives(
         nodes = math.ceil(n_processors / procs_per_node)
         if SYSTEM == "sockeye":
             arch = "cascade" if not cpu_arch else cpu_arch
-            procs_directive = "#PBS -l select={nodes}:ncpus={procs_per_node}:mpiprocs={procs_per_node}:mem=186gb:cpu_arch={cpu_arch}".format(
-                nodes=nodes, procs_per_node=procs_per_node, cpu_arch=arch
+            procs_directive = (
+                "#PBS -q R3896244\n"
+                "#PBS -l select={nodes}:ncpus={procs_per_node}:mpiprocs={procs_per_node}:mem=186gb:cpu_arch={cpu_arch}".format(
+                    nodes=nodes, procs_per_node=procs_per_node, cpu_arch=arch
+                )
             )
         else:
             procs_directive = "#PBS -l nodes={nodes}:ppn={procs_per_node}".format(

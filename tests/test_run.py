@@ -2655,6 +2655,7 @@ class TestBuildBatchScript:
             #PBS -m bea
             #PBS -M me@example.com
             #PBS -A st-sallen1-1
+            #PBS -q R3896244
             #PBS -l select=2:ncpus={procs}:mpiprocs={procs}:mem=186gb:cpu_arch={cpu_arch}
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
@@ -2918,19 +2919,31 @@ class TestPbsDirectives:
                 "sockeye",
                 32,
                 "skylake",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb:cpu_arch=skylake",
+                (
+                    "#PBS -A st-sallen1-1\n"
+                    "#PBS -q R3896244\n"
+                    "#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb:cpu_arch=skylake"
+                ),
             ),
             (
                 "sockeye",
                 40,
                 "cascade",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
+                (
+                    "#PBS -A st-sallen1-1\n"
+                    "#PBS -q R3896244\n"
+                    "#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade"
+                ),
             ),
             (
                 "sockeye",
                 40,
                 "",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
+                (
+                    "#PBS -A st-sallen1-1\n"
+                    "#PBS -q R3896244\n"
+                    "#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade"
+                ),
             ),
         ),
     )
@@ -3002,19 +3015,31 @@ class TestPbsDirectives:
                 "sockeye",
                 32,
                 "skylake",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb:cpu_arch=skylake",
+                (
+                    "#PBS -A st-sallen1-1\n"
+                    "#PBS -q R3896244\n"
+                    "#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb:cpu_arch=skylake"
+                ),
             ),
             (
                 "sockeye",
                 40,
                 "cascade",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
+                (
+                     "#PBS -A st-sallen1-1\n"
+                     "#PBS -q R3896244\n"
+                     "#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade"
+                ),
             ),
             (
                 "sockeye",
                 40,
                 "",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
+                (
+                    "#PBS -A st-sallen1-1\n"
+                    "#PBS -q R3896244\n"
+                    "#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade"
+                ),
             ),
         ),
     )
