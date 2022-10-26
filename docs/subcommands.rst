@@ -45,8 +45,8 @@ options and sub-commands:
     deflate        Deflate variables in netCDF files using Lempel-Ziv compression. (NEMO-Cmd)
     gather         Gather results from a NEMO run. (NEMO-Cmd)
     help           print detailed help for another command (cliff)
-    prepare        Prepare a Salish Sea NEMO run.
-    run            Prepare, execute, and gather results from a Salish Sea NEMO model run.
+    prepare        Prepare a SalishSeaCast NEMO run.
+    run            Prepare, execute, and gather results from a SalishSeaCast NEMO model run.
     split-results  Split the results of a multi-day SalishSeaCast NEMO model run
                    (e.g. a hindcast run) into daily results directories.
 
@@ -66,7 +66,7 @@ For example:
                          [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
-    Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
+    Prepare, execute, and gather the results from a SalishSeaCast NEMO run
     described in DESC_FILE. The results files from the run are gathered in RESULTS_DIR.
     If RESULTS_DIR does not exist it will be created.
 
@@ -132,7 +132,7 @@ You can check what version of :program:`salishsea` you have installed with:
 
 The :command:`run` sub-command prepares,
 executes,
-and gathers the results from the Salish Sea NEMO run described in the specified run
+and gathers the results from the SalishSeaCast NEMO run described in the specified run
 description file.
 The results are gathered in the specified results directory.
 
@@ -144,7 +144,7 @@ The results are gathered in the specified results directory.
                          [--separate-deflate] [--waitjob WAITJOB] [-q]
                          DESC_FILE RESULTS_DIR
 
-    Prepare, execute, and gather the results from a Salish Sea NEMO-3.6 run
+    Prepare, execute, and gather the results from a SalishSeaCast NEMO run
     described in DESC_FILE. The results files from the run are gathered in RESULTS_DIR.
     If RESULTS_DIR does not exist it will be created.
 
@@ -203,7 +203,7 @@ are printed upon completion of the command.
 
 The :command:`run` sub-command does the following:
 
-#. Execute the :ref:`salishsea-prepare` via the :ref:`SalishSeaCmdAPI` to set up a temporary run directory from which to execute the Salish Sea NEMO run.
+#. Execute the :ref:`salishsea-prepare` via the :ref:`SalishSeaCmdAPI` to set up a temporary run directory from which to execute the SalishSeaCast NEMO run.
 #. Create a :file:`SalishSeaNEMO.sh` job script in the run directory.
    The job script:
 
@@ -270,14 +270,14 @@ Example:
 ==========================
 
 The :command:`prepare` sub-command sets up a run directory from which to execute the
-Salish Sea NEMO run described in the specified run description,
+SalishSeaCast NEMO run described in the specified run description,
 and IOM server definitions files:
 
 .. code-block:: text
 
     usage: salishsea prepare [-h] [--nemo3.4] [-q] DESC_FILE
 
-    Set up the Salish Sea NEMO described in DESC_FILE and print the path to the
+    Set up the SalishSeaCast NEMO described in DESC_FILE and print the path to the
     run directory.
 
     positional arguments:

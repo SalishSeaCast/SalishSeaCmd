@@ -18,7 +18,7 @@
 
 """SalishSeaCmd command plug-in for prepare sub-command.
 
-Sets up the necessary symbolic links for a Salish Sea NEMO run
+Sets up the necessary symbolic links for a SalishSeaCast NEMO run
 in a specified directory and changes the pwd to that directory.
 """
 import logging
@@ -34,12 +34,12 @@ logger = logging.getLogger(__name__)
 
 
 class Prepare(cliff.command.Command):
-    """Prepare a Salish Sea NEMO run."""
+    """Prepare a SalishSeaCast NEMO run."""
 
     def get_parser(self, prog_name):
         parser = super(Prepare, self).get_parser(prog_name)
         parser.description = """
-            Set up the Salish Sea NEMO described in DESC_FILE
+            Set up the SalishSeaCast NEMO described in DESC_FILE
             and print the path to the run directory.
         """
         parser.add_argument(

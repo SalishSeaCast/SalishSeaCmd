@@ -18,7 +18,7 @@
 
 """SalishSeaCmd command plug-in for run sub-command.
 
-Prepare for, execute, and gather the results of a run of the Salish Sea NEMO model.
+Prepare for, execute, and gather the results of a run of the SalishSeaCast NEMO model.
 """
 import copy
 import datetime
@@ -59,12 +59,12 @@ SEPARATE_DEFLATE_JOBS = {
 
 
 class Run(cliff.command.Command):
-    """Prepare, execute, and gather results from a Salish Sea NEMO model run."""
+    """Prepare, execute, and gather results from a SalishSeaCast NEMO model run."""
 
     def get_parser(self, prog_name):
         parser = super(Run, self).get_parser(prog_name)
         parser.description = """
-            Prepare, execute, and gather the results from a Salish Sea NEMO-3.6
+            Prepare, execute, and gather the results from a SalishSeaCast NEMO
             run described in DESC_FILE.
             The results files from the run are gathered in RESULTS_DIR.
 

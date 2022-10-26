@@ -18,7 +18,7 @@
 
 """SalishSeaCast NEMO Command Processor API
 
-Application programming interface for the Salish Sea NEMO command
+Application programming interface for the SalishSeaCast NEMO command
 processor.
 Provides Python function interfaces to command processor sub-commands
 for use in other sub-command processor modules,
@@ -89,7 +89,7 @@ def gather(results_dir):
 
 
 def prepare(run_desc_file, nocheck_init=False):
-    """Prepare a Salish Sea NEMO run.
+    """Prepare a SalishSeaCast NEMO run.
 
     A UUID named temporary run directory is created and symbolic links
     are created in the directory to the files and directories specifed
@@ -124,7 +124,7 @@ def run_description(
     init_conditions=None,
     namelists=None,
 ):
-    """Return a Salish Sea NEMO run description dict template.
+    """Return a SalishSeaCast NEMO run description dict template.
 
     Value may be passed for the keyword arguments to set the value of the
     corresponding items.
