@@ -53,7 +53,7 @@ def combine(run_desc_file):
     at the INFO level.
 
     :param run_desc_file: File path/name of the run description YAML file.
-    :type results_dir: :py:class:`pathlib.Path`
+    :type run_desc_file: :py:class:`pathlib.Path`
     """
     return combine_plugin.combine(run_desc_file)
 
