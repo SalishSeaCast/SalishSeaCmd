@@ -31,3 +31,7 @@ dependencies:
 
     # For unit tests
     - pytest-randomly
+
+    # editable install of NEMO-Cmd & SalishSeaCmd packages
+    - --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
+    - --editable ../
