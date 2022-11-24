@@ -30,12 +30,6 @@ jobs:
            environment-file: envs/environment-test.yaml
            activate-environment: salishsea-cmd-test
 
-      - name: Install packages
-        shell: bash -l {0}
-        run: |
-          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
-          python3 -m pip install --editable $GITHUB_WORKSPACE
-
       - name: pytest package with coverage
         shell: bash -l {0}
         run: |
