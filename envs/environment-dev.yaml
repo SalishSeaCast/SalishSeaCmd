@@ -9,10 +9,10 @@
 #   (salishsea-cmd)$ pip install --editable NEMO-Cmd/
 #   (salishsea-cmd)$ pip install --editable SalishSeaCmd/
 #
-# The environment will also include all of the tools used to develop,
+# The environment will also include all the tools used to develop,
 # test, and document the SalishSeaCmd package.
 #
-# See the requirements.txt file for an exhaustive list of all of the
+# See the requirements.txt file for an exhaustive list of all the
 # packages installed in the environment and their versions used in
 # recent development.
 
@@ -28,7 +28,7 @@ dependencies:
   - f90nml
   - gitpython
   - pip
-  - python=3.10
+  - python=3.11
   - pyyaml
 
   # For coding style
