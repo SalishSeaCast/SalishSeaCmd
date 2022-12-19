@@ -77,7 +77,7 @@ class Prepare(cliff.command.Command):
         """
         run_dir = prepare(parsed_args.desc_file, parsed_args.nocheck_init)
         if not parsed_args.quiet:
-            logger.info("Created run directory {}".format(run_dir))
+            logger.info(f"Created run directory {run_dir}")
         return run_dir
 
 

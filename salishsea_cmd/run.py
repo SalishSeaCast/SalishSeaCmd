@@ -328,9 +328,7 @@ def run(
         if separate_deflate:
             _submit_separate_deflate_jobs(batch_file, msg, queue_job_cmd)
         if len(run_segments) != 1:
-            submit_job_msg = "{submit_job_msg} {msg_tail}".format(
-                submit_job_msg=submit_job_msg, msg_tail=msg.split()[-1]
-            )
+            submit_job_msg = f"{submit_job_msg} {msg.split()[-1]}"
             nocheck_init = True
             waitjob = msg
         else:
@@ -363,9 +361,7 @@ def _calc_run_segments(desc_file, results_dir):
         run_desc, ("segmented run", "first segment number")
     )
     for i, seg_no in enumerate(range(first_seg_no, first_seg_no + n_segments)):
-        segment_run_id = "{seg_no}_{base_run_id}".format(
-            seg_no=seg_no, base_run_id=base_run_id
-        )
+        segment_run_id = f"{seg_no}_{base_run_id}"
         segment_run_desc = copy.deepcopy(run_desc)
         segment_run_desc["run_id"] = segment_run_id
         nn_it000 = int(start_timestep + i * days_per_segment * timesteps_per_day)
@@ -380,14 +376,9 @@ def _calc_run_segments(desc_file, results_dir):
                 # Run description dict for the segment
                 segment_run_desc,
                 # Run description YAML file name for the segment
-                "{file_stem}_{seg_no}{suffix}".format(
-                    file_stem=desc_file.stem, seg_no=seg_no, suffix=desc_file.suffix
-                ),
+                f"{desc_file.stem}_{seg_no}{desc_file.suffix}",
                 # Results directory for the segment
-                results_dir.parent
-                / "{dir_name}_{seg_no}".format(
-                    dir_name=results_dir.name, seg_no=seg_no
-                ),
+                results_dir.parent / f"{results_dir.name}_{seg_no}",
                 # f90nml namelist patch for the segment for the namelist containing namrum
                 {
                     "namrun": {
@@ -486,12 +477,7 @@ def _write_segment_desc_file(
             name_head = path.name.split("_")[0]
             name_tail = path.name.split("_", 2)[-1]
             restart_path = (
-                restart_dir
-                / "{name_head}_{restart_timestep:08d}_{name_tail}".format(
-                    name_head=name_head,
-                    restart_timestep=restart_timestep,
-                    name_tail=name_tail,
-                )
+                restart_dir / f"{name_head}_{restart_timestep:08d}_{name_tail}"
             )
             run_desc["restart"][name] = os.fspath(restart_path)
     # walltime for segment
@@ -519,7 +505,7 @@ def _build_tmp_run_dir(
 ):
     run_dir = api.prepare(desc_file, nocheck_init)
     if not quiet:
-        log.info("Created run directory {}".format(run_dir))
+        log.info(f"Created run directory {run_dir}")
     nemo_processors = get_n_processors(run_desc, run_dir)
     separate_xios_server = get_run_desc_value(
         run_desc, ("output", "separate XIOS server")
@@ -549,7 +535,7 @@ def _build_tmp_run_dir(
             deflate_script = _build_deflate_script(
                 run_desc, pattern, deflate_job, results_dir
             )
-            script_file = run_dir / "deflate_{}.sh".format(deflate_job)
+            script_file = run_dir / f"deflate_{deflate_job}.sh"
             with script_file.open("wt") as f:
                 f.write(deflate_script)
     return run_dir, batch_file
@@ -560,16 +546,9 @@ def _submit_job(batch_file, queue_job_cmd, waitjob):
         depend_opt = (
             "-W depend=afterok" if queue_job_cmd.startswith("qsub") else "-d afterok"
         )
-        cmd = "{submit_cmd} {depend_opt}:{waitjob} {batch_file}".format(
-            submit_cmd=queue_job_cmd,
-            depend_opt=depend_opt,
-            batch_file=batch_file,
-            waitjob=waitjob,
-        )
+        cmd = f"{queue_job_cmd} {depend_opt}:{waitjob} {batch_file}"
     else:
-        cmd = "{submit_cmd} {batch_file}".format(
-            submit_cmd=queue_job_cmd, batch_file=batch_file
-        )
+        cmd = f"{queue_job_cmd} {batch_file}"
     submit_job_msg = subprocess.run(
         shlex.split(cmd), check=True, universal_newlines=True, stdout=subprocess.PIPE
     ).stdout
@@ -578,25 +557,14 @@ def _submit_job(batch_file, queue_job_cmd, waitjob):
 
 def _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd):
     nemo_job_no = submit_job_msg.split()[-1]
-    log.info(
-        "{batch_file} queued as job {nemo_job_no}".format(
-            batch_file=batch_file, nemo_job_no=nemo_job_no
-        )
-    )
+    log.info(f"{batch_file} queued as job {nemo_job_no}")
     run_dir = batch_file.parent
     depend_opt = (
         "-W depend=afterok" if queue_job_cmd.startswith("qsub") else "-d afterok"
     )
     for deflate_job in SEPARATE_DEFLATE_JOBS:
-        deflate_script = "{run_dir}/deflate_{deflate_job}.sh".format(
-            run_dir=run_dir, deflate_job=deflate_job
-        )
-        cmd = "{submit_cmd} {depend_opt}:{nemo_job_no} {deflate_script}".format(
-            submit_cmd=queue_job_cmd,
-            depend_opt=depend_opt,
-            nemo_job_no=nemo_job_no,
-            deflate_script=deflate_script,
-        )
+        deflate_script = f"{run_dir}/deflate_{deflate_job}.sh"
+        cmd = f"{queue_job_cmd} {depend_opt}:{nemo_job_no} {deflate_script}"
         deflate_job_msg = subprocess.run(
             shlex.split(cmd),
             check=True,
@@ -605,13 +573,8 @@ def _submit_separate_deflate_jobs(batch_file, submit_job_msg, queue_job_cmd):
         ).stdout
         deflate_job_no = deflate_job_msg.split()[-1]
         log.info(
-            "{run_dir}/{deflate_script} queued after job {nemo_job_no} as job "
-            "{deflate_job_no}".format(
-                run_dir=run_dir,
-                deflate_script=deflate_script,
-                nemo_job_no=nemo_job_no,
-                deflate_job_no=deflate_job_no,
-            )
+            f"{run_dir}/{deflate_script} queued after job {nemo_job_no} "
+            f"as job {deflate_job_no}"
         )
 
 
@@ -670,7 +633,7 @@ def _build_batch_script(
     try:
         email = get_run_desc_value(run_desc, ("email",), fatal=False)
     except KeyError:
-        email = "{user}@eoas.ubc.ca".format(user=os.getenv("USER"))
+        email = f"{os.getenv('USER')}@eoas.ubc.ca"
     if SYSTEM in {"beluga", "cedar", "graham"}:
         procs_per_node = {
             "beluga": 40 if not cores_per_node else int(cores_per_node),
@@ -680,16 +643,7 @@ def _build_batch_script(
         script = "\n".join(
             (
                 script,
-                "{sbatch_directives}\n".format(
-                    sbatch_directives=_sbatch_directives(
-                        run_desc,
-                        nemo_processors + xios_processors,
-                        procs_per_node,
-                        cpu_arch,
-                        email,
-                        results_dir,
-                    )
-                ),
+                f"{_sbatch_directives(run_desc, nemo_processors + xios_processors, procs_per_node, cpu_arch, email, results_dir, )}\n",
             )
         )
     else:
@@ -706,43 +660,22 @@ def _build_batch_script(
                 "seawolf3": 12 if not cores_per_node else int(cores_per_node),
             }[SYSTEM]
         except KeyError:
-            log.error("unknown system: {system}".format(system=SYSTEM))
+            log.error(f"unknown system: {SYSTEM}")
             raise SystemExit(2)
         script = "\n".join(
             (
                 script,
-                "{pbs_directives}\n".format(
-                    pbs_directives=_pbs_directives(
-                        run_desc,
-                        nemo_processors + xios_processors,
-                        email,
-                        results_dir,
-                        procs_per_node,
-                        cpu_arch,
-                    )
-                ),
+                f"{_pbs_directives(run_desc, nemo_processors + xios_processors, email, results_dir, procs_per_node, cpu_arch, )}\n",
             )
         )
     script = "\n".join(
         (
             script,
-            "{defns}\n"
-            "{modules}\n"
-            "{execute}\n"
-            "{fix_permissions}\n"
-            "{cleanup}".format(
-                defns=_definitions(run_desc, desc_file, run_dir, results_dir, deflate),
-                modules=_modules(),
-                execute=_execute(
-                    nemo_processors,
-                    xios_processors,
-                    deflate,
-                    max_deflate_jobs,
-                    separate_deflate,
-                ),
-                fix_permissions=_fix_permissions(),
-                cleanup=_cleanup(),
-            ),
+            f"{_definitions(run_desc, desc_file, run_dir, results_dir, deflate)}\n"
+            f"{_modules()}\n"
+            f"{_execute(nemo_processors, xios_processors, deflate, max_deflate_jobs, separate_deflate,)}\n"
+            f"{_fix_permissions()}\n"
+            f"{_cleanup()}",
         )
     )
     return script
@@ -796,9 +729,7 @@ def _sbatch_directives(
     nodes = math.ceil(n_processors / procs_per_node)
     mem = {"beluga": "92G", "cedar": "0", "graham": "0"}.get(SYSTEM, mem)
     if deflate:
-        run_id = "{result_type}_{run_id}_deflate".format(
-            run_id=run_id, result_type=result_type
-        )
+        run_id = f"{result_type}_{run_id}_deflate"
     try:
         td = datetime.timedelta(seconds=get_run_desc_value(run_desc, ("walltime",)))
     except TypeError:
@@ -809,52 +740,36 @@ def _sbatch_directives(
     walltime = _td2hms(td)
     if SYSTEM == "cedar":
         sbatch_directives = (
-            "#SBATCH --job-name={run_id}\n" f"#SBATCH --constraint={cpu_arch}\n"
-        ).format(run_id=run_id, cpu_arch=cpu_arch)
+            f"#SBATCH --job-name={run_id}\n" f"#SBATCH --constraint={cpu_arch}\n"
+        )
     else:
-        sbatch_directives = "#SBATCH --job-name={run_id}\n".format(run_id=run_id)
+        sbatch_directives = f"#SBATCH --job-name={run_id}\n"
     sbatch_directives += (
-        "#SBATCH --nodes={nodes}\n"
-        "#SBATCH --ntasks-per-node={procs_per_node}\n"
-        "#SBATCH --mem={mem}\n"
-        "#SBATCH --time={walltime}\n"
-        "#SBATCH --mail-user={email}\n"
-        "#SBATCH --mail-type=ALL\n"
-    ).format(
-        nodes=int(nodes),
-        procs_per_node=procs_per_node,
-        mem=mem,
-        walltime=walltime,
-        email=email,
+        f"#SBATCH --nodes={int(nodes)}\n"
+        f"#SBATCH --ntasks-per-node={procs_per_node}\n"
+        f"#SBATCH --mem={mem}\n"
+        f"#SBATCH --time={walltime}\n"
+        f"#SBATCH --mail-user={email}\n"
+        f"#SBATCH --mail-type=ALL\n"
     )
     try:
         account = get_run_desc_value(run_desc, ("account",), fatal=False)
-        sbatch_directives += "#SBATCH --account={account}\n".format(account=account)
+        sbatch_directives += f"#SBATCH --account={account}\n"
     except KeyError:
         account = "rrg-allen" if SYSTEM in {"beluga", "cedar"} else "def-allen"
-        sbatch_directives += "#SBATCH --account={account}\n".format(account=account)
+        sbatch_directives += f"#SBATCH --account={account}\n"
         log.info(
-            (
-                "No account found in run description YAML file, "
-                "so assuming {account}. If sbatch complains you can specify a "
-                "different account with a YAML line like account: def-allen"
-            ).format(account=account)
+            f"No account found in run description YAML file, "
+            f"so assuming {account}. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
         )
-    stdout = (
-        "stdout_deflate_{result_type}".format(result_type=result_type)
-        if deflate
-        else "stdout"
-    )
-    stderr = (
-        "stderr_deflate_{result_type}".format(result_type=result_type)
-        if deflate
-        else "stderr"
-    )
+    stdout = f"stdout_deflate_{result_type}" if deflate else "stdout"
+    stderr = f"stderr_deflate_{result_type}" if deflate else "stderr"
     sbatch_directives += (
-        "# stdout and stderr file paths/names\n"
-        "#SBATCH --output={stdout}\n"
-        "#SBATCH --error={stderr}\n"
-    ).format(stdout=results_dir / stdout, stderr=results_dir / stderr)
+        f"# stdout and stderr file paths/names\n"
+        f"#SBATCH --output={results_dir / stdout}\n"
+        f"#SBATCH --error={results_dir / stderr}\n"
+    )
     return sbatch_directives
 
 
@@ -914,22 +829,19 @@ def _pbs_directives(
     """
     run_id = get_run_desc_value(run_desc, ("run_id",))
     if not procs_per_node:
-        procs_directive = "#PBS -l procs={procs}".format(procs=n_processors)
+        procs_directive = f"#PBS -l procs={n_processors}"
     else:
         nodes = math.ceil(n_processors / procs_per_node)
         if SYSTEM == "sockeye":
             arch = "cascade" if not cpu_arch else cpu_arch
-            procs_directive = "#PBS -l select={nodes}:ncpus={procs_per_node}:mpiprocs={procs_per_node}:mem=186gb:cpu_arch={cpu_arch}".format(
-                nodes=nodes, procs_per_node=procs_per_node, cpu_arch=arch
+            procs_directive = (
+                f"#PBS -l select={nodes}:ncpus={procs_per_node}:"
+                f"mpiprocs={procs_per_node}:mem=186gb:cpu_arch={arch}"
             )
         else:
-            procs_directive = "#PBS -l nodes={nodes}:ppn={procs_per_node}".format(
-                nodes=nodes, procs_per_node=procs_per_node
-            )
+            procs_directive = f"#PBS -l nodes={nodes}:ppn={procs_per_node}"
     if deflate:
-        run_id = "{result_type}_{run_id}_deflate".format(
-            run_id=run_id, result_type=result_type
-        )
+        run_id = f"{result_type}_{run_id}_deflate"
     try:
         td = datetime.timedelta(seconds=get_run_desc_value(run_desc, ("walltime",)))
     except TypeError:
@@ -939,7 +851,7 @@ def _pbs_directives(
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td2hms(td)
     pbs_directives = textwrap.dedent(
-        """\
+        f"""\
         #PBS -N {run_id}
         #PBS -S /bin/bash
         #PBS -l walltime={walltime}
@@ -947,49 +859,43 @@ def _pbs_directives(
         #PBS -m bea
         #PBS -M {email}
         """
-    ).format(run_id=run_id, walltime=walltime, email=email)
+    )
     if SYSTEM == "sockeye":
         pbs_directives += textwrap.dedent(
-            """\
+            f"""\
             #PBS -A st-sallen1-1
             {procs_directive}
             """
-        ).format(procs_directive=procs_directive)
+        )
     else:
         if SYSTEM == "orcinus" or SYSTEM.startswith("seawolf"):
             pbs_directives += "#PBS -l partition=QDR\n"
         if SYSTEM == "salish":
             pbs_directives += textwrap.dedent(
-                """\
+                f"""\
                 {procs_directive}
                 # total memory for job
                 #PBS -l mem=64gb
                 """
-            ).format(procs_directive=procs_directive, pmem=pmem)
+            )
         else:
             pbs_directives += textwrap.dedent(
-                """\
+                f"""\
                 {procs_directive}
                 # memory per processor
                 #PBS -l pmem={pmem}
                 """
-            ).format(procs_directive=procs_directive, pmem=pmem)
+            )
     if stderr_stdout:
-        stdout = (
-            "stdout_deflate_{result_type}".format(result_type=result_type)
-            if deflate
-            else "stdout"
+        stdout = f"stdout_deflate_{result_type}" if deflate else "stdout"
+        stderr = f"stderr_deflate_{result_type}" if deflate else "stderr"
+        pbs_directives += textwrap.dedent(
+            f"""\
+            # stdout and stderr file paths/names
+            #PBS -o {results_dir}/{stdout}
+            #PBS -e {results_dir}/{stderr}
+            """
         )
-        stderr = (
-            "stderr_deflate_{result_type}".format(result_type=result_type)
-            if deflate
-            else "stderr"
-        )
-        pbs_directives += (
-            "# stdout and stderr file paths/names\n"
-            "#PBS -o {results_dir}/{stdout}\n"
-            "#PBS -e {results_dir}/{stderr}\n"
-        ).format(results_dir=results_dir, stdout=stdout, stderr=stderr)
     return pbs_directives
 
 
@@ -1009,7 +915,7 @@ def _td2hms(timedelta):
     for period_name, period_seconds in periods:
         period_value, seconds = divmod(seconds, period_seconds)
         hms.append(period_value)
-    return "{0[0]}:{0[1]:02d}:{0[2]:02d}".format(hms)
+    return f"{hms[0]}:{hms[1]:02d}:{hms[2]:02d}"
 
 
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
@@ -1028,23 +934,15 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "sockeye": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
     }.get(SYSTEM, Path("${HOME}", ".local", "bin", "salishsea"))
     defns = (
-        'RUN_ID="{run_id}"\n'
-        'RUN_DESC="{run_dir}/{run_desc_file}"\n'
-        'WORK_DIR="{run_dir}"\n'
-        'RESULTS_DIR="{results_dir}"\n'
-        'COMBINE="{salishsea_cmd} combine"\n'
-    ).format(
-        run_id=get_run_desc_value(run_desc, ("run_id",)),
-        run_desc_file=run_desc_file.name,
-        run_dir=run_dir,
-        results_dir=results_dir,
-        salishsea_cmd=salishsea_cmd,
+        f'RUN_ID="{get_run_desc_value(run_desc, ("run_id",))}"\n'
+        f'RUN_DESC="{run_dir}/{run_desc_file.name}"\n'
+        f'WORK_DIR="{run_dir}"\n'
+        f'RESULTS_DIR="{results_dir}"\n'
+        f'COMBINE="{salishsea_cmd} combine"\n'
     )
     if deflate:
-        defns += 'DEFLATE="{salishsea_cmd} deflate"\n'.format(
-            salishsea_cmd=salishsea_cmd
-        )
-    defns += 'GATHER="{salishsea_cmd} gather"\n'.format(salishsea_cmd=salishsea_cmd)
+        defns += f'DEFLATE="{salishsea_cmd} deflate"\n'
+    defns += f'GATHER="{salishsea_cmd} gather"\n'
     return defns
 
 
@@ -1162,91 +1060,39 @@ def _execute(
         "sockeye": "mpirun",
     }.get(SYSTEM, "mpirun")
     mpirun = {
-        "beluga": "{mpirun} -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "cedar": "{mpirun} -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "delta": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "graham": "{mpirun} -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "omega": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "orcinus": "{mpirun} -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "salish": "{mpirun} --bind-to none -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "seawolf1": "{mpirun} -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "seawolf2": "{mpirun} -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "seawolf3": "{mpirun} -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "sigma": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-        "sockeye": "{mpirun} --bind-to core -np {np} ./nemo.exe".format(
-            mpirun=mpirun, np=nemo_processors
-        ),
-    }.get(
-        SYSTEM, "{mpirun} -np {np} ./nemo.exe".format(mpirun=mpirun, np=nemo_processors)
-    )
+        "beluga": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "cedar": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "delta": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
+        "graham": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "omega": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
+        "orcinus": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "salish": f"{mpirun} --bind-to none -np {nemo_processors} ./nemo.exe",
+        "seawolf1": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "seawolf2": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "seawolf3": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "sigma": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
+        "sockeye": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
+    }.get(SYSTEM, f"{mpirun} -np {nemo_processors} ./nemo.exe")
     if xios_processors:
         mpirun = {
-            "beluga": "{mpirun} : -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "cedar": "{mpirun} : -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "delta": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "graham": "{mpirun} : -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "omega": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "orcinus": "{mpirun} : -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "salish": "{mpirun} : --bind-to none -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "seawolf1": "{mpirun} : -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "seawolf2": "{mpirun} : -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "seawolf3": "{mpirun} : -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "sigma": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
-            "sockeye": "{mpirun} : --bind-to core -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
+            "beluga": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
+            "cedar": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
+            "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe",
+            "graham": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
+            "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe",
+            "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
+            "salish": f"{mpirun} : --bind-to none -np {xios_processors} ./xios_server.exe",
+            "seawolf1": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
+            "seawolf2": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
+            "seawolf3": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
+            "sigma": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe",
+            "sockeye": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe",
         }.get(
             SYSTEM,
-            "{mpirun} : -np {np} ./xios_server.exe".format(
-                mpirun=mpirun, np=xios_processors
-            ),
+            f"{mpirun} : -np {xios_processors} ./xios_server.exe",
         )
     script = textwrap.dedent(
-        """\
+        f"""\
         mkdir -p ${{RESULTS_DIR}}
         cd ${{WORK_DIR}}
         echo "working dir: $(pwd)"
@@ -1257,9 +1103,7 @@ def _execute(
         echo "Ended run at $(date)"
 
         echo "Results combining started at $(date)"
-        """.format(
-            mpirun=mpirun
-        )
+        """
     )
     if SYSTEM in {"delta", "omega", "sigma"}:
         # Load GCC-8.3 modules just before combining because rebuild_nemo on optimum
@@ -1298,14 +1142,12 @@ def _execute(
                 """
             )
         script += textwrap.dedent(
-            """\
+            f"""\
             ${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
               *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
               --jobs {max_deflate_jobs} --debug
             echo "Results deflation ended at $(date)"
-            """.format(
-                max_deflate_jobs=max_deflate_jobs
-            )
+            """
         )
     script += textwrap.dedent(
         """\
@@ -1346,38 +1188,28 @@ def _build_deflate_script(run_desc, pattern, result_type, results_dir):
     try:
         email = get_run_desc_value(run_desc, ("email",))
     except KeyError:
-        email = "{user}@eos.ubc.ca".format(user=os.getenv("USER"))
+        email = f"{os.getenv('USER')}@eos.ubc.ca"
     pmem = "2500mb" if result_type == "ptrc" else "2000mb"
     script = "\n".join(
         (
             script,
-            "{pbs_directives}\n".format(
-                pbs_directives=_pbs_directives(
-                    run_desc,
-                    1,
-                    email,
-                    results_dir,
-                    pmem=pmem,
-                    deflate=True,
-                    result_type=result_type,
-                )
-            ),
+            f"{_pbs_directives(run_desc, 1, email, results_dir, pmem=pmem, deflate=True, result_type=result_type)}\n",
         )
     )
     script += (
-        'RESULTS_DIR="{results_dir}"\n'
-        'DEFLATE="${{PBS_O_HOME}}/.local/bin/salishsea deflate"\n'
-        "\n"
-        "{modules}\n"
-        "cd ${{RESULTS_DIR}}\n"
-        'echo "Results deflation started at $(date)"\n'
-        "${{DEFLATE}} {pattern} --jobs 1 --debug\n"
-        "DEFLATE_EXIT_CODE=$?\n"
-        'echo "Results deflation ended at $(date)"\n'
-        "\n"
-        "chmod g+rw ${{RESULTS_DIR}}/*\n"
-        "chmod o+r ${{RESULTS_DIR}}/*\n"
-        "\n"
-        "exit ${{DEFLATE_EXIT_CODE}}\n"
-    ).format(results_dir=results_dir, modules=_modules(), pattern=pattern)
+        f'RESULTS_DIR="{results_dir}"\n'
+        f'DEFLATE="${{PBS_O_HOME}}/.local/bin/salishsea deflate"\n'
+        f"\n"
+        f"{_modules()}\n"
+        f"cd ${{RESULTS_DIR}}\n"
+        f'echo "Results deflation started at $(date)"\n'
+        f"${{DEFLATE}} {pattern} --jobs 1 --debug\n"
+        f"DEFLATE_EXIT_CODE=$?\n"
+        f'echo "Results deflation ended at $(date)"\n'
+        f"\n"
+        f"chmod g+rw ${{RESULTS_DIR}}/*\n"
+        f"chmod o+r ${{RESULTS_DIR}}/*\n"
+        f"\n"
+        f"exit ${{DEFLATE_EXIT_CODE}}\n"
+    )
     return script
