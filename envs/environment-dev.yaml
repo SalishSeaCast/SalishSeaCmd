@@ -1,8 +1,7 @@
-# conda environment description file for SalishSeaCmd package
-# development environment
+# conda environment description file for SalishSeaCmd package development environment
 #
-# Create a conda environment in which the `salishsea` command can be run
-# with:
+# Create a conda environment in which the `salishsea` command is installed
+# in editable mode with:
 #
 #   $ conda env create -f SalishSeaCmd/envs/environment.yaml
 #   $ source activate salishsea-cmd
@@ -12,7 +11,7 @@
 # The environment will also include all the tools used to develop,
 # test, and document the SalishSeaCmd package.
 #
-# See the requirements.txt file for an exhaustive list of all the
+# See the envs/requirements.txt file for an exhaustive list of all the
 # packages installed in the environment and their versions used in
 # recent development.
 
@@ -31,8 +30,10 @@ dependencies:
   - python=3.11
   - pyyaml
 
-  # For coding style
+  # For coding style & repo QA
   - black
+  - pre-commit
+
   # For unit tests
   - coverage
   - pytest-cov
