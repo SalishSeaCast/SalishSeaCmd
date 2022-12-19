@@ -25,7 +25,7 @@
 .. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
-.. image:: https://img.shields.io/badge/python-3.5+-blue.svg
+.. image:: https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue?logo=python&label=Python&logoColor=gold
     :target: https://docs.python.org/3.11/
     :alt: Python Version
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
@@ -62,19 +62,17 @@
 Python Versions
 ===============
 
-.. image:: https://img.shields.io/badge/python-3.5+-blue.svg
+.. image:: https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue?logo=python&label=Python&logoColor=gold
     :target: https://docs.python.org/3.11/
     :alt: Python Version
 
-The :kbd:`SalishSeaCmd` package is developed and tested using `Python`_ 3.11.
-It is recommended that the package be used under Python>=3.8.
-However,
-the package must also run under `Python`_ 3.5 for use on the Westgrid :kbd:`orcinus` HPC platform.
-Python 3.5 is *not* covered by :ref:`NEMO-CmdContinuousIntegration` and support for it will be dropped as soon as we stop using :kbd:`orcinus`.
-So,
-seriously,
-*don't use this package under Python 3.5!*
-
+The :kbd:`SalishSeaCmd` package is developed using `Python`_ 3.11.
+The minimum supported Python version is 3.10.
+The :ref:`SalishSeaCmdContinuousIntegration` workflow on GitHub ensures that the package
+is tested for all versions of Python>=3.10.
+An old version of the package running under Python 3.5 is depoloyed on the
+Westgrid :kbd:`orcinus` HPC platform.
+That version is tagged in the repository as ``orcinus-python-3.5``.
 
 .. _Python: https://www.python.org/
 
@@ -156,6 +154,7 @@ activate the conda development environment,
 and run :command:`pre-commit install`:
 
 .. code-block:: bash
+
     $ cd SalishSeaCmd
     $ conda activate nemo-cmd
     (nemo-cmd)$ pre-commit install
@@ -347,7 +346,7 @@ The output looks something like::
   (line  497) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
   (line  491) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
   (line   21) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
-  (line   21) ok        https://img.shields.io/badge/python-3.5+-blue.svg
+  (line   21) ok        https://img.shields.io/badge/Python-3.10%20%7C%203.11-blue?logo=python&label=Python&logoColor=gold
   (line   21) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
   (line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
   (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
