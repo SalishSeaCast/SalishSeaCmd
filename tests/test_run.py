@@ -842,7 +842,7 @@ class TestRun:
                         StringIO(
                             """
                         run_id: 0_sensitivity
-                        
+
                         segmented run:
                             start date: 2014-11-15
                             start time step: 152634
@@ -871,7 +871,7 @@ class TestRun:
                         StringIO(
                             """
                         run_id: 1_sensitivity
-    
+
                         segmented run:
                             start date: 2014-11-15
                             start time step: 152634
@@ -1040,7 +1040,7 @@ class TestCalcRunSegments:
                 start date: 2014-11-15
                 start time step: 152634
                 end date: 2014-12-02
-                
+
                 first segment number: 0
                 segment walltime: 12:00:00
                 namelists:
@@ -1065,7 +1065,7 @@ class TestCalcRunSegments:
                 start time step: 152634
                 end date: 2014-12-02
                 days per segment: 10
-                
+
                 segment walltime: 12:00:00
                 namelists:
                     namrun: ./namelist.time
@@ -1093,7 +1093,7 @@ class TestCalcRunSegments:
                 segment walltime: 12:00:00
                 namelists:
                     namrun: ./namelist.time
-                    
+
         """
             )
         )
@@ -1108,7 +1108,7 @@ class TestCalcRunSegments:
             StringIO(
                 """
             run_id: sensitivity
-            
+
             segmented run:
                 start date: 2014-11-15
                 start time step: 152634
@@ -1133,7 +1133,7 @@ class TestCalcRunSegments:
                     StringIO(
                         """
                     run_id: {seg_no}_sensitivity
-                    
+
                     segmented run:
                         start date: 2014-11-15
                         start time step: 152634
@@ -1200,7 +1200,7 @@ class TestCalcRunSegments:
                 textwrap.dedent(
                     """\
                 run_id: SKOG_2016_BASE
-                
+
                 segmented run:
                   start date: 2016-04-30
                   start time step: 2730241
@@ -1429,11 +1429,11 @@ class TestWriteSegmentDescFile:
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    
+
             namelists:
                 namelist_cfg:
                     - ./namelist.time
-                    
+
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
@@ -1478,11 +1478,11 @@ class TestWriteSegmentDescFile:
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    
+
             namelists:
                 namelist_cfg:
                     - ./namelist.time
-                    
+
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
@@ -1527,11 +1527,11 @@ class TestWriteSegmentDescFile:
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    
+
             namelists:
                 namelist_cfg:
                     - ./namelist.time
-                    
+
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc
@@ -1584,11 +1584,11 @@ class TestWriteSegmentDescFile:
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    
+
             namelists:
                 namelist_cfg:
                     - ./namelist.time
-                    
+
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc
@@ -1636,15 +1636,15 @@ class TestWriteSegmentDescFile:
                 start time step: 152634
                 end date: 2014-12-02
                 days per segment: 10
-                
+
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    
+
             namelists:
                 namelist_cfg:
                     - ./namelist.time
-                    
+
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
@@ -1687,11 +1687,11 @@ class TestWriteSegmentDescFile:
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    
+
             namelists:
                 namelist_cfg:
                     - ./namelist.time
-                    
+
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
@@ -1991,7 +1991,7 @@ class TestBuildBatchScript:
         expected = textwrap.dedent(
             """\
             #!/bin/bash
-            
+
             #SBATCH --job-name=foo
             #SBATCH --nodes=2
             #SBATCH --ntasks-per-node=40
@@ -2003,8 +2003,8 @@ class TestBuildBatchScript:
             # stdout and stderr file paths/names
             #SBATCH --output=results_dir/stdout
             #SBATCH --error=results_dir/stderr
-            
-            
+
+
             RUN_ID="foo"
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
@@ -2023,20 +2023,20 @@ class TestBuildBatchScript:
         expected += textwrap.dedent(
             """\
             GATHER="${HOME}/.local/bin/salishsea gather"
-            
+
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.5.2
             module load python/3.9.6
-            
+
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
             echo "working dir: $(pwd)"
-            
+
             echo "Starting run at $(date)"
             mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
-            
+
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
@@ -2045,7 +2045,7 @@ class TestBuildBatchScript:
         if deflate:
             expected += textwrap.dedent(
                 """\
-                
+
                 echo "Results deflation started at $(date)"
                 module load nco/4.9.5
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
@@ -2056,15 +2056,15 @@ class TestBuildBatchScript:
             )
         expected += textwrap.dedent(
             """\
-            
+
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
-            
+
             chmod go+rx ${RESULTS_DIR}
             chmod g+rw ${RESULTS_DIR}/*
             chmod o+r ${RESULTS_DIR}/*
-            
+
             echo "Deleting run directory" >>${RESULTS_DIR}/stdout
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
@@ -2099,7 +2099,7 @@ class TestBuildBatchScript:
         expected = textwrap.dedent(
             """\
             #!/bin/bash
-            
+
             #SBATCH --job-name=foo
             #SBATCH --constraint={cpu_arch}
             #SBATCH --nodes={nodes}
@@ -2112,8 +2112,8 @@ class TestBuildBatchScript:
             # stdout and stderr file paths/names
             #SBATCH --output=results_dir/stdout
             #SBATCH --error=results_dir/stderr
-            
-            
+
+
             RUN_ID="foo"
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
@@ -2132,20 +2132,20 @@ class TestBuildBatchScript:
         expected += textwrap.dedent(
             """\
             GATHER="${HOME}/.local/bin/salishsea gather"
-            
+
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.5.2
             module load python/3.9.6
-            
+
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
             echo "working dir: $(pwd)"
-            
+
             echo "Starting run at $(date)"
             mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
-            
+
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
@@ -2154,7 +2154,7 @@ class TestBuildBatchScript:
         if deflate:
             expected += textwrap.dedent(
                 """\
-                
+
                 echo "Results deflation started at $(date)"
                 module load nco/4.9.5
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
@@ -2165,15 +2165,15 @@ class TestBuildBatchScript:
             )
         expected += textwrap.dedent(
             """\
-            
+
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
-            
+
             chmod go+rx ${RESULTS_DIR}
             chmod g+rw ${RESULTS_DIR}/*
             chmod o+r ${RESULTS_DIR}/*
-            
+
             echo "Deleting run directory" >>${RESULTS_DIR}/stdout
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
@@ -2207,7 +2207,7 @@ class TestBuildBatchScript:
         expected = textwrap.dedent(
             """\
             #!/bin/bash
-            
+
             #SBATCH --job-name=foo
             #SBATCH --nodes=2
             #SBATCH --ntasks-per-node=32
@@ -2219,8 +2219,8 @@ class TestBuildBatchScript:
             # stdout and stderr file paths/names
             #SBATCH --output=results_dir/stdout
             #SBATCH --error=results_dir/stderr
-            
-            
+
+
             RUN_ID="foo"
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
@@ -2239,20 +2239,20 @@ class TestBuildBatchScript:
         expected += textwrap.dedent(
             """\
             GATHER="${HOME}/.local/bin/salishsea gather"
-            
+
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.5.2
             module load python/3.9.6
-            
+
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
             echo "working dir: $(pwd)"
-            
+
             echo "Starting run at $(date)"
             mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
-            
+
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
@@ -2261,7 +2261,7 @@ class TestBuildBatchScript:
         if deflate:
             expected += textwrap.dedent(
                 """\
-                
+
                 echo "Results deflation started at $(date)"
                 module load nco/4.9.5
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
@@ -2272,15 +2272,15 @@ class TestBuildBatchScript:
             )
         expected += textwrap.dedent(
             """\
-            
+
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
-            
+
             chmod go+rx ${RESULTS_DIR}
             chmod g+rw ${RESULTS_DIR}/*
             chmod o+r ${RESULTS_DIR}/*
-            
+
             echo "Deleting run directory" >>${RESULTS_DIR}/stdout
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
@@ -2291,7 +2291,14 @@ class TestBuildBatchScript:
 
     @pytest.mark.parametrize(
         "system, deflate",
-        [("delta", True), ("delta", False), ("omega", True), ("omega", False), ("sigma", True), ("sigma", False)],
+        [
+            ("delta", True),
+            ("delta", False),
+            ("omega", True),
+            ("omega", False),
+            ("sigma", True),
+            ("sigma", False),
+        ],
     )
     def test_optimum(self, system, deflate):
         desc_file = StringIO(
@@ -2315,7 +2322,7 @@ class TestBuildBatchScript:
         expected = textwrap.dedent(
             """\
             #!/bin/bash
-            
+
             #PBS -N foo
             #PBS -S /bin/bash
             #PBS -l walltime=1:02:03
@@ -2328,8 +2335,8 @@ class TestBuildBatchScript:
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
-            
-            
+
+
             RUN_ID="foo"
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
@@ -2346,18 +2353,18 @@ class TestBuildBatchScript:
         expected += textwrap.dedent(
             """\
             GATHER="${PBS_O_HOME}/bin/salishsea gather"
-            
+
             module load OpenMPI/2.1.6/GCC/SYSTEM
-            
+
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
             echo "working dir: $(pwd)"
-            
+
             echo "Starting run at $(date)"
             mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 278 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
-            
+
             echo "Results combining started at $(date)"
             module load GCC/8.3
             module load OpenMPI/2.1.6/GCC/8.3
@@ -2372,7 +2379,7 @@ class TestBuildBatchScript:
         if deflate:
             expected += textwrap.dedent(
                 """\
-                
+
                 echo "Results deflation started at $(date)"
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
@@ -2382,15 +2389,15 @@ class TestBuildBatchScript:
             )
         expected += textwrap.dedent(
             """\
-            
+
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
-            
+
             chmod go+rx ${RESULTS_DIR}
             chmod g+rw ${RESULTS_DIR}/*
             chmod o+r ${RESULTS_DIR}/*
-            
+
             echo "Deleting run directory" >>${RESULTS_DIR}/stdout
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
@@ -2430,7 +2437,7 @@ class TestBuildBatchScript:
         expected = textwrap.dedent(
             """\
             #!/bin/bash
-            
+
             #PBS -N foo
             #PBS -S /bin/bash
             #PBS -l walltime=1:02:03
@@ -2444,8 +2451,8 @@ class TestBuildBatchScript:
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
-            
-            
+
+
             RUN_ID="foo"
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
@@ -2462,7 +2469,7 @@ class TestBuildBatchScript:
         expected += textwrap.dedent(
             """\
             GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"
-            
+
             module load intel
             module load intel/14.0/netcdf-4.3.3.1_mpi
             module load intel/14.0/netcdf-fortran-4.4.0_mpi
@@ -2470,16 +2477,16 @@ class TestBuildBatchScript:
             module load intel/14.0/nco-4.5.2
             module load python/3.5.0
             module load git
-            
+
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
             echo "working dir: $(pwd)"
-            
+
             echo "Starting run at $(date)"
             mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
-            
+
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
@@ -2488,7 +2495,7 @@ class TestBuildBatchScript:
         if deflate:
             expected += textwrap.dedent(
                 """\
-                
+
                 echo "Results deflation started at $(date)"
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
@@ -2498,15 +2505,15 @@ class TestBuildBatchScript:
             )
         expected += textwrap.dedent(
             """\
-            
+
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
-            
+
             chmod go+rx ${RESULTS_DIR}
             chmod g+rw ${RESULTS_DIR}/*
             chmod o+r ${RESULTS_DIR}/*
-            
+
             echo "Deleting run directory" >>${RESULTS_DIR}/stdout
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
@@ -2538,7 +2545,7 @@ class TestBuildBatchScript:
         expected = textwrap.dedent(
             """\
             #!/bin/bash
-            
+
             #PBS -N foo
             #PBS -S /bin/bash
             #PBS -l walltime=1:02:03
@@ -2551,8 +2558,8 @@ class TestBuildBatchScript:
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
-            
-            
+
+
             RUN_ID="foo"
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
@@ -2569,17 +2576,17 @@ class TestBuildBatchScript:
         expected += textwrap.dedent(
             """\
             GATHER="${HOME}/.local/bin/salishsea gather"
-            
-            
+
+
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
             echo "working dir: $(pwd)"
-            
+
             echo "Starting run at $(date)"
             /usr/bin/mpirun --bind-to none -np 7 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
-            
+
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
@@ -2588,7 +2595,7 @@ class TestBuildBatchScript:
         if deflate:
             expected += textwrap.dedent(
                 """\
-                
+
                 echo "Results deflation started at $(date)"
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
@@ -2598,15 +2605,15 @@ class TestBuildBatchScript:
             )
         expected += textwrap.dedent(
             """\
-            
+
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
-            
+
             chmod go+rx ${RESULTS_DIR}
             chmod g+rw ${RESULTS_DIR}/*
             chmod o+r ${RESULTS_DIR}/*
-            
+
             echo "Deleting run directory" >>${RESULTS_DIR}/stdout
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
@@ -2616,12 +2623,13 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize(
-        "cores_per_node, cpu_arch, deflate", [
+        "cores_per_node, cpu_arch, deflate",
+        [
             ("", "", True),
             ("", "", False),
             ("32", "skylake", False),
             ("40", "cascade", False),
-        ]
+        ],
     )
     def test_sockeye(self, cores_per_node, cpu_arch, deflate):
         desc_file = StringIO(
@@ -2819,7 +2827,11 @@ class TestSbatchDirectives:
             "#SBATCH --output=foo/stdout\n"
             "#SBATCH --error=foo/stderr\n"
         ).format(
-            cpu_arch=cpu_arch, nodes=nodes, procs_per_node=procs_per_node, mem=mem, account=account
+            cpu_arch=cpu_arch,
+            nodes=nodes,
+            procs_per_node=procs_per_node,
+            mem=mem,
+            account=account,
         )
         assert slurm_directives == expected
         assert m_logger.info.called
@@ -2858,7 +2870,7 @@ class TestSbatchDirectives:
             ("beluga", 40),
             ("cedar", 48),
             ("graham", 32),
-        )
+        ),
     )
     def test_account_directive_from_yaml(self, m_logger, system, procs_per_node):
         desc_file = StringIO(
@@ -2934,12 +2946,14 @@ class TestPbsDirectives:
             ),
         ),
     )
-    def test_pbs_directives_run(self, system, procs_per_node, cpu_arch, procs_directives):
+    def test_pbs_directives_run(
+        self, system, procs_per_node, cpu_arch, procs_directives
+    ):
         run_desc = yaml.safe_load(
             StringIO(
                 textwrap.dedent(
                     """\
-                    run_id: foo 
+                    run_id: foo
                     walltime: 01:02:03
                     """
                 )
@@ -3025,7 +3039,7 @@ class TestPbsDirectives:
             StringIO(
                 textwrap.dedent(
                     """\
-                    run_id: foo 
+                    run_id: foo
                     walltime: 01:02:03
                     """
                 )
@@ -3059,7 +3073,7 @@ class TestPbsDirectives:
             StringIO(
                 textwrap.dedent(
                     """\
-                    run_id: foo 
+                    run_id: foo
                     walltime: 01:02:03
                     """
                 )
@@ -3104,7 +3118,7 @@ class TestPbsDirectives:
             StringIO(
                 textwrap.dedent(
                     """\
-                    run_id: foo 
+                    run_id: foo
                     walltime: {walltime}
                     """
                 ).format(walltime=walltime)
@@ -3121,7 +3135,7 @@ class TestPbsDirectives:
             StringIO(
                 textwrap.dedent(
                     """\
-                    run_id: foo 
+                    run_id: foo
                     walltime: 01:02:03
                     """
                 )
@@ -3135,14 +3149,23 @@ class TestPbsDirectives:
 
     @pytest.mark.parametrize(
         "system",
-        ("delta", "orcinus", "salish", "seawolf1", "seawolf2", "seawolf3", "sigma", "omega"),
+        (
+            "delta",
+            "orcinus",
+            "salish",
+            "seawolf1",
+            "seawolf2",
+            "seawolf3",
+            "sigma",
+            "omega",
+        ),
     )
     def test_not_sockeye_no_account_directive_from_yaml(self, system):
         run_desc = yaml.safe_load(
             StringIO(
                 textwrap.dedent(
                     """\
-                    run_id: foo 
+                    run_id: foo
                     walltime: 01:02:03
                     """
                 )
@@ -3292,7 +3315,10 @@ class TestExecute:
                 "omega",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
-            ("salish", "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe"),
+            (
+                "salish",
+                "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe",
+            ),
             (
                 "sigma",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
@@ -3322,7 +3348,7 @@ class TestExecute:
             {mpirun_cmd}
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
-    
+
             echo "Results combining started at $(date)"
             """.format(
                 mpirun_cmd=mpirun_cmd
@@ -3343,7 +3369,7 @@ class TestExecute:
             """\
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
-            
+
             echo "Results deflation started at $(date)"
             """
         )
@@ -3363,7 +3389,7 @@ class TestExecute:
         )
         expected += textwrap.dedent(
             """\
-            
+
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
@@ -3549,12 +3575,12 @@ class TestExecute:
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)"
-    
+
             echo "Starting run at $(date)"
             {mpirun_cmd}
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
-    
+
             echo "Results combining started at $(date)"
             """.format(
                 mpirun_cmd=mpirun_cmd
@@ -3575,7 +3601,7 @@ class TestExecute:
             """\
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
-            
+
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
@@ -3623,7 +3649,7 @@ class TestBuildDeflateScript:
                 run_desc, pattern, result_type, Path(str(p_results_dir))
             )
         expected = """#!/bin/bash
-        
+
         #PBS -N {result_type}_19sep14_hindcast_deflate
         #PBS -S /bin/bash
         #PBS -l walltime=3:00:00
@@ -3637,10 +3663,10 @@ class TestBuildDeflateScript:
         # stdout and stderr file paths/names
         #PBS -o {results_dir}/stdout_deflate_{result_type}
         #PBS -e {results_dir}/stderr_deflate_{result_type}
-        
+
         RESULTS_DIR="{results_dir}"
         DEFLATE="${{PBS_O_HOME}}/.local/bin/salishsea deflate"
-        
+
         module load intel
         module load intel/14.0/netcdf-4.3.3.1_mpi
         module load intel/14.0/netcdf-fortran-4.4.0_mpi
@@ -3654,10 +3680,10 @@ class TestBuildDeflateScript:
         ${{DEFLATE}} {pattern} --jobs 1 --debug
         DEFLATE_EXIT_CODE=$?
         echo "Results deflation ended at $(date)"
-        
+
         chmod g+rw ${{RESULTS_DIR}}/*
         chmod o+r ${{RESULTS_DIR}}/*
-        
+
         exit ${{DEFLATE_EXIT_CODE}}
         """.format(
             result_type=result_type,

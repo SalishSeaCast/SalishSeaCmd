@@ -114,8 +114,8 @@ class Run(cliff.command.Command):
             Use this option, or the --separate-deflate option
             if you are *not* using on-the-fly deflation in XIOS-2;
             i.e. you are using more than 1 XIOS-2 process and/or
-            do not have the compression_level="4" attribute set in all of 
-            the file_group definitions in your file_def.xml file.            
+            do not have the compression_level="4" attribute set in all of
+            the file_group definitions in your file_def.xml file.
             """,
         )
         parser.add_argument(
@@ -154,7 +154,7 @@ class Run(cliff.command.Command):
             action="store_true",
             help="""
             Produce separate bash scripts to deflate the run results and submit
-            them to run as serial jobs after the NEMO run finishes via the 
+            them to run as serial jobs after the NEMO run finishes via the
             queue manager's job chaining feature.
             """,
         )
@@ -162,7 +162,7 @@ class Run(cliff.command.Command):
             "--waitjob",
             default="0",
             help="""
-            Make this job wait for to start until the successful completion of 
+            Make this job wait for to start until the successful completion of
             WAITJOB.  WAITJOB is the queue job number of the job to wait for.
             """,
         )
@@ -1250,12 +1250,12 @@ def _execute(
         mkdir -p ${{RESULTS_DIR}}
         cd ${{WORK_DIR}}
         echo "working dir: $(pwd)"
-        
+
         echo "Starting run at $(date)"
         {mpirun}
         MPIRUN_EXIT_CODE=$?
         echo "Ended run at $(date)"
-        
+
         echo "Results combining started at $(date)"
         """.format(
             mpirun=mpirun
@@ -1284,7 +1284,7 @@ def _execute(
     if deflate and not separate_deflate:
         script += textwrap.dedent(
             """\
-                
+
             echo "Results deflation started at $(date)"
             """
         )
@@ -1309,7 +1309,7 @@ def _execute(
         )
     script += textwrap.dedent(
         """\
-        
+
         echo "Results gathering started at $(date)"
         ${GATHER} ${RESULTS_DIR} --debug
         echo "Results gathering ended at $(date)"
