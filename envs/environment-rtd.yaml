@@ -11,10 +11,19 @@ channels:
   - nodefaults
 
 dependencies:
+  - pip
   - python=3.11
 
-  # RTD packages
+  # readthedocs packages
   - mock
   - pillow
   - sphinx
   - sphinx_rtd_theme
+
+  - pip:
+    - recommonmark
+    - readthedocs-sphinx-ext
+
+    # Install NEMO-Cmd & SalishSeaCmd packages in editable mode
+    - --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
+    - --editable ../
