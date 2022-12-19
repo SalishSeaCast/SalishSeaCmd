@@ -88,27 +88,17 @@ def split_results(source_dir, quiet):
                           The default is to show progress messages.
     """
     if not source_dir.exists() or not source_dir.is_dir():
-        log.error(
-            "run results directory not found: {source_dir}".format(
-                source_dir=source_dir
-            )
-        )
+        log.error(f"run results directory not found: {source_dir}")
         raise SystemExit(2)
     try:
         run_start_date = arrow.get(source_dir.name, "DDMMMYY")
     except arrow.parser.ParserError:
         log.error(
-            "run results directory name is not in DDMMMYY format (e.g. 01jan07): {.name}".format(
-                source_dir
-            )
+            f"run results directory name is not in DDMMMYY format (e.g. 01jan07): {source_dir.name}"
         )
         raise SystemExit(2)
     if not quiet:
-        log.info(
-            "splitting {source_dir} results files into daily directories".format(
-                source_dir=source_dir
-            )
-        )
+        log.info(f"splitting {source_dir} results files into daily directories")
     last_date = run_start_date
     for nc_file in source_dir.glob("*.nc"):
         if "restart" in os.fspath(nc_file):
@@ -145,17 +135,13 @@ def _move_results_nc_file(nc_file, dest_dir, date):
     """
     if nc_file.stem.startswith("SalishSea_1"):
         fn = Path(
-            "{nc_file_prefix}_{nc_file_date}_{nc_file_date}_{nc_file_grid}".format(
-                nc_file_prefix=nc_file.stem[:12],
-                nc_file_date=date.format("YYYYMMDD"),
-                nc_file_grid=nc_file.stem[31:37],
-            )
+            f"{nc_file.stem[:12]}_{date.format('YYYYMMDD')}_{date.format('YYYYMMDD')}_{nc_file.stem[31:37]}"
         ).with_suffix(".nc")
     else:
         fn = Path(nc_file.stem[:-18]).with_suffix(".nc")
     dest = dest_dir / fn
     shutil.move(os.fspath(nc_file), os.fspath(dest))
-    log.info("moved {nc_file} to {dest}".format(nc_file=nc_file, dest=dest))
+    log.info(f"moved {nc_file} to {dest}")
 
 
 def _move_restart_file(restart_file, dest_dir):
@@ -165,8 +151,4 @@ def _move_restart_file(restart_file, dest_dir):
     :param :py:class:`pathlib.Path` dest_dir:
     """
     shutil.move(os.fspath(restart_file), os.fspath(dest_dir))
-    log.info(
-        "moved {restart_file} to {dest_dir}/".format(
-            restart_file=restart_file, dest_dir=dest_dir
-        )
-    )
+    log.info(f"moved {restart_file} to {dest_dir}/")

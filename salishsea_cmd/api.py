@@ -252,7 +252,7 @@ def run_in_subprocess(run_id, run_desc, results_dir):
     :arg results_dir: Directory to store results into.
     :type results_dir: str
     """
-    yaml_file = "{}_subprocess_run.yaml".format(run_id)
+    yaml_file = f"{run_id}_subprocess_run.yaml"
     with open(yaml_file, "wt") as f:
         yaml.dump(run_desc, f, default_flow_style=False)
     cmd = ["salishsea", "run"]
@@ -265,11 +265,7 @@ def run_in_subprocess(run_id, run_desc, results_dir):
             if line:
                 log.info(line)
     except subprocess.CalledProcessError as e:
-        log.error(
-            "subprocess {cmd} failed with return code {status}".format(
-                cmd=cmd, status=e.returncode
-            )
-        )
+        log.error(f"subprocess {cmd} failed with return code {e.returncode}")
         for line in e.output.splitlines():
             if line:
                 log.error(line)

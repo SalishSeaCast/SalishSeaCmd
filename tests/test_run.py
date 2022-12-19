@@ -1106,7 +1106,7 @@ class TestCalcRunSegments:
     def test_run_segments(self, m_f90nml_read, m_lrd, first_seg_no):
         m_lrd.return_value = yaml.safe_load(
             StringIO(
-                """
+                f"""
             run_id: sensitivity
 
             segmented run:
@@ -1119,9 +1119,7 @@ class TestCalcRunSegments:
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """.format(
-                    first_seg_no=first_seg_no
-                )
+        """
             )
         )
         run_segments, first_seg_no_ = salishsea_cmd.run._calc_run_segments(
@@ -1131,39 +1129,8 @@ class TestCalcRunSegments:
             (
                 yaml.safe_load(
                     StringIO(
-                        """
-                    run_id: {seg_no}_sensitivity
-
-                    segmented run:
-                        start date: 2014-11-15
-                        start time step: 152634
-                        end date: 2014-12-02
-                        days per segment: 10
-                        first segment number: {seg_no}
-                        segment walltime: 12:00:00
-                        namelists:
-                            namrun: ./namelist.time
-                            namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                """.format(
-                            seg_no=first_seg_no
-                        )
-                    )
-                ),
-                "SalishSea_{seg_no}.yaml".format(seg_no=first_seg_no),
-                Path("results_dir_{seg_no}".format(seg_no=first_seg_no)),
-                {
-                    "namrun": {
-                        "nn_it000": 152634,
-                        "nn_itend": 152634 + 2160 * 10 - 1,
-                        "nn_date0": 20141115,
-                    }
-                },
-            ),
-            (
-                yaml.safe_load(
-                    StringIO(
-                        """
-                    run_id: {seg_no}_sensitivity
+                        f"""
+                    run_id: {first_seg_no}_sensitivity
 
                     segmented run:
                         start date: 2014-11-15
@@ -1175,13 +1142,40 @@ class TestCalcRunSegments:
                         namelists:
                             namrun: ./namelist.time
                             namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                """.format(
-                            first_seg_no=first_seg_no, seg_no=first_seg_no + 1
-                        )
+                """
                     )
                 ),
-                "SalishSea_{seg_no}.yaml".format(seg_no=first_seg_no + 1),
-                Path("results_dir_{seg_no}".format(seg_no=first_seg_no + 1)),
+                f"SalishSea_{first_seg_no}.yaml",
+                Path(f"results_dir_{first_seg_no}"),
+                {
+                    "namrun": {
+                        "nn_it000": 152634,
+                        "nn_itend": 152634 + 2160 * 10 - 1,
+                        "nn_date0": 20141115,
+                    }
+                },
+            ),
+            (
+                yaml.safe_load(
+                    StringIO(
+                        f"""
+                    run_id: {first_seg_no + 1}_sensitivity
+
+                    segmented run:
+                        start date: 2014-11-15
+                        start time step: 152634
+                        end date: 2014-12-02
+                        days per segment: 10
+                        first segment number: {first_seg_no}
+                        segment walltime: 12:00:00
+                        namelists:
+                            namrun: ./namelist.time
+                            namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                """
+                    )
+                ),
+                f"SalishSea_{first_seg_no + 1}.yaml",
+                Path(f"results_dir_{first_seg_no + 1}"),
                 {
                     "namrun": {
                         "nn_it000": 152634 + 2160 * 10,
@@ -1514,7 +1508,7 @@ class TestWriteSegmentDescFile:
     def test_segment_0_restart_files_path(self, nemo_exp, tmp_path):
         run_desc = yaml.safe_load(
             StringIO(
-                """
+                f"""
             run_id: sensitivity
             walltime: 24:00:00
 
@@ -1535,9 +1529,7 @@ class TestWriteSegmentDescFile:
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc
-        """.format(
-                    nemo_exp=nemo_exp
-                )
+        """
             )
         )
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
@@ -1558,12 +1550,12 @@ class TestWriteSegmentDescFile:
                 segment_namrun,
                 Path(tmp_run_desc_dir),
             )
-        expected = "$PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc".format(
-            nemo_exp=nemo_exp
+        expected = (
+            f"$PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc"
         )
         assert run_desc["restart"]["restart.nc"] == expected
-        expected = "$PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc".format(
-            nemo_exp=nemo_exp
+        expected = (
+            f"$PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc"
         )
         assert run_desc["restart"]["restart_trc.nc"] == expected
 
@@ -1571,7 +1563,7 @@ class TestWriteSegmentDescFile:
     def test_restart_files_path(self, nemo_exp, tmp_path):
         run_desc = yaml.safe_load(
             StringIO(
-                """
+                f"""
             run_id: sensitivity
             walltime: 24:00:00
 
@@ -1592,9 +1584,7 @@ class TestWriteSegmentDescFile:
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc
-        """.format(
-                    nemo_exp=nemo_exp
-                )
+        """
             )
         )
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
@@ -1615,13 +1605,9 @@ class TestWriteSegmentDescFile:
                 segment_namrun,
                 Path(tmp_run_desc_dir),
             )
-        expected = "$PROJECT/$USER/MEOPAR/results/results_dir_0/{nemo_exp}_00174233_restart.nc".format(
-            nemo_exp=nemo_exp
-        )
+        expected = f"$PROJECT/$USER/MEOPAR/results/results_dir_0/{nemo_exp}_00174233_restart.nc"
         assert run_desc["restart"]["restart.nc"] == expected
-        expected = "$PROJECT/$USER/MEOPAR/results/results_dir_0/{nemo_exp}_00174233_restart_trc.nc".format(
-            nemo_exp=nemo_exp
-        )
+        expected = f"$PROJECT/$USER/MEOPAR/results/results_dir_0/{nemo_exp}_00174233_restart_trc.nc"
         assert run_desc["restart"]["restart_trc.nc"] == expected
 
     def test_no_segment_walltime(self, tmp_path):
@@ -1857,11 +1843,7 @@ class TestSubmitJob:
             Path("run_dir", "SalishSeaNEMO.sh"), queue_job_cmd, "0"
         )
         m_run.assert_called_once_with(
-            shlex.split(
-                "{queue_job_cmd} {run_dir}/SalishSeaNEMO.sh".format(
-                    queue_job_cmd=queue_job_cmd, run_dir=Path("run_dir")
-                )
-            ),
+            shlex.split(f"{queue_job_cmd} {Path('run_dir')}/SalishSeaNEMO.sh"),
             check=True,
             universal_newlines=True,
             stdout=subprocess.PIPE,
@@ -1876,12 +1858,7 @@ class TestSubmitJob:
         )
         m_run.assert_called_once_with(
             shlex.split(
-                "{queue_job_cmd} {depend_flag} {depend_option}:42 {run_dir}/SalishSeaNEMO.sh".format(
-                    queue_job_cmd=queue_job_cmd,
-                    depend_flag=depend_flag,
-                    depend_option=depend_option,
-                    run_dir=Path("run_dir"),
-                )
+                f"{queue_job_cmd} {depend_flag} {depend_option}:42 {Path('run_dir')}/SalishSeaNEMO.sh"
             ),
             check=True,
             universal_newlines=True,
@@ -1920,13 +1897,7 @@ class TestSubmitSeparateDeflateJobs:
         assert m_run.call_args_list == [
             call(
                 shlex.split(
-                    "{queue_job_cmd} {depend_flag} {depend_option}:{job_id} {run_dir}/deflate_grid.sh".format(
-                        queue_job_cmd=queue_job_cmd,
-                        depend_flag=depend_flag,
-                        depend_option=depend_option,
-                        job_id=submit_job_msg.split()[-1],
-                        run_dir=str(p_run_dir),
-                    )
+                    f"{queue_job_cmd} {depend_flag} {depend_option}:{submit_job_msg.split()[-1]} {str(p_run_dir)}/deflate_grid.sh"
                 ),
                 check=True,
                 universal_newlines=True,
@@ -1934,13 +1905,7 @@ class TestSubmitSeparateDeflateJobs:
             ),
             call(
                 shlex.split(
-                    "{queue_job_cmd} {depend_flag} {depend_option}:{job_id} {run_dir}/deflate_ptrc.sh".format(
-                        queue_job_cmd=queue_job_cmd,
-                        depend_flag=depend_flag,
-                        depend_option=depend_option,
-                        job_id=submit_job_msg.split()[-1],
-                        run_dir=str(p_run_dir),
-                    )
+                    f"{queue_job_cmd} {depend_flag} {depend_option}:{submit_job_msg.split()[-1]} {str(p_run_dir)}/deflate_ptrc.sh"
                 ),
                 check=True,
                 universal_newlines=True,
@@ -1948,13 +1913,7 @@ class TestSubmitSeparateDeflateJobs:
             ),
             call(
                 shlex.split(
-                    "{queue_job_cmd} {depend_flag} {depend_option}:{job_id} {run_dir}/deflate_dia.sh".format(
-                        queue_job_cmd=queue_job_cmd,
-                        depend_flag=depend_flag,
-                        depend_option=depend_option,
-                        job_id=submit_job_msg.split()[-1],
-                        run_dir=str(p_run_dir),
-                    )
+                    f"{queue_job_cmd} {depend_flag} {depend_option}:{submit_job_msg.split()[-1]} {str(p_run_dir)}/deflate_dia.sh"
                 ),
                 check=True,
                 universal_newlines=True,
@@ -1989,7 +1948,7 @@ class TestBuildBatchScript:
                 cpu_arch="",
             )
         expected = textwrap.dedent(
-            """\
+            f"""\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2010,9 +1969,7 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="${{HOME}}/.local/bin/salishsea combine"
-            """.format(
-                account=account
-            )
+            """
         )
         if deflate:
             expected += textwrap.dedent(
@@ -2097,7 +2054,7 @@ class TestBuildBatchScript:
                 cpu_arch=cpu_arch,
             )
         expected = textwrap.dedent(
-            """\
+            f"""\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2119,9 +2076,7 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="${{HOME}}/.local/bin/salishsea combine"
-            """.format(
-                cpu_arch=cpu_arch, nodes=nodes, cores_per_node=cores_per_node, mem=mem
-            )
+            """
         )
         if deflate:
             expected += textwrap.dedent(
@@ -2205,7 +2160,7 @@ class TestBuildBatchScript:
                 cpu_arch="",
             )
         expected = textwrap.dedent(
-            """\
+            f"""\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2226,9 +2181,7 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="${{HOME}}/.local/bin/salishsea combine"
-            """.format(
-                account=account
-            )
+            """
         )
         if deflate:
             expected += textwrap.dedent(
@@ -2653,7 +2606,7 @@ class TestBuildBatchScript:
         procs = 40 if not cores_per_node else cores_per_node
         arch = "cascade" if not cpu_arch else cpu_arch
         expected = textwrap.dedent(
-            """\
+            f"""\
             #!/bin/bash
 
             #PBS -N foo
@@ -2663,7 +2616,7 @@ class TestBuildBatchScript:
             #PBS -m bea
             #PBS -M me@example.com
             #PBS -A st-sallen1-1
-            #PBS -l select=2:ncpus={procs}:mpiprocs={procs}:mem=186gb:cpu_arch={cpu_arch}
+            #PBS -l select=2:ncpus={procs}:mpiprocs={procs}:mem=186gb:cpu_arch={arch}
             # stdout and stderr file paths/names
             #PBS -o results_dir/stdout
             #PBS -e results_dir/stderr
@@ -2675,7 +2628,7 @@ class TestBuildBatchScript:
             RESULTS_DIR="results_dir"
             COMBINE="${{PBS_O_HOME}}/.local/bin/salishsea combine"
             """
-        ).format(procs=procs, cpu_arch=arch)
+        )
         if deflate:
             expected += textwrap.dedent(
                 """\
@@ -2814,24 +2767,18 @@ class TestSbatchDirectives:
                 results_dir=Path("foo"),
             )
         expected = (
-            "#SBATCH --job-name=foo\n"
-            "#SBATCH --constraint={cpu_arch}\n"
-            "#SBATCH --nodes={nodes}\n"
-            "#SBATCH --ntasks-per-node={procs_per_node}\n"
-            "#SBATCH --mem={mem}\n"
-            "#SBATCH --time=1:02:03\n"
-            "#SBATCH --mail-user=me@example.com\n"
-            "#SBATCH --mail-type=ALL\n"
-            "#SBATCH --account={account}\n"
-            "# stdout and stderr file paths/names\n"
-            "#SBATCH --output=foo/stdout\n"
-            "#SBATCH --error=foo/stderr\n"
-        ).format(
-            cpu_arch=cpu_arch,
-            nodes=nodes,
-            procs_per_node=procs_per_node,
-            mem=mem,
-            account=account,
+            f"#SBATCH --job-name=foo\n"
+            f"#SBATCH --constraint={cpu_arch}\n"
+            f"#SBATCH --nodes={nodes}\n"
+            f"#SBATCH --ntasks-per-node={procs_per_node}\n"
+            f"#SBATCH --mem={mem}\n"
+            f"#SBATCH --time=1:02:03\n"
+            f"#SBATCH --mail-user=me@example.com\n"
+            f"#SBATCH --mail-type=ALL\n"
+            f"#SBATCH --account={account}\n"
+            f"# stdout and stderr file paths/names\n"
+            f"#SBATCH --output=foo/stdout\n"
+            f"#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
         assert m_logger.info.called
@@ -2964,19 +2911,19 @@ class TestPbsDirectives:
                 run_desc, 42, "me@example.com", Path("foo"), procs_per_node, cpu_arch
             )
         expected = textwrap.dedent(
-            """\
-            #PBS -N foo
-            #PBS -S /bin/bash
-            #PBS -l walltime=1:02:03
-            # email when the job [b]egins and [e]nds, or is [a]borted
-            #PBS -m bea
-            #PBS -M me@example.com
-            {procs_directives}
-            # stdout and stderr file paths/names
-            #PBS -o foo/stdout
-            #PBS -e foo/stderr
+            f"""\
+#PBS -N foo
+#PBS -S /bin/bash
+#PBS -l walltime=1:02:03
+# email when the job [b]egins and [e]nds, or is [a]borted
+#PBS -m bea
+#PBS -M me@example.com
+{procs_directives}
+# stdout and stderr file paths/names
+#PBS -o foo/stdout
+#PBS -e foo/stderr
             """
-        ).format(procs_directives=procs_directives)
+        )
         assert pbs_directives == expected
 
     @pytest.mark.parametrize(
@@ -3056,16 +3003,16 @@ class TestPbsDirectives:
                 stderr_stdout=False,
             )
         expected = textwrap.dedent(
-            """\
-            #PBS -N foo
-            #PBS -S /bin/bash
-            #PBS -l walltime=1:02:03
-            # email when the job [b]egins and [e]nds, or is [a]borted
-            #PBS -m bea
-            #PBS -M me@example.com
-            {procs_directives}
+            f"""\
+#PBS -N foo
+#PBS -S /bin/bash
+#PBS -l walltime=1:02:03
+# email when the job [b]egins and [e]nds, or is [a]borted
+#PBS -m bea
+#PBS -M me@example.com
+{procs_directives}
             """
-        ).format(procs_directives=procs_directives)
+        )
         assert pbs_directives == expected
 
     def test_pbs_directives_deflate(self):
@@ -3117,17 +3064,17 @@ class TestPbsDirectives:
         run_desc = yaml.safe_load(
             StringIO(
                 textwrap.dedent(
-                    """\
+                    f"""\
                     run_id: foo
                     walltime: {walltime}
                     """
-                ).format(walltime=walltime)
+                )
             )
         )
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc, 42, "me@example.com", Path("")
         )
-        expected = "walltime={expected}".format(expected=expected_walltime)
+        expected = f"walltime={expected_walltime}"
         assert expected in pbs_directives
 
     def test_sockeye_account_directive(self):
@@ -3222,15 +3169,15 @@ class TestDefinitions:
                 deflate,
             )
         expected = (
-            'RUN_ID="foo"\n'
-            'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
-            'WORK_DIR="tmp_run_dir"\n'
-            'RESULTS_DIR="results_dir"\n'
-            'COMBINE="{home}/bin/salishsea combine"\n'
-        ).format(home=home)
+            f'RUN_ID="foo"\n'
+            f'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
+            f'WORK_DIR="tmp_run_dir"\n'
+            f'RESULTS_DIR="results_dir"\n'
+            f'COMBINE="{home}/bin/salishsea combine"\n'
+        )
         if deflate:
-            expected += 'DEFLATE="{home}/bin/salishsea deflate"\n'.format(home=home)
-        expected += 'GATHER="{home}/bin/salishsea gather"\n'.format(home=home)
+            expected += f'DEFLATE="{home}/bin/salishsea deflate"\n'
+        expected += f'GATHER="{home}/bin/salishsea gather"\n'
         assert defns == expected
 
 
@@ -3339,7 +3286,7 @@ class TestExecute:
                 separate_deflate=False,
             )
         expected = textwrap.dedent(
-            """\
+            f"""\
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)"
@@ -3350,9 +3297,7 @@ class TestExecute:
             echo "Ended run at $(date)"
 
             echo "Results combining started at $(date)"
-            """.format(
-                mpirun_cmd=mpirun_cmd
-            )
+            """
         )
         if system in {"delta", "omega", "sigma"}:
             expected += textwrap.dedent(
@@ -3571,7 +3516,7 @@ class TestExecute:
                 separate_deflate=separate_deflate,
             )
         expected = textwrap.dedent(
-            """\
+            f"""\
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)"
@@ -3582,9 +3527,7 @@ class TestExecute:
             echo "Ended run at $(date)"
 
             echo "Results combining started at $(date)"
-            """.format(
-                mpirun_cmd=mpirun_cmd
-            )
+            """
         )
         if system in {"delta", "sigma", "omega"}:
             expected += textwrap.dedent(
@@ -3648,7 +3591,7 @@ class TestBuildDeflateScript:
             script = salishsea_cmd.run._build_deflate_script(
                 run_desc, pattern, result_type, Path(str(p_results_dir))
             )
-        expected = """#!/bin/bash
+        expected = f"""#!/bin/bash
 
         #PBS -N {result_type}_19sep14_hindcast_deflate
         #PBS -S /bin/bash
@@ -3661,10 +3604,10 @@ class TestBuildDeflateScript:
         # memory per processor
         #PBS -l pmem={pmem}
         # stdout and stderr file paths/names
-        #PBS -o {results_dir}/stdout_deflate_{result_type}
-        #PBS -e {results_dir}/stderr_deflate_{result_type}
+        #PBS -o {str(p_results_dir)}/stdout_deflate_{result_type}
+        #PBS -e {str(p_results_dir)}/stderr_deflate_{result_type}
 
-        RESULTS_DIR="{results_dir}"
+        RESULTS_DIR="{str(p_results_dir)}"
         DEFLATE="${{PBS_O_HOME}}/.local/bin/salishsea deflate"
 
         module load intel
@@ -3685,12 +3628,7 @@ class TestBuildDeflateScript:
         chmod o+r ${{RESULTS_DIR}}/*
 
         exit ${{DEFLATE_EXIT_CODE}}
-        """.format(
-            result_type=result_type,
-            results_dir=str(p_results_dir),
-            pattern=pattern,
-            pmem=pmem,
-        )
+        """
         expected = expected.splitlines()
         for i, line in enumerate(script.splitlines()):
             assert line.strip() == expected[i].strip()
