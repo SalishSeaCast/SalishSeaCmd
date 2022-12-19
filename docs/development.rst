@@ -31,6 +31,9 @@
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaCmd
     :alt: Git on GitHub
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+    :target: https://github.com/pre-commit/pre-commit
+    :alt: pre-commit
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
@@ -134,36 +137,35 @@ To deactivate the environment use:
 Coding Style
 ============
 
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+    :target: https://github.com/pre-commit/pre-commit
+    :alt: pre-commit
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 
-The :kbd:`SalishSeaCmd` package uses the `black`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
+The ``SalishSeaCmd`` package uses Git pre-commit hooks managed by `pre-commit`_ to
+maintain consistent code style and and other aspects of code,
+docs,
+and repo QA.
 
-.. _black: https://black.readthedocs.io/en/stable/
-.. _PEP 8: https://peps.python.org/pep-0008/
+.. _pre-commit: https://pre-commit.com/
 
-:command:`black` is installed as part of the :ref:`SalishSeaCmdDevelopmentEnvironment` setup.
-
-To run :command:`black` on the entire code-base use:
+To install the `pre-commit` hooks in a newly cloned repo,
+activate the conda development environment,
+and run :command:`pre-commit install`:
 
 .. code-block:: bash
-
     $ cd SalishSeaCmd
-    $ conda activate salishsea-cmd
-    (salishsea-cmd)$ black ./
+    $ conda activate nemo-cmd
+    (nemo-cmd)$ pre-commit install
 
-in the repository root directory.
-The output looks something like::
+.. note::
+    You only need to install the hooks once immediately after you make a new clone
+    of the `SalishSeaCmd repository`_ and build your :ref:`SalishSeaCmdDevelopmentEnvironment`.
 
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/salishsea_cmd/prepare.py
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/tests/test_api.py
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/salishsea_cmd/api.py
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/tests/test_prepare.py
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/salishsea_cmd/run.py
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaCmd/tests/test_run.py
-  All done! ✨ 🍰 ✨
-  6 files reformatted, 5 files left unchanged.
+.. _SalishSeaCmd repository: https://github.com/SalishSeaCast/SalishSeaCmd
+
 
 .. _SalishSeaCmdBuildingTheDocumentation:
 
