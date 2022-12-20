@@ -3,12 +3,12 @@
 # Create a conda environment in which the `salishsea` command is installed
 # in editable mode with:
 #
-#   $ conda env create -f SalishSeaCmd/envs/environment.yaml
-#   $ source activate salishsea-cmd
-#   (salishsea-cmd)$ pip install --editable NEMO-Cmd/
-#   (salishsea-cmd)$ pip install --editable SalishSeaCmd/
+#   $ conda env create -f SalishSeaCmd/envs/environment-dev.yaml
+#   $ conda activate salishsea-cmd
+#   (salishsea-cmd)$ python3 -m pip install --editable NEMO-Cmd/
+#   (salishsea-cmd)$ python3 -m pip install --editable SalishSeaCmd/
 #
-# The environment will also include all the tools used to develop,
+# The environment includes all the tools used to develop,
 # test, and document the SalishSeaCmd package.
 #
 # See the envs/requirements.txt file for an exhaustive list of all the
