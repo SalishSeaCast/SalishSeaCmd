@@ -41,7 +41,7 @@
     :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/sphinx-linkcheck/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3A
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Asphinx-linkcheck
     :alt: Sphinx linkcheck
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
@@ -262,7 +262,7 @@ Link Checking the Documentation
 -------------------------------
 
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/sphinx-linkcheck/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3A
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Asphinx-linkcheck
     :alt: Sphinx linkcheck
 
 Sphinx also provides a link checker utility which can be run to find broken or redirected links in the docs.
