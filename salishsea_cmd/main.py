@@ -20,8 +20,8 @@
 
 SalishSeaCast NEMO Command Processor
 
-This module is connected to the `salishsea` command via a console_scripts
-entry point in setup.cfg.
+This module is connected to the :command:`salishsea` command via a scripts and
+entry-points configuration in :file:`pyproject.toml`.
 """
 import sys
 

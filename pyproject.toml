@@ -22,6 +22,69 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+packages = [ "salishsea_cmd" ]
+
+
+[project]
+name = "SalishSeaCmd"
+dynamic = [ "version" ]
+description = "SalishSeaCast NEMO Command Processor"
+readme = "README.rst"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Doug Latornell", email = "dlatornell@eoas.ubc.ca" },
+]
+keywords = [
+    "automation", "oceanography", "ocean modelling",
+    "UBC-MOAD", "Salish Sea", "SalishSeaCast",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers",
+]
+dependencies = [
+    # see envs/environment-dev.yaml for conda environment dev installation
+    # see envs/requirements.txt for versions most recently used in development
+    "arrow",
+    "attrs",
+    "cliff",
+    "f90nml",
+    "gitpython",
+    "python-hglib",
+    "pyyaml",
+    # 'NEMO-Cmd',  ; use python3 -m pip install --editable NEMO-Cmd/
+]
+
+[project.urls]
+"Documenation" = "https://salishsea-cmd.readthedocs.io/en/latest/"
+"Changelog" = "https://salishseacmd.readthedocs.io/en/latest/breaking_changes.html"
+"Issue Tracker" = "https://github.com/SalishSeaCast/SalishSeaCmd/issues"
+"Source Code" = "https://github.com/SalishSeaCast/SalishSeaCmd"
+
+[project.scripts]
+salishsea = "salishsea_cmd.main:main"
+
+[project.entry-points.salishsea]
+combine = "nemo_cmd.combine:Combine"
+deflate = "nemo_cmd.deflate:Deflate"
+gather = "nemo_cmd.gather:Gather"
+prepare = "salishsea_cmd.prepare:Prepare"
+run = "salishsea_cmd.run:Run"
+split-results = "salishsea_cmd.split_results:SplitResults"
+
+
 [tool.coverage.run]
 branch = true
 source = [ "salishsea_cmd", "tests"]
