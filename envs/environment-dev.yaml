@@ -42,6 +42,7 @@ dependencies:
   # For documentation
   - sphinx
   - sphinx_rtd_theme
+  - sphinx-notfound-page
 
   - pip:
     - python-hglib
