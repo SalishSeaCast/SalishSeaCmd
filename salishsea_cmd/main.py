@@ -35,7 +35,7 @@ class SalishSeaApp(cliff.app.App):
     CONSOLE_MESSAGE_FORMAT = "%(name)s %(levelname)s: %(message)s"
 
     def __init__(self):
-        super(SalishSeaApp, self).__init__(
+        super().__init__(
             description="SalishSeaCast NEMO Command Processor",
             version=salishsea_cmd.__version__,
             command_manager=cliff.commandmanager.CommandManager(
