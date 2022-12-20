@@ -19,11 +19,8 @@
 # SalishSeaCmd -- SalishSeaCast NEMO command processor
 
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-packages = [ "salishsea_cmd" ]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 
 [project]
@@ -91,3 +88,7 @@ source = [ "salishsea_cmd", "tests"]
 
 [tool.coverage.report]
 show_missing = true
+
+
+[tool.hatch.version]
+path = "salishsea_cmd/__init__.py"
