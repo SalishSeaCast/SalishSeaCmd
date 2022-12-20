@@ -39,15 +39,15 @@ class SalishSeaApp(cliff.app.App):
             description="SalishSeaCast NEMO Command Processor",
             version=salishsea_cmd.__version__,
             command_manager=cliff.commandmanager.CommandManager(
-                "salishsea.app", convert_underscores=False
+                "salishsea", convert_underscores=False
             ),
             stderr=sys.stdout,
         )
 
 
 def main(argv=sys.argv[1:]):
-    app = SalishSeaApp()
-    return app.run(argv)
+    salishsea = SalishSeaApp()
+    return salishsea.run(argv)
 
 
 if __name__ == "__main__":
