@@ -91,4 +91,4 @@ show_missing = true
 
 
 [tool.hatch.version]
-path = "salishsea_cmd/__init__.py"
+path = "salishsea_cmd/__about__.py"
