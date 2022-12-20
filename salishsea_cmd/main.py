@@ -23,12 +23,11 @@ SalishSeaCast NEMO Command Processor
 This module is connected to the :command:`salishsea` command via a scripts and
 entry-points configuration in :file:`pyproject.toml`.
 """
+import importlib.metadata
 import sys
 
 import cliff.app
 import cliff.commandmanager
-
-import salishsea_cmd
 
 
 class SalishSeaApp(cliff.app.App):
@@ -37,7 +36,7 @@ class SalishSeaApp(cliff.app.App):
     def __init__(self):
         super().__init__(
             description="SalishSeaCast NEMO Command Processor",
-            version=salishsea_cmd.__version__,
+            version=importlib.metadata.version("SalishSeaCmd"),
             command_manager=cliff.commandmanager.CommandManager(
                 "salishsea", convert_underscores=False
             ),
