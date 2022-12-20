@@ -37,7 +37,7 @@ class Prepare(cliff.command.Command):
     """Prepare a SalishSeaCast NEMO run."""
 
     def get_parser(self, prog_name):
-        parser = super(Prepare, self).get_parser(prog_name)
+        parser = super().get_parser(prog_name)
         parser.description = """
             Set up the SalishSeaCast NEMO described in DESC_FILE
             and print the path to the run directory.

@@ -44,7 +44,7 @@ class SplitResults(cliff.command.Command):
     """
 
     def get_parser(self, prog_name):
-        parser = super(SplitResults, self).get_parser(prog_name)
+        parser = super().get_parser(prog_name)
         parser.description = """
             Split the results of the multi-day SalishSeaCast NEMO model run in SOURCE_DIR
             into daily results directories.
