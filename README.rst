@@ -23,9 +23,9 @@ SalishSeaCast NEMO Command Processor
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/sphinx-linkcheck/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Asphinx-linkcheck
     :alt: Sphinx linkcheck
-.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
-    :alt: pytest and test coverage analysis
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/pytest-with-coverage/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Apytest-with-coverage
+    :alt: Pytest with Coverage Status
 .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
     :target: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report

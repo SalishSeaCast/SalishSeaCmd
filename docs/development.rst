@@ -43,9 +43,9 @@
 .. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/sphinx-linkcheck/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Asphinx-linkcheck
     :alt: Sphinx linkcheck
-.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
-    :alt: pytest and test coverage analysis
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/pytest-with-coverage/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Apytest-with-coverage
+    :alt: Pytest with Coverage Status
 .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
     :target: https://app.codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
@@ -335,12 +335,12 @@ The output looks something like::
   (line  391) ok        https://docs.pytest.org/en/latest/
   (line  109) ok        https://conda.io/en/latest/
   (line  109) ok        https://docs.conda.io/en/latest/miniconda.html
-  (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
+  (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Apytest-with-coverage
   (line  424) ok        https://pytest-cov.readthedocs.io/en/latest/
   (line  424) ok        https://coverage.readthedocs.io/en/latest/
   (line  469) ok        https://docs.github.com/en/free-pro-team@latest/actions
   (line  483) ok        https://git-scm.com/
-  (line  449) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
+  (line  449) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Apytest-with-coverage
   (line  195) ok        https://readthedocs.org/projects/salishseacmd/builds/
   (line  458) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions
   (line  497) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
@@ -351,7 +351,7 @@ The output looks something like::
   (line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
   (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
   (line  509) ok        https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
-  (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
+  (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/pytest-with-coverage/badge.svg
   (line  458) ok        https://github.com/SalishSeaCast/SalishSeaCmd/commits/main
   (line   21) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
   (line  173) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
@@ -455,7 +455,8 @@ you can use
 
     (salishsea-cmd)$ pytest --cov=./ --cov-report html
 
-to produce an HTML report that you can view in your browser by opening :file:`SalishSeaCmd/htmlcov/index.html`.
+to produce an HTML report that you can view in your browser by opening
+:file:`SalishSeaCmd/htmlcov/index.html`.
 
 
 .. _SalishSeaCmdContinuousIntegration:
@@ -463,17 +464,19 @@ to produce an HTML report that you can view in your browser by opening :file:`Sa
 Continuous Integration
 ----------------------
 
-.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/CI/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3ACI
-    :alt: GitHub Workflow Status
+.. image:: https://github.com/SalishSeaCast/SalishSeaCmd/workflows/pytest-with-coverage/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Apytest-with-coverage
+    :alt: Pytest with Coverage Status
 .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
     :target: https://app.codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
 
-The :kbd:`SalishSeaCmd` package unit test suite is run and a coverage report is generated whenever changes are pushed to GitHub.
+The :kbd:`SalishSeaCmd` package unit test suite is run and a coverage report is generated
+whenever changes are pushed to GitHub.
 The results are visible on the `repo actions page`_,
 from the green checkmarks beside commits on the `repo commits page`_,
-or from the green checkmark to the left of the "Latest commit" message on the `repo code overview page`_ .
+or from the green checkmark to the left of the "Latest commit" message on the
+`repo code overview page`_ .
 The testing coverage report is uploaded to `codecov.io`_
 
 .. _repo actions page: https://github.com/SalishSeaCast/SalishSeaCmd/actions
@@ -481,7 +484,8 @@ The testing coverage report is uploaded to `codecov.io`_
 .. _repo code overview page: https://github.com/SalishSeaCast/SalishSeaCmd
 .. _codecov.io: https://app.codecov.io/gh/SalishSeaCast/SalishSeaCmd
 
-The `GitHub Actions`_ workflow configuration that defines the continuous integration tasks is in the :file:`.github/workflows/pytest-coverage.yaml` file.
+The `GitHub Actions`_ workflow configuration that defines the continuous integration
+tasks is in the :file:`.github/workflows/pytest-with-coverage.yaml` file.
 
 .. _GitHub Actions: https://docs.github.com/en/actions
 
