@@ -16,9 +16,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCmd -- SalishSeaCast NEMO command processor
-"""
-import setuptools
+# SalishSeaCmd -- SalishSeaCast NEMO command processor
 
-
-setuptools.setup()
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
