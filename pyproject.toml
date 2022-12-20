@@ -21,3 +21,10 @@
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.coverage.run]
+branch = true
+source = [ "salishsea_cmd", "tests"]
+
+[tool.coverage.report]
+show_missing = true
