@@ -29,7 +29,7 @@ NEMO-3.6 Run Description File for AGRIF Runs
 This section describes the additional sections that can be included in a NEMO-3.6 YAML run description file to enable :kbd:`SalishSeaCmd` to handle runs that use `AGRIF`_
 (Adaptive Grid Refinement in Fortran).
 
-.. _AGRIF: http://agrif.imag.fr/
+.. _AGRIF: https://agrif.imag.fr/
 
 
 .. _NEMO-3.6-AGRIF-ExampleRunDescriptionYAML-File:

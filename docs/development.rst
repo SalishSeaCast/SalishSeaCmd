@@ -350,7 +350,7 @@ The output looks something like::
   (line   21) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
   (line   21) ok        https://img.shields.io/badge/code%20style-black-000000.svg
   (line   21) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
-  (line  509) ok        https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
+  (line  509) ok        https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst
   (line   21) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/pytest-with-coverage/badge.svg
   (line  458) ok        https://github.com/SalishSeaCast/SalishSeaCmd/commits/main
   (line   21) ok        https://readthedocs.org/projects/salishseacmd/badge/?version=latest
@@ -387,7 +387,7 @@ The output looks something like::
   (line  388) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
   (line  408) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
   (line  366) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
-  (line  428) ok        https://github.com/SalishSeaCast/SS-run-sets/blob/master/v201905/hindcast/file_def_dailysplit.xml
+  (line  428) ok        https://github.com/SalishSeaCast/SS-run-sets/blob/main/v201905/hindcast/file_def_dailysplit.xml
 
   build succeeded.
 
