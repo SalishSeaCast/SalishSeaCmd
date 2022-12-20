@@ -17,6 +17,9 @@ SalishSeaCast NEMO Command Processor
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
+.. image:: https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg
+    :alt: Hatch project
+    :target: https://github.com/pypa/hatch
 .. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
     :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status
