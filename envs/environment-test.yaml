@@ -21,6 +21,7 @@ dependencies:
   # For unit tests and coverage monitoring
   - coverage
   - pytest-cov
+  - pytest-randomly
 
   # For documentation links checking
   - sphinx
@@ -29,9 +30,6 @@ dependencies:
 
   - pip:
     - python-hglib
-
-    # For unit tests
-    - pytest-randomly
 
     # Install NEMO-Cmd & SalishSeaCmd packages in editable mode
     - --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd

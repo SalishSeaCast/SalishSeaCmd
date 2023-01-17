@@ -38,6 +38,7 @@ dependencies:
   # For unit tests
   - coverage
   - pytest-cov
+  - pytest-randomly
 
   # For documentation
   - sphinx
@@ -46,6 +47,3 @@ dependencies:
 
   - pip:
     - python-hglib
-
-    # For unit tests
-    - pytest-randomly
