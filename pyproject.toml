@@ -65,7 +65,7 @@ dependencies = [
 ]
 
 [project.urls]
-"Documenation" = "https://salishsea-cmd.readthedocs.io/en/latest/"
+"Documentation" = "https://salishsea-cmd.readthedocs.io/en/latest/"
 "Changelog" = "https://salishseacmd.readthedocs.io/en/latest/breaking_changes.html"
 "Issue Tracker" = "https://github.com/SalishSeaCast/SalishSeaCmd/issues"
 "Source Code" = "https://github.com/SalishSeaCast/SalishSeaCmd"
