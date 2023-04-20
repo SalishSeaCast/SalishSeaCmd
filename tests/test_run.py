@@ -1982,8 +1982,8 @@ class TestBuildBatchScript:
             GATHER="${HOME}/.local/bin/salishsea gather"
 
             module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.5.2
-            module load python/3.9.6
+            module load netcdf-fortran-mpi/4.6.0
+            module load python/3.11.2
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -2089,8 +2089,8 @@ class TestBuildBatchScript:
             GATHER="${HOME}/.local/bin/salishsea gather"
 
             module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.5.2
-            module load python/3.9.6
+            module load netcdf-fortran-mpi/4.6.0
+            module load python/3.11.2
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -2194,8 +2194,8 @@ class TestBuildBatchScript:
             GATHER="${HOME}/.local/bin/salishsea gather"
 
             module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.5.2
-            module load python/3.9.6
+            module load netcdf-fortran-mpi/4.6.0
+            module load python/3.11.2
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -3195,8 +3195,8 @@ class TestModules:
         expected = textwrap.dedent(
             """\
             module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.5.2
-            module load python/3.9.6
+            module load netcdf-fortran-mpi/4.6.0
+            module load python/3.11.2
             """
         )
         assert modules == expected
