@@ -1926,7 +1926,7 @@ class TestBuildBatchScript:
     """Unit test for _build_batch_script() function."""
 
     @pytest.mark.parametrize(
-        "account, deflate", [("rrg-allen", True), ("rrg-allen", False)]
+        "account, deflate", [("def-allen", True), ("def-allen", False)]
     )
     def test_beluga(self, account, deflate):
         desc_file = StringIO(
@@ -2065,7 +2065,7 @@ class TestBuildBatchScript:
             #SBATCH --time=1:02:03
             #SBATCH --mail-user=me@example.com
             #SBATCH --mail-type=ALL
-            #SBATCH --account=rrg-allen
+            #SBATCH --account=def-allen
             # stdout and stderr file paths/names
             #SBATCH --output=results_dir/stdout
             #SBATCH --error=results_dir/stderr
@@ -2138,7 +2138,7 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize(
-        "account, deflate", [("def-allen", True), ("def-allen", False)]
+        "account, deflate", [("rrg-allen", True), ("rrg-allen", False)]
     )
     def test_graham(self, account, deflate):
         desc_file = StringIO(
@@ -2737,7 +2737,7 @@ class TestSbatchDirectives:
             "#SBATCH --time=1:02:03\n"
             "#SBATCH --mail-user=me@example.com\n"
             "#SBATCH --mail-type=ALL\n"
-            "#SBATCH --account=rrg-allen\n"
+            "#SBATCH --account=def-allen\n"
             "# stdout and stderr file paths/names\n"
             "#SBATCH --output=foo/stdout\n"
             "#SBATCH --error=foo/stderr\n"
@@ -2748,8 +2748,8 @@ class TestSbatchDirectives:
     @pytest.mark.parametrize(
         "system, account, cpu_arch, nodes, procs_per_node, mem",
         [
-            ("cedar", "rrg-allen", "broadwell", 2, 32, "0"),
-            ("cedar", "rrg-allen", "skylake", 1, 48, "0"),
+            ("cedar", "def-allen", "broadwell", 2, 32, "0"),
+            ("cedar", "def-allen", "skylake", 1, 48, "0"),
         ],
     )
     def test_cedar_sbatch_directives(
@@ -2803,7 +2803,7 @@ class TestSbatchDirectives:
             "#SBATCH --time=1:02:03\n"
             "#SBATCH --mail-user=me@example.com\n"
             "#SBATCH --mail-type=ALL\n"
-            "#SBATCH --account=def-allen\n"
+            "#SBATCH --account=rrg-allen\n"
             "# stdout and stderr file paths/names\n"
             "#SBATCH --output=foo/stdout\n"
             "#SBATCH --error=foo/stderr\n"
