@@ -756,7 +756,7 @@ def _sbatch_directives(
         account = get_run_desc_value(run_desc, ("account",), fatal=False)
         sbatch_directives += f"#SBATCH --account={account}\n"
     except KeyError:
-        account = "rrg-allen" if SYSTEM in {"beluga", "cedar"} else "def-allen"
+        account = "rrg-allen" if SYSTEM in {"graham"} else "def-allen"
         sbatch_directives += f"#SBATCH --account={account}\n"
         log.info(
             f"No account found in run description YAML file, "
