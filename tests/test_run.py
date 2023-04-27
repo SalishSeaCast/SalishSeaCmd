@@ -1983,7 +1983,6 @@ class TestBuildBatchScript:
 
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
-            module load python/3.11.2
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -2090,7 +2089,6 @@ class TestBuildBatchScript:
 
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
-            module load python/3.11.2
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -2195,7 +2193,6 @@ class TestBuildBatchScript:
 
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
-            module load python/3.11.2
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -3196,7 +3193,6 @@ class TestModules:
             """\
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
-            module load python/3.11.2
             """
         )
         assert modules == expected

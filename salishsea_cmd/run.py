@@ -952,14 +952,12 @@ def _modules():
             """\
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
-            module load python/3.11.2
             """
         ),
         "cedar": textwrap.dedent(
             """\
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
-            module load python/3.11.2
             """
         ),
         "delta": textwrap.dedent(
@@ -971,7 +969,6 @@ def _modules():
             """\
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
-            module load python/3.11.2
             """
         ),
         "omega": textwrap.dedent(
