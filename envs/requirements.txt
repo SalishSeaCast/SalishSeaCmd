@@ -16,7 +16,7 @@ Babel==2.12.1
 backports.functools-lru-cache==1.6.4
 black==23.3.0
 brotlipy==0.7.0
-certifi==2022.12.7
+certifi==2023.5.7
 cffi==1.15.1
 cfgv==3.3.1
 charset-normalizer==3.1.0
@@ -65,7 +65,7 @@ pexpect==4.8.0
 pip==23.1
 platformdirs==3.2.0
 pluggy==1.0.0
-pre-commit==3.2.2
+pre-commit==3.3.3
 prettytable==3.7.0
 ptyprocess==0.7.0
 pycparser==2.21
