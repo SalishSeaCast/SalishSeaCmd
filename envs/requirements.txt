@@ -25,7 +25,7 @@ cliff==4.2.0
 cmd2==2.4.3
 colorama==0.4.6
 coverage==7.2.3
-cryptography==41.0.0
+cryptography==41.0.1
 distlib==0.3.6
 docutils==0.17.1
 editables==0.3
@@ -70,7 +70,7 @@ prettytable==3.7.0
 ptyprocess==0.7.0
 pycparser==2.21
 Pygments==2.15.1
-pyOpenSSL==23.1.1
+pyOpenSSL==23.2.0
 pyperclip==1.8.2
 PySocks==1.7.1
 pytest==7.3.1
