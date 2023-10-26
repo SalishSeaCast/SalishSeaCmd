@@ -2640,8 +2640,6 @@ class TestBuildBatchScript:
             module load gcc/5.5.0
             module load openmpi/4.1.1-cuda11-3
             module load netcdf-fortran/4.5.3-hdf4-support
-            module load python/3.8.10
-            module load py-setuptools/50.3.2
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -3235,8 +3233,6 @@ class TestModules:
             module load gcc/5.5.0
             module load openmpi/4.1.1-cuda11-3
             module load netcdf-fortran/4.5.3-hdf4-support
-            module load python/3.8.10
-            module load py-setuptools/50.3.2
             """
         )
         assert modules == expected
