@@ -2636,6 +2636,7 @@ class TestBuildBatchScript:
             """\
             GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"
 
+            module load Software_Collection/ARC_2023
             module load gcc/5.5.0
             module load openmpi/4.1.1-cuda11-3
             module load netcdf-fortran/4.5.3-hdf4-support
@@ -3230,6 +3231,7 @@ class TestModules:
             modules = salishsea_cmd.run._modules()
         expected = textwrap.dedent(
             """\
+            module load Software_Collection/ARC_2023
             module load gcc/5.5.0
             module load openmpi/4.1.1-cuda11-3
             module load netcdf-fortran/4.5.3-hdf4-support
