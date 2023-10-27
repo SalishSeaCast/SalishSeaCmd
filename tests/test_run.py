@@ -147,8 +147,8 @@ class TestRun:
             (True, 4, "salish", "qsub", "43.master"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "sockeye", "qsub", "43.pbsha"),
-            (True, 4, "sockeye", "qsub", "43.pbsha"),
+            (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
+            (True, 4, "sockeye", "sbatch", "Submitted batch job 43"),
             (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
@@ -224,8 +224,8 @@ class TestRun:
             (True, 4, "salish", "qsub", "43.master"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "sockeye", "qsub", "43.pbsha"),
-            (True, 4, "sockeye", "qsub", "43.pbsha"),
+            (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
+            (True, 4, "sockeye", "sbatch", "Submitted batch job 43"),
             (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
@@ -390,8 +390,8 @@ class TestRun:
             (True, 4, "salish", "qsub", "43.master"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "sockeye", "qsub", "43.pbsha"),
-            (True, 4, "sockeye", "qsub", "43.pbsha"),
+            (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
+            (True, 4, "sockeye", "sbatch", "Submitted batch job 43"),
             (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
@@ -770,9 +770,9 @@ class TestRun:
                 True,
                 4,
                 "sockeye",
-                "qsub",
-                ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
-                "43.pbsha.ib.sockeye",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
             ),
             (
                 False,
@@ -2601,40 +2601,49 @@ class TestBuildBatchScript:
                 cpu_arch=cpu_arch,
             )
         procs = 40 if not cores_per_node else cores_per_node
-        arch = "cascade" if not cpu_arch else cpu_arch
         expected = textwrap.dedent(
             f"""\
             #!/bin/bash
 
-            #PBS -N foo
-            #PBS -S /bin/bash
-            #PBS -l walltime=1:02:03
-            # email when the job [b]egins and [e]nds, or is [a]borted
-            #PBS -m bea
-            #PBS -M me@example.com
-            #PBS -A st-sallen1-1
-            #PBS -l select=2:ncpus={procs}:mpiprocs={procs}:mem=186gb:cpu_arch={arch}
+            #SBATCH --job-name=foo
+        """
+        )
+        if cpu_arch:
+            expected += textwrap.dedent(
+                f"""\
+                #SBATCH --constraint={cpu_arch}
+                """
+            )
+        expected += textwrap.dedent(
+            f"""\
+            #SBATCH --nodes=2
+            #SBATCH --ntasks-per-node={procs}
+            #SBATCH --mem=186gb
+            #SBATCH --time=1:02:03
+            #SBATCH --mail-user=me@example.com
+            #SBATCH --mail-type=ALL
+            #SBATCH --account=st-sallen1-1
             # stdout and stderr file paths/names
-            #PBS -o results_dir/stdout
-            #PBS -e results_dir/stderr
+            #SBATCH --output=results_dir/stdout
+            #SBATCH --error=results_dir/stderr
 
 
             RUN_ID="foo"
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="${{PBS_O_HOME}}/.local/bin/salishsea combine"
+            COMBINE="${{HOME}}/.local/bin/salishsea combine"
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
-                DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"
+                DEFLATE="${HOME}/.local/bin/salishsea deflate"
                 """
             )
         expected += textwrap.dedent(
             """\
-            GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"
+            GATHER="${HOME}/.local/bin/salishsea gather"
 
             module load Software_Collection/ARC_2023
             module load gcc/5.5.0
@@ -2807,12 +2816,41 @@ class TestSbatchDirectives:
         assert slurm_directives == expected
         assert m_logger.info.called
 
+    def test_sockeye_sbatch_directives(self, m_logger):
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
+        run_desc = yaml.safe_load(desc_file)
+        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
+            slurm_directives = salishsea_cmd.run._sbatch_directives(
+                run_desc,
+                n_processors=43,
+                procs_per_node=40,
+                cpu_arch="",
+                email="me@example.com",
+                results_dir=Path("foo"),
+            )
+        expected = (
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --nodes=2\n"
+            "#SBATCH --ntasks-per-node=40\n"
+            "#SBATCH --mem=186gb\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account=st-sallen1-1\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=foo/stdout\n"
+            "#SBATCH --error=foo/stderr\n"
+        )
+        assert slurm_directives == expected
+        assert m_logger.info.called
+
     @pytest.mark.parametrize(
         "system, procs_per_node",
         (
             ("beluga", 40),
             ("cedar", 48),
             ("graham", 32),
+            ("sockeye", 40),
         ),
     )
     def test_account_directive_from_yaml(self, m_logger, system, procs_per_node):
@@ -2868,24 +2906,6 @@ class TestPbsDirectives:
                 20,
                 "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
-            ),
-            (
-                "sockeye",
-                32,
-                "skylake",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb:cpu_arch=skylake",
-            ),
-            (
-                "sockeye",
-                40,
-                "cascade",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
-            ),
-            (
-                "sockeye",
-                40,
-                "",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
             ),
         ),
     )
@@ -2954,24 +2974,6 @@ class TestPbsDirectives:
                 20,
                 "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
-            ),
-            (
-                "sockeye",
-                32,
-                "skylake",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=32:mpiprocs=32:mem=186gb:cpu_arch=skylake",
-            ),
-            (
-                "sockeye",
-                40,
-                "cascade",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
-            ),
-            (
-                "sockeye",
-                40,
-                "",
-                "#PBS -A st-sallen1-1\n#PBS -l select=2:ncpus=40:mpiprocs=40:mem=186gb:cpu_arch=cascade",
             ),
         ),
     )
@@ -3073,53 +3075,6 @@ class TestPbsDirectives:
         expected = f"walltime={expected_walltime}"
         assert expected in pbs_directives
 
-    def test_sockeye_account_directive(self):
-        run_desc = yaml.safe_load(
-            StringIO(
-                textwrap.dedent(
-                    """\
-                    run_id: foo
-                    walltime: 01:02:03
-                    """
-                )
-            )
-        )
-        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
-            pbs_directives = salishsea_cmd.run._pbs_directives(
-                run_desc, 43, email="me@example.com", results_dir=Path("foo")
-            )
-        assert "#PBS -A st-sallen1-1\n" in pbs_directives
-
-    @pytest.mark.parametrize(
-        "system",
-        (
-            "delta",
-            "orcinus",
-            "salish",
-            "seawolf1",
-            "seawolf2",
-            "seawolf3",
-            "sigma",
-            "omega",
-        ),
-    )
-    def test_not_sockeye_no_account_directive_from_yaml(self, system):
-        run_desc = yaml.safe_load(
-            StringIO(
-                textwrap.dedent(
-                    """\
-                    run_id: foo
-                    walltime: 01:02:03
-                    """
-                )
-            )
-        )
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            pbs_directives = salishsea_cmd.run._pbs_directives(
-                run_desc, 43, email="me@example.com", results_dir=Path("foo")
-            )
-        assert "#PBS -A" not in pbs_directives
-
 
 class TestDefinitions:
     """Unit tests for _definitions function."""
@@ -3149,8 +3104,8 @@ class TestDefinitions:
             ("seawolf3", "${PBS_O_HOME}/.local", False),
             ("sigma", "${PBS_O_HOME}", True),
             ("sigma", "${PBS_O_HOME}", False),
-            ("sockeye", "${PBS_O_HOME}/.local", True),
-            ("sockeye", "${PBS_O_HOME}/.local", False),
+            ("sockeye", "${HOME}/.local", True),
+            ("sockeye", "${HOME}/.local", False),
         ],
     )
     def test_definitions(self, system, home, deflate):
