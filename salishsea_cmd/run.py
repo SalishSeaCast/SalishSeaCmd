@@ -233,12 +233,12 @@ def run(
                                Use this option to override the default cores/node that are
                                specified in the code for each HPC cluster.
 
-    :param str cores_per_node: CPU architecture to use in PBS or SBATCH directives.
-                               Use this to override the default CPU architecture on
-                               HPC clusters that have more than one type of CPU;
-                               e.g. sockeye (cascade is default, skylake is alternative)
-                               or cedar (skylake is default, broadwell is alternative).
-                               This option must be used in conjunction with --core-per-node.
+    :param str cpu_arch: CPU architecture to use in PBS or SBATCH directives.
+                         Use this to override the default CPU architecture on
+                         HPC clusters that have more than one type of CPU;
+                         e.g. sockeye (cascade is default, skylake is alternative)
+                         or cedar (skylake is default, broadwell is alternative).
+                         This option must be used in conjunction with --core-per-node.
 
     :param boolean deflate: Include "salishsea deflate" command in the bash
                             script.
@@ -280,7 +280,7 @@ def run(
         "seawolf2": "qsub",  # orcinus.westgrid.ca login node
         "seawolf3": "qsub",  # orcinus.westgrid.ca login node
         "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-        "sockeye": "qsub",
+        "sockeye": "sbatch",
     }.get(SYSTEM, "qsub")
     results_dir = nemo_cmd.resolved_path(results_dir)
     run_segments, first_seg_no = _calc_run_segments(desc_file, results_dir)
@@ -634,11 +634,12 @@ def _build_batch_script(
         email = get_run_desc_value(run_desc, ("email",), fatal=False)
     except KeyError:
         email = f"{os.getenv('USER')}@eoas.ubc.ca"
-    if SYSTEM in {"beluga", "cedar", "graham"}:
+    if SYSTEM in {"beluga", "cedar", "graham", "sockeye"}:
         procs_per_node = {
             "beluga": 40 if not cores_per_node else int(cores_per_node),
             "cedar": 48 if not cores_per_node else int(cores_per_node),
             "graham": 32 if not cores_per_node else int(cores_per_node),
+            "sockeye": 40 if not cores_per_node else int(cores_per_node),
         }[SYSTEM]
         script = "\n".join(
             (
@@ -652,7 +653,6 @@ def _build_batch_script(
                 "delta": 20 if not cores_per_node else int(cores_per_node),
                 "omega": 20 if not cores_per_node else int(cores_per_node),
                 "sigma": 20 if not cores_per_node else int(cores_per_node),
-                "sockeye": 40 if not cores_per_node else int(cores_per_node),
                 "orcinus": 12 if not cores_per_node else int(cores_per_node),
                 "salish": 0,  # solish only has 1 node; 0 gets things right
                 "seawolf1": 12 if not cores_per_node else int(cores_per_node),
@@ -696,7 +696,7 @@ def _sbatch_directives(
     Slurm Workload Manager for job scheduling.
 
     The string that is returned is intended for inclusion in a bash script
-    that will submitted be to the cluster queue manager via the
+    that will be submitted to the cluster queue manager via the
     :command:`sbatch` command.
 
     :param dict run_desc: Run description dictionary.
@@ -727,7 +727,9 @@ def _sbatch_directives(
     """
     run_id = get_run_desc_value(run_desc, ("run_id",))
     nodes = math.ceil(n_processors / procs_per_node)
-    mem = {"beluga": "92G", "cedar": "0", "graham": "0"}.get(SYSTEM, mem)
+    mem = {"beluga": "92G", "cedar": "0", "graham": "0", "sockeye": "186gb"}.get(
+        SYSTEM, mem
+    )
     if deflate:
         run_id = f"{result_type}_{run_id}_deflate"
     try:
@@ -738,7 +740,7 @@ def _sbatch_directives(
         ).time()
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td2hms(td)
-    if SYSTEM == "cedar":
+    if SYSTEM in {"cedar", "sockeye"} and cpu_arch:
         sbatch_directives = (
             f"#SBATCH --job-name={run_id}\n" f"#SBATCH --constraint={cpu_arch}\n"
         )
@@ -756,7 +758,14 @@ def _sbatch_directives(
         account = get_run_desc_value(run_desc, ("account",), fatal=False)
         sbatch_directives += f"#SBATCH --account={account}\n"
     except KeyError:
-        account = "rrg-allen" if SYSTEM in {"graham"} else "def-allen"
+        accounts = {
+            "graham": "rrg-allen",
+            "sockeye": "st-sallen1-1",
+        }
+        try:
+            account = accounts[SYSTEM]
+        except KeyError:
+            account = "def-allen"
         sbatch_directives += f"#SBATCH --account={account}\n"
         log.info(
             f"No account found in run description YAML file, "
@@ -832,14 +841,7 @@ def _pbs_directives(
         procs_directive = f"#PBS -l procs={n_processors}"
     else:
         nodes = math.ceil(n_processors / procs_per_node)
-        if SYSTEM == "sockeye":
-            arch = "cascade" if not cpu_arch else cpu_arch
-            procs_directive = (
-                f"#PBS -l select={nodes}:ncpus={procs_per_node}:"
-                f"mpiprocs={procs_per_node}:mem=186gb:cpu_arch={arch}"
-            )
-        else:
-            procs_directive = f"#PBS -l nodes={nodes}:ppn={procs_per_node}"
+        procs_directive = f"#PBS -l nodes={nodes}:ppn={procs_per_node}"
     if deflate:
         run_id = f"{result_type}_{run_id}_deflate"
     try:
@@ -860,32 +862,24 @@ def _pbs_directives(
         #PBS -M {email}
         """
     )
-    if SYSTEM == "sockeye":
+    if SYSTEM == "orcinus" or SYSTEM.startswith("seawolf"):
+        pbs_directives += "#PBS -l partition=QDR\n"
+    if SYSTEM == "salish":
         pbs_directives += textwrap.dedent(
             f"""\
-            #PBS -A st-sallen1-1
             {procs_directive}
+            # total memory for job
+            #PBS -l mem=64gb
             """
         )
     else:
-        if SYSTEM == "orcinus" or SYSTEM.startswith("seawolf"):
-            pbs_directives += "#PBS -l partition=QDR\n"
-        if SYSTEM == "salish":
-            pbs_directives += textwrap.dedent(
-                f"""\
-                {procs_directive}
-                # total memory for job
-                #PBS -l mem=64gb
-                """
-            )
-        else:
-            pbs_directives += textwrap.dedent(
-                f"""\
-                {procs_directive}
-                # memory per processor
-                #PBS -l pmem={pmem}
-                """
-            )
+        pbs_directives += textwrap.dedent(
+            f"""\
+            {procs_directive}
+            # memory per processor
+            #PBS -l pmem={pmem}
+            """
+        )
     if stderr_stdout:
         stdout = f"stdout_deflate_{result_type}" if deflate else "stdout"
         stderr = f"stderr_deflate_{result_type}" if deflate else "stderr"
@@ -931,7 +925,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "seawolf1": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "seawolf2": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "seawolf3": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
-        "sockeye": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
+        "sockeye": Path("${HOME}", ".local", "bin", "salishsea"),
     }.get(SYSTEM, Path("${HOME}", ".local", "bin", "salishsea"))
     defns = (
         f'RUN_ID="{get_run_desc_value(run_desc, ("run_id",))}"\n'
@@ -1031,8 +1025,6 @@ def _modules():
             module load gcc/5.5.0
             module load openmpi/4.1.1-cuda11-3
             module load netcdf-fortran/4.5.3-hdf4-support
-            module load python/3.8.10
-            module load py-setuptools/50.3.2
             """
         ),
     }.get(SYSTEM, "")
