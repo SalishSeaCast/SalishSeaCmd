@@ -14,14 +14,16 @@ dependencies:
   - pip
   - python=3.12
 
-  # readthedocs packages
+  # Sphinx and extensions we use
+  - sphinx=7.2.6
+  - sphinx-notfound-page=1.0.0
+  - sphinx-rtd-theme=2.0.0
+
+  # readthedocs build system packages
   - mock
   - pillow
-  - sphinx
-  - sphinx_rtd_theme
-  - sphinx-notfound-page
-
   - pip:
+    - commonmark
     - recommonmark
     - readthedocs-sphinx-ext
 
