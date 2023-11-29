@@ -24,9 +24,9 @@ dependencies:
   - pytest-randomly
 
   # For documentation links checking
-  - sphinx
-  - sphinx_rtd_theme
-  - sphinx-notfound-page
+  - sphinx=7.2.6
+  - sphinx-notfound-page=1.0.0
+  - sphinx-rtd-theme=2.0.0
 
   - pip:
     - python-hglib
