@@ -4,8 +4,8 @@
 #
 #   $ conda env create -f SalishSeaCmd/envs/environment-hpc.yaml
 #   $ conda activate salishsea-cmd
-#   (salishsea-cmd)$ python3 -m pip install --user --editable NEMO-Cmd/
-#   (salishsea-cmd)$ python3 -m pip install --user --editable SalishSeaCmd/
+#   (salishsea-cmd)$ python -m pip install --user --editable NEMO-Cmd/
+#   (salishsea-cmd)$ python -m pip install --user --editable SalishSeaCmd/
 
 name: salishsea-cmd
 
@@ -19,7 +19,7 @@ dependencies:
   - f90nml
   - gitpython
   - pip
-  - python=3.11
+  - python=3.12
   - pyyaml
 
   - pip:

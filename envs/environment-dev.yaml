@@ -5,8 +5,8 @@
 #
 #   $ conda env create -f SalishSeaCmd/envs/environment-dev.yaml
 #   $ conda activate salishsea-cmd
-#   (salishsea-cmd)$ python3 -m pip install --editable NEMO-Cmd/
-#   (salishsea-cmd)$ python3 -m pip install --editable SalishSeaCmd/
+#   (salishsea-cmd)$ python -m pip install --editable NEMO-Cmd/
+#   (salishsea-cmd)$ python -m pip install --editable SalishSeaCmd/
 #
 # The environment includes all the tools used to develop,
 # test, and document the SalishSeaCmd package.
@@ -27,7 +27,7 @@ dependencies:
   - f90nml
   - gitpython
   - pip
-  - python=3.11
+  - python=3.12
   - pyyaml
 
   # For coding style, repo QA, and pkg management
