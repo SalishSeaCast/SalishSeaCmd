@@ -583,7 +583,6 @@ The release process steps are:
 
    * Change the :guilabel:`Due date` to the release date
    * Delete the "when it's ready" comment in the :guilabel:`Description`
-   * Close the release milestone
 
 #. Use the GitHub :guilabel:`Issues -> Milestones` web interface to create a milestone for
    the next release:
@@ -595,6 +594,12 @@ The release process steps are:
    * Set the :guilabel:`Description` to something like
      ``v23.1 release - when it's ready :-)``
    * Create the next release milestone
+
+#. Review the open issues,
+   especially any that are associated with the milestone for the just released version,
+   and update their milestone.
+
+#. Close the milestone for the just released version.
 
 #. Use :command:`hatch version minor,dev` to bump the version for the next development cycle,
    or use :command:`hatch version major,minor,dev` for a year rollover version bump
