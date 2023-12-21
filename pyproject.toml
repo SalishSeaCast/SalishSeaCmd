@@ -76,5 +76,8 @@ source = [ "salishsea_cmd", "tests"]
 show_missing = true
 
 
+[tool.hatch.build.targets.wheel]
+packages = ["salishsea_cmd"]
+
 [tool.hatch.version]
 path = "salishsea_cmd/__about__.py"
