@@ -1981,8 +1981,8 @@ class TestBuildBatchScript:
             """\
             GATHER="${HOME}/.local/bin/salishsea gather"
 
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -2003,7 +2003,7 @@ class TestBuildBatchScript:
                 """\
 
                 echo "Results deflation started at $(date)"
-                module load nco/4.9.5
+                module load nco/5.1.7
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
@@ -2087,8 +2087,8 @@ class TestBuildBatchScript:
             """\
             GATHER="${HOME}/.local/bin/salishsea gather"
 
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -2109,7 +2109,7 @@ class TestBuildBatchScript:
                 """\
 
                 echo "Results deflation started at $(date)"
-                module load nco/4.9.5
+                module load nco/5.1.7
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
@@ -2191,8 +2191,8 @@ class TestBuildBatchScript:
             """\
             GATHER="${HOME}/.local/bin/salishsea gather"
 
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -2213,7 +2213,7 @@ class TestBuildBatchScript:
                 """\
 
                 echo "Results deflation started at $(date)"
-                module load nco/4.9.5
+                module load nco/5.1.7
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
@@ -3144,8 +3144,8 @@ class TestModules:
             modules = salishsea_cmd.run._modules()
         expected = textwrap.dedent(
             """\
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
             """
         )
         assert modules == expected
@@ -3268,7 +3268,7 @@ class TestExecute:
         if system in {"beluga", "cedar", "graham"}:
             expected += textwrap.dedent(
                 """\
-                module load nco/4.9.5
+                module load nco/5.1.7
                 """
             )
         expected += textwrap.dedent(
