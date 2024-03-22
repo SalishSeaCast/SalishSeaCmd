@@ -944,14 +944,14 @@ def _modules():
     modules = {
         "beluga": textwrap.dedent(
             """\
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
             """
         ),
         "cedar": textwrap.dedent(
             """\
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
             """
         ),
         "delta": textwrap.dedent(
@@ -961,8 +961,8 @@ def _modules():
         ),
         "graham": textwrap.dedent(
             """\
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
             """
         ),
         "omega": textwrap.dedent(
@@ -1127,7 +1127,7 @@ def _execute(
             # variants
             script += textwrap.dedent(
                 """\
-                module load nco/4.9.5
+                module load nco/5.1.7
                 """
             )
         script += textwrap.dedent(
