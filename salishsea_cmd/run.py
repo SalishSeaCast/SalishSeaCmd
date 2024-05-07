@@ -962,6 +962,7 @@ def _modules():
         "graham": textwrap.dedent(
             """\
             module load StdEnv/2023
+            module load intel/2023.2.1
             module load netcdf-fortran-mpi/4.6.1
             """
         ),
