@@ -38,7 +38,6 @@ import f90nml
 import nemo_cmd
 import yaml
 from nemo_cmd.prepare import get_n_processors, get_run_desc_value, load_run_desc
-
 from salishsea_cmd import api
 
 log = logging.getLogger(__name__)
@@ -945,12 +944,14 @@ def _modules():
         "beluga": textwrap.dedent(
             """\
             module load StdEnv/2023
+            module load intel/2023.2.1
             module load netcdf-fortran-mpi/4.6.1
             """
         ),
         "cedar": textwrap.dedent(
             """\
             module load StdEnv/2023
+            module load intel/2023.2.1
             module load netcdf-fortran-mpi/4.6.1
             """
         ),

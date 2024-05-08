@@ -30,9 +30,8 @@ from unittest.mock import call, Mock, patch
 import cliff.app
 import f90nml
 import pytest
-import yaml
-
 import salishsea_cmd.run
+import yaml
 
 
 @pytest.fixture
@@ -1982,6 +1981,7 @@ class TestBuildBatchScript:
             GATHER="${HOME}/.local/bin/salishsea gather"
 
             module load StdEnv/2023
+            module load intel/2023.2.1
             module load netcdf-fortran-mpi/4.6.1
 
             mkdir -p ${RESULTS_DIR}
@@ -2088,6 +2088,7 @@ class TestBuildBatchScript:
             GATHER="${HOME}/.local/bin/salishsea gather"
 
             module load StdEnv/2023
+            module load intel/2023.2.1
             module load netcdf-fortran-mpi/4.6.1
 
             mkdir -p ${RESULTS_DIR}
@@ -2192,6 +2193,7 @@ class TestBuildBatchScript:
             GATHER="${HOME}/.local/bin/salishsea gather"
 
             module load StdEnv/2023
+            module load intel/2023.2.1
             module load netcdf-fortran-mpi/4.6.1
 
             mkdir -p ${RESULTS_DIR}
@@ -3145,6 +3147,7 @@ class TestModules:
         expected = textwrap.dedent(
             """\
             module load StdEnv/2023
+            module load intel/2023.2.1
             module load netcdf-fortran-mpi/4.6.1
             """
         )
