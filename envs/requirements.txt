@@ -82,7 +82,7 @@ python-dateutil==2.9.0
 python-hglib==2.6.2
 pytz==2024.1
 PyYAML==6.0.1
-requests==2.31.0
+requests==2.32.0
 rich==13.7.1
 SecretStorage==3.3.3
 setuptools==69.5.1
