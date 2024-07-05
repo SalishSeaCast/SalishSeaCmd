@@ -157,6 +157,7 @@ def _record_vcs_revisions(run_desc, run_dir):
             run_desc, ("vcs revisions", vcs_tool), run_dir=run_dir
         )
         for repo in repos:
-            nemo_cmd.prepare.write_repo_rev_file(
-                Path(repo), run_dir, vcs_funcs[vcs_tool]
-            )
+            if not Path(repo) in (nemo_code_config.parent.parent, xios_code_repo):
+                nemo_cmd.prepare.write_repo_rev_file(
+                    Path(repo), run_dir, vcs_funcs[vcs_tool]
+                )
