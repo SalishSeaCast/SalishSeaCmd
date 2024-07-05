@@ -18,13 +18,13 @@
 
 """SalishSeaCmd prepare sub-command plug-in unit tests
 """
+import os
 from pathlib import Path
 from unittest.mock import call, Mock, patch
 
 import cliff.app
 import nemo_cmd.prepare
 import pytest
-
 import salishsea_cmd.prepare
 
 
@@ -125,27 +125,29 @@ class TestRecordVCSRevisions:
     )
     @patch("nemo_cmd.prepare.write_repo_rev_file")
     def test_write_repo_rev_file_default_calls(
-        self, m_write, config_name_key, nemo_code_config_key, tmpdir
+        self, m_write, config_name_key, nemo_code_config_key, tmp_path
     ):
-        nemo_code_repo = tmpdir.ensure_dir("NEMO-3.6-code")
-        nemo_config = nemo_code_repo.ensure_dir("NEMOGCM", "CONFIG")
-        xios_code_repo = tmpdir.ensure_dir("XIOS")
+        nemo_code_repo = tmp_path / Path("NEMO-3.6-code")
+        nemo_config = nemo_code_repo / Path("NEMOGCM", "CONFIG")
+        nemo_config.mkdir(parents=True)
+        xios_code_repo = tmp_path / Path("XIOS")
+        xios_code_repo.mkdir()
         run_desc = {
             config_name_key: "SalishSea",
             "paths": {
-                nemo_code_config_key: str(nemo_config),
-                "XIOS": str(xios_code_repo),
+                nemo_code_config_key: os.fspath(nemo_config),
+                "XIOS": os.fspath(xios_code_repo),
             },
         }
         salishsea_cmd.prepare._record_vcs_revisions(run_desc, Path("run_dir"))
         assert m_write.call_args_list == [
             call(
-                Path(str(nemo_code_repo)),
+                nemo_code_repo,
                 Path("run_dir"),
                 nemo_cmd.prepare.get_git_revision,
             ),
             call(
-                Path(str(xios_code_repo)),
+                xios_code_repo,
                 Path("run_dir"),
                 nemo_cmd.prepare.get_git_revision,
             ),
@@ -157,24 +159,31 @@ class TestRecordVCSRevisions:
     )
     @patch("nemo_cmd.prepare.write_repo_rev_file")
     def test_write_repo_rev_file_vcs_revisions_hg_call(
-        self, m_write, config_name_key, nemo_code_config_key, tmpdir
+        self, m_write, config_name_key, nemo_code_config_key, tmp_path
     ):
-        nemo_config = tmpdir.ensure_dir("NEMO-3.6-code", "NEMOGCM", "CONFIG")
-        xios_code_repo = tmpdir.ensure_dir("XIOS")
-        nemo_forcing = tmpdir.ensure_dir("NEMO-forcing")
-        ss_run_sets = tmpdir.ensure_dir("SS-run-sets")
+        nemo_code_repo = tmp_path / Path("NEMO-3.6-code")
+        nemo_config = nemo_code_repo / Path("NEMOGCM", "CONFIG")
+        nemo_config.mkdir(parents=True)
+        xios_code_repo = tmp_path / Path("XIOS")
+        xios_code_repo.mkdir()
+        nemo_forcing = tmp_path / Path("NEMO-forcing")
+        nemo_forcing.mkdir()
+        ss_run_sets = tmp_path / Path("SS-run-sets")
+        ss_run_sets.mkdir()
         run_desc = {
             config_name_key: "SalishSea",
             "paths": {
-                nemo_code_config_key: str(nemo_config),
-                "XIOS": str(xios_code_repo),
-                "forcing": str(nemo_forcing),
+                nemo_code_config_key: os.fspath(nemo_config),
+                "XIOS": os.fspath(xios_code_repo),
+                "forcing": os.fspath(nemo_forcing),
             },
-            "vcs revisions": {"hg": [str(ss_run_sets)]},
+            "vcs revisions": {"hg": [os.fspath(ss_run_sets)]},
         }
         salishsea_cmd.prepare._record_vcs_revisions(run_desc, Path("run_dir"))
         assert m_write.call_args_list[-1] == call(
-            Path(str(ss_run_sets)), Path("run_dir"), nemo_cmd.prepare.get_hg_revision
+            Path(os.fspath(ss_run_sets)),
+            Path("run_dir"),
+            nemo_cmd.prepare.get_hg_revision,
         )
 
     @pytest.mark.parametrize(
@@ -183,22 +192,64 @@ class TestRecordVCSRevisions:
     )
     @patch("nemo_cmd.prepare.write_repo_rev_file")
     def test_write_repo_rev_file_vcs_revisions_git_call(
-        self, m_write, config_name_key, nemo_code_config_key, tmpdir
+        self, m_write, config_name_key, nemo_code_config_key, tmp_path
     ):
-        nemo_config = tmpdir.ensure_dir("NEMO-3.6-code", "NEMOGCM", "CONFIG")
-        xios_code_repo = tmpdir.ensure_dir("XIOS")
-        nemo_forcing = tmpdir.ensure_dir("NEMO-forcing")
-        ss_run_sets = tmpdir.ensure_dir("SS-run-sets")
+        nemo_code_repo = tmp_path / Path("NEMO-3.6-code")
+        nemo_config = nemo_code_repo / Path("NEMOGCM", "CONFIG")
+        nemo_config.mkdir(parents=True)
+        xios_code_repo = tmp_path / Path("XIOS")
+        xios_code_repo.mkdir()
+        nemo_forcing = tmp_path / Path("NEMO-forcing")
+        nemo_forcing.mkdir()
+        ss_run_sets = tmp_path / Path("SS-run-sets")
+        ss_run_sets.mkdir()
         run_desc = {
             config_name_key: "SalishSea",
             "paths": {
-                nemo_code_config_key: str(nemo_config),
-                "XIOS": str(xios_code_repo),
-                "forcing": str(nemo_forcing),
+                nemo_code_config_key: os.fspath(nemo_config),
+                "XIOS": os.fspath(xios_code_repo),
+                "forcing": os.fspath(nemo_forcing),
             },
-            "vcs revisions": {"git": [str(ss_run_sets)]},
+            "vcs revisions": {"git": [os.fspath(ss_run_sets)]},
         }
         salishsea_cmd.prepare._record_vcs_revisions(run_desc, Path("run_dir"))
         assert m_write.call_args_list[-1] == call(
-            Path(str(ss_run_sets)), Path("run_dir"), nemo_cmd.prepare.get_git_revision
+            Path(os.fspath(ss_run_sets)),
+            Path("run_dir"),
+            nemo_cmd.prepare.get_git_revision,
+        )
+
+    @pytest.mark.parametrize(
+        "config_name_key, nemo_code_config_key",
+        [("config name", "NEMO code config"), ("config_name", "NEMO-code-config")],
+    )
+    @patch("nemo_cmd.prepare.write_repo_rev_file")
+    def test_write_repo_rev_file_vcs_revisions_git_call_no_dups(
+        self, m_write, config_name_key, nemo_code_config_key, tmp_path
+    ):
+        nemo_code_repo = tmp_path / Path("NEMO-3.6-code")
+        nemo_config = nemo_code_repo / Path("NEMOGCM", "CONFIG")
+        nemo_config.mkdir(parents=True)
+        xios_code_repo = tmp_path / Path("XIOS")
+        xios_code_repo.mkdir()
+        nemo_forcing = tmp_path / Path("NEMO-forcing")
+        nemo_forcing.mkdir()
+        ss_run_sets = tmp_path / Path("SS-run-sets")
+        ss_run_sets.mkdir()
+        run_desc = {
+            config_name_key: "SalishSea",
+            "paths": {
+                nemo_code_config_key: os.fspath(nemo_config),
+                "XIOS": os.fspath(xios_code_repo),
+                "forcing": os.fspath(nemo_forcing),
+            },
+            "vcs revisions": {
+                "git": [os.fspath(ss_run_sets), os.fspath(nemo_code_repo)]
+            },
+        }
+        salishsea_cmd.prepare._record_vcs_revisions(run_desc, Path("run_dir"))
+        assert m_write.call_args_list[-1] == call(
+            Path(os.fspath(ss_run_sets)),
+            Path("run_dir"),
+            nemo_cmd.prepare.get_git_revision,
         )
