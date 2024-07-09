@@ -115,5 +115,5 @@ userpath==1.7.0
 virtualenv==20.26.1
 wcwidth==0.2.13
 wheel==0.43.0
-zipp==3.17.0
+zipp==3.19.1
 zstandard==0.22.0
