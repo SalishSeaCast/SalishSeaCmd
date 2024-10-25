@@ -36,7 +36,7 @@ These instructions assume that:
   (`Miniforge`_ or `Miniconda3`_)
   installed
 
-  .. _Conda: https://conda.io/en/latest/
+  .. _Conda: https://docs.conda.io/en/latest/
   .. _Miniforge: https://github.com/conda-forge/miniforge
   .. _Miniconda3: https://docs.conda.io/en/latest/miniconda.html
 
