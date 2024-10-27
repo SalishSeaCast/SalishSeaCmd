@@ -44,7 +44,7 @@
 |                            |     :target: https://github.com/SalishSeaCast/SalishSeaCmd/releases                                                                                                                                  |
 |                            |     :alt: Releases                                                                                                                                                                                   |
 |                            | .. image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaCmd/main/pyproject.toml&logo=Python&logoColor=gold&label=Python |
-|                            |      :target: https://docs.python.org/3.12/                                                                                                                                                          |
+|                            |      :target: https://docs.python.org/3.13/                                                                                                                                                          |
 |                            |      :alt: Python Version from PEP 621 TOML                                                                                                                                                          |
 |                            | .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github                                                                                                               |
 |                            |     :target: https://github.com/SalishSeaCast/SalishSeaCmd/issues                                                                                                                                    |
@@ -74,10 +74,10 @@ Python Versions
 ===============
 
 .. image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaCmd/main/pyproject.toml&logo=Python&logoColor=gold&label=Python
-    :target: https://docs.python.org/3.12/
+    :target: https://docs.python.org/3.13/
     :alt: Python Version from PEP 621 TOML
 
-The :kbd:`SalishSeaCmd` package is developed using `Python`_ 3.12.
+The :kbd:`SalishSeaCmd` package is developed using `Python`_ 3.13.
 The minimum supported Python version is 3.11.
 The :ref:`SalishSeaCmdContinuousIntegration` workflow on GitHub ensures that the package
 is tested for all versions of Python>=3.11.
@@ -328,7 +328,7 @@ The output looks something like:
     (     development: line  119) ok        https://docs.conda.io/en/latest/miniconda.html
     (     development: line  119) ok        https://docs.conda.io/en/latest/
     (breaking_changes: line  102) ok        https://calver.org/
-    (     development: line   23) ok        https://docs.python.org/3.12/
+    (     development: line   23) ok        https://docs.python.org/3.13/
     (             api: line   23) ok        https://docs.python.org/3/library/constants.html#None
     (breaking_changes: line  153) ok        https://docs.python.org/3/library/constants.html#False
     (run_description_file/3.6_yaml_file: line  446) ok        https://docs.python.org/3/library/constants.html#True
@@ -427,24 +427,23 @@ The output looks something like:
 
 .. code-block:: text
 
-    =============================== test session starts ================================
-    platform linux -- Python 3.12.7, pytest-8.3.3, pluggy-1.5.0
-    Using --randomly-seed=363797280
+    ================================= test session starts ===================================
+    platform linux -- Python 3.13.0, pytest-8.3.3, pluggy-1.5.0
+    Using --randomly-seed=1698456346
     rootdir: /media/doug/warehouse/MEOPAR/SalishSeaCmd
     configfile: pytest.ini
-    plugins: cov-5.0.0, anyio-4.6.2.post1, randomly-3.15.0
+    plugins: randomly-3.15.0, cov-5.0.0, anyio-4.6.2.post1
     collected 327 items
 
-    tests/test_split_results.py ................                                   [  4%]
-    tests/test_prepare.py ..............                                           [  9%]
-    tests/test_api.py ......                                                       [ 11%]
-    tests/test_run.py ...................................................................
-    .....................................................................................
-    .....................................................................................
-    ...............................                                                [ 92%]
-    .......................                                                        [100%]
+    tests/test_api.py ......                                                           [  1%]
+    tests/test_prepare.py ..............                                               [  6%]
+    tests/test_run.py .......................................................................
+    .........................................................................................
+    .........................................................................................
+    ..........................................                                         [ 95%]
+    tests/test_split_results.py ................                                       [100%]
 
-    =============================== 327 passed in 2.53s ================================
+    ================================= 327 passed in 0.93s ===================================
 
 You can monitor what lines of code the test suite exercises using the `coverage.py`_ and `pytest-cov`_ tools with the command:
 
