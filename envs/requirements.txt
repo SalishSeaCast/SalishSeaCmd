@@ -114,6 +114,5 @@ urllib3==2.2.3
 userpath==1.7.0
 virtualenv==20.27.0
 wcwidth==0.2.13
-wheel==0.44.0
 zipp==3.20.2
 zstandard==0.23.0
