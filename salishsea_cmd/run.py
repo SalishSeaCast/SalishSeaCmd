@@ -275,7 +275,7 @@ def run(
         "graham": "sbatch",
         "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "orcinus": "qsub",
-        "salish": "bash",
+        "salish": "qsub",
         "seawolf1": "qsub",  # orcinus.westgrid.ca login node
         "seawolf2": "qsub",  # orcinus.westgrid.ca login node
         "seawolf3": "qsub",  # orcinus.westgrid.ca login node
