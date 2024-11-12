@@ -2525,35 +2525,35 @@ class TestBuildBatchScript:
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
-            echo "working dir: $(pwd)"
+            echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
 
-            echo "Starting run at $(date)"
-            /usr/bin/mpirun --bind-to none -np 7 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe
+            echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
+            /usr/bin/mpirun --bind-to none -np 7 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
             MPIRUN_EXIT_CODE=$?
-            echo "Ended run at $(date)"
+            echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
-            echo "Results combining started at $(date)"
+            echo "Results combining started at $(date)" >>${RESULTS_DIR}/stdout
             ${COMBINE} ${RUN_DESC} --debug
-            echo "Results combining ended at $(date)"
+            echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
 
-                echo "Results deflation started at $(date)"
+                echo "Results deflation started at $(date)" >>${RESULTS_DIR}/stdout
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
-                echo "Results deflation ended at $(date)"
+                echo "Results deflation ended at $(date)" >>${RESULTS_DIR}/stdout
                 """
             )
         expected += textwrap.dedent(
             """\
 
-            echo "Results gathering started at $(date)"
+            echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
             ${GATHER} ${RESULTS_DIR} --debug
-            echo "Results gathering ended at $(date)"
+            echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
 
             chmod go+rx ${RESULTS_DIR}
             chmod g+rw ${RESULTS_DIR}/*
@@ -3208,10 +3208,6 @@ class TestExecute:
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
             (
-                "salish",
-                "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe",
-            ),
-            (
                 "sigma",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
@@ -3221,15 +3217,18 @@ class TestExecute:
             ),
         ],
     )
-    def test_execute_with_deflate(self, system, mpirun_cmd):
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            script = salishsea_cmd.run._execute(
-                nemo_processors=42,
-                xios_processors=1,
-                deflate=True,
-                max_deflate_jobs=4,
-                separate_deflate=False,
-            )
+    def test_execute_with_deflate(self, system, mpirun_cmd, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        script = salishsea_cmd.run._execute(
+            nemo_processors=42,
+            xios_processors=1,
+            deflate=True,
+            max_deflate_jobs=4,
+            separate_deflate=False,
+            redirect_stdout_stderr=False,
+        )
+
         expected = textwrap.dedent(
             f"""\
             mkdir -p ${{RESULTS_DIR}}
@@ -3283,6 +3282,46 @@ class TestExecute:
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
+            """
+        )
+        assert script == expected
+
+    def test_salish_execute_with_deflate(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "salish")
+
+        script = salishsea_cmd.run._execute(
+            nemo_processors=42,
+            xios_processors=1,
+            deflate=True,
+            max_deflate_jobs=4,
+            separate_deflate=False,
+            redirect_stdout_stderr=True,
+        )
+
+        expected = textwrap.dedent(
+            f"""\
+            mkdir -p ${{RESULTS_DIR}}
+            cd ${{WORK_DIR}}
+            echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
+
+            echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+            /usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
+
+            echo "Results combining started at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{COMBINE}} ${{RUN_DESC}} --debug
+            echo "Results combining ended at $(date)" >>${{RESULTS_DIR}}/stdout
+
+            echo "Results deflation started at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+              *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+              --jobs 4 --debug
+            echo "Results deflation ended at $(date)" >>${{RESULTS_DIR}}/stdout
+
+            echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{GATHER}} ${{RESULTS_DIR}} --debug
+            echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
             """
         )
         assert script == expected
@@ -3394,24 +3433,6 @@ class TestExecute:
                 True,
             ),
             (
-                "salish",
-                "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe",
-                False,
-                True,
-            ),
-            (
-                "salish",
-                "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe",
-                False,
-                False,
-            ),
-            (
-                "salish",
-                "/usr/bin/mpirun --bind-to none -np 42 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe",
-                True,
-                True,
-            ),
-            (
                 "sigma",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
@@ -3450,16 +3471,19 @@ class TestExecute:
         ],
     )
     def test_execute_without_deflate(
-        self, system, mpirun_cmd, deflate, separate_deflate
+        self, system, mpirun_cmd, deflate, separate_deflate, monkeypatch
     ):
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            script = salishsea_cmd.run._execute(
-                nemo_processors=42,
-                xios_processors=1,
-                deflate=deflate,
-                max_deflate_jobs=4,
-                separate_deflate=separate_deflate,
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        script = salishsea_cmd.run._execute(
+            nemo_processors=42,
+            xios_processors=1,
+            deflate=deflate,
+            max_deflate_jobs=4,
+            separate_deflate=separate_deflate,
+            redirect_stdout_stderr=False,
+        )
+
         expected = textwrap.dedent(
             f"""\
             mkdir -p ${{RESULTS_DIR}}
@@ -3493,6 +3517,50 @@ class TestExecute:
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
+            """
+        )
+        assert script == expected
+
+    @pytest.mark.parametrize(
+        "deflate, separate_deflate",
+        [
+            (False, True),
+            (False, False),
+            (True, True),
+        ],
+    )
+    def test_salish_execute_without_deflate(
+        self, deflate, separate_deflate, monkeypatch
+    ):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "salish")
+
+        script = salishsea_cmd.run._execute(
+            nemo_processors=7,
+            xios_processors=1,
+            deflate=deflate,
+            max_deflate_jobs=4,
+            separate_deflate=separate_deflate,
+            redirect_stdout_stderr=True,
+        )
+
+        expected = textwrap.dedent(
+            f"""\
+            mkdir -p ${{RESULTS_DIR}}
+            cd ${{WORK_DIR}}
+            echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
+
+            echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+            /usr/bin/mpirun --bind-to none -np 7 ./nemo.exe : --bind-to none -np 1 ./xios_server.exe >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
+
+            echo "Results combining started at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{COMBINE}} ${{RUN_DESC}} --debug
+            echo "Results combining ended at $(date)" >>${{RESULTS_DIR}}/stdout
+
+            echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{GATHER}} ${{RESULTS_DIR}} --debug
+            echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
             """
         )
         assert script == expected
