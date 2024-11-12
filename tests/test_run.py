@@ -2473,42 +2473,37 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
-    def test_salish(self, deflate):
-        desc_file = StringIO(
-            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
-        )
-        run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "salish"):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=7,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node="",
-                cpu_arch="",
+    def test_salish(self, deflate, monkeypatch):
+        run_desc = yaml.safe_load(
+            StringIO(
+                textwrap.dedent(
+                    """\
+                    run_id: foo
+                    walltime: 01:02:03
+                    email: me@example.com
+                    """
+                )
             )
+        )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "salish")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=7,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
         expected = textwrap.dedent(
             """\
             #!/bin/bash
-
-            #PBS -N foo
-            #PBS -S /bin/bash
-            #PBS -l walltime=1:02:03
-            # email when the job [b]egins and [e]nds, or is [a]borted
-            #PBS -m bea
-            #PBS -M me@example.com
-            #PBS -l procs=8
-            # total memory for job
-            #PBS -l mem=64gb
-            # stdout and stderr file paths/names
-            #PBS -o results_dir/stdout
-            #PBS -e results_dir/stderr
-
 
             RUN_ID="foo"
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
@@ -2895,12 +2890,6 @@ class TestPbsDirectives:
                 "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
-                "salish",
-                0,
-                "",
-                "#PBS -l procs=42\n# total memory for job\n#PBS -l mem=64gb",
-            ),
-            (
                 "sigma",
                 20,
                 "",
@@ -2961,12 +2950,6 @@ class TestPbsDirectives:
                 0,
                 "",
                 "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
-            ),
-            (
-                "salish",
-                0,
-                "",
-                "#PBS -l procs=42\n# total memory for job\n#PBS -l mem=64gb",
             ),
             (
                 "sigma",

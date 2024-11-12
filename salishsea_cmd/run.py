@@ -634,7 +634,10 @@ def _build_batch_script(
         email = get_run_desc_value(run_desc, ("email",), fatal=False)
     except KeyError:
         email = f"{os.getenv('USER')}@eoas.ubc.ca"
-    if SYSTEM in {"beluga", "cedar", "graham", "sockeye"}:
+    if SYSTEM == "salish":
+        # salish doesn't use a scheduler, so no sbatch or PBS directives in its script
+        pass
+    elif SYSTEM in {"beluga", "cedar", "graham", "sockeye"}:
         procs_per_node = {
             "beluga": 40 if not cores_per_node else int(cores_per_node),
             "cedar": 48 if not cores_per_node else int(cores_per_node),
@@ -654,7 +657,6 @@ def _build_batch_script(
                 "omega": 20 if not cores_per_node else int(cores_per_node),
                 "sigma": 20 if not cores_per_node else int(cores_per_node),
                 "orcinus": 12 if not cores_per_node else int(cores_per_node),
-                "salish": 0,  # solish only has 1 node; 0 gets things right
                 "seawolf1": 12 if not cores_per_node else int(cores_per_node),
                 "seawolf2": 12 if not cores_per_node else int(cores_per_node),
                 "seawolf3": 12 if not cores_per_node else int(cores_per_node),
@@ -673,7 +675,7 @@ def _build_batch_script(
             script,
             f"{_definitions(run_desc, desc_file, run_dir, results_dir, deflate)}\n"
             f"{_modules()}\n"
-            f"{_execute(nemo_processors, xios_processors, deflate, max_deflate_jobs, separate_deflate,)}\n"
+            f"{_execute(nemo_processors, xios_processors, deflate, max_deflate_jobs, separate_deflate)}\n"
             f"{_fix_permissions()}\n"
             f"{_cleanup()}",
         )
