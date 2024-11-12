@@ -671,14 +671,20 @@ def _build_batch_script(
             )
         )
     redirect_stdout_stderr = True if SYSTEM == "salish" else False
+    execute_section = _execute(
+        nemo_processors,
+        xios_processors,
+        deflate,
+        max_deflate_jobs,
+        separate_deflate,
+        redirect_stdout_stderr,
+    )
     script = "\n".join(
         (
             script,
             f"{_definitions(run_desc, desc_file, run_dir, results_dir, deflate)}\n"
             f"{_modules()}\n"
-            f"{_execute(
-                nemo_processors, xios_processors, deflate, max_deflate_jobs, separate_deflate,
-                redirect_stdout_stderr)}\n"
+            f"{execute_section}\n"
             f"{_fix_permissions()}\n"
             f"{_cleanup()}",
         )
