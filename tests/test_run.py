@@ -3121,10 +3121,19 @@ class TestModules:
         modules = salishsea_cmd.run._modules()
         assert modules == ""
 
+    def test_salish(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "salish")
+
+        modules = salishsea_cmd.run._modules()
+
+        assert modules == ""
+
     @pytest.mark.parametrize("system", ["beluga", "cedar", "graham"])
-    def test_beluga_cedar_graham(self, system):
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            modules = salishsea_cmd.run._modules()
+    def test_beluga_cedar_graham(self, system, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        modules = salishsea_cmd.run._modules()
+
         expected = textwrap.dedent(
             """\
             module load StdEnv/2020
@@ -3134,9 +3143,11 @@ class TestModules:
         assert modules == expected
 
     @pytest.mark.parametrize("system", ("orcinus", "seawolf1", "seawolf2", "seawolf3"))
-    def test_orcinus(self, system):
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            modules = salishsea_cmd.run._modules()
+    def test_orcinus(self, system, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        modules = salishsea_cmd.run._modules()
+
         expected = textwrap.dedent(
             """\
             module load intel
@@ -3151,9 +3162,11 @@ class TestModules:
         assert modules == expected
 
     @pytest.mark.parametrize("system", ["delta", "sigma", "omega"])
-    def test_optimum(self, system):
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            modules = salishsea_cmd.run._modules()
+    def test_optimum(self, system, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        modules = salishsea_cmd.run._modules()
+
         expected = textwrap.dedent(
             """\
             module load OpenMPI/2.1.6/GCC/SYSTEM
@@ -3161,9 +3174,11 @@ class TestModules:
         )
         assert modules == expected
 
-    def test_sockeye(self):
-        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
-            modules = salishsea_cmd.run._modules()
+    def test_sockeye(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
+
+        modules = salishsea_cmd.run._modules()
+
         expected = textwrap.dedent(
             """\
             module load gcc/5.5.0
