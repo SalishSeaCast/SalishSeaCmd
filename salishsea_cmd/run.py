@@ -275,7 +275,7 @@ def run(
         "graham": "sbatch",
         "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "orcinus": "qsub",
-        "salish": "qsub",
+        "salish": "bash",
         "seawolf1": "qsub",  # orcinus.westgrid.ca login node
         "seawolf2": "qsub",  # orcinus.westgrid.ca login node
         "seawolf3": "qsub",  # orcinus.westgrid.ca login node
@@ -543,12 +543,23 @@ def _build_tmp_run_dir(
 
 def _submit_job(batch_file, queue_job_cmd, waitjob):
     if waitjob != "0":
-        depend_opt = (
-            "-W depend=afterok" if queue_job_cmd.startswith("qsub") else "-d afterok"
-        )
+        match queue_job_cmd.split(" ")[0]:
+            case "qsub":
+                depend_opt = "-W depend=afterok"
+            case "sbatch":
+                depend_opt = "-d afterok"
+            case _:
+                log.error(
+                    f"dependent jobs are not available for systems that launch jobs with "
+                    f"{queue_job_cmd}"
+                )
+                raise SystemExit(2)
         cmd = f"{queue_job_cmd} {depend_opt}:{waitjob} {batch_file}"
     else:
         cmd = f"{queue_job_cmd} {batch_file}"
+    if queue_job_cmd == "bash":
+        subprocess.Popen(shlex.split(cmd), start_new_session=True)
+        return f"{cmd} started"
     submit_job_msg = subprocess.run(
         shlex.split(cmd), check=True, universal_newlines=True, stdout=subprocess.PIPE
     ).stdout
@@ -634,7 +645,10 @@ def _build_batch_script(
         email = get_run_desc_value(run_desc, ("email",), fatal=False)
     except KeyError:
         email = f"{os.getenv('USER')}@eoas.ubc.ca"
-    if SYSTEM in {"beluga", "cedar", "graham", "sockeye"}:
+    if SYSTEM == "salish":
+        # salish doesn't use a scheduler, so no sbatch or PBS directives in its script
+        pass
+    elif SYSTEM in {"beluga", "cedar", "graham", "sockeye"}:
         procs_per_node = {
             "beluga": 40 if not cores_per_node else int(cores_per_node),
             "cedar": 48 if not cores_per_node else int(cores_per_node),
@@ -654,7 +668,6 @@ def _build_batch_script(
                 "omega": 20 if not cores_per_node else int(cores_per_node),
                 "sigma": 20 if not cores_per_node else int(cores_per_node),
                 "orcinus": 12 if not cores_per_node else int(cores_per_node),
-                "salish": 0,  # solish only has 1 node; 0 gets things right
                 "seawolf1": 12 if not cores_per_node else int(cores_per_node),
                 "seawolf2": 12 if not cores_per_node else int(cores_per_node),
                 "seawolf3": 12 if not cores_per_node else int(cores_per_node),
@@ -668,12 +681,21 @@ def _build_batch_script(
                 f"{_pbs_directives(run_desc, nemo_processors + xios_processors, email, results_dir, procs_per_node, cpu_arch, )}\n",
             )
         )
+    redirect_stdout_stderr = True if SYSTEM == "salish" else False
+    execute_section = _execute(
+        nemo_processors,
+        xios_processors,
+        deflate,
+        max_deflate_jobs,
+        separate_deflate,
+        redirect_stdout_stderr,
+    )
     script = "\n".join(
         (
             script,
             f"{_definitions(run_desc, desc_file, run_dir, results_dir, deflate)}\n"
             f"{_modules()}\n"
-            f"{_execute(nemo_processors, xios_processors, deflate, max_deflate_jobs, separate_deflate,)}\n"
+            f"{execute_section}\n"
             f"{_fix_permissions()}\n"
             f"{_cleanup()}",
         )
@@ -1032,8 +1054,18 @@ def _modules():
 
 
 def _execute(
-    nemo_processors, xios_processors, deflate, max_deflate_jobs, separate_deflate
+    nemo_processors,
+    xios_processors,
+    deflate,
+    max_deflate_jobs,
+    separate_deflate,
+    redirect_stdout_stderr,
 ):
+    redirect = (
+        ""
+        if not redirect_stdout_stderr
+        else " >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr"
+    )
     mpirun = {
         "beluga": "mpirun",
         "cedar": "mpirun",
@@ -1064,34 +1096,35 @@ def _execute(
     }.get(SYSTEM, f"{mpirun} -np {nemo_processors} ./nemo.exe")
     if xios_processors:
         mpirun = {
-            "beluga": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
-            "cedar": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
-            "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe",
-            "graham": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
-            "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe",
-            "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
-            "salish": f"{mpirun} : --bind-to none -np {xios_processors} ./xios_server.exe",
-            "seawolf1": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
-            "seawolf2": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
-            "seawolf3": f"{mpirun} : -np {xios_processors} ./xios_server.exe",
-            "sigma": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe",
-            "sockeye": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe",
+            "beluga": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "cedar": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
+            "graham": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
+            "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "salish": f"{mpirun} : --bind-to none -np {xios_processors} ./xios_server.exe{redirect}",
+            "seawolf1": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "seawolf2": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "seawolf3": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "sigma": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
+            "sockeye": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
         }.get(
             SYSTEM,
-            f"{mpirun} : -np {xios_processors} ./xios_server.exe",
+            f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
         )
+    redirect = "" if not redirect_stdout_stderr else " >>${RESULTS_DIR}/stdout"
     script = textwrap.dedent(
         f"""\
         mkdir -p ${{RESULTS_DIR}}
         cd ${{WORK_DIR}}
-        echo "working dir: $(pwd)"
+        echo "working dir: $(pwd)"{redirect}
 
-        echo "Starting run at $(date)"
+        echo "Starting run at $(date)"{redirect}
         {mpirun}
         MPIRUN_EXIT_CODE=$?
-        echo "Ended run at $(date)"
+        echo "Ended run at $(date)"{redirect}
 
-        echo "Results combining started at $(date)"
+        echo "Results combining started at $(date)"{redirect}
         """
     )
     if SYSTEM in {"delta", "omega", "sigma"}:
@@ -1109,16 +1142,16 @@ def _execute(
             """
         )
     script += textwrap.dedent(
-        """\
-        ${COMBINE} ${RUN_DESC} --debug
-        echo "Results combining ended at $(date)"
+        f"""\
+        ${{COMBINE}} ${{RUN_DESC}} --debug
+        echo "Results combining ended at $(date)"{redirect}
         """
     )
     if deflate and not separate_deflate:
         script += textwrap.dedent(
-            """\
+            f"""\
 
-            echo "Results deflation started at $(date)"
+            echo "Results deflation started at $(date)"{redirect}
             """
         )
         if SYSTEM in {"beluga", "cedar", "graham"}:
@@ -1135,15 +1168,15 @@ def _execute(
             ${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
               *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
               --jobs {max_deflate_jobs} --debug
-            echo "Results deflation ended at $(date)"
+            echo "Results deflation ended at $(date)"{redirect}
             """
         )
     script += textwrap.dedent(
-        """\
+        f"""\
 
-        echo "Results gathering started at $(date)"
-        ${GATHER} ${RESULTS_DIR} --debug
-        echo "Results gathering ended at $(date)"
+        echo "Results gathering started at $(date)"{redirect}
+        ${{GATHER}} ${{RESULTS_DIR}} --debug
+        echo "Results gathering ended at $(date)"{redirect}
         """
     )
     return script
