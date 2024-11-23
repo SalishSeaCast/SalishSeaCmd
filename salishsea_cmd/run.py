@@ -275,7 +275,7 @@ def run(
         "graham": "sbatch",
         "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "orcinus": "qsub",
-        "salish": "qsub",
+        "salish": "bash",
         "seawolf1": "qsub",  # orcinus.westgrid.ca login node
         "seawolf2": "qsub",  # orcinus.westgrid.ca login node
         "seawolf3": "qsub",  # orcinus.westgrid.ca login node
@@ -543,12 +543,23 @@ def _build_tmp_run_dir(
 
 def _submit_job(batch_file, queue_job_cmd, waitjob):
     if waitjob != "0":
-        depend_opt = (
-            "-W depend=afterok" if queue_job_cmd.startswith("qsub") else "-d afterok"
-        )
+        match queue_job_cmd.split(" ")[0]:
+            case "qsub":
+                depend_opt = "-W depend=afterok"
+            case "sbatch":
+                depend_opt = "-d afterok"
+            case _:
+                log.error(
+                    f"dependent jobs are not available for systems that launch jobs with "
+                    f"{queue_job_cmd}"
+                )
+                raise SystemExit(2)
         cmd = f"{queue_job_cmd} {depend_opt}:{waitjob} {batch_file}"
     else:
         cmd = f"{queue_job_cmd} {batch_file}"
+    if queue_job_cmd == "bash":
+        subprocess.Popen(shlex.split(cmd), start_new_session=True)
+        return f"{cmd} started"
     submit_job_msg = subprocess.run(
         shlex.split(cmd), check=True, universal_newlines=True, stdout=subprocess.PIPE
     ).stdout

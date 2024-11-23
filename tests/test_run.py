@@ -18,6 +18,7 @@
 
 """SalishSeaCmd run sub-command plug-in unit tests
 """
+import logging
 import os
 import shlex
 import subprocess
@@ -143,8 +144,8 @@ class TestRun:
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "graham", "sbatch", "Submitted batch job 43"),
             (True, 4, "graham", "sbatch", "Submitted batch job 43"),
-            (False, 0, "salish", "qsub", "43.master"),
-            (True, 4, "salish", "qsub", "43.master"),
+            (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
+            (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
@@ -176,6 +177,7 @@ class TestRun:
         queue_job_cmd,
         submit_job_msg,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -200,10 +202,12 @@ class TestRun:
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
         m_sj.return_value = submit_job_msg
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir))
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"), Path(str(p_results_dir))
+        )
+
         m_sj.assert_called_once_with(
             Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob="0"
         )
@@ -220,8 +224,8 @@ class TestRun:
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "graham", "sbatch", "Submitted batch job 43"),
             (True, 4, "graham", "sbatch", "Submitted batch job 43"),
-            (False, 0, "salish", "qsub", "43.master"),
-            (True, 4, "salish", "qsub", "43.master"),
+            (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
+            (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
@@ -386,8 +390,8 @@ class TestRun:
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "graham", "sbatch", "Submitted batch job 43"),
             (True, 4, "graham", "sbatch", "Submitted batch job 43"),
-            (False, 0, "salish", "qsub", "43.master"),
-            (True, 4, "salish", "qsub", "43.master"),
+            (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
+            (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
@@ -520,8 +524,8 @@ class TestRun:
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
             ),
-            (False, 0, "salish", "qsub", ("43.master", "44.master"), "43.master"),
-            (True, 4, "salish", "qsub", ("43.master", "44.master"), "43.master"),
+            (False, 0, "salish", "bash", ("43.master", "44.master"), "43.master"),
+            (True, 4, "salish", "bash", ("43.master", "44.master"), "43.master"),
             (
                 False,
                 0,
@@ -748,8 +752,8 @@ class TestRun:
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
             ),
-            (False, 0, "salish", "qsub", ("43.master", "44.master"), "43.master"),
-            (True, 4, "salish", "qsub", ("43.master", "44.master"), "43.master"),
+            (False, 0, "salish", "bash", ("43.master", "44.master"), "43.master"),
+            (True, 4, "salish", "bash", ("43.master", "44.master"), "43.master"),
             (
                 False,
                 0,
@@ -1824,47 +1828,94 @@ class TestBuildTmpRunDir:
         assert batch_file == Path(str(p_run_dir)) / "SalishSeaNEMO.sh"
 
 
-@patch("salishsea_cmd.run.subprocess.run")
-@pytest.mark.parametrize(
-    "queue_job_cmd, depend_flag, depend_option, submit_job_msg",
-    [
-        ("sbatch", "-d", "afterok", "Submitted batch job 43"),
-        ("qsub", "-W", "depend=afterok", "43.orca2.ibb"),
-        ("qsub -q mpi", "-W", "depend=afterok", "43.admin.default.domain"),
-    ],
-)
 class TestSubmitJob:
     """Unit tests for _submit_job() function."""
 
-    def test_submit_job(
-        self, m_run, queue_job_cmd, depend_flag, depend_option, submit_job_msg
-    ):
+    @pytest.mark.parametrize(
+        "queue_job_cmd, msg",
+        (
+            ("bash", "bash run_dir/SalishSeaNEMO.sh started"),  # salish
+            ("sbatch", "Submitted batch job 43"),  # sockeye & Alliance HPC clusters
+            ("qsub", "43.orca2.ibb"),  # orcinus
+            ("qsub -q mpi", "43.admin.default.domain"),  # optimum
+        ),
+    )
+    def test_submit_job(self, queue_job_cmd, msg, monkeypatch):
+        def mock_subprocess_Popen(cmd, start_new_session):
+            pass
+
+        monkeypatch.setattr(subprocess, "Popen", mock_subprocess_Popen)
+
+        def mock_subprocess_run(cmd, check, universal_newlines, stdout):
+            return subprocess.CompletedProcess(cmd, 0, msg)
+
+        monkeypatch.setattr(subprocess, "run", mock_subprocess_run)
+
         submit_job_msg = salishsea_cmd.run._submit_job(
             Path("run_dir", "SalishSeaNEMO.sh"), queue_job_cmd, "0"
         )
-        m_run.assert_called_once_with(
-            shlex.split(f"{queue_job_cmd} {Path('run_dir')}/SalishSeaNEMO.sh"),
-            check=True,
-            universal_newlines=True,
-            stdout=subprocess.PIPE,
-        )
-        assert submit_job_msg == submit_job_msg
 
-    def test_submit_job_w_waitjob(
-        self, m_run, queue_job_cmd, depend_flag, depend_option, submit_job_msg
+        assert submit_job_msg == msg
+
+    @pytest.mark.parametrize(
+        "queue_job_cmd, depend_flag, depend_option, msg",
+        [
+            # sockeye & Alliance HPC clusters
+            (
+                "sbatch",
+                "-d",
+                "afterok",
+                "Submitted batch job 43",
+            ),
+            # sockeye & Alliance HPC clusters
+            (
+                "qsub",
+                "-W",
+                "depend=afterok",
+                "43.orca2.ibb",
+            ),
+            # optimum
+            (
+                "qsub -q mpi",
+                "-W",
+                "depend=afterok",
+                "43.admin.default.domain",
+            ),
+        ],
+    )
+    def test_submit_job_with_waitjob(
+        self,
+        queue_job_cmd,
+        depend_flag,
+        depend_option,
+        msg,
+        monkeypatch,
     ):
+        def mock_subprocess_run(cmd, check, universal_newlines, stdout):
+            return subprocess.CompletedProcess(cmd, 0, msg)
+
+        monkeypatch.setattr(subprocess, "run", mock_subprocess_run)
+
         submit_job_msg = salishsea_cmd.run._submit_job(
             Path("run_dir", "SalishSeaNEMO.sh"), queue_job_cmd, 42
         )
-        m_run.assert_called_once_with(
-            shlex.split(
-                f"{queue_job_cmd} {depend_flag} {depend_option}:42 {Path('run_dir')}/SalishSeaNEMO.sh"
-            ),
-            check=True,
-            universal_newlines=True,
-            stdout=subprocess.PIPE,
-        )
+
         assert submit_job_msg == submit_job_msg
+
+    def test_no_waitjob_for_bash_submit(self, caplog):
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(SystemExit) as exc:
+            salishsea_cmd.run._submit_job(
+                Path("run_dir", "SalishSeaNEMO.sh"), "bash", "43"
+            )
+
+        assert exc.value.code == 2
+        assert caplog.records[0].levelname == "ERROR"
+        expected = (
+            "dependent jobs are not available for systems that launch jobs with bash"
+        )
+        assert caplog.records[0].message == expected
 
 
 @patch("salishsea_cmd.run.log", autospec=True)
