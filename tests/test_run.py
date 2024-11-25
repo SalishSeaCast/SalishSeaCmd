@@ -2584,7 +2584,7 @@ class TestBuildBatchScript:
             echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
             echo "Results combining started at $(date)" >>${RESULTS_DIR}/stdout
-            ${COMBINE} ${RUN_DESC} --debug
+            ${COMBINE} ${RUN_DESC} --debug >>${RESULTS_DIR}/stdout
             echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout
             """
         )
@@ -2595,7 +2595,7 @@ class TestBuildBatchScript:
                 echo "Results deflation started at $(date)" >>${RESULTS_DIR}/stdout
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
-                  --jobs 4 --debug
+                  --jobs 4 --debug >>${RESULTS_DIR}/stdout
                 echo "Results deflation ended at $(date)" >>${RESULTS_DIR}/stdout
                 """
             )
@@ -2603,7 +2603,7 @@ class TestBuildBatchScript:
             """\
 
             echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
-            ${GATHER} ${RESULTS_DIR} --debug
+            ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
             echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
 
             chmod go+rx ${RESULTS_DIR}
@@ -3367,7 +3367,7 @@ class TestExecute:
             echo "Results deflation started at $(date)" >>${{RESULTS_DIR}}/stdout
             ${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
               *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
-              --jobs 4 --debug
+              --jobs 4 --debug >>${{RESULTS_DIR}}/stdout
             echo "Results deflation ended at $(date)" >>${{RESULTS_DIR}}/stdout
 
             echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
@@ -3606,11 +3606,11 @@ class TestExecute:
             echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
             echo "Results combining started at $(date)" >>${{RESULTS_DIR}}/stdout
-            ${{COMBINE}} ${{RUN_DESC}} --debug
+            ${{COMBINE}} ${{RUN_DESC}} --debug >>${{RESULTS_DIR}}/stdout
             echo "Results combining ended at $(date)" >>${{RESULTS_DIR}}/stdout
 
             echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
-            ${{GATHER}} ${{RESULTS_DIR}} --debug
+            ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
             echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
             """
         )
