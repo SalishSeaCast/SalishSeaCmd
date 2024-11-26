@@ -1143,7 +1143,7 @@ def _execute(
         )
     script += textwrap.dedent(
         f"""\
-        ${{COMBINE}} ${{RUN_DESC}} --debug
+        ${{COMBINE}} ${{RUN_DESC}} --debug{redirect}
         echo "Results combining ended at $(date)"{redirect}
         """
     )
@@ -1167,7 +1167,7 @@ def _execute(
             f"""\
             ${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
               *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
-              --jobs {max_deflate_jobs} --debug
+              --jobs {max_deflate_jobs} --debug{redirect}
             echo "Results deflation ended at $(date)"{redirect}
             """
         )
@@ -1175,7 +1175,7 @@ def _execute(
         f"""\
 
         echo "Results gathering started at $(date)"{redirect}
-        ${{GATHER}} ${{RESULTS_DIR}} --debug
+        ${{GATHER}} ${{RESULTS_DIR}} --debug{redirect}
         echo "Results gathering ended at $(date)"{redirect}
         """
     )
