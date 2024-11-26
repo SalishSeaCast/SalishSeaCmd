@@ -648,11 +648,12 @@ def _build_batch_script(
     if SYSTEM == "salish":
         # salish doesn't use a scheduler, so no sbatch or PBS directives in its script
         pass
-    elif SYSTEM in {"beluga", "cedar", "graham", "sockeye"}:
+    elif SYSTEM in {"beluga", "cedar", "graham", "narval", "sockeye"}:
         procs_per_node = {
             "beluga": 40 if not cores_per_node else int(cores_per_node),
             "cedar": 48 if not cores_per_node else int(cores_per_node),
             "graham": 32 if not cores_per_node else int(cores_per_node),
+            "narval": 64 if not cores_per_node else int(cores_per_node),
             "sockeye": 40 if not cores_per_node else int(cores_per_node),
         }[SYSTEM]
         script = "\n".join(
@@ -749,7 +750,7 @@ def _sbatch_directives(
     """
     run_id = get_run_desc_value(run_desc, ("run_id",))
     nodes = math.ceil(n_processors / procs_per_node)
-    mem = {"beluga": "92G", "cedar": "0", "graham": "0", "sockeye": "186gb"}.get(
+    mem = {"beluga": "92G", "cedar": "0", "graham": "0", "narval": "0", "sockeye": "186gb"}.get(
         SYSTEM, mem
     )
     if deflate:
