@@ -1979,25 +1979,27 @@ class TestBuildBatchScript:
     @pytest.mark.parametrize(
         "account, deflate", [("def-allen", True), ("def-allen", False)]
     )
-    def test_beluga(self, account, deflate):
+    def test_beluga(self, account, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "beluga"):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node="",
-                cpu_arch="",
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "beluga")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
         expected = textwrap.dedent(
             f"""\
             #!/bin/bash
@@ -2084,25 +2086,27 @@ class TestBuildBatchScript:
         "cpu_arch, nodes, cores_per_node, mem, deflate",
         [("broadwell", 2, "32", "0", True), ("skylake", 1, "48", "0", True)],
     )
-    def test_cedar(self, cpu_arch, nodes, cores_per_node, mem, deflate):
+    def test_cedar(self, cpu_arch, nodes, cores_per_node, mem, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node=cores_per_node,
-                cpu_arch=cpu_arch,
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "cedar")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node=cores_per_node,
+            cpu_arch=cpu_arch,
+        )
+
         expected = textwrap.dedent(
             f"""\
             #!/bin/bash
@@ -2189,25 +2193,27 @@ class TestBuildBatchScript:
     @pytest.mark.parametrize(
         "account, deflate", [("rrg-allen", True), ("rrg-allen", False)]
     )
-    def test_graham(self, account, deflate):
+    def test_graham(self, account, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "graham"):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node="",
-                cpu_arch="",
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "graham")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
         expected = textwrap.dedent(
             f"""\
             #!/bin/bash
@@ -2301,25 +2307,27 @@ class TestBuildBatchScript:
             ("sigma", False),
         ],
     )
-    def test_optimum(self, system, deflate):
+    def test_optimum(self, system, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=278,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node="",
-                cpu_arch="",
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=278,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
         expected = textwrap.dedent(
             """\
             #!/bin/bash
@@ -2416,25 +2424,27 @@ class TestBuildBatchScript:
             ("seawolf3", False),
         ),
     )
-    def test_orcinus(self, system, deflate):
+    def test_orcinus(self, system, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node="",
-                cpu_arch="",
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "orcinus")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
         expected = textwrap.dedent(
             """\
             #!/bin/bash
@@ -2627,25 +2637,27 @@ class TestBuildBatchScript:
             ("40", "cascade", False),
         ],
     )
-    def test_sockeye(self, cores_per_node, cpu_arch, deflate):
+    def test_sockeye(self, cores_per_node, cpu_arch, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node=cores_per_node,
-                cpu_arch=cpu_arch,
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node=cores_per_node,
+            cpu_arch=cpu_arch,
+        )
+
         procs = 40 if not cores_per_node else cores_per_node
         expected = textwrap.dedent(
             f"""\
@@ -2739,29 +2751,31 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
-    @patch("salishsea_cmd.run.log", autospec=True)
-    def test_unknown_system(self, m_logger):
+    def test_unknown_system(self, caplog, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "mythical"):
-            with pytest.raises(SystemExit):
-                salishsea_cmd.run._build_batch_script(
-                    run_desc,
-                    Path("SalishSea.yaml"),
-                    nemo_processors=7,
-                    xios_processors=1,
-                    max_deflate_jobs=4,
-                    results_dir=Path("results_dir"),
-                    run_dir=Path("tmp_run_dir"),
-                    deflate=False,
-                    separate_deflate=False,
-                    cores_per_node="",
-                    cpu_arch="",
-                )
-            assert m_logger.error.called
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "mythical")
+        caplog.set_level(logging.DEBUG)
 
+        with pytest.raises(SystemExit):
+            salishsea_cmd.run._build_batch_script(
+                run_desc,
+                Path("SalishSea.yaml"),
+                nemo_processors=7,
+                xios_processors=1,
+                max_deflate_jobs=4,
+                results_dir=Path("results_dir"),
+                run_dir=Path("tmp_run_dir"),
+                deflate=False,
+                separate_deflate=False,
+                cores_per_node="",
+                cpu_arch="",
+            )
+
+            assert caplog.records[0].levelname == "ERROR"
+            assert caplog.records[0].message == "unknown system: mythical"
 
 class TestSbatchDirectives:
     """Unit tests for _sbatch_directives() function."""
