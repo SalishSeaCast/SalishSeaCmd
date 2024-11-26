@@ -3253,6 +3253,7 @@ class TestExecute:
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
             ("graham", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
+            ("narval", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             (
                 "omega",
@@ -3313,7 +3314,7 @@ class TestExecute:
             echo "Results deflation started at $(date)"
             """
         )
-        if system in {"beluga", "cedar", "graham"}:
+        if system in {"beluga", "cedar", "graham", "narval"}:
             expected += textwrap.dedent(
                 """\
                 module load nco/4.9.5
@@ -3443,6 +3444,12 @@ class TestExecute:
             ),
             (
                 "graham",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                True,
+                True,
+            ),
+            (
+                "narval",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
