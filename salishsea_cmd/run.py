@@ -987,6 +987,12 @@ def _modules():
             module load netcdf-fortran-mpi/4.6.0
             """
         ),
+        "narval": textwrap.dedent(
+            """\
+            module load StdEnv/2020
+            module load netcdf-fortran-mpi/4.6.0
+            """
+        ),
         "omega": textwrap.dedent(
             """\
             module load OpenMPI/2.1.6/GCC/SYSTEM

@@ -3179,8 +3179,8 @@ class TestModules:
 
         assert modules == ""
 
-    @pytest.mark.parametrize("system", ["beluga", "cedar", "graham"])
-    def test_beluga_cedar_graham(self, system, monkeypatch):
+    @pytest.mark.parametrize("system", ["beluga", "cedar", "graham", "narval"])
+    def test_beluga_cedar_graham_narval(self, system, monkeypatch):
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
 
         modules = salishsea_cmd.run._modules()
