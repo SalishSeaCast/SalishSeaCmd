@@ -2763,22 +2763,31 @@ class TestBuildBatchScript:
             assert m_logger.error.called
 
 
-@patch("salishsea_cmd.run.log", autospec=True)
 class TestSbatchDirectives:
     """Unit tests for _sbatch_directives() function."""
 
-    def test_beluga_sbatch_directives(self, m_logger):
+    def test_beluga_sbatch_directives(self, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "beluga"):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                n_processors=43,
-                procs_per_node=40,
-                cpu_arch="",
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "beluga")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            n_processors=43,
+            procs_per_node=40,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming def-allen. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
         expected = (
             "#SBATCH --job-name=foo\n"
             "#SBATCH --nodes=2\n"
@@ -2793,7 +2802,6 @@ class TestSbatchDirectives:
             "#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
-        assert m_logger.info.called
 
     @pytest.mark.parametrize(
         "system, account, cpu_arch, nodes, procs_per_node, mem",
@@ -2803,19 +2811,29 @@ class TestSbatchDirectives:
         ],
     )
     def test_cedar_sbatch_directives(
-        self, m_logger, system, account, cpu_arch, nodes, procs_per_node, mem
+        self, system, account, cpu_arch, nodes, procs_per_node, mem, caplog, monkeypatch
     ):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                43,
-                procs_per_node=procs_per_node,
-                cpu_arch=cpu_arch,
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "cedar")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            43,
+            procs_per_node=procs_per_node,
+            cpu_arch=cpu_arch,
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming def-allen. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
         expected = (
             f"#SBATCH --job-name=foo\n"
             f"#SBATCH --constraint={cpu_arch}\n"
@@ -2831,20 +2849,29 @@ class TestSbatchDirectives:
             f"#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
-        assert m_logger.info.called
 
-    def test_graham_sbatch_directives(self, m_logger):
+    def test_graham_sbatch_directives(self, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "graham"):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                n_processors=43,
-                procs_per_node=32,
-                cpu_arch="",
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "graham")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            n_processors=43,
+            procs_per_node=32,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming rrg-allen. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
         expected = (
             "#SBATCH --job-name=foo\n"
             "#SBATCH --nodes=2\n"
@@ -2859,20 +2886,29 @@ class TestSbatchDirectives:
             "#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
-        assert m_logger.info.called
 
-    def test_sockeye_sbatch_directives(self, m_logger):
+    def test_sockeye_sbatch_directives(self, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                n_processors=43,
-                procs_per_node=40,
-                cpu_arch="",
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            n_processors=43,
+            procs_per_node=40,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming st-sallen1-1. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
         expected = (
             "#SBATCH --job-name=foo\n"
             "#SBATCH --nodes=2\n"
@@ -2887,7 +2923,6 @@ class TestSbatchDirectives:
             "#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
-        assert m_logger.info.called
 
     @pytest.mark.parametrize(
         "system, procs_per_node",
@@ -2898,22 +2933,25 @@ class TestSbatchDirectives:
             ("sockeye", 40),
         ),
     )
-    def test_account_directive_from_yaml(self, m_logger, system, procs_per_node):
+    def test_account_directive_from_yaml(self, system, procs_per_node, caplog, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "account: def-sverdrup\n"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                43,
-                procs_per_node=procs_per_node,
-                cpu_arch="",
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            43,
+            procs_per_node=procs_per_node,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert not caplog.records
         assert "#SBATCH --account=def-sverdrup\n" in slurm_directives
-        assert not m_logger.info.called
 
 
 class TestPbsDirectives:
