@@ -2887,6 +2887,43 @@ class TestSbatchDirectives:
         )
         assert slurm_directives == expected
 
+    def test_narval_sbatch_directives(self, caplog, monkeypatch):
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
+        run_desc = yaml.safe_load(desc_file)
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "narval")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            n_processors=43,
+            procs_per_node=64,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming def-allen. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
+        expected = (
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --nodes=1\n"
+            "#SBATCH --ntasks-per-node=64\n"
+            "#SBATCH --mem=0\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account=def-allen\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=foo/stdout\n"
+            "#SBATCH --error=foo/stderr\n"
+        )
+        assert slurm_directives == expected
+
     def test_sockeye_sbatch_directives(self, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
@@ -2930,6 +2967,7 @@ class TestSbatchDirectives:
             ("beluga", 40),
             ("cedar", 48),
             ("graham", 32),
+            ("narval", 64),
             ("sockeye", 40),
         ),
     )
