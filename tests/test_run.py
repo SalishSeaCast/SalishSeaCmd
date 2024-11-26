@@ -2296,9 +2296,7 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
-    @pytest.mark.parametrize(
-        "deflate", [True, False]
-    )
+    @pytest.mark.parametrize("deflate", [True, False])
     def test_narval(self, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
@@ -2883,6 +2881,7 @@ class TestBuildBatchScript:
             assert caplog.records[0].levelname == "ERROR"
             assert caplog.records[0].message == "unknown system: mythical"
 
+
 class TestSbatchDirectives:
     """Unit tests for _sbatch_directives() function."""
 
@@ -3091,7 +3090,9 @@ class TestSbatchDirectives:
             ("sockeye", 40),
         ),
     )
-    def test_account_directive_from_yaml(self, system, procs_per_node, caplog, monkeypatch):
+    def test_account_directive_from_yaml(
+        self, system, procs_per_node, caplog, monkeypatch
+    ):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "account: def-sverdrup\n"
         )

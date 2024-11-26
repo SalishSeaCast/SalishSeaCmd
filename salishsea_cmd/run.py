@@ -750,9 +750,13 @@ def _sbatch_directives(
     """
     run_id = get_run_desc_value(run_desc, ("run_id",))
     nodes = math.ceil(n_processors / procs_per_node)
-    mem = {"beluga": "92G", "cedar": "0", "graham": "0", "narval": "0", "sockeye": "186gb"}.get(
-        SYSTEM, mem
-    )
+    mem = {
+        "beluga": "92G",
+        "cedar": "0",
+        "graham": "0",
+        "narval": "0",
+        "sockeye": "186gb",
+    }.get(SYSTEM, mem)
     if deflate:
         run_id = f"{result_type}_{run_id}_deflate"
     try:
