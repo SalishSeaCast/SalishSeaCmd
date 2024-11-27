@@ -144,6 +144,8 @@ class TestRun:
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "graham", "sbatch", "Submitted batch job 43"),
             (True, 4, "graham", "sbatch", "Submitted batch job 43"),
+            (False, 0, "narval", "sbatch", "Submitted batch job 43"),
+            (True, 4, "narval", "sbatch", "Submitted batch job 43"),
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
@@ -224,6 +226,8 @@ class TestRun:
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "graham", "sbatch", "Submitted batch job 43"),
             (True, 4, "graham", "sbatch", "Submitted batch job 43"),
+            (False, 0, "narval", "sbatch", "Submitted batch job 43"),
+            (True, 4, "narval", "sbatch", "Submitted batch job 43"),
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
@@ -257,6 +261,7 @@ class TestRun:
         queue_job_cmd,
         submit_job_msg,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -281,10 +286,12 @@ class TestRun:
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
         m_sj.return_value = submit_job_msg
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob="42"
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob="42"
+        )
+
         m_sj.assert_called_once_with(
             Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob="42"
         )
@@ -303,6 +310,7 @@ class TestRun:
         sep_xios_server,
         xios_servers,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -326,10 +334,12 @@ class TestRun:
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
-        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir)), no_submit=True
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "orcinus")
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"), Path(str(p_results_dir)), no_submit=True
+        )
+
         assert not m_sj.called
         assert submit_job_msg is None
 
@@ -346,6 +356,7 @@ class TestRun:
         sep_xios_server,
         xios_servers,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -369,13 +380,15 @@ class TestRun:
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
-        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"),
-                Path(str(p_results_dir)),
-                no_submit=True,
-                separate_deflate=True,
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "orcinus")
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"),
+            Path(str(p_results_dir)),
+            no_submit=True,
+            separate_deflate=True,
+        )
+
         assert not m_sj.called
         assert submit_job_msg is None
 
@@ -390,6 +403,8 @@ class TestRun:
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "graham", "sbatch", "Submitted batch job 43"),
             (True, 4, "graham", "sbatch", "Submitted batch job 43"),
+            (False, 0, "narval", "sbatch", "Submitted batch job 43"),
+            (True, 4, "narval", "sbatch", "Submitted batch job 43"),
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
@@ -524,6 +539,22 @@ class TestRun:
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
             ),
+            (
+                False,
+                0,
+                "narval",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "narval",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
             (False, 0, "salish", "bash", ("43.master", "44.master"), "43.master"),
             (True, 4, "salish", "bash", ("43.master", "44.master"), "43.master"),
             (
@@ -608,6 +639,7 @@ class TestRun:
         job_msgs,
         submit_job_msg,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -679,10 +711,10 @@ class TestRun:
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
         m_sj.side_effect = job_msgs
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir))
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        salishsea_cmd.run.run(Path("SalishSea.yaml"), Path(str(p_results_dir)))
+
         assert m_wsdf.call_args_list[1][0][2] == Path("results_dir_1")
 
     @pytest.mark.parametrize(
@@ -748,6 +780,22 @@ class TestRun:
                 True,
                 4,
                 "graham",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                False,
+                0,
+                "narval",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "narval",
                 "sbatch",
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
@@ -836,6 +884,7 @@ class TestRun:
         job_msgs,
         submit_job_msg,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -907,10 +956,12 @@ class TestRun:
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
         m_sj.side_effect = job_msgs
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir))
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"), Path(str(p_results_dir))
+        )
+
         assert m_sj.call_args_list == [
             call(Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob="0"),
             call(
