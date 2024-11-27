@@ -2878,7 +2878,7 @@ class TestBuildBatchScript:
                 cpu_arch="",
             )
 
-            assert exc.value.code == 2
+        assert exc.value.code == 2
         assert caplog.records[0].levelname == "ERROR"
         assert caplog.records[0].message == "unknown system: mythical"
 
