@@ -2863,7 +2863,7 @@ class TestBuildBatchScript:
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "mythical")
         caplog.set_level(logging.DEBUG)
 
-        with pytest.raises(SystemExit):
+        with pytest.raises(SystemExit) as exc:
             salishsea_cmd.run._build_batch_script(
                 run_desc,
                 Path("SalishSea.yaml"),
@@ -2878,8 +2878,10 @@ class TestBuildBatchScript:
                 cpu_arch="",
             )
 
-            assert caplog.records[0].levelname == "ERROR"
-            assert caplog.records[0].message == "unknown system: mythical"
+            assert exc.value.code == 2
+        assert caplog.records[0].levelname == "ERROR"
+        assert caplog.records[0].message == "unknown system: mythical"
+
 
 
 class TestSbatchDirectives:
