@@ -2883,7 +2883,6 @@ class TestBuildBatchScript:
         assert caplog.records[0].message == "unknown system: mythical"
 
 
-
 class TestSbatchDirectives:
     """Unit tests for _sbatch_directives() function."""
 
