@@ -273,6 +273,7 @@ def run(
         "cedar": "sbatch",
         "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "graham": "sbatch",
+        "narval": "sbatch",
         "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "orcinus": "qsub",
         "salish": "bash",
@@ -648,11 +649,12 @@ def _build_batch_script(
     if SYSTEM == "salish":
         # salish doesn't use a scheduler, so no sbatch or PBS directives in its script
         pass
-    elif SYSTEM in {"beluga", "cedar", "graham", "sockeye"}:
+    elif SYSTEM in {"beluga", "cedar", "graham", "narval", "sockeye"}:
         procs_per_node = {
             "beluga": 40 if not cores_per_node else int(cores_per_node),
             "cedar": 48 if not cores_per_node else int(cores_per_node),
             "graham": 32 if not cores_per_node else int(cores_per_node),
+            "narval": 64 if not cores_per_node else int(cores_per_node),
             "sockeye": 40 if not cores_per_node else int(cores_per_node),
         }[SYSTEM]
         script = "\n".join(
@@ -749,9 +751,13 @@ def _sbatch_directives(
     """
     run_id = get_run_desc_value(run_desc, ("run_id",))
     nodes = math.ceil(n_processors / procs_per_node)
-    mem = {"beluga": "92G", "cedar": "0", "graham": "0", "sockeye": "186gb"}.get(
-        SYSTEM, mem
-    )
+    mem = {
+        "beluga": "92G",
+        "cedar": "0",
+        "graham": "0",
+        "narval": "0",
+        "sockeye": "186gb",
+    }.get(SYSTEM, mem)
     if deflate:
         run_id = f"{result_type}_{run_id}_deflate"
     try:
@@ -940,6 +946,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "cedar": Path("${HOME}", ".local", "bin", "salishsea"),
         "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "graham": Path("${HOME}", ".local", "bin", "salishsea"),
+        "narval": Path("${HOME}", ".local", "bin", "salishsea"),
         "omega": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "sigma": Path("${PBS_O_HOME}", "bin", "salishsea"),
@@ -982,6 +989,12 @@ def _modules():
             """
         ),
         "graham": textwrap.dedent(
+            """\
+            module load StdEnv/2020
+            module load netcdf-fortran-mpi/4.6.0
+            """
+        ),
+        "narval": textwrap.dedent(
             """\
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
@@ -1071,6 +1084,7 @@ def _execute(
         "cedar": "mpirun",
         "delta": "mpiexec -hostfile $(openmpi_nodefile)",
         "graham": "mpirun",
+        "narval": "mpirun",
         "omega": "mpiexec -hostfile $(openmpi_nodefile)",
         "orcinus": "mpirun",
         "salish": "/usr/bin/mpirun",
@@ -1085,6 +1099,7 @@ def _execute(
         "cedar": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "delta": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
         "graham": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "narval": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "omega": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
         "orcinus": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "salish": f"{mpirun} --bind-to none -np {nemo_processors} ./nemo.exe",
@@ -1100,6 +1115,7 @@ def _execute(
             "cedar": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
             "graham": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "narval": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
             "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "salish": f"{mpirun} : --bind-to none -np {xios_processors} ./xios_server.exe{redirect}",
@@ -1154,7 +1170,7 @@ def _execute(
             echo "Results deflation started at $(date)"{redirect}
             """
         )
-        if SYSTEM in {"beluga", "cedar", "graham"}:
+        if SYSTEM in {"beluga", "cedar", "graham", "narval"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants

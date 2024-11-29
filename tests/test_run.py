@@ -144,6 +144,8 @@ class TestRun:
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "graham", "sbatch", "Submitted batch job 43"),
             (True, 4, "graham", "sbatch", "Submitted batch job 43"),
+            (False, 0, "narval", "sbatch", "Submitted batch job 43"),
+            (True, 4, "narval", "sbatch", "Submitted batch job 43"),
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
@@ -224,6 +226,8 @@ class TestRun:
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "graham", "sbatch", "Submitted batch job 43"),
             (True, 4, "graham", "sbatch", "Submitted batch job 43"),
+            (False, 0, "narval", "sbatch", "Submitted batch job 43"),
+            (True, 4, "narval", "sbatch", "Submitted batch job 43"),
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
@@ -257,6 +261,7 @@ class TestRun:
         queue_job_cmd,
         submit_job_msg,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -281,10 +286,12 @@ class TestRun:
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
         m_sj.return_value = submit_job_msg
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob="42"
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"), Path(str(p_results_dir)), waitjob="42"
+        )
+
         m_sj.assert_called_once_with(
             Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob="42"
         )
@@ -303,6 +310,7 @@ class TestRun:
         sep_xios_server,
         xios_servers,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -326,10 +334,12 @@ class TestRun:
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
-        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir)), no_submit=True
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "orcinus")
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"), Path(str(p_results_dir)), no_submit=True
+        )
+
         assert not m_sj.called
         assert submit_job_msg is None
 
@@ -346,6 +356,7 @@ class TestRun:
         sep_xios_server,
         xios_servers,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -369,13 +380,15 @@ class TestRun:
             Path(str(p_run_dir)),
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
-        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"),
-                Path(str(p_results_dir)),
-                no_submit=True,
-                separate_deflate=True,
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "orcinus")
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"),
+            Path(str(p_results_dir)),
+            no_submit=True,
+            separate_deflate=True,
+        )
+
         assert not m_sj.called
         assert submit_job_msg is None
 
@@ -390,6 +403,8 @@ class TestRun:
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "graham", "sbatch", "Submitted batch job 43"),
             (True, 4, "graham", "sbatch", "Submitted batch job 43"),
+            (False, 0, "narval", "sbatch", "Submitted batch job 43"),
+            (True, 4, "narval", "sbatch", "Submitted batch job 43"),
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
@@ -524,6 +539,22 @@ class TestRun:
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
             ),
+            (
+                False,
+                0,
+                "narval",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "narval",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
             (False, 0, "salish", "bash", ("43.master", "44.master"), "43.master"),
             (True, 4, "salish", "bash", ("43.master", "44.master"), "43.master"),
             (
@@ -608,6 +639,7 @@ class TestRun:
         job_msgs,
         submit_job_msg,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -679,10 +711,10 @@ class TestRun:
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
         m_sj.side_effect = job_msgs
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir))
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        salishsea_cmd.run.run(Path("SalishSea.yaml"), Path(str(p_results_dir)))
+
         assert m_wsdf.call_args_list[1][0][2] == Path("results_dir_1")
 
     @pytest.mark.parametrize(
@@ -748,6 +780,22 @@ class TestRun:
                 True,
                 4,
                 "graham",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                False,
+                0,
+                "narval",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "narval",
                 "sbatch",
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
@@ -836,6 +884,7 @@ class TestRun:
         job_msgs,
         submit_job_msg,
         tmpdir,
+        monkeypatch,
     ):
         p_run_dir = tmpdir.ensure_dir("run_dir")
         p_results_dir = tmpdir.ensure_dir("results_dir")
@@ -907,10 +956,12 @@ class TestRun:
             Path(str(p_run_dir), "SalishSeaNEMO.sh"),
         )
         m_sj.side_effect = job_msgs
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), Path(str(p_results_dir))
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"), Path(str(p_results_dir))
+        )
+
         assert m_sj.call_args_list == [
             call(Path(str(p_run_dir), "SalishSeaNEMO.sh"), queue_job_cmd, waitjob="0"),
             call(
@@ -1979,25 +2030,27 @@ class TestBuildBatchScript:
     @pytest.mark.parametrize(
         "account, deflate", [("def-allen", True), ("def-allen", False)]
     )
-    def test_beluga(self, account, deflate):
+    def test_beluga(self, account, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "beluga"):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node="",
-                cpu_arch="",
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "beluga")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
         expected = textwrap.dedent(
             f"""\
             #!/bin/bash
@@ -2084,25 +2137,27 @@ class TestBuildBatchScript:
         "cpu_arch, nodes, cores_per_node, mem, deflate",
         [("broadwell", 2, "32", "0", True), ("skylake", 1, "48", "0", True)],
     )
-    def test_cedar(self, cpu_arch, nodes, cores_per_node, mem, deflate):
+    def test_cedar(self, cpu_arch, nodes, cores_per_node, mem, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node=cores_per_node,
-                cpu_arch=cpu_arch,
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "cedar")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node=cores_per_node,
+            cpu_arch=cpu_arch,
+        )
+
         expected = textwrap.dedent(
             f"""\
             #!/bin/bash
@@ -2189,25 +2244,27 @@ class TestBuildBatchScript:
     @pytest.mark.parametrize(
         "account, deflate", [("rrg-allen", True), ("rrg-allen", False)]
     )
-    def test_graham(self, account, deflate):
+    def test_graham(self, account, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "graham"):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node="",
-                cpu_arch="",
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "graham")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
         expected = textwrap.dedent(
             f"""\
             #!/bin/bash
@@ -2290,6 +2347,110 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
+    @pytest.mark.parametrize("deflate", [True, False])
+    def test_narval(self, deflate, monkeypatch):
+        desc_file = StringIO(
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
+        )
+        run_desc = yaml.safe_load(desc_file)
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "narval")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
+        expected = textwrap.dedent(
+            f"""\
+            #!/bin/bash
+
+            #SBATCH --job-name=foo
+            #SBATCH --nodes=1
+            #SBATCH --ntasks-per-node=64
+            #SBATCH --mem=0
+            #SBATCH --time=1:02:03
+            #SBATCH --mail-user=me@example.com
+            #SBATCH --mail-type=ALL
+            #SBATCH --account=def-allen
+            # stdout and stderr file paths/names
+            #SBATCH --output=results_dir/stdout
+            #SBATCH --error=results_dir/stderr
+
+
+            RUN_ID="foo"
+            RUN_DESC="tmp_run_dir/SalishSea.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            COMBINE="${{HOME}}/.local/bin/salishsea combine"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            GATHER="${HOME}/.local/bin/salishsea gather"
+
+            module load StdEnv/2020
+            module load netcdf-fortran-mpi/4.6.0
+
+            mkdir -p ${RESULTS_DIR}
+            cd ${WORK_DIR}
+            echo "working dir: $(pwd)"
+
+            echo "Starting run at $(date)"
+            mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+            MPIRUN_EXIT_CODE=$?
+            echo "Ended run at $(date)"
+
+            echo "Results combining started at $(date)"
+            ${COMBINE} ${RUN_DESC} --debug
+            echo "Results combining ended at $(date)"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+
+                echo "Results deflation started at $(date)"
+                module load nco/4.9.5
+                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+                  --jobs 4 --debug
+                echo "Results deflation ended at $(date)"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+
+            echo "Results gathering started at $(date)"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo "Results gathering ended at $(date)"
+
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+
+            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
+        )
+        assert script == expected
+
     @pytest.mark.parametrize(
         "system, deflate",
         [
@@ -2301,25 +2462,27 @@ class TestBuildBatchScript:
             ("sigma", False),
         ],
     )
-    def test_optimum(self, system, deflate):
+    def test_optimum(self, system, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=278,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node="",
-                cpu_arch="",
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=278,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
         expected = textwrap.dedent(
             """\
             #!/bin/bash
@@ -2416,25 +2579,27 @@ class TestBuildBatchScript:
             ("seawolf3", False),
         ),
     )
-    def test_orcinus(self, system, deflate):
+    def test_orcinus(self, system, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node="",
-                cpu_arch="",
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "orcinus")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
         expected = textwrap.dedent(
             """\
             #!/bin/bash
@@ -2627,25 +2792,27 @@ class TestBuildBatchScript:
             ("40", "cascade", False),
         ],
     )
-    def test_sockeye(self, cores_per_node, cpu_arch, deflate):
+    def test_sockeye(self, cores_per_node, cpu_arch, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
-            script = salishsea_cmd.run._build_batch_script(
-                run_desc,
-                Path("SalishSea.yaml"),
-                nemo_processors=42,
-                xios_processors=1,
-                max_deflate_jobs=4,
-                results_dir=Path("results_dir"),
-                run_dir=Path("tmp_run_dir"),
-                deflate=deflate,
-                separate_deflate=False,
-                cores_per_node=cores_per_node,
-                cpu_arch=cpu_arch,
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node=cores_per_node,
+            cpu_arch=cpu_arch,
+        )
+
         procs = 40 if not cores_per_node else cores_per_node
         expected = textwrap.dedent(
             f"""\
@@ -2739,46 +2906,59 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
-    @patch("salishsea_cmd.run.log", autospec=True)
-    def test_unknown_system(self, m_logger):
+    def test_unknown_system(self, caplog, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "mythical"):
-            with pytest.raises(SystemExit):
-                salishsea_cmd.run._build_batch_script(
-                    run_desc,
-                    Path("SalishSea.yaml"),
-                    nemo_processors=7,
-                    xios_processors=1,
-                    max_deflate_jobs=4,
-                    results_dir=Path("results_dir"),
-                    run_dir=Path("tmp_run_dir"),
-                    deflate=False,
-                    separate_deflate=False,
-                    cores_per_node="",
-                    cpu_arch="",
-                )
-            assert m_logger.error.called
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "mythical")
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(SystemExit) as exc:
+            salishsea_cmd.run._build_batch_script(
+                run_desc,
+                Path("SalishSea.yaml"),
+                nemo_processors=7,
+                xios_processors=1,
+                max_deflate_jobs=4,
+                results_dir=Path("results_dir"),
+                run_dir=Path("tmp_run_dir"),
+                deflate=False,
+                separate_deflate=False,
+                cores_per_node="",
+                cpu_arch="",
+            )
+
+        assert exc.value.code == 2
+        assert caplog.records[0].levelname == "ERROR"
+        assert caplog.records[0].message == "unknown system: mythical"
 
 
-@patch("salishsea_cmd.run.log", autospec=True)
 class TestSbatchDirectives:
     """Unit tests for _sbatch_directives() function."""
 
-    def test_beluga_sbatch_directives(self, m_logger):
+    def test_beluga_sbatch_directives(self, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "beluga"):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                n_processors=43,
-                procs_per_node=40,
-                cpu_arch="",
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "beluga")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            n_processors=43,
+            procs_per_node=40,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming def-allen. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
         expected = (
             "#SBATCH --job-name=foo\n"
             "#SBATCH --nodes=2\n"
@@ -2793,7 +2973,6 @@ class TestSbatchDirectives:
             "#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
-        assert m_logger.info.called
 
     @pytest.mark.parametrize(
         "system, account, cpu_arch, nodes, procs_per_node, mem",
@@ -2803,19 +2982,29 @@ class TestSbatchDirectives:
         ],
     )
     def test_cedar_sbatch_directives(
-        self, m_logger, system, account, cpu_arch, nodes, procs_per_node, mem
+        self, system, account, cpu_arch, nodes, procs_per_node, mem, caplog, monkeypatch
     ):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "cedar"):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                43,
-                procs_per_node=procs_per_node,
-                cpu_arch=cpu_arch,
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "cedar")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            43,
+            procs_per_node=procs_per_node,
+            cpu_arch=cpu_arch,
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming def-allen. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
         expected = (
             f"#SBATCH --job-name=foo\n"
             f"#SBATCH --constraint={cpu_arch}\n"
@@ -2831,20 +3020,29 @@ class TestSbatchDirectives:
             f"#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
-        assert m_logger.info.called
 
-    def test_graham_sbatch_directives(self, m_logger):
+    def test_graham_sbatch_directives(self, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "graham"):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                n_processors=43,
-                procs_per_node=32,
-                cpu_arch="",
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "graham")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            n_processors=43,
+            procs_per_node=32,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming rrg-allen. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
         expected = (
             "#SBATCH --job-name=foo\n"
             "#SBATCH --nodes=2\n"
@@ -2859,20 +3057,66 @@ class TestSbatchDirectives:
             "#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
-        assert m_logger.info.called
 
-    def test_sockeye_sbatch_directives(self, m_logger):
+    def test_narval_sbatch_directives(self, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", "sockeye"):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                n_processors=43,
-                procs_per_node=40,
-                cpu_arch="",
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "narval")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            n_processors=43,
+            procs_per_node=64,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming def-allen. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
+        expected = (
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --nodes=1\n"
+            "#SBATCH --ntasks-per-node=64\n"
+            "#SBATCH --mem=0\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account=def-allen\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=foo/stdout\n"
+            "#SBATCH --error=foo/stderr\n"
+        )
+        assert slurm_directives == expected
+
+    def test_sockeye_sbatch_directives(self, caplog, monkeypatch):
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
+        run_desc = yaml.safe_load(desc_file)
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            n_processors=43,
+            procs_per_node=40,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming st-sallen1-1. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
         expected = (
             "#SBATCH --job-name=foo\n"
             "#SBATCH --nodes=2\n"
@@ -2887,7 +3131,6 @@ class TestSbatchDirectives:
             "#SBATCH --error=foo/stderr\n"
         )
         assert slurm_directives == expected
-        assert m_logger.info.called
 
     @pytest.mark.parametrize(
         "system, procs_per_node",
@@ -2895,25 +3138,31 @@ class TestSbatchDirectives:
             ("beluga", 40),
             ("cedar", 48),
             ("graham", 32),
+            ("narval", 64),
             ("sockeye", 40),
         ),
     )
-    def test_account_directive_from_yaml(self, m_logger, system, procs_per_node):
+    def test_account_directive_from_yaml(
+        self, system, procs_per_node, caplog, monkeypatch
+    ):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "account: def-sverdrup\n"
         )
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            slurm_directives = salishsea_cmd.run._sbatch_directives(
-                run_desc,
-                43,
-                procs_per_node=procs_per_node,
-                cpu_arch="",
-                email="me@example.com",
-                results_dir=Path("foo"),
-            )
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            43,
+            procs_per_node=procs_per_node,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert not caplog.records
         assert "#SBATCH --account=def-sverdrup\n" in slurm_directives
-        assert not m_logger.info.called
 
 
 class TestPbsDirectives:
@@ -3123,6 +3372,8 @@ class TestDefinitions:
             ("delta", "${PBS_O_HOME}", False),
             ("graham", "${HOME}/.local", True),
             ("graham", "${HOME}/.local", False),
+            ("narval", "${HOME}/.local", True),
+            ("narval", "${HOME}/.local", False),
             ("omega", "${PBS_O_HOME}", True),
             ("omega", "${PBS_O_HOME}", False),
             ("orcinus", "${PBS_O_HOME}/.local", True),
@@ -3179,8 +3430,8 @@ class TestModules:
 
         assert modules == ""
 
-    @pytest.mark.parametrize("system", ["beluga", "cedar", "graham"])
-    def test_beluga_cedar_graham(self, system, monkeypatch):
+    @pytest.mark.parametrize("system", ["beluga", "cedar", "graham", "narval"])
+    def test_beluga_cedar_graham_narval(self, system, monkeypatch):
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
 
         modules = salishsea_cmd.run._modules()
@@ -3253,6 +3504,7 @@ class TestExecute:
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
             ("graham", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
+            ("narval", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             (
                 "omega",
@@ -3313,7 +3565,7 @@ class TestExecute:
             echo "Results deflation started at $(date)"
             """
         )
-        if system in {"beluga", "cedar", "graham"}:
+        if system in {"beluga", "cedar", "graham", "narval"}:
             expected += textwrap.dedent(
                 """\
                 module load nco/4.9.5
@@ -3443,6 +3695,12 @@ class TestExecute:
             ),
             (
                 "graham",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                True,
+                True,
+            ),
+            (
+                "narval",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
