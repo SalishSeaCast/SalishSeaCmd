@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCmd prepare sub-command plug-in unit tests
-"""
+"""SalishSeaCmd prepare sub-command plug-in unit tests"""
 import os
 from pathlib import Path
 from unittest.mock import call, Mock, patch

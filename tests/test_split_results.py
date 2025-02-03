@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCmd split-results sub-command plug-in unit tests
-"""
+"""SalishSeaCmd split-results sub-command plug-in unit tests"""
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch

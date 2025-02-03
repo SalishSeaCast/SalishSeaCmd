@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCmd run sub-command plug-in unit tests
-"""
+"""SalishSeaCmd run sub-command plug-in unit tests"""
 import logging
 import os
 import shlex
