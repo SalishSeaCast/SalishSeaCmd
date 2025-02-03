@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCmd combine sub-command plug-in unit tests
-"""
+"""SalishSeaCmd combine sub-command plug-in unit tests"""
 from unittest.mock import Mock, patch
 
 import cliff.app
