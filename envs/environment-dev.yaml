@@ -23,6 +23,7 @@ channels:
 
 dependencies:
   - arrow
+  - attrs
   - cliff
   - f90nml
   - gitpython
