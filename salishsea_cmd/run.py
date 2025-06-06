@@ -1057,9 +1057,10 @@ def _modules():
         ),
         "sockeye": textwrap.dedent(
             """\
-            module load gcc/5.5.0
+            module load gcc/9.4.0
             module load openmpi/4.1.1-cuda11-3
             module load netcdf-fortran/4.5.3-hdf4-support
+            module load parallel-netcdf/1.12.2-additional-bindings
             """
         ),
     }.get(SYSTEM, "")
