@@ -2901,7 +2901,7 @@ class TestBuildBatchScript:
             echo "working dir: $(pwd)"
 
             echo "Starting run at $(date)"
-            mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe
+            mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
             MPIRUN_EXIT_CODE=$?
             echo "Ended run at $(date)"
 
@@ -3552,13 +3552,13 @@ class TestExecute:
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
             (
-                "login01",  # sockeye
-                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-            ),
+                "login01",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+            ),  # sockeye
             (
-                "login02",  # sockeye
-                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-            ),
+                "login02",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+            ),  # sockeye
         ],
     )
     def test_execute_with_deflate(self, system, mpirun_cmd, monkeypatch):
@@ -3802,37 +3802,37 @@ class TestExecute:
             ),
             (
                 "login01",  # sockeye
-                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "login01",  # sockeye
-                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "login01",  # sockeye
-                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
             (
                 "login02",  # sockeye
-                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
                 "login02",  # sockeye
-                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
                 "login02",  # sockeye
-                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
             ),

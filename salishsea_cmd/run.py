@@ -1122,8 +1122,8 @@ def _execute(
         "seawolf2": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "seawolf3": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "sigma": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
-        "login01": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",  # sockeye
-        "login02": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",  # sockeye
+        "login01": f"{mpirun} -np {nemo_processors} ./nemo.exe",  # sockeye
+        "login02": f"{mpirun} -np {nemo_processors} ./nemo.exe",  # sockeye
     }.get(SYSTEM, f"{mpirun} -np {nemo_processors} ./nemo.exe")
     if xios_processors:
         mpirun = {
@@ -1139,8 +1139,8 @@ def _execute(
             "seawolf2": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "seawolf3": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "sigma": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
-            "login01": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",  # sockeye
-            "login02": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",  # sockeye
+            "login01": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",  # sockeye
+            "login02": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",  # sockeye
         }.get(
             SYSTEM,
             f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
