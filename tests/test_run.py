@@ -149,8 +149,10 @@ class TestRun:
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
-            (True, 4, "sockeye", "sbatch", "Submitted batch job 43"),
+            (False, 0, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
+            (True, 4, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
+            (False, 0, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
+            (True, 4, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
             (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
@@ -231,8 +233,10 @@ class TestRun:
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
-            (True, 4, "sockeye", "sbatch", "Submitted batch job 43"),
+            (False, 0, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
+            (True, 4, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
+            (False, 0, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
+            (True, 4, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
             (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
@@ -408,8 +412,10 @@ class TestRun:
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
-            (True, 4, "sockeye", "sbatch", "Submitted batch job 43"),
+            (False, 0, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
+            (True, 4, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
+            (False, 0, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
+            (True, 4, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
             (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
@@ -818,9 +824,33 @@ class TestRun:
                 "43.admin.default.domain",
             ),
             (
+                False,
+                0,
+                "login01",  # sockeye
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
                 True,
                 4,
-                "sockeye",
+                "login01",  # sockeye
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                False,
+                0,
+                "login02",  # sockeye
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "login02",  # sockeye
                 "sbatch",
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
@@ -2783,20 +2813,24 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize(
-        "cores_per_node, cpu_arch, deflate",
+        "node_name, cores_per_node, cpu_arch, deflate",
         [
-            ("", "", True),
-            ("", "", False),
-            ("32", "skylake", False),
-            ("40", "cascade", False),
+            ("login01", "", "", True),
+            ("login01", "", "", False),
+            ("login01", "32", "skylake", False),
+            ("login01", "40", "cascade", False),
+            ("login02", "", "", True),
+            ("login02", "", "", False),
+            ("login02", "32", "skylake", False),
+            ("login02", "40", "cascade", False),
         ],
     )
-    def test_sockeye(self, cores_per_node, cpu_arch, deflate, monkeypatch):
+    def test_sockeye(self, node_name, cores_per_node, cpu_arch, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", node_name)
 
         script = salishsea_cmd.run._build_batch_script(
             run_desc,
@@ -3095,10 +3129,11 @@ class TestSbatchDirectives:
         )
         assert slurm_directives == expected
 
-    def test_sockeye_sbatch_directives(self, caplog, monkeypatch):
+    @pytest.mark.parametrize("node_name", ["login01", "login02"])
+    def test_sockeye_sbatch_directives(self, node_name, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", node_name)
         caplog.set_level(logging.DEBUG)
 
         slurm_directives = salishsea_cmd.run._sbatch_directives(
@@ -3476,8 +3511,9 @@ class TestModules:
         )
         assert modules == expected
 
-    def test_sockeye(self, monkeypatch):
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
+    @pytest.mark.parametrize("node_name", ["login01", "login02"])
+    def test_sockeye(self, node_name, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", node_name)
 
         modules = salishsea_cmd.run._modules()
 
@@ -3516,7 +3552,11 @@ class TestExecute:
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
             (
-                "sockeye",
+                "login01",  # sockeye
+                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+            ),
+            (
+                "login02",  # sockeye
                 "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
         ],
@@ -3761,19 +3801,37 @@ class TestExecute:
                 True,
             ),
             (
-                "sockeye",
+                "login01",  # sockeye
                 "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
-                "sockeye",
+                "login01",  # sockeye
                 "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
-                "sockeye",
+                "login01",  # sockeye
+                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                True,
+                True,
+            ),
+            (
+                "login02",  # sockeye
+                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                True,
+            ),
+            (
+                "login02",  # sockeye
+                "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                False,
+            ),
+            (
+                "login02",  # sockeye
                 "mpirun --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 True,
                 True,
