@@ -281,7 +281,8 @@ def run(
         "seawolf2": "qsub",  # orcinus.westgrid.ca login node
         "seawolf3": "qsub",  # orcinus.westgrid.ca login node
         "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-        "sockeye": "sbatch",
+        "login01": "sbatch",  # sockeye
+        "login02": "sbatch",  # sockeye
     }.get(SYSTEM, "qsub")
     results_dir = nemo_cmd.resolved_path(results_dir)
     run_segments, first_seg_no = _calc_run_segments(desc_file, results_dir)
@@ -649,13 +650,14 @@ def _build_batch_script(
     if SYSTEM == "salish":
         # salish doesn't use a scheduler, so no sbatch or PBS directives in its script
         pass
-    elif SYSTEM in {"beluga", "cedar", "graham", "narval", "sockeye"}:
+    elif SYSTEM in {"beluga", "cedar", "graham", "narval", "login01", "login02"}:
         procs_per_node = {
             "beluga": 40 if not cores_per_node else int(cores_per_node),
             "cedar": 48 if not cores_per_node else int(cores_per_node),
             "graham": 32 if not cores_per_node else int(cores_per_node),
             "narval": 64 if not cores_per_node else int(cores_per_node),
-            "sockeye": 40 if not cores_per_node else int(cores_per_node),
+            "login01": 40 if not cores_per_node else int(cores_per_node),  # sockeye
+            "login02": 40 if not cores_per_node else int(cores_per_node),  # sockeye
         }[SYSTEM]
         script = "\n".join(
             (
@@ -756,7 +758,8 @@ def _sbatch_directives(
         "cedar": "0",
         "graham": "0",
         "narval": "0",
-        "sockeye": "186gb",
+        "login01": "186gb",  # sockeye
+        "login02": "186gb",  # sockeye
     }.get(SYSTEM, mem)
     if deflate:
         run_id = f"{result_type}_{run_id}_deflate"
@@ -768,7 +771,7 @@ def _sbatch_directives(
         ).time()
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td2hms(td)
-    if SYSTEM in {"cedar", "sockeye"} and cpu_arch:
+    if SYSTEM in {"cedar", "login01", "login02"} and cpu_arch:
         sbatch_directives = (
             f"#SBATCH --job-name={run_id}\n" f"#SBATCH --constraint={cpu_arch}\n"
         )
@@ -788,7 +791,8 @@ def _sbatch_directives(
     except KeyError:
         accounts = {
             "graham": "rrg-allen",
-            "sockeye": "st-sallen1-1",
+            "login01": "st-sallen1-1",  # sockeye
+            "login02": "st-sallen1-1",  # sockeye
         }
         try:
             account = accounts[SYSTEM]
@@ -954,7 +958,8 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "seawolf1": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "seawolf2": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "seawolf3": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
-        "sockeye": Path("${HOME}", ".local", "bin", "salishsea"),
+        "login01": Path("${HOME}", ".local", "bin", "salishsea"),  # sockeye
+        "login02": Path("${HOME}", ".local", "bin", "salishsea"),  # sockeye
     }.get(SYSTEM, Path("${HOME}", ".local", "bin", "salishsea"))
     defns = (
         f'RUN_ID="{get_run_desc_value(run_desc, ("run_id",))}"\n'
@@ -1055,11 +1060,20 @@ def _modules():
             module load OpenMPI/2.1.6/GCC/SYSTEM
             """
         ),
-        "sockeye": textwrap.dedent(
+        "login01": textwrap.dedent(  # sockeye
             """\
-            module load gcc/5.5.0
+            module load gcc/9.4.0
             module load openmpi/4.1.1-cuda11-3
             module load netcdf-fortran/4.5.3-hdf4-support
+            module load parallel-netcdf/1.12.2-additional-bindings
+            """
+        ),
+        "login02": textwrap.dedent(  # sockeye
+            """\
+            module load gcc/9.4.0
+            module load openmpi/4.1.1-cuda11-3
+            module load netcdf-fortran/4.5.3-hdf4-support
+            module load parallel-netcdf/1.12.2-additional-bindings
             """
         ),
     }.get(SYSTEM, "")
@@ -1092,7 +1106,8 @@ def _execute(
         "seawolf2": "mpirun",
         "seawolf3": "mpirun",
         "sigma": "mpiexec -hostfile $(openmpi_nodefile)",
-        "sockeye": "mpirun",
+        "login01": "mpirun",  # sockeye
+        "login02": "mpirun",  # sockeye
     }.get(SYSTEM, "mpirun")
     mpirun = {
         "beluga": f"{mpirun} -np {nemo_processors} ./nemo.exe",
@@ -1107,7 +1122,8 @@ def _execute(
         "seawolf2": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "seawolf3": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "sigma": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
-        "sockeye": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
+        "login01": f"{mpirun} -np {nemo_processors} ./nemo.exe",  # sockeye
+        "login02": f"{mpirun} -np {nemo_processors} ./nemo.exe",  # sockeye
     }.get(SYSTEM, f"{mpirun} -np {nemo_processors} ./nemo.exe")
     if xios_processors:
         mpirun = {
@@ -1123,7 +1139,8 @@ def _execute(
             "seawolf2": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "seawolf3": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "sigma": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
-            "sockeye": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
+            "login01": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",  # sockeye
+            "login02": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",  # sockeye
         }.get(
             SYSTEM,
             f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
