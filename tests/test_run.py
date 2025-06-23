@@ -39,7 +39,7 @@ import salishsea_cmd.run
 def run_cmd():
     import salishsea_cmd.run
 
-    return salishsea_cmd.run.Run(Mock(spec=cliff.app.App), [])
+    return salishsea_cmd.run.Run(Mock(spec=cliff.app.App), None)
 
 
 class TestParser:
