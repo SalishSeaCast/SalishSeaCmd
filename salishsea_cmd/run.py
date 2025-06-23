@@ -274,6 +274,7 @@ def run(
         "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "graham": "sbatch",
         "narval": "sbatch",
+        "nibi": "sbatch",
         "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "orcinus": "qsub",
         "salish": "bash",
