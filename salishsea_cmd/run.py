@@ -1009,6 +1009,12 @@ def _modules():
             module load netcdf-fortran-mpi/4.6.0
             """
         ),
+        "nibi": textwrap.dedent(
+            """\
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
+            """
+        ),
         "omega": textwrap.dedent(
             """\
             module load OpenMPI/2.1.6/GCC/SYSTEM

@@ -3556,6 +3556,19 @@ class TestModules:
         )
         assert modules == expected
 
+    def test_nibi(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "nibi")
+
+        modules = salishsea_cmd.run._modules()
+
+        expected = textwrap.dedent(
+            """\
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
+            """
+        )
+        assert modules == expected
+
     @pytest.mark.parametrize("system", ("orcinus", "seawolf1", "seawolf2", "seawolf3"))
     def test_orcinus(self, system, monkeypatch):
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
