@@ -651,12 +651,21 @@ def _build_batch_script(
     if SYSTEM == "salish":
         # salish doesn't use a scheduler, so no sbatch or PBS directives in its script
         pass
-    elif SYSTEM in {"beluga", "cedar", "graham", "narval", "login01", "login02"}:
+    elif SYSTEM in {
+        "beluga",
+        "cedar",
+        "graham",
+        "narval",
+        "nibi",
+        "login01",
+        "login02",
+    }:
         procs_per_node = {
             "beluga": 40 if not cores_per_node else int(cores_per_node),
             "cedar": 48 if not cores_per_node else int(cores_per_node),
             "graham": 32 if not cores_per_node else int(cores_per_node),
             "narval": 64 if not cores_per_node else int(cores_per_node),
+            "nibi": 192 if not cores_per_node else int(cores_per_node),
             "login01": 40 if not cores_per_node else int(cores_per_node),  # sockeye
             "login02": 40 if not cores_per_node else int(cores_per_node),  # sockeye
         }[SYSTEM]
