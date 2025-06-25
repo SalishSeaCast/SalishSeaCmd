@@ -759,6 +759,7 @@ def _sbatch_directives(
         "cedar": "0",
         "graham": "0",
         "narval": "0",
+        "nibi": "0",
         "login01": "186gb",  # sockeye
         "login02": "186gb",  # sockeye
     }.get(SYSTEM, mem)
@@ -794,6 +795,7 @@ def _sbatch_directives(
             "graham": "rrg-allen",
             "login01": "st-sallen1-1",  # sockeye
             "login02": "st-sallen1-1",  # sockeye
+            "nibi": "def-allen",  # until allocation is activated, then rrg-allen
         }
         try:
             account = accounts[SYSTEM]
