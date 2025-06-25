@@ -3837,6 +3837,12 @@ class TestExecute:
                 True,
             ),
             (
+                "nibi",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                False,
+                False,
+            ),
+            (
                 "omega",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,

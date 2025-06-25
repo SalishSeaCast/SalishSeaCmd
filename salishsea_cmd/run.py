@@ -1109,6 +1109,7 @@ def _execute(
         "delta": "mpiexec -hostfile $(openmpi_nodefile)",
         "graham": "mpirun",
         "narval": "mpirun",
+        "nibi": "mpirun",
         "omega": "mpiexec -hostfile $(openmpi_nodefile)",
         "orcinus": "mpirun",
         "salish": "/usr/bin/mpirun",
@@ -1125,6 +1126,7 @@ def _execute(
         "delta": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
         "graham": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "narval": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "nibi": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "omega": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
         "orcinus": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "salish": f"{mpirun} --bind-to none -np {nemo_processors} ./nemo.exe",
@@ -1142,6 +1144,7 @@ def _execute(
             "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
             "graham": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "narval": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "nibi": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
             "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "salish": f"{mpirun} : --bind-to none -np {xios_processors} ./xios_server.exe{redirect}",
@@ -1197,7 +1200,7 @@ def _execute(
             echo "Results deflation started at $(date)"{redirect}
             """
         )
-        if SYSTEM in {"beluga", "cedar", "graham", "narval"}:
+        if SYSTEM in {"beluga", "cedar", "graham", "narval", "nibi"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
