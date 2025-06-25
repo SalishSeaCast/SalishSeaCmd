@@ -3484,6 +3484,8 @@ class TestDefinitions:
             ("graham", "${HOME}/.local", False),
             ("narval", "${HOME}/.local", True),
             ("narval", "${HOME}/.local", False),
+            ("nibi", "${HOME}/.local", True),
+            ("nibi", "${HOME}/.local", False),
             ("omega", "${PBS_O_HOME}", True),
             ("omega", "${PBS_O_HOME}", False),
             ("orcinus", "${PBS_O_HOME}/.local", True),

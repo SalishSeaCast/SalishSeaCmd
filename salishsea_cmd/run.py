@@ -954,6 +954,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "graham": Path("${HOME}", ".local", "bin", "salishsea"),
         "narval": Path("${HOME}", ".local", "bin", "salishsea"),
+        "nibi": Path("${HOME}", ".local", "bin", "salishsea"),
         "omega": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "sigma": Path("${PBS_O_HOME}", "bin", "salishsea"),
