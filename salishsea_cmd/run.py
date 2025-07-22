@@ -274,6 +274,7 @@ def run(
         "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "graham": "sbatch",
         "narval": "sbatch",
+        "nibi": "sbatch",
         "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "orcinus": "qsub",
         "salish": "bash",
@@ -650,12 +651,21 @@ def _build_batch_script(
     if SYSTEM == "salish":
         # salish doesn't use a scheduler, so no sbatch or PBS directives in its script
         pass
-    elif SYSTEM in {"beluga", "cedar", "graham", "narval", "login01", "login02"}:
+    elif SYSTEM in {
+        "beluga",
+        "cedar",
+        "graham",
+        "narval",
+        "nibi",
+        "login01",
+        "login02",
+    }:
         procs_per_node = {
             "beluga": 40 if not cores_per_node else int(cores_per_node),
             "cedar": 48 if not cores_per_node else int(cores_per_node),
             "graham": 32 if not cores_per_node else int(cores_per_node),
             "narval": 64 if not cores_per_node else int(cores_per_node),
+            "nibi": 192 if not cores_per_node else int(cores_per_node),
             "login01": 40 if not cores_per_node else int(cores_per_node),  # sockeye
             "login02": 40 if not cores_per_node else int(cores_per_node),  # sockeye
         }[SYSTEM]
@@ -758,6 +768,7 @@ def _sbatch_directives(
         "cedar": "0",
         "graham": "0",
         "narval": "0",
+        "nibi": "0",
         "login01": "186gb",  # sockeye
         "login02": "186gb",  # sockeye
     }.get(SYSTEM, mem)
@@ -793,6 +804,7 @@ def _sbatch_directives(
             "graham": "rrg-allen",
             "login01": "st-sallen1-1",  # sockeye
             "login02": "st-sallen1-1",  # sockeye
+            "nibi": "def-allen",  # until allocation is activated, then rrg-allen
         }
         try:
             account = accounts[SYSTEM]
@@ -951,6 +963,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "graham": Path("${HOME}", ".local", "bin", "salishsea"),
         "narval": Path("${HOME}", ".local", "bin", "salishsea"),
+        "nibi": Path("${HOME}", ".local", "bin", "salishsea"),
         "omega": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "sigma": Path("${PBS_O_HOME}", "bin", "salishsea"),
@@ -1003,6 +1016,12 @@ def _modules():
             """\
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
+            """
+        ),
+        "nibi": textwrap.dedent(
+            """\
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
             """
         ),
         "omega": textwrap.dedent(
@@ -1099,6 +1118,7 @@ def _execute(
         "delta": "mpiexec -hostfile $(openmpi_nodefile)",
         "graham": "mpirun",
         "narval": "mpirun",
+        "nibi": "mpirun",
         "omega": "mpiexec -hostfile $(openmpi_nodefile)",
         "orcinus": "mpirun",
         "salish": "/usr/bin/mpirun",
@@ -1115,6 +1135,7 @@ def _execute(
         "delta": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
         "graham": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "narval": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "nibi": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "omega": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
         "orcinus": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "salish": f"{mpirun} --bind-to none -np {nemo_processors} ./nemo.exe",
@@ -1132,6 +1153,7 @@ def _execute(
             "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
             "graham": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "narval": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "nibi": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
             "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "salish": f"{mpirun} : --bind-to none -np {xios_processors} ./xios_server.exe{redirect}",
@@ -1187,7 +1209,7 @@ def _execute(
             echo "Results deflation started at $(date)"{redirect}
             """
         )
-        if SYSTEM in {"beluga", "cedar", "graham", "narval"}:
+        if SYSTEM in {"beluga", "cedar", "graham", "narval", "nibi"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
