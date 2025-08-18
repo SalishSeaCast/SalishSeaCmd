@@ -212,8 +212,8 @@ The :command:`run` sub-command does the following:
    * executes the :ref:`salishsea-gather` to collect the run description and results files into the results directory
 
 #. Submit the job script to the queue manager via the appropriate command
-   (:command:`qsub` for systems that use TORQUE/MOAB; e.g. :kbd:`bugaboo`, :kbd:`orcinus`, and :kbd:`salish`,
-   or :command:`sbatch` for systems that use slurm; e.g. :kbd:`cedar` and :kbd:`graham`).
+   (:command:`sbatch` for systems that use slurm; e.g. :kbd:`nibi`,
+   or :command:`qsub` for systems that use TORQUE/MOAB; e.g. :kbd:`orcinus`).
 
 See the :ref:`RunDescriptionFileStructure` section for details of the run description YAML file.
 

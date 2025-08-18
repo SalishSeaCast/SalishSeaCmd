@@ -22,6 +22,17 @@
 ``SalishSeaCmd`` Changes That Break Backward Compatibility
 *************************************************************
 
+.. _BreakingChangesVersion25.2:
+
+Version 25.2
+============
+
+The following change that was introduced in version 23.1 of the ``SalishSeaCmd``
+package is incompatible with earlier versions:
+
+* Drop support for the ``graham`` HPC system that was decommissioned on 1-Sep-2025.
+
+
 .. _BreakingChangesVersion23.1:
 
 Version 23.1
