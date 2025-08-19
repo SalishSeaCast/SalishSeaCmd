@@ -30,7 +30,9 @@ Version 25.2
 The following change that was introduced in version 23.1 of the ``SalishSeaCmd``
 package is incompatible with earlier versions:
 
-* Drop support for the ``graham`` HPC system that was decommissioned on 1-Sep-2025.
+* Dropped support for the ``graham`` HPC system that was decommissioned on 1-Sep-2025.
+
+* Dropped support for the ``beluga`` HPC system that was decommissioned on 31-Jul-2025.
 
 
 .. _BreakingChangesVersion23.1:

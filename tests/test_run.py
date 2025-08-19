@@ -135,8 +135,6 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
-            (False, 0, "beluga", "sbatch", "Submitted batch job 43"),
-            (True, 4, "beluga", "sbatch", "Submitted batch job 43"),
             (False, 0, "cedar", "sbatch", "Submitted batch job 43"),
             (True, 4, "cedar", "sbatch", "Submitted batch job 43"),
             (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
@@ -219,8 +217,6 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
-            (False, 0, "beluga", "sbatch", "Submitted batch job 43"),
-            (True, 4, "beluga", "sbatch", "Submitted batch job 43"),
             (False, 0, "cedar", "sbatch", "Submitted batch job 43"),
             (True, 4, "cedar", "sbatch", "Submitted batch job 43"),
             (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
@@ -398,8 +394,6 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
-            (False, 0, "beluga", "sbatch", "Submitted batch job 43"),
-            (True, 4, "beluga", "sbatch", "Submitted batch job 43"),
             (False, 0, "cedar", "sbatch", "Submitted batch job 43"),
             (True, 4, "cedar", "sbatch", "Submitted batch job 43"),
             (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
@@ -480,22 +474,6 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, job_msgs, submit_job_msg",
         [
-            (
-                False,
-                0,
-                "beluga",
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
-            (
-                True,
-                4,
-                "beluga",
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
             (
                 False,
                 0,
@@ -725,22 +703,6 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, job_msgs, submit_job_msg",
         [
-            (
-                False,
-                0,
-                "beluga",
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
-            (
-                True,
-                4,
-                "beluga",
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
             (
                 False,
                 0,
@@ -2057,112 +2019,6 @@ class TestBuildBatchScript:
     """Unit test for _build_batch_script() function."""
 
     @pytest.mark.parametrize(
-        "account, deflate", [("def-allen", True), ("def-allen", False)]
-    )
-    def test_beluga(self, account, deflate, monkeypatch):
-        desc_file = StringIO(
-            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
-        )
-        run_desc = yaml.safe_load(desc_file)
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "beluga")
-
-        script = salishsea_cmd.run._build_batch_script(
-            run_desc,
-            Path("SalishSea.yaml"),
-            nemo_processors=42,
-            xios_processors=1,
-            max_deflate_jobs=4,
-            results_dir=Path("results_dir"),
-            run_dir=Path("tmp_run_dir"),
-            deflate=deflate,
-            separate_deflate=False,
-            cores_per_node="",
-            cpu_arch="",
-        )
-
-        expected = textwrap.dedent(
-            f"""\
-            #!/bin/bash
-
-            #SBATCH --job-name=foo
-            #SBATCH --nodes=2
-            #SBATCH --ntasks-per-node=40
-            #SBATCH --mem=92G
-            #SBATCH --time=1:02:03
-            #SBATCH --mail-user=me@example.com
-            #SBATCH --mail-type=ALL
-            #SBATCH --account={account}
-            # stdout and stderr file paths/names
-            #SBATCH --output=results_dir/stdout
-            #SBATCH --error=results_dir/stderr
-
-
-            RUN_ID="foo"
-            RUN_DESC="tmp_run_dir/SalishSea.yaml"
-            WORK_DIR="tmp_run_dir"
-            RESULTS_DIR="results_dir"
-            COMBINE="${{HOME}}/.local/bin/salishsea combine"
-            """
-        )
-        if deflate:
-            expected += textwrap.dedent(
-                """\
-                DEFLATE="${HOME}/.local/bin/salishsea deflate"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
-            GATHER="${HOME}/.local/bin/salishsea gather"
-
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
-
-            mkdir -p ${RESULTS_DIR}
-            cd ${WORK_DIR}
-            echo "working dir: $(pwd)"
-
-            echo "Starting run at $(date)"
-            mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
-            MPIRUN_EXIT_CODE=$?
-            echo "Ended run at $(date)"
-
-            echo "Results combining started at $(date)"
-            ${COMBINE} ${RUN_DESC} --debug
-            echo "Results combining ended at $(date)"
-            """
-        )
-        if deflate:
-            expected += textwrap.dedent(
-                """\
-
-                echo "Results deflation started at $(date)"
-                module load nco/4.9.5
-                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
-                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
-                  --jobs 4 --debug
-                echo "Results deflation ended at $(date)"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
-
-            echo "Results gathering started at $(date)"
-            ${GATHER} ${RESULTS_DIR} --debug
-            echo "Results gathering ended at $(date)"
-
-            chmod go+rx ${RESULTS_DIR}
-            chmod g+rw ${RESULTS_DIR}/*
-            chmod o+r ${RESULTS_DIR}/*
-
-            echo "Deleting run directory" >>${RESULTS_DIR}/stdout
-            rmdir $(pwd)
-            echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
-            exit ${MPIRUN_EXIT_CODE}
-            """
-        )
-        assert script == expected
-
-    @pytest.mark.parametrize(
         "cpu_arch, nodes, cores_per_node, mem, deflate",
         [("broadwell", 2, "32", "0", True), ("skylake", 1, "48", "0", True)],
     )
@@ -2969,43 +2825,6 @@ class TestBuildBatchScript:
 class TestSbatchDirectives:
     """Unit tests for _sbatch_directives() function."""
 
-    def test_beluga_sbatch_directives(self, caplog, monkeypatch):
-        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
-        run_desc = yaml.safe_load(desc_file)
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "beluga")
-        caplog.set_level(logging.DEBUG)
-
-        slurm_directives = salishsea_cmd.run._sbatch_directives(
-            run_desc,
-            n_processors=43,
-            procs_per_node=40,
-            cpu_arch="",
-            email="me@example.com",
-            results_dir=Path("foo"),
-        )
-
-        assert caplog.records[0].levelname == "INFO"
-        expected = (
-            f"No account found in run description YAML file, "
-            f"so assuming def-allen. If sbatch complains you can specify a "
-            f"different account with a YAML line like account: def-allen"
-        )
-        assert caplog.records[0].message == expected
-        expected = (
-            "#SBATCH --job-name=foo\n"
-            "#SBATCH --nodes=2\n"
-            "#SBATCH --ntasks-per-node=40\n"
-            "#SBATCH --mem=92G\n"
-            "#SBATCH --time=1:02:03\n"
-            "#SBATCH --mail-user=me@example.com\n"
-            "#SBATCH --mail-type=ALL\n"
-            "#SBATCH --account=def-allen\n"
-            "# stdout and stderr file paths/names\n"
-            "#SBATCH --output=foo/stdout\n"
-            "#SBATCH --error=foo/stderr\n"
-        )
-        assert slurm_directives == expected
-
     @pytest.mark.parametrize(
         "system, account, cpu_arch, nodes, procs_per_node, mem",
         [
@@ -3168,7 +2987,6 @@ class TestSbatchDirectives:
     @pytest.mark.parametrize(
         "system, procs_per_node",
         (
-            ("beluga", 40),
             ("cedar", 48),
             ("narval", 64),
             ("sockeye", 40),
@@ -3396,8 +3214,6 @@ class TestDefinitions:
     @pytest.mark.parametrize(
         "system, home, deflate",
         [
-            ("beluga", "${HOME}/.local", True),
-            ("beluga", "${HOME}/.local", False),
             ("cedar", "${HOME}/.local", True),
             ("cedar", "${HOME}/.local", False),
             ("delta", "${PBS_O_HOME}", True),
@@ -3462,8 +3278,8 @@ class TestModules:
 
         assert modules == ""
 
-    @pytest.mark.parametrize("system", ["beluga", "cedar", "narval"])
-    def test_beluga_cedar_narval(self, system, monkeypatch):
+    @pytest.mark.parametrize("system", ["cedar", "narval"])
+    def test_cedar_narval(self, system, monkeypatch):
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
 
         modules = salishsea_cmd.run._modules()
@@ -3544,7 +3360,6 @@ class TestExecute:
     @pytest.mark.parametrize(
         "system, mpirun_cmd",
         [
-            ("beluga", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             ("cedar", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             (
                 "delta",
@@ -3615,7 +3430,7 @@ class TestExecute:
             echo "Results deflation started at $(date)"
             """
         )
-        if system in {"beluga", "cedar", "nibi", "narval"}:
+        if system in {"cedar", "nibi", "narval"}:
             expected += textwrap.dedent(
                 """\
                 module load nco/4.9.5
@@ -3682,24 +3497,6 @@ class TestExecute:
     @pytest.mark.parametrize(
         "system, mpirun_cmd, deflate, separate_deflate",
         [
-            (
-                "beluga",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                False,
-                True,
-            ),
-            (
-                "beluga",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                False,
-                False,
-            ),
-            (
-                "beluga",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                True,
-                True,
-            ),
             (
                 "cedar",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
