@@ -34,6 +34,11 @@ package is incompatible with earlier versions:
 
 * Dropped support for the ``beluga`` HPC system that was decommissioned on 31-Jul-2025.
 
+* Dropped support for the ``cedar`` HPC system that was decommissioned after 11-Aug-2025.
+  Practically,
+  we have not been able to use ``cedar`` efficiently since late-2018 due to issues with
+  its OmniPath interconnect.
+
 
 .. _BreakingChangesVersion23.1:
 
