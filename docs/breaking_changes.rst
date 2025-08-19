@@ -27,8 +27,8 @@
 Version 25.2
 ============
 
-The following change that was introduced in version 23.1 of the ``SalishSeaCmd``
-package is incompatible with earlier versions:
+The following changes that was introduced in version 25.2 of the ``SalishSeaCmd``
+package are incompatible with earlier versions:
 
 * Dropped support for the ``graham`` HPC system that was decommissioned on 1-Sep-2025.
 
