@@ -22,6 +22,24 @@
 ``SalishSeaCmd`` Changes That Break Backward Compatibility
 *************************************************************
 
+.. _BreakingChangesVersion25.2:
+
+Version 25.2
+============
+
+The following changes that were introduced in version 25.2 of the ``SalishSeaCmd``
+package are incompatible with earlier versions:
+
+* Dropped support for the ``graham`` HPC system that was decommissioned on 1-Sep-2025.
+
+* Dropped support for the ``beluga`` HPC system that was decommissioned on 31-Jul-2025.
+
+* Dropped support for the ``cedar`` HPC system that was decommissioned after 11-Aug-2025.
+  Practically,
+  we have not been able to use ``cedar`` efficiently since late-2018 due to issues with
+  its OmniPath interconnect.
+
+
 .. _BreakingChangesVersion23.1:
 
 Version 23.1

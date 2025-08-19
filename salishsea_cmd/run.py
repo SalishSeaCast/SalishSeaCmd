@@ -100,8 +100,7 @@ class Run(cliff.command.Command):
             CPU architecture to use in PBS or SBATCH directives.
             Use this to override the default CPU architecture on HPC clusters that have
             more than one type of CPU;
-            e.g. sockeye (cascade is default, skylake is alternative)
-            or cedar (skylake is default, broadwell is alternative).
+            e.g. sockeye (cascade is default, skylake is alternative).
             This option must be used in conjunction with --core-per-node.
             """,
         )
@@ -236,8 +235,7 @@ def run(
     :param str cpu_arch: CPU architecture to use in PBS or SBATCH directives.
                          Use this to override the default CPU architecture on
                          HPC clusters that have more than one type of CPU;
-                         e.g. sockeye (cascade is default, skylake is alternative)
-                         or cedar (skylake is default, broadwell is alternative).
+                         e.g. sockeye (cascade is default, skylake is alternative).
                          This option must be used in conjunction with --core-per-node.
 
     :param boolean deflate: Include "salishsea deflate" command in the bash
@@ -269,10 +267,7 @@ def run(
     :rtype: str
     """
     queue_job_cmd = {
-        "beluga": "sbatch",
-        "cedar": "sbatch",
         "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-        "graham": "sbatch",
         "narval": "sbatch",
         "nibi": "sbatch",
         "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
@@ -652,18 +647,12 @@ def _build_batch_script(
         # salish doesn't use a scheduler, so no sbatch or PBS directives in its script
         pass
     elif SYSTEM in {
-        "beluga",
-        "cedar",
-        "graham",
         "narval",
         "nibi",
         "login01",
         "login02",
     }:
         procs_per_node = {
-            "beluga": 40 if not cores_per_node else int(cores_per_node),
-            "cedar": 48 if not cores_per_node else int(cores_per_node),
-            "graham": 32 if not cores_per_node else int(cores_per_node),
             "narval": 64 if not cores_per_node else int(cores_per_node),
             "nibi": 192 if not cores_per_node else int(cores_per_node),
             "login01": 40 if not cores_per_node else int(cores_per_node),  # sockeye
@@ -764,9 +753,6 @@ def _sbatch_directives(
     run_id = get_run_desc_value(run_desc, ("run_id",))
     nodes = math.ceil(n_processors / procs_per_node)
     mem = {
-        "beluga": "92G",
-        "cedar": "0",
-        "graham": "0",
         "narval": "0",
         "nibi": "0",
         "login01": "186gb",  # sockeye
@@ -782,7 +768,7 @@ def _sbatch_directives(
         ).time()
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td2hms(td)
-    if SYSTEM in {"cedar", "login01", "login02"} and cpu_arch:
+    if SYSTEM in {"login01", "login02"} and cpu_arch:
         sbatch_directives = (
             f"#SBATCH --job-name={run_id}\n" f"#SBATCH --constraint={cpu_arch}\n"
         )
@@ -801,7 +787,6 @@ def _sbatch_directives(
         sbatch_directives += f"#SBATCH --account={account}\n"
     except KeyError:
         accounts = {
-            "graham": "rrg-allen",
             "login01": "st-sallen1-1",  # sockeye
             "login02": "st-sallen1-1",  # sockeye
             "nibi": "def-allen",  # until allocation is activated, then rrg-allen
@@ -958,10 +943,7 @@ def _td2hms(timedelta):
 
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
     salishsea_cmd = {
-        "beluga": Path("${HOME}", ".local", "bin", "salishsea"),
-        "cedar": Path("${HOME}", ".local", "bin", "salishsea"),
         "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
-        "graham": Path("${HOME}", ".local", "bin", "salishsea"),
         "narval": Path("${HOME}", ".local", "bin", "salishsea"),
         "nibi": Path("${HOME}", ".local", "bin", "salishsea"),
         "omega": Path("${PBS_O_HOME}", "bin", "salishsea"),
@@ -989,27 +971,9 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
 
 def _modules():
     modules = {
-        "beluga": textwrap.dedent(
-            """\
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
-            """
-        ),
-        "cedar": textwrap.dedent(
-            """\
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
-            """
-        ),
         "delta": textwrap.dedent(
             """\
             module load OpenMPI/2.1.6/GCC/SYSTEM
-            """
-        ),
-        "graham": textwrap.dedent(
-            """\
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
             """
         ),
         "narval": textwrap.dedent(
@@ -1113,10 +1077,7 @@ def _execute(
         else " >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr"
     )
     mpirun = {
-        "beluga": "mpirun",
-        "cedar": "mpirun",
         "delta": "mpiexec -hostfile $(openmpi_nodefile)",
-        "graham": "mpirun",
         "narval": "mpirun",
         "nibi": "mpirun",
         "omega": "mpiexec -hostfile $(openmpi_nodefile)",
@@ -1130,10 +1091,7 @@ def _execute(
         "login02": "mpirun",  # sockeye
     }.get(SYSTEM, "mpirun")
     mpirun = {
-        "beluga": f"{mpirun} -np {nemo_processors} ./nemo.exe",
-        "cedar": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "delta": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
-        "graham": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "narval": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "nibi": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "omega": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
@@ -1148,10 +1106,7 @@ def _execute(
     }.get(SYSTEM, f"{mpirun} -np {nemo_processors} ./nemo.exe")
     if xios_processors:
         mpirun = {
-            "beluga": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
-            "cedar": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
-            "graham": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "narval": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "nibi": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
@@ -1209,7 +1164,7 @@ def _execute(
             echo "Results deflation started at $(date)"{redirect}
             """
         )
-        if SYSTEM in {"beluga", "cedar", "graham", "narval", "nibi"}:
+        if SYSTEM in {"narval", "nibi"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants

@@ -75,7 +75,7 @@ The following key-value pairs provide the basic configuration for the run:
 :kbd:`account`
   *Optional.*
   The account name to include in the :kbd:`#SBATCH` directives section of the :file:`SalishSeaNEMO.sh` job script.
-  This key-value pair is required on systems like :kbd:`cedar.computecanada.ca` and :kbd:`graham.computecanada.ca` that use the `Slurm Workload Manager`_ and that you submit runs to with the :command:`sbatch` command.
+  This key-value pair is required on systems like :kbd:`nibi.alliancecan.ca` that use the `Slurm Workload Manager`_ and that you submit runs to with the :command:`sbatch` command.
 
   .. _Slurm Workload Manager: https://slurm.schedmd.com/
 

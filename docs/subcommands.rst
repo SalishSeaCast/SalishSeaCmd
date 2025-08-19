@@ -84,8 +84,7 @@ For example:
                             CPU architecture to use in PBS or SBATCH directives.
                             Use this to override the default CPU architecture on
                             HPC clusters that have more than one type of CPU;
-                            e.g. sockeye (cascade is default, skylake is alternative)
-                            or cedar (skylake is default, broadwell is alternative).
+                            e.g. sockeye (cascade is default, skylake is alternative).
                             This option must be used in conjunction with --core-per-node.
       --deflate
                             Include "salishsea deflate" command in the bash script.
@@ -162,8 +161,7 @@ The results are gathered in the specified results directory.
                             CPU architecture to use in PBS or SBATCH directives.
                             Use this to override the default CPU architecture on
                             HPC clusters that have more than one type of CPU;
-                            e.g. sockeye (cascade is default, skylake is alternative)
-                            or cedar (skylake is default, broadwell is alternative).
+                            e.g. sockeye (cascade is default, skylake is alternative).
                             This option must be used in conjunction with --core-per-node.
       --deflate
                             Include "salishsea deflate" command in the bash script.
@@ -212,8 +210,8 @@ The :command:`run` sub-command does the following:
    * executes the :ref:`salishsea-gather` to collect the run description and results files into the results directory
 
 #. Submit the job script to the queue manager via the appropriate command
-   (:command:`qsub` for systems that use TORQUE/MOAB; e.g. :kbd:`bugaboo`, :kbd:`orcinus`, and :kbd:`salish`,
-   or :command:`sbatch` for systems that use slurm; e.g. :kbd:`cedar` and :kbd:`graham`).
+   (:command:`sbatch` for systems that use slurm; e.g. :kbd:`nibi`,
+   or :command:`qsub` for systems that use TORQUE/MOAB; e.g. :kbd:`orcinus`).
 
 See the :ref:`RunDescriptionFileStructure` section for details of the run description YAML file.
 

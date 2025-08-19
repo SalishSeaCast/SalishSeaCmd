@@ -162,9 +162,9 @@ The process begins by calculating several pieces of information for each segment
 * the directory name in which the segment run results will be stored;
   that is the results directory name given in the :command:`salishsea run` command with the 0-based index of the segment appended to it.
   For example,
-  if the command-line results directory is :file:`$SCRATCH/SKOG_graham_BASERUN/BR_2016/`,
-  the first segment's results will be stored in :file:`$SCRATCH/SKOG_graham_BASERUN/BR_2016_0/`,
-  the second will be in :file:`$SCRATCH/SKOG_graham_BASERUN/BR_2016_1/`,
+  if the command-line results directory is :file:`$SCRATCH/SKOG_nibi_BASERUN/BR_2016/`,
+  the first segment's results will be stored in :file:`$SCRATCH/SKOG_nibi_BASERUN/BR_2016_0/`,
+  the second will be in :file:`$SCRATCH/SKOG_nibi_BASERUN/BR_2016_1/`,
   etc.
 
 * the `f90nml`_ patch :py:obj:`dict` that will be applied to the :kbd:`namrun` namelist to set the values of :kbd:`nn_it000`,
