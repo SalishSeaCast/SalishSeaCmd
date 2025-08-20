@@ -268,6 +268,7 @@ def run(
     """
     queue_job_cmd = {
         # Alliance Canada clusters
+        "fir": "sbatch",
         "narval": "sbatch",
         "nibi": "sbatch",
         # UBC ARC sockeye cluster
@@ -653,6 +654,7 @@ def _build_batch_script(
         pass
     elif SYSTEM in {
         # Alliance Canada clusters
+        "fir",
         "narval",
         "nibi",
         # UBC ARC sockeye cluster
@@ -661,6 +663,7 @@ def _build_batch_script(
     }:
         procs_per_node = {
             # Alliance Canada clusters
+            "fir": 192 if not cores_per_node else int(cores_per_node),
             "narval": 64 if not cores_per_node else int(cores_per_node),
             "nibi": 192 if not cores_per_node else int(cores_per_node),
             # UBC ARC sockeye cluster
@@ -765,6 +768,7 @@ def _sbatch_directives(
     nodes = math.ceil(n_processors / procs_per_node)
     mem = {
         # Alliance Canada clusters
+        "fir": "0",
         "narval": "0",
         "nibi": "0",
         # UBC ARC sockeye cluster
@@ -959,6 +963,7 @@ def _td2hms(timedelta):
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
     salishsea_cmd = {
         # Alliance Canada clusters
+        "fir": Path("${HOME}", ".local", "bin", "salishsea"),
         "narval": Path("${HOME}", ".local", "bin", "salishsea"),
         "nibi": Path("${HOME}", ".local", "bin", "salishsea"),
         # UBC ARC sockeye cluster
@@ -992,6 +997,12 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
 def _modules():
     modules = {
         # Alliance Canada clusters
+        "fir": textwrap.dedent(
+            """\
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
+            """
+        ),
         "narval": textwrap.dedent(
             """\
             module load StdEnv/2020
@@ -1103,6 +1114,7 @@ def _execute(
     )
     mpirun = {
         # Alliance Canada clusters
+        "fir": "mpirun",
         "narval": "mpirun",
         "nibi": "mpirun",
         # UBC ARC sockeye cluster
@@ -1122,6 +1134,7 @@ def _execute(
     }.get(SYSTEM, "mpirun")
     mpirun = {
         # Alliance Canada clusters
+        "fir": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "narval": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "nibi": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         # UBC ARC sockeye cluster
@@ -1142,6 +1155,7 @@ def _execute(
     if xios_processors:
         mpirun = {
             # Alliance Canada clusters
+            "fir": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "narval": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "nibi": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             # UBC ARC sockeye cluster
@@ -1204,7 +1218,7 @@ def _execute(
             echo "Results deflation started at $(date)"{redirect}
             """
         )
-        if SYSTEM in {"narval", "nibi"}:
+        if SYSTEM in {"fir", "narval", "nibi"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
