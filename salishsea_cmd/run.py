@@ -267,18 +267,23 @@ def run(
     :rtype: str
     """
     queue_job_cmd = {
-        "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
+        # Alliance Canada clusters
         "narval": "sbatch",
         "nibi": "sbatch",
-        "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-        "orcinus": "qsub",
+        # UBC ARC sockeye cluster
+        "login01": "sbatch",
+        "login02": "sbatch",
+        # MOAD development machine
         "salish": "bash",
+        # UBC Chemistry orcinus cluster
+        "orcinus": "qsub",
         "seawolf1": "qsub",  # orcinus.westgrid.ca login node
         "seawolf2": "qsub",  # orcinus.westgrid.ca login node
         "seawolf3": "qsub",  # orcinus.westgrid.ca login node
+        # EOAS optimum cluster
+        "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
+        "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
         "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-        "login01": "sbatch",  # sockeye
-        "login02": "sbatch",  # sockeye
     }.get(SYSTEM, "qsub")
     results_dir = nemo_cmd.resolved_path(results_dir)
     run_segments, first_seg_no = _calc_run_segments(desc_file, results_dir)
@@ -647,16 +652,20 @@ def _build_batch_script(
         # salish doesn't use a scheduler, so no sbatch or PBS directives in its script
         pass
     elif SYSTEM in {
+        # Alliance Canada clusters
         "narval",
         "nibi",
+        # UBC ARC sockeye cluster
         "login01",
         "login02",
     }:
         procs_per_node = {
+            # Alliance Canada clusters
             "narval": 64 if not cores_per_node else int(cores_per_node),
             "nibi": 192 if not cores_per_node else int(cores_per_node),
-            "login01": 40 if not cores_per_node else int(cores_per_node),  # sockeye
-            "login02": 40 if not cores_per_node else int(cores_per_node),  # sockeye
+            # UBC ARC sockeye cluster
+            "login01": 40 if not cores_per_node else int(cores_per_node),
+            "login02": 40 if not cores_per_node else int(cores_per_node),
         }[SYSTEM]
         script = "\n".join(
             (
@@ -667,13 +676,15 @@ def _build_batch_script(
     else:
         try:
             procs_per_node = {
-                "delta": 20 if not cores_per_node else int(cores_per_node),
-                "omega": 20 if not cores_per_node else int(cores_per_node),
-                "sigma": 20 if not cores_per_node else int(cores_per_node),
+                # UBC Chemistry orcinus cluster
                 "orcinus": 12 if not cores_per_node else int(cores_per_node),
                 "seawolf1": 12 if not cores_per_node else int(cores_per_node),
                 "seawolf2": 12 if not cores_per_node else int(cores_per_node),
                 "seawolf3": 12 if not cores_per_node else int(cores_per_node),
+                # EOAS optimum cluster
+                "delta": 20 if not cores_per_node else int(cores_per_node),
+                "omega": 20 if not cores_per_node else int(cores_per_node),
+                "sigma": 20 if not cores_per_node else int(cores_per_node),
             }[SYSTEM]
         except KeyError:
             log.error(f"unknown system: {SYSTEM}")
@@ -753,10 +764,12 @@ def _sbatch_directives(
     run_id = get_run_desc_value(run_desc, ("run_id",))
     nodes = math.ceil(n_processors / procs_per_node)
     mem = {
+        # Alliance Canada clusters
         "narval": "0",
         "nibi": "0",
-        "login01": "186gb",  # sockeye
-        "login02": "186gb",  # sockeye
+        # UBC ARC sockeye cluster
+        "login01": "186gb",
+        "login02": "186gb",
     }.get(SYSTEM, mem)
     if deflate:
         run_id = f"{result_type}_{run_id}_deflate"
@@ -787,9 +800,11 @@ def _sbatch_directives(
         sbatch_directives += f"#SBATCH --account={account}\n"
     except KeyError:
         accounts = {
-            "login01": "st-sallen1-1",  # sockeye
-            "login02": "st-sallen1-1",  # sockeye
+            # Alliance Canada clusters
             "nibi": "def-allen",  # until allocation is activated, then rrg-allen
+            # UBC ARC sockeye cluster
+            "login01": "st-sallen1-1",
+            "login02": "st-sallen1-1",
         }
         try:
             account = accounts[SYSTEM]
@@ -943,18 +958,23 @@ def _td2hms(timedelta):
 
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
     salishsea_cmd = {
-        "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
+        # Alliance Canada clusters
         "narval": Path("${HOME}", ".local", "bin", "salishsea"),
         "nibi": Path("${HOME}", ".local", "bin", "salishsea"),
-        "omega": Path("${PBS_O_HOME}", "bin", "salishsea"),
-        "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
-        "sigma": Path("${PBS_O_HOME}", "bin", "salishsea"),
+        # UBC ARC sockeye cluster
+        "login01": Path("${HOME}", ".local", "bin", "salishsea"),
+        "login02": Path("${HOME}", ".local", "bin", "salishsea"),
+        # MOAD development machine
         "salish": Path("${HOME}", ".local", "bin", "salishsea"),
+        # UBC Chemistry orcinus cluster
+        "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "seawolf1": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "seawolf2": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         "seawolf3": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
-        "login01": Path("${HOME}", ".local", "bin", "salishsea"),  # sockeye
-        "login02": Path("${HOME}", ".local", "bin", "salishsea"),  # sockeye
+        # EOAS optimum cluster
+        "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
+        "omega": Path("${PBS_O_HOME}", "bin", "salishsea"),
+        "sigma": Path("${PBS_O_HOME}", "bin", "salishsea"),
     }.get(SYSTEM, Path("${HOME}", ".local", "bin", "salishsea"))
     defns = (
         f'RUN_ID="{get_run_desc_value(run_desc, ("run_id",))}"\n'
@@ -971,11 +991,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
 
 def _modules():
     modules = {
-        "delta": textwrap.dedent(
-            """\
-            module load OpenMPI/2.1.6/GCC/SYSTEM
-            """
-        ),
+        # Alliance Canada clusters
         "narval": textwrap.dedent(
             """\
             module load StdEnv/2020
@@ -988,11 +1004,26 @@ def _modules():
             module load netcdf-fortran-mpi/4.6.1
             """
         ),
-        "omega": textwrap.dedent(
+        # UBC ARC sockeye cluster
+        "login01": textwrap.dedent(
             """\
-            module load OpenMPI/2.1.6/GCC/SYSTEM
+            module load gcc/9.4.0
+            module load openmpi/4.1.1-cuda11-3
+            module load netcdf-fortran/4.5.3-hdf4-support
+            module load parallel-netcdf/1.12.2-additional-bindings
             """
         ),
+        "login02": textwrap.dedent(
+            """\
+            module load gcc/9.4.0
+            module load openmpi/4.1.1-cuda11-3
+            module load netcdf-fortran/4.5.3-hdf4-support
+            module load parallel-netcdf/1.12.2-additional-bindings
+            """
+        ),
+        # MOAD development machine
+        "salish": "",
+        # UBC Chemistry orcinus cluster
         "orcinus": textwrap.dedent(
             """\
             module load intel
@@ -1004,7 +1035,6 @@ def _modules():
             module load git
             """
         ),
-        "salish": "",
         "seawolf1": textwrap.dedent(
             """\
             module load intel
@@ -1038,25 +1068,20 @@ def _modules():
             module load git
             """
         ),
-        "sigma": textwrap.dedent(
+        # EOAS optimum cluster
+        "delta": textwrap.dedent(
             """\
             module load OpenMPI/2.1.6/GCC/SYSTEM
             """
         ),
-        "login01": textwrap.dedent(  # sockeye
+        "omega": textwrap.dedent(
             """\
-            module load gcc/9.4.0
-            module load openmpi/4.1.1-cuda11-3
-            module load netcdf-fortran/4.5.3-hdf4-support
-            module load parallel-netcdf/1.12.2-additional-bindings
+            module load OpenMPI/2.1.6/GCC/SYSTEM
             """
         ),
-        "login02": textwrap.dedent(  # sockeye
+        "sigma": textwrap.dedent(
             """\
-            module load gcc/9.4.0
-            module load openmpi/4.1.1-cuda11-3
-            module load netcdf-fortran/4.5.3-hdf4-support
-            module load parallel-netcdf/1.12.2-additional-bindings
+            module load OpenMPI/2.1.6/GCC/SYSTEM
             """
         ),
     }.get(SYSTEM, "")
@@ -1077,47 +1102,62 @@ def _execute(
         else " >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr"
     )
     mpirun = {
-        "delta": "mpiexec -hostfile $(openmpi_nodefile)",
+        # Alliance Canada clusters
         "narval": "mpirun",
         "nibi": "mpirun",
-        "omega": "mpiexec -hostfile $(openmpi_nodefile)",
-        "orcinus": "mpirun",
+        # UBC ARC sockeye cluster
+        "login01": "mpirun",
+        "login02": "mpirun",
+        # MOAD development machine
         "salish": "/usr/bin/mpirun",
+        # UBC Chemistry orcinus cluster
+        "orcinus": "mpirun",
         "seawolf1": "mpirun",
         "seawolf2": "mpirun",
         "seawolf3": "mpirun",
+        # EOAS optimum cluster
+        "delta": "mpiexec -hostfile $(openmpi_nodefile)",
+        "omega": "mpiexec -hostfile $(openmpi_nodefile)",
         "sigma": "mpiexec -hostfile $(openmpi_nodefile)",
-        "login01": "mpirun",  # sockeye
-        "login02": "mpirun",  # sockeye
     }.get(SYSTEM, "mpirun")
     mpirun = {
-        "delta": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
+        # Alliance Canada clusters
         "narval": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "nibi": f"{mpirun} -np {nemo_processors} ./nemo.exe",
-        "omega": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
-        "orcinus": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        # UBC ARC sockeye cluster
+        "login01": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "login02": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        # MOAD development machine
         "salish": f"{mpirun} --bind-to none -np {nemo_processors} ./nemo.exe",
+        # UBC Chemistry orcinus cluster
+        "orcinus": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "seawolf1": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "seawolf2": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "seawolf3": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        # EOAS optimum cluster
+        "delta": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
+        "omega": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
         "sigma": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
-        "login01": f"{mpirun} -np {nemo_processors} ./nemo.exe",  # sockeye
-        "login02": f"{mpirun} -np {nemo_processors} ./nemo.exe",  # sockeye
     }.get(SYSTEM, f"{mpirun} -np {nemo_processors} ./nemo.exe")
     if xios_processors:
         mpirun = {
-            "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
+            # Alliance Canada clusters
             "narval": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "nibi": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
-            "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
-            "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            # UBC ARC sockeye cluster
+            "login01": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "login02": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            # MOAD development machine
             "salish": f"{mpirun} : --bind-to none -np {xios_processors} ./xios_server.exe{redirect}",
+            # UBC Chemistry orcinus cluster
+            "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "seawolf1": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "seawolf2": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "seawolf3": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            # EOAS optimum cluster
+            "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
+            "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
             "sigma": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
-            "login01": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",  # sockeye
-            "login02": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",  # sockeye
         }.get(
             SYSTEM,
             f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",

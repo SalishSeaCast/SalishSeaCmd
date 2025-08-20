@@ -135,22 +135,20 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
-            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            # Alliance Canada clusters
             (False, 0, "narval", "sbatch", "Submitted batch job 43"),
             (True, 4, "narval", "sbatch", "Submitted batch job 43"),
             (False, 0, "nibi", "sbatch", "Submitted batch job 43"),
             (True, 4, "nibi", "sbatch", "Submitted batch job 43"),
+            # UBC ARC sockeye cluster
+            (False, 0, "login01", "sbatch", "Submitted batch job 43"),
+            (True, 4, "login01", "sbatch", "Submitted batch job 43"),
+            (False, 0, "login02", "sbatch", "Submitted batch job 43"),
+            (True, 4, "login02", "sbatch", "Submitted batch job 43"),
+            # MOAD development machine
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
-            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
-            (True, 4, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
-            (False, 0, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
-            (True, 4, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
-            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            # UBC Chemistry orcinus cluster
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
@@ -159,6 +157,13 @@ class TestRun:
             (True, 4, "seawolf2", "qsub", "432.orca2.ibb"),
             (False, 0, "seawolf3", "qsub", "433.orca2.ibb"),
             (True, 4, "seawolf3", "qsub", "433.orca2.ibb"),
+            # EOAS optimum cluster
+            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
         ],
     )
     def test_run_submit(
@@ -215,22 +220,20 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
-            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            # Alliance Canada clusters
             (False, 0, "narval", "sbatch", "Submitted batch job 43"),
             (True, 4, "narval", "sbatch", "Submitted batch job 43"),
             (False, 0, "nibi", "sbatch", "Submitted batch job 43"),
             (True, 4, "nibi", "sbatch", "Submitted batch job 43"),
+            # UBC ARC sockeye cluster
+            (False, 0, "login01", "sbatch", "Submitted batch job 43"),
+            (True, 4, "login01", "sbatch", "Submitted batch job 43"),
+            (False, 0, "login02", "sbatch", "Submitted batch job 43"),
+            (True, 4, "login02", "sbatch", "Submitted batch job 43"),
+            # MOAD development machine
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
-            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
-            (True, 4, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
-            (False, 0, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
-            (True, 4, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
-            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            # UBC Chemistry orcinus cluster
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
@@ -239,6 +242,13 @@ class TestRun:
             (True, 4, "seawolf2", "qsub", "432.orca2.ibb"),
             (False, 0, "seawolf3", "qsub", "433.orca2.ibb"),
             (True, 4, "seawolf3", "qsub", "433.orca2.ibb"),
+            # EOAS optimum cluster
+            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
         ],
     )
     def test_run_waitjob(
@@ -390,22 +400,20 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
-            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            # Alliance Canada clusters
             (False, 0, "narval", "sbatch", "Submitted batch job 43"),
             (True, 4, "narval", "sbatch", "Submitted batch job 43"),
             (False, 0, "nibi", "sbatch", "Submitted batch job 43"),
             (True, 4, "nibi", "sbatch", "Submitted batch job 43"),
+            # UBC ARC sockeye cluster
+            (False, 0, "login01", "sbatch", "Submitted batch job 43"),
+            (True, 4, "login01", "sbatch", "Submitted batch job 43"),
+            (False, 0, "login02", "sbatch", "Submitted batch job 43"),
+            (True, 4, "login02", "sbatch", "Submitted batch job 43"),
+            # MOAD development machine
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
-            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
-            (True, 4, "login01", "sbatch", "Submitted batch job 43"),  # sockeye
-            (False, 0, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
-            (True, 4, "login02", "sbatch", "Submitted batch job 43"),  # sockeye
-            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            # UBC Chemistry orcinus cluster
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
@@ -414,6 +422,13 @@ class TestRun:
             (True, 4, "seawolf2", "qsub", "432.orca2.ibb"),
             (False, 0, "seawolf3", "qsub", "433.orca2.ibb"),
             (True, 4, "seawolf3", "qsub", "433.orca2.ibb"),
+            # EOAS optimum cluster
+            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
         ],
     )
     def test_run_separate_deflate(
@@ -468,22 +483,7 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, job_msgs, submit_job_msg",
         [
-            (
-                False,
-                0,
-                "delta",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                True,
-                4,
-                "delta",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
+            # Alliance Canada clusters
             (
                 False,
                 0,
@@ -516,8 +516,60 @@ class TestRun:
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
             ),
+            # UBC ARC sockeye cluster
+            (
+                False,
+                0,
+                "sockeye",
+                "qsub",
+                ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
+                "43.pbsha.ib.sockeye",
+            ),
+            (
+                True,
+                4,
+                "sockeye",
+                "qsub",
+                ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
+                "43.pbsha.ib.sockeye",
+            ),
+            # MOAD development machine
             (False, 0, "salish", "bash", ("43.master", "44.master"), "43.master"),
             (True, 4, "salish", "bash", ("43.master", "44.master"), "43.master"),
+            # UBC Chemistry orcinus cluster
+            (
+                False,
+                0,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
+            ),
+            (
+                True,
+                4,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
+            ),
+            # EOAS optimum cluster
+            (
+                False,
+                0,
+                "delta",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                True,
+                4,
+                "delta",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
             (
                 False,
                 0,
@@ -537,22 +589,6 @@ class TestRun:
             (
                 False,
                 0,
-                "sockeye",
-                "qsub",
-                ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
-                "43.pbsha.ib.sockeye",
-            ),
-            (
-                True,
-                4,
-                "sockeye",
-                "qsub",
-                ("43.pbsha.ib.sockeye", "44.pbsha.ib.sockeye"),
-                "43.pbsha.ib.sockeye",
-            ),
-            (
-                False,
-                0,
                 "omega",
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
@@ -565,22 +601,6 @@ class TestRun:
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
                 "43.admin.default.domain",
-            ),
-            (
-                False,
-                0,
-                "orcinus",
-                "qsub",
-                ("43.orca2.ibb", "44.orca2.ibb"),
-                "43.orca2.ibb",
-            ),
-            (
-                True,
-                4,
-                "orcinus",
-                "qsub",
-                ("43.orca2.ibb", "44.orca2.ibb"),
-                "43.orca2.ibb",
             ),
         ],
     )
@@ -681,22 +701,7 @@ class TestRun:
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, job_msgs, submit_job_msg",
         [
-            (
-                False,
-                0,
-                "delta",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                True,
-                4,
-                "delta",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
+            # Alliance Canada clusters
             (
                 False,
                 0,
@@ -729,8 +734,84 @@ class TestRun:
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
             ),
+            # UBC ARC sockeye cluster
+            (
+                False,
+                0,
+                "login01",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "login01",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                False,
+                0,
+                "login02",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            (
+                True,
+                4,
+                "login02",
+                "sbatch",
+                ("Submitted batch job 43", "Submitted batch job 44"),
+                "Submitted batch job 43",
+            ),
+            # MOAD development machine
             (False, 0, "salish", "bash", ("43.master", "44.master"), "43.master"),
             (True, 4, "salish", "bash", ("43.master", "44.master"), "43.master"),
+            # UBC Chemistry orcinus cluster
+            (
+                False,
+                0,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
+            ),
+            (
+                False,
+                0,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
+            ),
+            (
+                True,
+                4,
+                "orcinus",
+                "qsub",
+                ("43.orca2.ibb", "44.orca2.ibb"),
+                "43.orca2.ibb",
+            ),
+            # EOAS optimum cluster
+            (
+                False,
+                0,
+                "delta",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
+            (
+                True,
+                4,
+                "delta",
+                "qsub -q mpi",
+                ("43.admin.default.domain", "44.admin.default.domain"),
+                "43.admin.default.domain",
+            ),
             (
                 False,
                 0,
@@ -750,38 +831,6 @@ class TestRun:
             (
                 False,
                 0,
-                "login01",  # sockeye
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
-            (
-                True,
-                4,
-                "login01",  # sockeye
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
-            (
-                False,
-                0,
-                "login02",  # sockeye
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
-            (
-                True,
-                4,
-                "login02",  # sockeye
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
-            (
-                False,
-                0,
                 "omega",
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
@@ -794,30 +843,6 @@ class TestRun:
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
                 "43.admin.default.domain",
-            ),
-            (
-                False,
-                0,
-                "orcinus",
-                "qsub",
-                ("43.orca2.ibb", "44.orca2.ibb"),
-                "43.orca2.ibb",
-            ),
-            (
-                False,
-                0,
-                "orcinus",
-                "qsub",
-                ("43.orca2.ibb", "44.orca2.ibb"),
-                "43.orca2.ibb",
-            ),
-            (
-                True,
-                4,
-                "orcinus",
-                "qsub",
-                ("43.orca2.ibb", "44.orca2.ibb"),
-                "43.orca2.ibb",
             ),
         ],
     )
@@ -3020,28 +3045,33 @@ class TestDefinitions:
     @pytest.mark.parametrize(
         "system, home, deflate",
         [
-            ("delta", "${PBS_O_HOME}", True),
-            ("delta", "${PBS_O_HOME}", False),
+            # Alliance Canada clusters
             ("narval", "${HOME}/.local", True),
             ("narval", "${HOME}/.local", False),
             ("nibi", "${HOME}/.local", True),
             ("nibi", "${HOME}/.local", False),
-            ("omega", "${PBS_O_HOME}", True),
-            ("omega", "${PBS_O_HOME}", False),
-            ("orcinus", "${PBS_O_HOME}/.local", True),
-            ("orcinus", "${PBS_O_HOME}/.local", False),
+            # UBC ARC sockeye cluster
+            ("sockeye", "${HOME}/.local", True),
+            ("sockeye", "${HOME}/.local", False),
+            # MOAD development machine
             ("salish", "${HOME}/.local", True),
             ("salish", "${HOME}/.local", False),
+            # UBC Chemistry orcinus cluster
+            ("orcinus", "${PBS_O_HOME}/.local", True),
+            ("orcinus", "${PBS_O_HOME}/.local", False),
             ("seawolf1", "${PBS_O_HOME}/.local", True),
             ("seawolf1", "${PBS_O_HOME}/.local", False),
             ("seawolf2", "${PBS_O_HOME}/.local", True),
             ("seawolf2", "${PBS_O_HOME}/.local", False),
             ("seawolf3", "${PBS_O_HOME}/.local", True),
             ("seawolf3", "${PBS_O_HOME}/.local", False),
+            # EOAS optimum cluster
+            ("delta", "${PBS_O_HOME}", True),
+            ("delta", "${PBS_O_HOME}", False),
+            ("omega", "${PBS_O_HOME}", True),
+            ("omega", "${PBS_O_HOME}", False),
             ("sigma", "${PBS_O_HOME}", True),
             ("sigma", "${PBS_O_HOME}", False),
-            ("sockeye", "${HOME}/.local", True),
-            ("sockeye", "${HOME}/.local", False),
         ],
     )
     def test_definitions(self, system, home, deflate):
@@ -3164,12 +3194,24 @@ class TestExecute:
     @pytest.mark.parametrize(
         "system, mpirun_cmd",
         [
+            # Alliance Canada clusters
+            ("narval", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
+            # UBC ARC sockeye cluster
+            (
+                "login01",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+            ),
+            (
+                "login02",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+            ),
+            # UBC Chemistry orcinus cluster
+            ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
+            # EOAS optimum cluster
             (
                 "delta",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
-            ("narval", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
-            ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             (
                 "omega",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
@@ -3178,14 +3220,6 @@ class TestExecute:
                 "sigma",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
-            (
-                "login01",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-            ),  # sockeye
-            (
-                "login02",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-            ),  # sockeye
         ],
     )
     def test_execute_with_deflate(self, system, mpirun_cmd, monkeypatch):
@@ -3300,24 +3334,7 @@ class TestExecute:
     @pytest.mark.parametrize(
         "system, mpirun_cmd, deflate, separate_deflate",
         [
-            (
-                "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                False,
-                True,
-            ),
-            (
-                "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                False,
-                False,
-            ),
-            (
-                "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                True,
-                True,
-            ),
+            # Alliance Canada clusters
             (
                 "narval",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
@@ -3330,24 +3347,44 @@ class TestExecute:
                 False,
                 False,
             ),
+            # UBC ARC sockeye cluster
             (
-                "omega",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                "login01",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
-                "omega",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                "login01",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
-                "omega",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                "login01",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
+            (
+                "login02",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                False,
+                True,
+            ),
+            (
+                "login02",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                False,
+                False,
+            ),
+            (
+                "login02",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                True,
+                True,
+            ),
+            # UBC Chemistry orcinus cluster
             (
                 "orcinus",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
@@ -3367,6 +3404,42 @@ class TestExecute:
                 True,
             ),
             (
+                "delta",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                True,
+            ),
+            (
+                "delta",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                False,
+            ),
+            (
+                "delta",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                True,
+                True,
+            ),
+            (
+                "omega",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                True,
+            ),
+            (
+                "omega",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                False,
+                False,
+            ),
+            (
+                "omega",
+                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
+                True,
+                True,
+            ),
+            (
                 "sigma",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
@@ -3381,42 +3454,6 @@ class TestExecute:
             (
                 "sigma",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                True,
-                True,
-            ),
-            (
-                "login01",  # sockeye
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                False,
-                True,
-            ),
-            (
-                "login01",  # sockeye
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                False,
-                False,
-            ),
-            (
-                "login01",  # sockeye
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                True,
-                True,
-            ),
-            (
-                "login02",  # sockeye
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                False,
-                True,
-            ),
-            (
-                "login02",  # sockeye
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                False,
-                False,
-            ),
-            (
-                "login02",  # sockeye
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
             ),
