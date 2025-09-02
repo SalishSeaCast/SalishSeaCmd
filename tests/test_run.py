@@ -124,13 +124,22 @@ class TestTakeAction:
 
 @patch("salishsea_cmd.run._submit_separate_deflate_jobs")
 @patch("salishsea_cmd.run._submit_job")
-@patch("salishsea_cmd.run._build_deflate_script", return_value="deflate script")
 @patch("salishsea_cmd.run._build_tmp_run_dir")
 @patch("salishsea_cmd.run._calc_run_segments")
 @patch("salishsea_cmd.run._write_segment_namrun_namelist")
 @patch("salishsea_cmd.run._write_segment_desc_file", return_value=({}, ""))
 class TestRun:
     """Unit tests for `salishsea run` run() function."""
+
+    @staticmethod
+    @pytest.fixture
+    def mock_build_deflate_script(monkeypatch):
+        def _mock_build_deflate_script(run_desc, pattern, result_type, results_dir):
+            return "deflate script"
+
+        monkeypatch.setattr(
+            salishsea_cmd.run, "_build_deflate_script", _mock_build_deflate_script
+        )
 
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
@@ -174,7 +183,6 @@ class TestRun:
         m_wsnn,
         m_crs,
         m_btrd,
-        m_bds,
         m_sj,
         m_ssdj,
         sep_xios_server,
@@ -261,7 +269,6 @@ class TestRun:
         m_wsnn,
         m_crs,
         m_btrd,
-        m_bds,
         m_sj,
         m_ssdj,
         sep_xios_server,
@@ -313,7 +320,6 @@ class TestRun:
         m_wsnn,
         m_crs,
         m_btrd,
-        m_bds,
         m_sj,
         m_ssdj,
         sep_xios_server,
@@ -359,7 +365,6 @@ class TestRun:
         m_wsnn,
         m_crs,
         m_btrd,
-        m_bds,
         m_sj,
         m_ssdj,
         sep_xios_server,
@@ -443,7 +448,6 @@ class TestRun:
         m_wsnn,
         m_crs,
         m_btrd,
-        m_bds,
         m_sj,
         m_ssdj,
         sep_xios_server,
@@ -632,7 +636,6 @@ class TestRun:
         m_wsnn,
         m_crs,
         m_btrd,
-        m_bds,
         m_sj,
         m_ssdj,
         sep_xios_server,
@@ -890,7 +893,6 @@ class TestRun:
         m_wsnn,
         m_crs,
         m_btrd,
-        m_bds,
         m_sj,
         m_ssdj,
         sep_xios_server,
