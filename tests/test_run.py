@@ -992,228 +992,289 @@ class TestRun:
         assert submit_job_msg == expected
 
 
-@patch("salishsea_cmd.run.load_run_desc")
-@patch("salishsea_cmd.run.f90nml.read", return_value={"namdom": {"rn_rdt": 40.0}})
 class TestCalcRunSegments:
     """Unit tests for _calc_run_segments() function."""
 
-    def test_not_segmented_run(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = {}
+    @staticmethod
+    @pytest.fixture
+    def mock_f90nml_read(monkeypatch):
+        """Mock the f90nml.read() function."""
+
+        def _mock_f90nml_read(nml_path):
+            return {"namdom": {"rn_rdt": 40.0}}
+
+        monkeypatch.setattr(salishsea_cmd.run.f90nml, "read", _mock_f90nml_read)
+
+    def test_not_segmented_run(self, mock_f90nml_read, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return {}
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         run_segments, first_seg_no = salishsea_cmd.run._calc_run_segments(
             Path("SalishSea.yaml"), Path("results_dir")
         )
-        assert run_segments == [
-            (m_lrd(), Path("SalishSea.yaml"), Path("results_dir"), {})
-        ]
+
+        assert run_segments == [({}, Path("SalishSea.yaml"), Path("results_dir"), {})]
         assert first_seg_no == 0
 
-    def test_no_run_id(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.safe_load(
-            StringIO(
-                """
-            segmented run:
-                start date: 2014-11-15
-                start time step: 152634
-                end date: 2014-12-02
-                days per segment: 10
-                first segment number: 0
-                segment walltime: 12:00:00
-                namelists:
-                    namrun: ./namelist.time
-                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """
+    def test_no_run_id(self, mock_f90nml_read, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        """\
+                        segmented run:
+                            start date: 2014-11-15
+                            start time step: 152634
+                            end date: 2014-12-02
+                            days per segment: 10
+                            first segment number: 0
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                            """
+                    )
+                )
             )
-        )
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         with pytest.raises(SystemExit):
             salishsea_cmd.run._calc_run_segments(
                 Path("SalishSea.yaml"), Path("results_dir")
             )
 
-    def test_no_start_date(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.safe_load(
-            StringIO(
-                """
-            run_id: sensitivity
+    def test_no_start_date(self, mock_f90nml_read, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        """\
+                        run_id: sensitivity
 
-            segmented run:
+                        segmented run:
 
-                start time step: 152634
-                end date: 2014-12-02
-                days per segment: 10
-                first segment number: 0
-                segment walltime: 12:00:00
-                namelists:
-                    namrun: ./namelist.time
-                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """
+                            start time step: 152634
+                            end date: 2014-12-02
+                            days per segment: 10
+                            first segment number: 0
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                        """
+                    )
+                )
             )
-        )
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         with pytest.raises(SystemExit):
             salishsea_cmd.run._calc_run_segments(
                 Path("SalishSea.yaml"), Path("results_dir")
             )
 
-    def test_no_start_time_step(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.safe_load(
-            StringIO(
-                """
-            run_id: sensitivity
+    def test_no_start_time_step(self, mock_f90nml_read, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        """\
+                        run_id: sensitivity
 
-            segmented run:
-                start date: 2014-11-15
+                        segmented run:
+                            start date: 2014-11-15
 
-                end date: 2014-12-02
-                days per segment: 10
-                first segment number: 0
-                segment walltime: 12:00:00
-                namelists:
-                    namrun: ./namelist.time
-                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """
+                            end date: 2014-12-02
+                            days per segment: 10
+                            first segment number: 0
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                        """
+                    )
+                )
             )
-        )
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         with pytest.raises(SystemExit):
             salishsea_cmd.run._calc_run_segments(
                 Path("SalishSea.yaml"), Path("results_dir")
             )
 
-    def test_no_end_date(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.safe_load(
-            StringIO(
-                """
-            run_id: sensitivity
+    def test_no_end_date(self, mock_f90nml_read, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        """\
+                        run_id: sensitivity
 
-            segmented run:
-                start date: 2014-11-15
-                start time step: 152634
+                        segmented run:
+                            start date: 2014-11-15
+                            start time step: 152634
 
-                days per segment: 10
-                first segment number: 0
-                segment walltime: 12:00:00
-                namelists:
-                    namrun: ./namelist.time
-                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """
+                            days per segment: 10
+                            first segment number: 0
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                        """
+                    )
+                )
             )
-        )
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         with pytest.raises(SystemExit):
             salishsea_cmd.run._calc_run_segments(
                 Path("SalishSea.yaml"), Path("results_dir")
             )
 
-    def test_no_days_per_segment(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.safe_load(
-            StringIO(
-                """
-            run_id: sensitivity
+    def test_no_days_per_segment(self, mock_f90nml_read, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        """\
+                        run_id: sensitivity
 
-            segmented run:
-                start date: 2014-11-15
-                start time step: 152634
-                end date: 2014-12-02
+                        segmented run:
+                            start date: 2014-11-15
+                            start time step: 152634
+                            end date: 2014-12-02
 
-                first segment number: 0
-                segment walltime: 12:00:00
-                namelists:
-                    namrun: ./namelist.time
-                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """
+                            first segment number: 0
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                        """
+                    )
+                )
             )
-        )
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         with pytest.raises(SystemExit):
             salishsea_cmd.run._calc_run_segments(
                 Path("SalishSea.yaml"), Path("results_dir")
             )
 
-    def test_no_first_segment_number(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.safe_load(
-            StringIO(
-                """
-            run_id: sensitivity
+    def test_no_first_segment_number(self, mock_f90nml_read, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        """\
+                        run_id: sensitivity
 
-            segmented run:
-                start date: 2014-11-15
-                start time step: 152634
-                end date: 2014-12-02
-                days per segment: 10
+                        segmented run:
+                            start date: 2014-11-15
+                            start time step: 152634
+                            end date: 2014-12-02
+                            days per segment: 10
 
-                segment walltime: 12:00:00
-                namelists:
-                    namrun: ./namelist.time
-                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                        """
+                    )
+                )
             )
-        )
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         with pytest.raises(SystemExit):
             salishsea_cmd.run._calc_run_segments(
                 Path("SalishSea.yaml"), Path("results_dir")
             )
 
-    def test_no_namdom_namelist(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.safe_load(
-            StringIO(
-                """
-            run_id: sensitivity
+    def test_no_namdom_namelist(self, mock_f90nml_read, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        """\
+                        run_id: sensitivity
 
-            segmented run:
-                start date: 2014-11-15
-                start time step: 152634
-                end date: 2014-12-02
-                days per segment: 10
-                first segment number: 0
-                segment walltime: 12:00:00
-                namelists:
-                    namrun: ./namelist.time
-
-        """
+                        segmented run:
+                            start date: 2014-11-15
+                            start time step: 152634
+                            end date: 2014-12-02
+                            days per segment: 10
+                            first segment number: 0
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                        """
+                    )
+                )
             )
-        )
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         with pytest.raises(SystemExit):
             salishsea_cmd.run._calc_run_segments(
                 Path("SalishSea.yaml"), Path("results_dir")
             )
 
     @pytest.mark.parametrize("first_seg_no", (0, 3))
-    def test_run_segments(self, m_f90nml_read, m_lrd, first_seg_no):
-        m_lrd.return_value = yaml.safe_load(
-            StringIO(
-                f"""
-            run_id: sensitivity
+    def test_run_segments(self, mock_f90nml_read, first_seg_no, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        f"""\
+                        run_id: sensitivity
 
-            segmented run:
-                start date: 2014-11-15
-                start time step: 152634
-                end date: 2014-12-02
-                days per segment: 10
-                first segment number: {first_seg_no}
-                segment walltime: 12:00:00
-                namelists:
-                    namrun: ./namelist.time
-                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """
+                        segmented run:
+                            start date: 2014-11-15
+                            start time step: 152634
+                            end date: 2014-12-02
+                            days per segment: 10
+                            first segment number: {first_seg_no}
+                            segment walltime: 12:00:00
+                            namelists:
+                                namrun: ./namelist.time
+                                namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                        """
+                    )
+                )
             )
-        )
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         run_segments, first_seg_no_ = salishsea_cmd.run._calc_run_segments(
             Path("SalishSea.yaml"), Path("results_dir")
         )
+
         expected = [
             (
                 yaml.safe_load(
                     StringIO(
-                        f"""
-                    run_id: {first_seg_no}_sensitivity
+                        textwrap.dedent(
+                            f"""\
+                            run_id: {first_seg_no}_sensitivity
 
-                    segmented run:
-                        start date: 2014-11-15
-                        start time step: 152634
-                        end date: 2014-12-02
-                        days per segment: 10
-                        first segment number: {first_seg_no}
-                        segment walltime: 12:00:00
-                        namelists:
-                            namrun: ./namelist.time
-                            namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                """
+                            segmented run:
+                                start date: 2014-11-15
+                                start time step: 152634
+                                end date: 2014-12-02
+                                days per segment: 10
+                                first segment number: {first_seg_no}
+                                segment walltime: 12:00:00
+                                namelists:
+                                    namrun: ./namelist.time
+                                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                            """
+                        )
                     )
                 ),
                 f"SalishSea_{first_seg_no}.yaml",
@@ -1229,20 +1290,22 @@ class TestCalcRunSegments:
             (
                 yaml.safe_load(
                     StringIO(
-                        f"""
-                    run_id: {first_seg_no + 1}_sensitivity
+                        textwrap.dedent(
+                            f"""\
+                            run_id: {first_seg_no + 1}_sensitivity
 
-                    segmented run:
-                        start date: 2014-11-15
-                        start time step: 152634
-                        end date: 2014-12-02
-                        days per segment: 10
-                        first segment number: {first_seg_no}
-                        segment walltime: 12:00:00
-                        namelists:
-                            namrun: ./namelist.time
-                            namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                """
+                            segmented run:
+                                start date: 2014-11-15
+                                start time step: 152634
+                                end date: 2014-12-02
+                                days per segment: 10
+                                first segment number: {first_seg_no}
+                                segment walltime: 12:00:00
+                                namelists:
+                                    namrun: ./namelist.time
+                                    namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
+                            """
+                        )
                     )
                 ),
                 f"SalishSea_{first_seg_no + 1}.yaml",
@@ -1259,30 +1322,35 @@ class TestCalcRunSegments:
         assert run_segments == expected
         assert first_seg_no_ == first_seg_no
 
-    def test_final_run_segment(self, m_f90nml_read, m_lrd):
-        m_lrd.return_value = yaml.safe_load(
-            StringIO(
-                textwrap.dedent(
-                    """\
-                run_id: SKOG_2016_BASE
+    def test_final_run_segment(self, mock_f90nml_read, monkeypatch):
+        def mock_load_run_desc(run_desc_path):
+            return yaml.safe_load(
+                StringIO(
+                    textwrap.dedent(
+                        """\
+                        run_id: SKOG_2016_BASE
 
-                segmented run:
-                  start date: 2016-04-30
-                  start time step: 2730241
-                  end date: 2016-12-31
-                  days per segment: 30
-                  first segment number: 0
-                  segment walltime: 12:00:00
-                  namelists:
-                    namrun: ./namelist.time
-                    namdom: $PROJECT/SalishSeaCast/hindcast-sys/SS-run-sets/v201812/namelist.domain
-                """
+                        segmented run:
+                          start date: 2016-04-30
+                          start time step: 2730241
+                          end date: 2016-12-31
+                          days per segment: 30
+                          first segment number: 0
+                          segment walltime: 12:00:00
+                          namelists:
+                            namrun: ./namelist.time
+                            namdom: $PROJECT/SalishSeaCast/hindcast-sys/SS-run-sets/v201812/namelist.domain
+                        """
+                    )
                 )
             )
-        )
+
+        monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
+
         run_segments, first_seg_no = salishsea_cmd.run._calc_run_segments(
             Path("BR5_12SKOG2016.yaml"), Path("SKOG_C")
         )
+
         expected = (
             yaml.safe_load(
                 StringIO(
