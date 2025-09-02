@@ -35,7 +35,7 @@ filelock==3.18.0
 gitdb==4.0.12
 GitPython==3.1.44
 h11==0.16.0
-h2==4.2.0
+h2==4.3.0
 hatch==1.14.1
 hatchling==1.27.0
 hpack==4.1.0
