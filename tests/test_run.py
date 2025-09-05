@@ -2354,7 +2354,7 @@ class TestBuildBatchScript:
             #SBATCH --time=1:02:03
             #SBATCH --mail-user=me@example.com
             #SBATCH --mail-type=ALL
-            #SBATCH --account=def-allen
+            #SBATCH --account=rrg-allen
             # stdout and stderr file paths/names
             #SBATCH --output=results_dir/stdout
             #SBATCH --error=results_dir/stderr
@@ -3008,7 +3008,7 @@ class TestSbatchDirectives:
         assert caplog.records[0].levelname == "INFO"
         expected = (
             f"No account found in run description YAML file, "
-            f"so assuming def-allen. If sbatch complains you can specify a "
+            f"so assuming rrg-allen. If sbatch complains you can specify a "
             f"different account with a YAML line like account: def-allen"
         )
         assert caplog.records[0].message == expected
@@ -3020,7 +3020,7 @@ class TestSbatchDirectives:
             "#SBATCH --time=1:02:03\n"
             "#SBATCH --mail-user=me@example.com\n"
             "#SBATCH --mail-type=ALL\n"
-            "#SBATCH --account=def-allen\n"
+            "#SBATCH --account=rrg-allen\n"
             "# stdout and stderr file paths/names\n"
             "#SBATCH --output=foo/stdout\n"
             "#SBATCH --error=foo/stderr\n"

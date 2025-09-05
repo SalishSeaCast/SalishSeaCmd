@@ -805,7 +805,7 @@ def _sbatch_directives(
     except KeyError:
         accounts = {
             # Alliance Canada clusters
-            "nibi": "def-allen",  # until allocation is activated, then rrg-allen
+            "nibi": "rrg-allen",
             # UBC ARC sockeye cluster
             "login01": "st-sallen1-1",
             "login02": "st-sallen1-1",
