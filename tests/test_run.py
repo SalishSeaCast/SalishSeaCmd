@@ -1837,7 +1837,6 @@ class TestWriteSegmentDescFile:
         assert run_desc["walltime"] == 43200
 
 
-@patch("salishsea_cmd.run.log", autospec=True)
 @patch("salishsea_cmd.run._build_deflate_script", return_value="deflate script")
 @patch("salishsea_cmd.run._build_batch_script", return_value="batch script")
 @patch("salishsea_cmd.run.get_n_processors", return_value=144)
@@ -1852,9 +1851,9 @@ class TestBuildTmpRunDir:
         m_gnp,
         m_bbs,
         m_bds,
-        m_log,
         sep_xios_server,
         xios_servers,
+        caplog,
         tmp_path,
     ):
         p_run_dir = tmp_path / "run_dir"
@@ -1866,6 +1865,8 @@ class TestBuildTmpRunDir:
                 "XIOS servers": xios_servers,
             }
         }
+        caplog.set_level(logging.DEBUG)
+
         run_dir, batch_file = salishsea_cmd.run._build_tmp_run_dir(
             run_desc,
             Path("SalishSea.yaml"),
@@ -1878,6 +1879,9 @@ class TestBuildTmpRunDir:
             nocheck_init=False,
             quiet=False,
         )
+
+        assert caplog.records[0].levelname == "INFO"
+        assert caplog.records[0].message == f"Created run directory {p_run_dir}"
         assert (p_run_dir / "SalishSeaNEMO.sh").is_file()
         assert run_dir == p_run_dir
         assert batch_file == p_run_dir / "SalishSeaNEMO.sh"
@@ -1888,9 +1892,9 @@ class TestBuildTmpRunDir:
         m_gnp,
         m_bbs,
         m_bds,
-        m_log,
         sep_xios_server,
         xios_servers,
+        caplog,
         tmp_path,
     ):
         p_run_dir = tmp_path / "run_dir"
@@ -1902,6 +1906,8 @@ class TestBuildTmpRunDir:
                 "XIOS servers": xios_servers,
             }
         }
+        caplog.set_level(logging.DEBUG)
+
         run_dir, batch_file = salishsea_cmd.run._build_tmp_run_dir(
             run_desc,
             Path("SalishSea.yaml"),
@@ -1914,7 +1920,8 @@ class TestBuildTmpRunDir:
             nocheck_init=False,
             quiet=True,
         )
-        assert not m_log.info.called
+
+        assert not caplog.records
         assert (p_run_dir / "SalishSeaNEMO.sh").is_file()
         assert run_dir == p_run_dir
         assert batch_file == p_run_dir / "SalishSeaNEMO.sh"
@@ -1925,9 +1932,9 @@ class TestBuildTmpRunDir:
         m_gnp,
         m_bbs,
         m_bds,
-        m_log,
         sep_xios_server,
         xios_servers,
+        caplog,
         tmp_path,
     ):
         p_run_dir = tmp_path / "run_dir"
@@ -1939,6 +1946,8 @@ class TestBuildTmpRunDir:
                 "XIOS servers": xios_servers,
             }
         }
+        caplog.set_level(logging.DEBUG)
+
         run_dir, batch_file = salishsea_cmd.run._build_tmp_run_dir(
             run_desc,
             Path("SalishSea.yaml"),
@@ -1951,6 +1960,8 @@ class TestBuildTmpRunDir:
             nocheck_init=False,
             quiet=False,
         )
+        assert caplog.records[0].levelname == "INFO"
+        assert caplog.records[0].message == f"Created run directory {p_run_dir}"
         assert (p_run_dir / "SalishSeaNEMO.sh").is_file()
         assert (p_run_dir / "deflate_grid.sh").is_file()
         assert (p_run_dir / "deflate_ptrc.sh").is_file()
