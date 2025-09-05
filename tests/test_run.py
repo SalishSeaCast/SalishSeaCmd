@@ -141,6 +141,24 @@ class TestRun:
             salishsea_cmd.run, "_build_deflate_script", _mock_build_deflate_script
         )
 
+    def test_unknown_system(
+        self, m_wsdf, m_wsnn, m_crs, m_btrd, m_sj, m_ssdj, caplog, tmp_path, monkeypatch
+    ):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "foo")
+        p_results_dir = tmp_path / "results_dir"
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(SystemExit) as excinfo:
+            salishsea_cmd.run.run(Path("SalishSea.yaml"), p_results_dir)
+
+        assert excinfo.value.code == 2
+        assert caplog.records[0].levelname == "ERROR"
+        expected = (
+            "Unrecognized system name: foo. "
+            "If you are working on sockeye, please load the gcc module"
+        )
+        assert caplog.records[0].message == expected
+
     @pytest.mark.parametrize(
         "sep_xios_server, xios_servers, system, queue_job_cmd, submit_job_msg",
         [
@@ -152,10 +170,8 @@ class TestRun:
             (False, 0, "nibi", "sbatch", "Submitted batch job 43"),
             (True, 4, "nibi", "sbatch", "Submitted batch job 43"),
             # UBC ARC sockeye cluster
-            (False, 0, "login01", "sbatch", "Submitted batch job 43"),
-            (True, 4, "login01", "sbatch", "Submitted batch job 43"),
-            (False, 0, "login02", "sbatch", "Submitted batch job 43"),
-            (True, 4, "login02", "sbatch", "Submitted batch job 43"),
+            (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
+            (True, 4, "sockeye", "sbatch", "Submitted batch job 43"),
             # MOAD development machine
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
@@ -238,10 +254,8 @@ class TestRun:
             (False, 0, "nibi", "sbatch", "Submitted batch job 43"),
             (True, 4, "nibi", "sbatch", "Submitted batch job 43"),
             # UBC ARC sockeye cluster
-            (False, 0, "login01", "sbatch", "Submitted batch job 43"),
-            (True, 4, "login01", "sbatch", "Submitted batch job 43"),
-            (False, 0, "login02", "sbatch", "Submitted batch job 43"),
-            (True, 4, "login02", "sbatch", "Submitted batch job 43"),
+            (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
+            (True, 4, "sockeye", "sbatch", "Submitted batch job 43"),
             # MOAD development machine
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
@@ -417,10 +431,8 @@ class TestRun:
             (False, 0, "nibi", "sbatch", "Submitted batch job 43"),
             (True, 4, "nibi", "sbatch", "Submitted batch job 43"),
             # UBC ARC sockeye cluster
-            (False, 0, "login01", "sbatch", "Submitted batch job 43"),
-            (True, 4, "login01", "sbatch", "Submitted batch job 43"),
-            (False, 0, "login02", "sbatch", "Submitted batch job 43"),
-            (True, 4, "login02", "sbatch", "Submitted batch job 43"),
+            (False, 0, "sockeye", "sbatch", "Submitted batch job 43"),
+            (True, 4, "sockeye", "sbatch", "Submitted batch job 43"),
             # MOAD development machine
             (False, 0, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
             (True, 4, "salish", "bash", "bash run_dir/SalishSeaNEMO.sh started"),
@@ -779,7 +791,7 @@ class TestRun:
             (
                 False,
                 0,
-                "login01",
+                "sockeye",
                 "sbatch",
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
@@ -787,23 +799,7 @@ class TestRun:
             (
                 True,
                 4,
-                "login01",
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
-            (
-                False,
-                0,
-                "login02",
-                "sbatch",
-                ("Submitted batch job 43", "Submitted batch job 44"),
-                "Submitted batch job 43",
-            ),
-            (
-                True,
-                4,
-                "login02",
+                "sockeye",
                 "sbatch",
                 ("Submitted batch job 43", "Submitted batch job 44"),
                 "Submitted batch job 43",
@@ -2760,14 +2756,10 @@ class TestBuildBatchScript:
     @pytest.mark.parametrize(
         "node_name, cores_per_node, cpu_arch, deflate",
         [
-            ("login01", "", "", True),
-            ("login01", "", "", False),
-            ("login01", "32", "skylake", False),
-            ("login01", "40", "cascade", False),
-            ("login02", "", "", True),
-            ("login02", "", "", False),
-            ("login02", "32", "skylake", False),
-            ("login02", "40", "cascade", False),
+            ("sockeye", "", "", True),
+            ("sockeye", "", "", False),
+            ("sockeye", "32", "skylake", False),
+            ("sockeye", "40", "cascade", False),
         ],
     )
     def test_sockeye(self, node_name, cores_per_node, cpu_arch, deflate, monkeypatch):
@@ -3027,11 +3019,10 @@ class TestSbatchDirectives:
         )
         assert slurm_directives == expected
 
-    @pytest.mark.parametrize("node_name", ["login01", "login02"])
-    def test_sockeye_sbatch_directives(self, node_name, caplog, monkeypatch):
+    def test_sockeye_sbatch_directives(self, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", node_name)
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
         caplog.set_level(logging.DEBUG)
 
         slurm_directives = salishsea_cmd.run._sbatch_directives(
@@ -3423,9 +3414,8 @@ class TestModules:
         )
         assert modules == expected
 
-    @pytest.mark.parametrize("node_name", ["login01", "login02"])
-    def test_sockeye(self, node_name, monkeypatch):
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", node_name)
+    def test_sockeye(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "sockeye")
 
         modules = salishsea_cmd.run._modules()
 
@@ -3450,11 +3440,7 @@ class TestExecute:
             ("narval", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             # UBC ARC sockeye cluster
             (
-                "login01",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-            ),
-            (
-                "login02",
+                "sockeye",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
             ),
             # UBC Chemistry orcinus cluster
@@ -3607,37 +3593,19 @@ class TestExecute:
             ),
             # UBC ARC sockeye cluster
             (
-                "login01",
+                "sockeye",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
-                "login01",
+                "sockeye",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
-                "login01",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                True,
-                True,
-            ),
-            (
-                "login02",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                False,
-                True,
-            ),
-            (
-                "login02",
-                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
-                False,
-                False,
-            ),
-            (
-                "login02",
+                "sockeye",
                 "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
                 True,
                 True,
