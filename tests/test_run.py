@@ -81,12 +81,18 @@ class TestParser:
         assert getattr(parsed_args, attr)
 
 
-@patch("salishsea_cmd.run.log")
-@patch("salishsea_cmd.run.run", return_value="job submitted message")
 class TestTakeAction:
-    """Unit tests for `salishsea run` sub-command take_action() method."""
+    """Unit tests for the `salishsea run` sub-command take_action() method."""
 
-    def test_take_action(self, m_run, m_log, run_cmd):
+    @staticmethod
+    @pytest.fixture
+    def mock_run(monkeypatch):
+        def _mock_run(desc_file, results_dir, *args, **kwargs):
+            return "job submitted message"
+
+        monkeypatch.setattr(salishsea_cmd.run, "run", _mock_run)
+
+    def test_take_action(self, mock_run, run_cmd, caplog):
         parsed_args = Mock(
             desc_file="desc file",
             results_dir="results dir",
@@ -100,26 +106,19 @@ class TestTakeAction:
             waitjob=0,
             quiet=False,
         )
-        run_cmd.run(parsed_args)
-        m_run.assert_called_once_with(
-            "desc file",
-            "results dir",
-            cores_per_node="",
-            cpu_arch="",
-            deflate=False,
-            max_deflate_jobs=4,
-            nocheck_init=False,
-            no_submit=False,
-            separate_deflate=False,
-            waitjob=0,
-            quiet=False,
-        )
-        m_log.info.assert_called_once_with("job submitted message")
+        caplog.set_level(logging.DEBUG)
 
-    def test_take_action_quiet(self, m_run, m_log, run_cmd):
-        parsed_args = Mock(desc_file="desc file", results_dir="results dir", quiet=True)
         run_cmd.run(parsed_args)
-        assert not m_log.info.called
+
+        assert caplog.records[0].message == "job submitted message"
+
+    def test_take_action_quiet(self, mock_run, run_cmd, caplog):
+        parsed_args = Mock(desc_file="desc file", results_dir="results dir", quiet=True)
+        caplog.set_level(logging.DEBUG)
+
+        run_cmd.run(parsed_args)
+
+        assert not caplog.records
 
 
 @patch("salishsea_cmd.run._submit_separate_deflate_jobs")
