@@ -1855,10 +1855,11 @@ class TestBuildTmpRunDir:
         m_log,
         sep_xios_server,
         xios_servers,
-        tmpdir,
+        tmp_path,
     ):
-        p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
+        p_run_dir = tmp_path / "run_dir"
+        p_run_dir.mkdir()
+        m_prepare.return_value = p_run_dir
         run_desc = {
             "output": {
                 "separate XIOS server": sep_xios_server,
@@ -1877,9 +1878,9 @@ class TestBuildTmpRunDir:
             nocheck_init=False,
             quiet=False,
         )
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert run_dir == Path(str(p_run_dir))
-        assert batch_file == Path(str(p_run_dir)) / "SalishSeaNEMO.sh"
+        assert (p_run_dir / "SalishSeaNEMO.sh").is_file()
+        assert run_dir == p_run_dir
+        assert batch_file == p_run_dir / "SalishSeaNEMO.sh"
 
     def test_build_tmp_run_dir_quiet(
         self,
@@ -1890,10 +1891,11 @@ class TestBuildTmpRunDir:
         m_log,
         sep_xios_server,
         xios_servers,
-        tmpdir,
+        tmp_path,
     ):
-        p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
+        p_run_dir = tmp_path / "run_dir"
+        p_run_dir.mkdir()
+        m_prepare.return_value = p_run_dir
         run_desc = {
             "output": {
                 "separate XIOS server": sep_xios_server,
@@ -1913,9 +1915,9 @@ class TestBuildTmpRunDir:
             quiet=True,
         )
         assert not m_log.info.called
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert run_dir == Path(str(p_run_dir))
-        assert batch_file == Path(str(p_run_dir)) / "SalishSeaNEMO.sh"
+        assert (p_run_dir / "SalishSeaNEMO.sh").is_file()
+        assert run_dir == p_run_dir
+        assert batch_file == p_run_dir / "SalishSeaNEMO.sh"
 
     def test_build_tmp_run_dir_separate_deflate(
         self,
@@ -1926,10 +1928,11 @@ class TestBuildTmpRunDir:
         m_log,
         sep_xios_server,
         xios_servers,
-        tmpdir,
+        tmp_path,
     ):
-        p_run_dir = tmpdir.ensure_dir("run_dir")
-        m_prepare.return_value = Path(str(p_run_dir))
+        p_run_dir = tmp_path / "run_dir"
+        p_run_dir.mkdir()
+        m_prepare.return_value = p_run_dir
         run_desc = {
             "output": {
                 "separate XIOS server": sep_xios_server,
@@ -1948,12 +1951,11 @@ class TestBuildTmpRunDir:
             nocheck_init=False,
             quiet=False,
         )
-        assert p_run_dir.join("SalishSeaNEMO.sh").check(file=True)
-        assert p_run_dir.join("deflate_grid.sh").check(file=True)
-        assert p_run_dir.join("deflate_ptrc.sh").check(file=True)
-        assert p_run_dir.join("deflate_dia.sh").check(file=True)
-        assert run_dir == Path(str(p_run_dir))
-        assert batch_file == Path(str(p_run_dir)) / "SalishSeaNEMO.sh"
+        assert (p_run_dir / "SalishSeaNEMO.sh").is_file()
+        assert (p_run_dir / "deflate_grid.sh").is_file()
+        assert (p_run_dir / "deflate_ptrc.sh").is_file()
+        assert (p_run_dir / "deflate_dia.sh").is_file()
+        assert run_dir == p_run_dir
 
 
 class TestSubmitJob:
