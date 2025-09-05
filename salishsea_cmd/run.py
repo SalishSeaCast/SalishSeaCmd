@@ -266,26 +266,32 @@ def run(
               run script.
     :rtype: str
     """
-    queue_job_cmd = {
-        # Alliance Canada clusters
-        "fir": "sbatch",
-        "narval": "sbatch",
-        "nibi": "sbatch",
-        # UBC ARC sockeye cluster
-        "login01": "sbatch",
-        "login02": "sbatch",
-        # MOAD development machine
-        "salish": "bash",
-        # UBC Chemistry orcinus cluster
-        "orcinus": "qsub",
-        "seawolf1": "qsub",  # orcinus.westgrid.ca login node
-        "seawolf2": "qsub",  # orcinus.westgrid.ca login node
-        "seawolf3": "qsub",  # orcinus.westgrid.ca login node
-        # EOAS optimum cluster
-        "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-        "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-        "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-    }.get(SYSTEM, "qsub")
+    try:
+        queue_job_cmd = {
+            # Alliance Canada clusters
+            "fir": "sbatch",
+            "narval": "sbatch",
+            "nibi": "sbatch",
+            # UBC ARC sockeye cluster
+            "sockeye": "sbatch",
+            # MOAD development machine
+            "salish": "bash",
+            # UBC Chemistry orcinus cluster
+            "orcinus": "qsub",
+            "seawolf1": "qsub",  # orcinus.westgrid.ca login node
+            "seawolf2": "qsub",  # orcinus.westgrid.ca login node
+            "seawolf3": "qsub",  # orcinus.westgrid.ca login node
+            # EOAS optimum cluster
+            "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
+            "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
+            "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
+        }[SYSTEM]
+    except KeyError:
+        log.error(
+            f"Unrecognized system name: {SYSTEM}. "
+            f"If you are working on sockeye, please load the gcc module"
+        )
+        raise SystemExit(2)
     results_dir = nemo_cmd.resolved_path(results_dir)
     run_segments, first_seg_no = _calc_run_segments(desc_file, results_dir)
     submit_job_msg = "Submitted jobs"
@@ -658,8 +664,7 @@ def _build_batch_script(
         "narval",
         "nibi",
         # UBC ARC sockeye cluster
-        "login01",
-        "login02",
+        "sockeye",
     }:
         procs_per_node = {
             # Alliance Canada clusters
@@ -667,8 +672,7 @@ def _build_batch_script(
             "narval": 64 if not cores_per_node else int(cores_per_node),
             "nibi": 192 if not cores_per_node else int(cores_per_node),
             # UBC ARC sockeye cluster
-            "login01": 40 if not cores_per_node else int(cores_per_node),
-            "login02": 40 if not cores_per_node else int(cores_per_node),
+            "sockeye": 40 if not cores_per_node else int(cores_per_node),
         }[SYSTEM]
         script = "\n".join(
             (
@@ -772,8 +776,7 @@ def _sbatch_directives(
         "narval": "0",
         "nibi": "0",
         # UBC ARC sockeye cluster
-        "login01": "186gb",
-        "login02": "186gb",
+        "sockeye": "186gb",
     }.get(SYSTEM, mem)
     if deflate:
         run_id = f"{result_type}_{run_id}_deflate"
@@ -785,7 +788,7 @@ def _sbatch_directives(
         ).time()
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td2hms(td)
-    if SYSTEM in {"login01", "login02"} and cpu_arch:
+    if SYSTEM == "sockeye" and cpu_arch:
         sbatch_directives = (
             f"#SBATCH --job-name={run_id}\n" f"#SBATCH --constraint={cpu_arch}\n"
         )
@@ -807,8 +810,7 @@ def _sbatch_directives(
             # Alliance Canada clusters
             "nibi": "rrg-allen",
             # UBC ARC sockeye cluster
-            "login01": "st-sallen1-1",
-            "login02": "st-sallen1-1",
+            "sockeye": "st-sallen1-1",
         }
         try:
             account = accounts[SYSTEM]
@@ -967,8 +969,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "narval": Path("${HOME}", ".local", "bin", "salishsea"),
         "nibi": Path("${HOME}", ".local", "bin", "salishsea"),
         # UBC ARC sockeye cluster
-        "login01": Path("${HOME}", ".local", "bin", "salishsea"),
-        "login02": Path("${HOME}", ".local", "bin", "salishsea"),
+        "sockeye": Path("${HOME}", ".local", "bin", "salishsea"),
         # MOAD development machine
         "salish": Path("${HOME}", ".local", "bin", "salishsea"),
         # UBC Chemistry orcinus cluster
@@ -1016,15 +1017,7 @@ def _modules():
             """
         ),
         # UBC ARC sockeye cluster
-        "login01": textwrap.dedent(
-            """\
-            module load gcc/9.4.0
-            module load openmpi/4.1.1-cuda11-3
-            module load netcdf-fortran/4.5.3-hdf4-support
-            module load parallel-netcdf/1.12.2-additional-bindings
-            """
-        ),
-        "login02": textwrap.dedent(
+        "sockeye": textwrap.dedent(
             """\
             module load gcc/9.4.0
             module load openmpi/4.1.1-cuda11-3
@@ -1118,8 +1111,7 @@ def _execute(
         "narval": "mpirun",
         "nibi": "mpirun",
         # UBC ARC sockeye cluster
-        "login01": "mpirun",
-        "login02": "mpirun",
+        "sockeye": "mpirun",
         # MOAD development machine
         "salish": "/usr/bin/mpirun",
         # UBC Chemistry orcinus cluster
@@ -1138,8 +1130,7 @@ def _execute(
         "narval": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "nibi": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         # UBC ARC sockeye cluster
-        "login01": f"{mpirun} -np {nemo_processors} ./nemo.exe",
-        "login02": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "sockeye": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         # MOAD development machine
         "salish": f"{mpirun} --bind-to none -np {nemo_processors} ./nemo.exe",
         # UBC Chemistry orcinus cluster
@@ -1159,8 +1150,7 @@ def _execute(
             "narval": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "nibi": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             # UBC ARC sockeye cluster
-            "login01": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
-            "login02": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "sockeye": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             # MOAD development machine
             "salish": f"{mpirun} : --bind-to none -np {xios_processors} ./xios_server.exe{redirect}",
             # UBC Chemistry orcinus cluster
