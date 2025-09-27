@@ -272,6 +272,7 @@ def run(
             "fir": "sbatch",
             "narval": "sbatch",
             "nibi": "sbatch",
+            "trillium": "sbatch",
             # UBC ARC sockeye cluster
             "sockeye": "sbatch",
             # MOAD development machine
