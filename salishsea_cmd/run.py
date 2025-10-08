@@ -778,7 +778,7 @@ def _sbatch_directives(
         "fir": "0",
         "narval": "0",
         "nibi": "0",
-        "trillium": "0",
+        # Not used on trillium
         # UBC ARC sockeye cluster
         "sockeye": "186gb",
     }.get(SYSTEM, mem)
@@ -801,7 +801,10 @@ def _sbatch_directives(
     sbatch_directives += (
         f"#SBATCH --nodes={int(nodes)}\n"
         f"#SBATCH --ntasks-per-node={procs_per_node}\n"
-        f"#SBATCH --mem={mem}\n"
+    )
+    if SYSTEM != "trillium":
+        sbatch_directives += f"#SBATCH --mem={mem}\n"
+    sbatch_directives += (
         f"#SBATCH --time={walltime}\n"
         f"#SBATCH --mail-user={email}\n"
         f"#SBATCH --mail-type=ALL\n"
