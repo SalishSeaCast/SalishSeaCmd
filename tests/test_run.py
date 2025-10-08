@@ -2316,6 +2316,7 @@ class TestBuildBatchScript:
             GATHER=\"${HOME}/.local/bin/salishsea gather\"
 
             module load StdEnv/2023
+            module load gcc/12.3
             module load netcdf-fortran-mpi/4.6.1
 
             mkdir -p ${RESULTS_DIR}
@@ -3557,8 +3558,8 @@ class TestModules:
         )
         assert modules == expected
 
-    @pytest.mark.parametrize("system", ["fir", "nibi", "trillium"])
-    def test_2025_alliance_cluster(self, system, monkeypatch):
+    @pytest.mark.parametrize("system", ["fir", "nibi"])
+    def test_2025_alliance_clusters(self, system, monkeypatch):
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
 
         modules = salishsea_cmd.run._modules()
@@ -3566,6 +3567,20 @@ class TestModules:
         expected = textwrap.dedent(
             """\
             module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
+            """
+        )
+        assert modules == expected
+
+    def test_trillium(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "trillium")
+
+        modules = salishsea_cmd.run._modules()
+
+        expected = textwrap.dedent(
+            """\
+            module load StdEnv/2023
+            module load gcc/12.3
             module load netcdf-fortran-mpi/4.6.1
             """
         )

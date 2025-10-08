@@ -1012,6 +1012,7 @@ def _modules():
         "trillium": textwrap.dedent(
             """\
             module load StdEnv/2023
+            module load gcc/12.3
             module load netcdf-fortran-mpi/4.6.1
             """
         ),
