@@ -3793,6 +3793,12 @@ class TestExecute:
                 False,
                 False,
             ),
+            (
+                "trillium",
+                "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe",
+                False,
+                False,
+            ),
             # UBC ARC sockeye cluster
             (
                 "sockeye",
