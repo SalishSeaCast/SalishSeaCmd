@@ -2260,110 +2260,6 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
-    def test_trillium(self, deflate, monkeypatch):
-        desc_file = StringIO(
-            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
-        )
-        run_desc = yaml.safe_load(desc_file)
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "trillium")
-
-        script = salishsea_cmd.run._build_batch_script(
-            run_desc,
-            Path("SalishSea.yaml"),
-            nemo_processors=42,
-            xios_processors=1,
-            max_deflate_jobs=4,
-            results_dir=Path("results_dir"),
-            run_dir=Path("tmp_run_dir"),
-            deflate=deflate,
-            separate_deflate=False,
-            cores_per_node="",
-            cpu_arch="",
-        )
-
-        expected = textwrap.dedent(
-            f"""\
-            #!/bin/bash
-
-            #SBATCH --job-name=foo
-            #SBATCH --nodes=1
-            #SBATCH --ntasks-per-node=192
-            #SBATCH --time=1:02:03
-            #SBATCH --mail-user=me@example.com
-            #SBATCH --mail-type=ALL
-            #SBATCH --account=def-allen
-            # stdout and stderr file paths/names
-            #SBATCH --output=results_dir/stdout
-            #SBATCH --error=results_dir/stderr
-
-
-            RUN_ID=\"foo\"
-            RUN_DESC=\"tmp_run_dir/SalishSea.yaml\"
-            WORK_DIR=\"tmp_run_dir\"
-            RESULTS_DIR=\"results_dir\"
-            COMBINE=\"${{HOME}}/.local/bin/salishsea combine\"
-            """
-        )
-        if deflate:
-            expected += textwrap.dedent(
-                """\
-                DEFLATE=\"${HOME}/.local/bin/salishsea deflate\"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
-            GATHER=\"${HOME}/.local/bin/salishsea gather\"
-
-            module load StdEnv/2023
-            module load gcc/12.3
-            module load netcdf-fortran-mpi/4.6.1
-
-            mkdir -p ${RESULTS_DIR}
-            cd ${WORK_DIR}
-            echo \"working dir: $(pwd)\"
-
-            echo \"Starting run at $(date)\"
-            mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
-            MPIRUN_EXIT_CODE=$?
-            echo \"Ended run at $(date)\"
-
-            echo \"Results combining started at $(date)\"
-            ${COMBINE} ${RUN_DESC} --debug
-            echo \"Results combining ended at $(date)\"
-            """
-        )
-        if deflate:
-            expected += textwrap.dedent(
-                """\
-
-                echo \"Results deflation started at $(date)\"
-                module load nco/4.9.5
-                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
-                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
-                  --jobs 4 --debug
-                echo \"Results deflation ended at $(date)\"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
-
-            echo \"Results gathering started at $(date)\"
-            ${GATHER} ${RESULTS_DIR} --debug
-            echo \"Results gathering ended at $(date)\"
-
-            chmod go+rx ${RESULTS_DIR}
-            chmod g+rw ${RESULTS_DIR}/*
-            chmod o+r ${RESULTS_DIR}/*
-
-            echo \"Deleting run directory\" >>${RESULTS_DIR}/stdout
-            rmdir $(pwd)
-            echo \"Finished at $(date)\" >>${RESULTS_DIR}/stdout
-            exit ${MPIRUN_EXIT_CODE}
-            """
-        )
-        assert script == expected
-
-    @pytest.mark.parametrize("deflate", [True, False])
     def test_narval(self, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
@@ -2566,6 +2462,110 @@ class TestBuildBatchScript:
             echo "Deleting run directory" >>${RESULTS_DIR}/stdout
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+            exit ${MPIRUN_EXIT_CODE}
+            """
+        )
+        assert script == expected
+
+    @pytest.mark.parametrize("deflate", [True, False])
+    def test_trillium(self, deflate, monkeypatch):
+        desc_file = StringIO(
+            "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
+        )
+        run_desc = yaml.safe_load(desc_file)
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "trillium")
+
+        script = salishsea_cmd.run._build_batch_script(
+            run_desc,
+            Path("SalishSea.yaml"),
+            nemo_processors=42,
+            xios_processors=1,
+            max_deflate_jobs=4,
+            results_dir=Path("results_dir"),
+            run_dir=Path("tmp_run_dir"),
+            deflate=deflate,
+            separate_deflate=False,
+            cores_per_node="",
+            cpu_arch="",
+        )
+
+        expected = textwrap.dedent(
+            f"""\
+            #!/bin/bash
+
+            #SBATCH --job-name=foo
+            #SBATCH --nodes=1
+            #SBATCH --ntasks-per-node=192
+            #SBATCH --time=1:02:03
+            #SBATCH --mail-user=me@example.com
+            #SBATCH --mail-type=ALL
+            #SBATCH --account=def-allen
+            # stdout and stderr file paths/names
+            #SBATCH --output=results_dir/stdout
+            #SBATCH --error=results_dir/stderr
+
+
+            RUN_ID=\"foo\"
+            RUN_DESC=\"tmp_run_dir/SalishSea.yaml\"
+            WORK_DIR=\"tmp_run_dir\"
+            RESULTS_DIR=\"results_dir\"
+            COMBINE=\"${{HOME}}/.local/bin/salishsea combine\"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+                DEFLATE=\"${HOME}/.local/bin/salishsea deflate\"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+            GATHER=\"${HOME}/.local/bin/salishsea gather\"
+
+            module load StdEnv/2023
+            module load gcc/12.3
+            module load netcdf-fortran-mpi/4.6.1
+
+            mkdir -p ${RESULTS_DIR}
+            cd ${WORK_DIR}
+            echo \"working dir: $(pwd)\"
+
+            echo \"Starting run at $(date)\"
+            mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe
+            MPIRUN_EXIT_CODE=$?
+            echo \"Ended run at $(date)\"
+
+            echo \"Results combining started at $(date)\"
+            ${COMBINE} ${RUN_DESC} --debug
+            echo \"Results combining ended at $(date)\"
+            """
+        )
+        if deflate:
+            expected += textwrap.dedent(
+                """\
+
+                echo \"Results deflation started at $(date)\"
+                module load nco/4.9.5
+                ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
+                  *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
+                  --jobs 4 --debug
+                echo \"Results deflation ended at $(date)\"
+                """
+            )
+        expected += textwrap.dedent(
+            """\
+
+            echo \"Results gathering started at $(date)\"
+            ${GATHER} ${RESULTS_DIR} --debug
+            echo \"Results gathering ended at $(date)\"
+
+            chmod go+rx ${RESULTS_DIR}
+            chmod g+rw ${RESULTS_DIR}/*
+            chmod o+r ${RESULTS_DIR}/*
+
+            echo \"Deleting run directory\" >>${RESULTS_DIR}/stdout
+            rmdir $(pwd)
+            echo \"Finished at $(date)\" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
             """
         )
@@ -3095,42 +3095,6 @@ class TestSbatchDirectives:
         )
         assert slurm_directives == expected
 
-    def test_trillium_sbatch_directives(self, caplog, monkeypatch):
-        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
-        run_desc = yaml.safe_load(desc_file)
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "trillium")
-        caplog.set_level(logging.DEBUG)
-
-        slurm_directives = salishsea_cmd.run._sbatch_directives(
-            run_desc,
-            n_processors=43,
-            procs_per_node=192,
-            cpu_arch="",
-            email="me@example.com",
-            results_dir=Path("foo"),
-        )
-
-        assert caplog.records[0].levelname == "INFO"
-        expected = (
-            f"No account found in run description YAML file, "
-            f"so assuming def-allen. If sbatch complains you can specify a "
-            f"different account with a YAML line like account: def-allen"
-        )
-        assert caplog.records[0].message == expected
-        expected = (
-            "#SBATCH --job-name=foo\n"
-            "#SBATCH --nodes=1\n"
-            "#SBATCH --ntasks-per-node=192\n"
-            "#SBATCH --time=1:02:03\n"
-            "#SBATCH --mail-user=me@example.com\n"
-            "#SBATCH --mail-type=ALL\n"
-            "#SBATCH --account=def-allen\n"
-            "# stdout and stderr file paths/names\n"
-            "#SBATCH --output=foo/stdout\n"
-            "#SBATCH --error=foo/stderr\n"
-        )
-        assert slurm_directives == expected
-
     def test_narval_sbatch_directives(self, caplog, monkeypatch):
         desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
         run_desc = yaml.safe_load(desc_file)
@@ -3199,6 +3163,42 @@ class TestSbatchDirectives:
             "#SBATCH --mail-user=me@example.com\n"
             "#SBATCH --mail-type=ALL\n"
             "#SBATCH --account=rrg-allen\n"
+            "# stdout and stderr file paths/names\n"
+            "#SBATCH --output=foo/stdout\n"
+            "#SBATCH --error=foo/stderr\n"
+        )
+        assert slurm_directives == expected
+
+    def test_trillium_sbatch_directives(self, caplog, monkeypatch):
+        desc_file = StringIO("run_id: foo\n" "walltime: 01:02:03\n")
+        run_desc = yaml.safe_load(desc_file)
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "trillium")
+        caplog.set_level(logging.DEBUG)
+
+        slurm_directives = salishsea_cmd.run._sbatch_directives(
+            run_desc,
+            n_processors=43,
+            procs_per_node=192,
+            cpu_arch="",
+            email="me@example.com",
+            results_dir=Path("foo"),
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"No account found in run description YAML file, "
+            f"so assuming def-allen. If sbatch complains you can specify a "
+            f"different account with a YAML line like account: def-allen"
+        )
+        assert caplog.records[0].message == expected
+        expected = (
+            "#SBATCH --job-name=foo\n"
+            "#SBATCH --nodes=1\n"
+            "#SBATCH --ntasks-per-node=192\n"
+            "#SBATCH --time=1:02:03\n"
+            "#SBATCH --mail-user=me@example.com\n"
+            "#SBATCH --mail-type=ALL\n"
+            "#SBATCH --account=def-allen\n"
             "# stdout and stderr file paths/names\n"
             "#SBATCH --output=foo/stdout\n"
             "#SBATCH --error=foo/stderr\n"
@@ -3707,7 +3707,7 @@ class TestExecute:
             echo "Results deflation started at $(date)"
             """
         )
-        if system in {"fir", "nibi", "narval", "trillium"}:
+        if system in {"fir", "narval", "nibi", "trillium"}:
             expected += textwrap.dedent(
                 """\
                 module load nco/4.9.5

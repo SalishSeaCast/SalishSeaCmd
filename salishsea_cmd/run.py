@@ -1012,13 +1012,6 @@ def _modules():
             module load netcdf-fortran-mpi/4.6.1
             """
         ),
-        "trillium": textwrap.dedent(
-            """\
-            module load StdEnv/2023
-            module load gcc/12.3
-            module load netcdf-fortran-mpi/4.6.1
-            """
-        ),
         "narval": textwrap.dedent(
             """\
             module load StdEnv/2020
@@ -1028,6 +1021,13 @@ def _modules():
         "nibi": textwrap.dedent(
             """\
             module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
+            """
+        ),
+        "trillium": textwrap.dedent(
+            """\
+            module load StdEnv/2023
+            module load gcc/12.3
             module load netcdf-fortran-mpi/4.6.1
             """
         ),
