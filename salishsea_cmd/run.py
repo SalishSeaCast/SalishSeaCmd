@@ -49,6 +49,8 @@ SYSTEM = (
     or os.getenv("WGSYSTEM")
     or socket.gethostname().split(".")[0]
 )
+if SYSTEM in {"seawolf1", "seawolf2", "seawolf3"}:
+    SYSTEM = "orcinus"
 
 SEPARATE_DEFLATE_JOBS = {
     # deflate job type: file pattern
@@ -279,9 +281,6 @@ def run(
             "salish": "bash",
             # UBC Chemistry orcinus cluster
             "orcinus": "qsub",
-            "seawolf1": "qsub",  # orcinus.westgrid.ca login node
-            "seawolf2": "qsub",  # orcinus.westgrid.ca login node
-            "seawolf3": "qsub",  # orcinus.westgrid.ca login node
             # EOAS optimum cluster
             "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
             "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
@@ -688,9 +687,6 @@ def _build_batch_script(
             procs_per_node = {
                 # UBC Chemistry orcinus cluster
                 "orcinus": 12 if not cores_per_node else int(cores_per_node),
-                "seawolf1": 12 if not cores_per_node else int(cores_per_node),
-                "seawolf2": 12 if not cores_per_node else int(cores_per_node),
-                "seawolf3": 12 if not cores_per_node else int(cores_per_node),
                 # EOAS optimum cluster
                 "delta": 20 if not cores_per_node else int(cores_per_node),
                 "omega": 20 if not cores_per_node else int(cores_per_node),
@@ -919,7 +915,7 @@ def _pbs_directives(
         #PBS -M {email}
         """
     )
-    if SYSTEM == "orcinus" or SYSTEM.startswith("seawolf"):
+    if SYSTEM == "orcinus":
         pbs_directives += "#PBS -l partition=QDR\n"
     if SYSTEM == "salish":
         pbs_directives += textwrap.dedent(
@@ -982,9 +978,6 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "salish": Path("${HOME}", ".local", "bin", "salishsea"),
         # UBC Chemistry orcinus cluster
         "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
-        "seawolf1": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
-        "seawolf2": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
-        "seawolf3": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         # EOAS optimum cluster
         "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
         "omega": Path("${PBS_O_HOME}", "bin", "salishsea"),
@@ -1054,39 +1047,6 @@ def _modules():
             module load git
             """
         ),
-        "seawolf1": textwrap.dedent(
-            """\
-            module load intel
-            module load intel/14.0/netcdf-4.3.3.1_mpi
-            module load intel/14.0/netcdf-fortran-4.4.0_mpi
-            module load intel/14.0/hdf5-1.8.15p1_mpi
-            module load intel/14.0/nco-4.5.2
-            module load python/3.5.0
-            module load git
-            """
-        ),
-        "seawolf2": textwrap.dedent(
-            """\
-            module load intel
-            module load intel/14.0/netcdf-4.3.3.1_mpi
-            module load intel/14.0/netcdf-fortran-4.4.0_mpi
-            module load intel/14.0/hdf5-1.8.15p1_mpi
-            module load intel/14.0/nco-4.5.2
-            module load python/3.5.0
-            module load git
-            """
-        ),
-        "seawolf3": textwrap.dedent(
-            """\
-            module load intel
-            module load intel/14.0/netcdf-4.3.3.1_mpi
-            module load intel/14.0/netcdf-fortran-4.4.0_mpi
-            module load intel/14.0/hdf5-1.8.15p1_mpi
-            module load intel/14.0/nco-4.5.2
-            module load python/3.5.0
-            module load git
-            """
-        ),
         # EOAS optimum cluster
         "delta": textwrap.dedent(
             """\
@@ -1132,9 +1092,6 @@ def _execute(
         "salish": "/usr/bin/mpirun",
         # UBC Chemistry orcinus cluster
         "orcinus": "mpirun",
-        "seawolf1": "mpirun",
-        "seawolf2": "mpirun",
-        "seawolf3": "mpirun",
         # EOAS optimum cluster
         "delta": "mpiexec -hostfile $(openmpi_nodefile)",
         "omega": "mpiexec -hostfile $(openmpi_nodefile)",
@@ -1152,9 +1109,6 @@ def _execute(
         "salish": f"{mpirun} --bind-to none -np {nemo_processors} ./nemo.exe",
         # UBC Chemistry orcinus cluster
         "orcinus": f"{mpirun} -np {nemo_processors} ./nemo.exe",
-        "seawolf1": f"{mpirun} -np {nemo_processors} ./nemo.exe",
-        "seawolf2": f"{mpirun} -np {nemo_processors} ./nemo.exe",
-        "seawolf3": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         # EOAS optimum cluster
         "delta": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
         "omega": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
@@ -1173,9 +1127,6 @@ def _execute(
             "salish": f"{mpirun} : --bind-to none -np {xios_processors} ./xios_server.exe{redirect}",
             # UBC Chemistry orcinus cluster
             "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
-            "seawolf1": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
-            "seawolf2": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
-            "seawolf3": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             # EOAS optimum cluster
             "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
             "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
