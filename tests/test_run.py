@@ -464,7 +464,9 @@ class TestRun:
         queue_job_cmd,
         submit_job_msg,
         tmp_path,
+        monkeypatch,
     ):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
         p_run_dir = tmp_path / "run_dir"
         p_results_dir = tmp_path / "results_dir"
         m_crs.return_value = (
@@ -488,10 +490,11 @@ class TestRun:
             p_run_dir / "SalishSeaNEMO.sh",
         )
         m_sj.return_value = submit_job_msg
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), p_results_dir, separate_deflate=True
-            )
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"), p_results_dir, separate_deflate=True
+        )
+
         m_sj.assert_called_once_with(
             p_run_dir / "SalishSeaNEMO.sh", queue_job_cmd, waitjob="0"
         )
@@ -3496,17 +3499,19 @@ class TestDefinitions:
             ("sigma", "${PBS_O_HOME}", False),
         ],
     )
-    def test_definitions(self, system, home, deflate):
+    def test_definitions(self, system, home, deflate, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
         desc_file = StringIO("run_id: foo\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            defns = salishsea_cmd.run._definitions(
-                run_desc,
-                Path("SS-run-sets", "SalishSea.yaml"),
-                Path("tmp_run_dir"),
-                Path("results_dir"),
-                deflate,
-            )
+
+        defns = salishsea_cmd.run._definitions(
+            run_desc,
+            Path("SS-run-sets", "SalishSea.yaml"),
+            Path("tmp_run_dir"),
+            Path("results_dir"),
+            deflate,
+        )
+
         expected = (
             f'RUN_ID="foo"\n'
             f'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
@@ -4010,17 +4015,21 @@ class TestCleanup:
 class TestBuildDeflateScript:
     """Unit test for _build_deflate_script() function."""
 
-    def test_build_deflate_script_orcinus(self, pattern, result_type, pmem, tmpdir):
+    def test_build_deflate_script_orcinus(
+        self, pattern, result_type, pmem, tmpdir, monkeypatch
+    ):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "orcinus")
         run_desc = {
             "run_id": "19sep14_hindcast",
             "walltime": "3:00:00",
             "email": "test@example.com",
         }
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
-            script = salishsea_cmd.run._build_deflate_script(
-                run_desc, pattern, result_type, Path(str(p_results_dir))
-            )
+
+        script = salishsea_cmd.run._build_deflate_script(
+            run_desc, pattern, result_type, Path(str(p_results_dir))
+        )
+
         expected = f"""#!/bin/bash
 
         #PBS -N {result_type}_19sep14_hindcast_deflate
