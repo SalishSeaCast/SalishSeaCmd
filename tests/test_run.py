@@ -23,6 +23,7 @@ import shlex
 import subprocess
 import tempfile
 import textwrap
+from importlib import reload
 from io import StringIO
 from pathlib import Path
 from unittest.mock import call, Mock, patch
@@ -37,9 +38,19 @@ import salishsea_cmd.run
 
 @pytest.fixture
 def run_cmd():
-    import salishsea_cmd.run
-
     return salishsea_cmd.run.Run(Mock(spec=cliff.app.App), None)
+
+
+class TestSYSTEM:
+    """Unit tests for the SYSTEM constant."""
+
+    @pytest.mark.parametrize("node_name", ("seawolf1", "seawolf2", "seawolf3"))
+    def test_orcinus(self, node_name, monkeypatch):
+        monkeypatch.setenv("WGSYSTEM", node_name)
+
+        reload(salishsea_cmd.run)
+
+        assert salishsea_cmd.run.SYSTEM == "orcinus"
 
 
 class TestParser:
@@ -179,12 +190,6 @@ class TestRun:
             # UBC Chemistry orcinus cluster
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
-            (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
-            (True, 4, "seawolf1", "qsub", "431.orca2.ibb"),
-            (False, 0, "seawolf2", "qsub", "432.orca2.ibb"),
-            (True, 4, "seawolf2", "qsub", "432.orca2.ibb"),
-            (False, 0, "seawolf3", "qsub", "433.orca2.ibb"),
-            (True, 4, "seawolf3", "qsub", "433.orca2.ibb"),
             # EOAS optimum cluster
             (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
@@ -263,12 +268,6 @@ class TestRun:
             # UBC Chemistry orcinus cluster
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
-            (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
-            (True, 4, "seawolf1", "qsub", "431.orca2.ibb"),
-            (False, 0, "seawolf2", "qsub", "432.orca2.ibb"),
-            (True, 4, "seawolf2", "qsub", "432.orca2.ibb"),
-            (False, 0, "seawolf3", "qsub", "433.orca2.ibb"),
-            (True, 4, "seawolf3", "qsub", "433.orca2.ibb"),
             # EOAS optimum cluster
             (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
@@ -442,12 +441,6 @@ class TestRun:
             # UBC Chemistry orcinus cluster
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
-            (False, 0, "seawolf1", "qsub", "431.orca2.ibb"),
-            (True, 4, "seawolf1", "qsub", "431.orca2.ibb"),
-            (False, 0, "seawolf2", "qsub", "432.orca2.ibb"),
-            (True, 4, "seawolf2", "qsub", "432.orca2.ibb"),
-            (False, 0, "seawolf3", "qsub", "433.orca2.ibb"),
-            (True, 4, "seawolf3", "qsub", "433.orca2.ibb"),
             # EOAS optimum cluster
             (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
             (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
@@ -471,7 +464,9 @@ class TestRun:
         queue_job_cmd,
         submit_job_msg,
         tmp_path,
+        monkeypatch,
     ):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
         p_run_dir = tmp_path / "run_dir"
         p_results_dir = tmp_path / "results_dir"
         m_crs.return_value = (
@@ -495,10 +490,11 @@ class TestRun:
             p_run_dir / "SalishSeaNEMO.sh",
         )
         m_sj.return_value = submit_job_msg
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            submit_job_msg = salishsea_cmd.run.run(
-                Path("SalishSea.yaml"), p_results_dir, separate_deflate=True
-            )
+
+        submit_job_msg = salishsea_cmd.run.run(
+            Path("SalishSea.yaml"), p_results_dir, separate_deflate=True
+        )
+
         m_sj.assert_called_once_with(
             p_run_dir / "SalishSeaNEMO.sh", queue_job_cmd, waitjob="0"
         )
@@ -2691,15 +2687,10 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize(
-        "system, deflate",
-        (
-            ("orcinus", True),
-            ("seawolf1", False),
-            ("seawolf2", False),
-            ("seawolf3", False),
-        ),
+        "deflate",
+        (True, False),
     )
-    def test_orcinus(self, system, deflate, monkeypatch):
+    def test_orcinus(self, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -3278,6 +3269,14 @@ class TestPbsDirectives:
     @pytest.mark.parametrize(
         "system, procs_per_node, cpu_arch, procs_directives",
         (
+            # UBC Chemistry orcinus cluster
+            (
+                "orcinus",
+                0,
+                "",
+                "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            # EOAS optimum cluster
             (
                 "delta",
                 20,
@@ -3291,12 +3290,6 @@ class TestPbsDirectives:
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
-                "orcinus",
-                0,
-                "",
-                "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
-            ),
-            (
                 "sigma",
                 20,
                 "",
@@ -3305,8 +3298,9 @@ class TestPbsDirectives:
         ),
     )
     def test_pbs_directives_run(
-        self, system, procs_per_node, cpu_arch, procs_directives
+        self, system, procs_per_node, cpu_arch, procs_directives, monkeypatch
     ):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
         run_desc = yaml.safe_load(
             StringIO(
                 textwrap.dedent(
@@ -3317,10 +3311,11 @@ class TestPbsDirectives:
                 )
             )
         )
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            pbs_directives = salishsea_cmd.run._pbs_directives(
-                run_desc, 42, "me@example.com", Path("foo"), procs_per_node, cpu_arch
-            )
+
+        pbs_directives = salishsea_cmd.run._pbs_directives(
+            run_desc, 42, "me@example.com", Path("foo"), procs_per_node, cpu_arch
+        )
+
         expected = textwrap.dedent(
             f"""\
 #PBS -N foo
@@ -3340,6 +3335,14 @@ class TestPbsDirectives:
     @pytest.mark.parametrize(
         "system, procs_per_node, cpu_arch, procs_directives",
         (
+            # UBC Chemistry orcinus cluster
+            (
+                "orcinus",
+                0,
+                "",
+                "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
+            ),
+            # EOAS optimum cluster
             (
                 "delta",
                 20,
@@ -3353,12 +3356,6 @@ class TestPbsDirectives:
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
             ),
             (
-                "orcinus",
-                0,
-                "",
-                "#PBS -l partition=QDR\n#PBS -l procs=42\n# memory per processor\n#PBS -l pmem=2000mb",
-            ),
-            (
                 "sigma",
                 20,
                 "",
@@ -3367,8 +3364,9 @@ class TestPbsDirectives:
         ),
     )
     def test_pbs_directives_run_no_stderr_stdout(
-        self, system, procs_per_node, cpu_arch, procs_directives
+        self, system, procs_per_node, cpu_arch, procs_directives, monkeypatch
     ):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
         run_desc = yaml.safe_load(
             StringIO(
                 textwrap.dedent(
@@ -3379,16 +3377,17 @@ class TestPbsDirectives:
                 )
             )
         )
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            pbs_directives = salishsea_cmd.run._pbs_directives(
-                run_desc,
-                42,
-                "me@example.com",
-                Path("foo"),
-                procs_per_node,
-                cpu_arch,
-                stderr_stdout=False,
-            )
+
+        pbs_directives = salishsea_cmd.run._pbs_directives(
+            run_desc,
+            42,
+            "me@example.com",
+            Path("foo"),
+            procs_per_node,
+            cpu_arch,
+            stderr_stdout=False,
+        )
+
         expected = textwrap.dedent(
             f"""\
 #PBS -N foo
@@ -3402,7 +3401,9 @@ class TestPbsDirectives:
         )
         assert pbs_directives == expected
 
-    def test_pbs_directives_deflate(self):
+    @pytest.mark.parametrize("node_name", ("delta", "sigma", "omega"))
+    def test_pbs_directives_deflate(self, node_name, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", node_name)
         run_desc = yaml.safe_load(
             StringIO(
                 textwrap.dedent(
@@ -3489,12 +3490,6 @@ class TestDefinitions:
             # UBC Chemistry orcinus cluster
             ("orcinus", "${PBS_O_HOME}/.local", True),
             ("orcinus", "${PBS_O_HOME}/.local", False),
-            ("seawolf1", "${PBS_O_HOME}/.local", True),
-            ("seawolf1", "${PBS_O_HOME}/.local", False),
-            ("seawolf2", "${PBS_O_HOME}/.local", True),
-            ("seawolf2", "${PBS_O_HOME}/.local", False),
-            ("seawolf3", "${PBS_O_HOME}/.local", True),
-            ("seawolf3", "${PBS_O_HOME}/.local", False),
             # EOAS optimum cluster
             ("delta", "${PBS_O_HOME}", True),
             ("delta", "${PBS_O_HOME}", False),
@@ -3504,17 +3499,19 @@ class TestDefinitions:
             ("sigma", "${PBS_O_HOME}", False),
         ],
     )
-    def test_definitions(self, system, home, deflate):
+    def test_definitions(self, system, home, deflate, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
         desc_file = StringIO("run_id: foo\n")
         run_desc = yaml.safe_load(desc_file)
-        with patch("salishsea_cmd.run.SYSTEM", system):
-            defns = salishsea_cmd.run._definitions(
-                run_desc,
-                Path("SS-run-sets", "SalishSea.yaml"),
-                Path("tmp_run_dir"),
-                Path("results_dir"),
-                deflate,
-            )
+
+        defns = salishsea_cmd.run._definitions(
+            run_desc,
+            Path("SS-run-sets", "SalishSea.yaml"),
+            Path("tmp_run_dir"),
+            Path("results_dir"),
+            deflate,
+        )
+
         expected = (
             f'RUN_ID="foo"\n'
             f'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
@@ -3531,8 +3528,11 @@ class TestDefinitions:
 class TestModules:
     """Unit tests for _modules function."""
 
-    def test_unknown_system(self):
+    def test_unknown_system(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "unknown")
+
         modules = salishsea_cmd.run._modules()
+
         assert modules == ""
 
     def test_salish(self, monkeypatch):
@@ -3584,9 +3584,8 @@ class TestModules:
         )
         assert modules == expected
 
-    @pytest.mark.parametrize("system", ("orcinus", "seawolf1", "seawolf2", "seawolf3"))
-    def test_orcinus(self, system, monkeypatch):
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+    def test_orcinus(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "orcinus")
 
         modules = salishsea_cmd.run._modules()
 
@@ -4016,17 +4015,21 @@ class TestCleanup:
 class TestBuildDeflateScript:
     """Unit test for _build_deflate_script() function."""
 
-    def test_build_deflate_script_orcinus(self, pattern, result_type, pmem, tmpdir):
+    def test_build_deflate_script_orcinus(
+        self, pattern, result_type, pmem, tmpdir, monkeypatch
+    ):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "orcinus")
         run_desc = {
             "run_id": "19sep14_hindcast",
             "walltime": "3:00:00",
             "email": "test@example.com",
         }
         p_results_dir = tmpdir.ensure_dir("results_dir")
-        with patch("salishsea_cmd.run.SYSTEM", "orcinus"):
-            script = salishsea_cmd.run._build_deflate_script(
-                run_desc, pattern, result_type, Path(str(p_results_dir))
-            )
+
+        script = salishsea_cmd.run._build_deflate_script(
+            run_desc, pattern, result_type, Path(str(p_results_dir))
+        )
+
         expected = f"""#!/bin/bash
 
         #PBS -N {result_type}_19sep14_hindcast_deflate
