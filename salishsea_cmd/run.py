@@ -272,6 +272,7 @@ def run(
             "fir": "sbatch",
             "narval": "sbatch",
             "nibi": "sbatch",
+            "trillium": "sbatch",
             # UBC ARC sockeye cluster
             "sockeye": "sbatch",
             # MOAD development machine
@@ -663,6 +664,7 @@ def _build_batch_script(
         "fir",
         "narval",
         "nibi",
+        "trillium",
         # UBC ARC sockeye cluster
         "sockeye",
     }:
@@ -671,6 +673,7 @@ def _build_batch_script(
             "fir": 192 if not cores_per_node else int(cores_per_node),
             "narval": 64 if not cores_per_node else int(cores_per_node),
             "nibi": 192 if not cores_per_node else int(cores_per_node),
+            "trillium": 192 if not cores_per_node else int(cores_per_node),
             # UBC ARC sockeye cluster
             "sockeye": 40 if not cores_per_node else int(cores_per_node),
         }[SYSTEM]
@@ -775,6 +778,7 @@ def _sbatch_directives(
         "fir": "0",
         "narval": "0",
         "nibi": "0",
+        # Not used on trillium
         # UBC ARC sockeye cluster
         "sockeye": "186gb",
     }.get(SYSTEM, mem)
@@ -797,7 +801,10 @@ def _sbatch_directives(
     sbatch_directives += (
         f"#SBATCH --nodes={int(nodes)}\n"
         f"#SBATCH --ntasks-per-node={procs_per_node}\n"
-        f"#SBATCH --mem={mem}\n"
+    )
+    if SYSTEM != "trillium":
+        sbatch_directives += f"#SBATCH --mem={mem}\n"
+    sbatch_directives += (
         f"#SBATCH --time={walltime}\n"
         f"#SBATCH --mail-user={email}\n"
         f"#SBATCH --mail-type=ALL\n"
@@ -968,6 +975,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         "fir": Path("${HOME}", ".local", "bin", "salishsea"),
         "narval": Path("${HOME}", ".local", "bin", "salishsea"),
         "nibi": Path("${HOME}", ".local", "bin", "salishsea"),
+        "trillium": Path("${HOME}", ".local", "bin", "salishsea"),
         # UBC ARC sockeye cluster
         "sockeye": Path("${HOME}", ".local", "bin", "salishsea"),
         # MOAD development machine
@@ -1013,6 +1021,13 @@ def _modules():
         "nibi": textwrap.dedent(
             """\
             module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
+            """
+        ),
+        "trillium": textwrap.dedent(
+            """\
+            module load StdEnv/2023
+            module load gcc/12.3
             module load netcdf-fortran-mpi/4.6.1
             """
         ),
@@ -1110,6 +1125,7 @@ def _execute(
         "fir": "mpirun",
         "narval": "mpirun",
         "nibi": "mpirun",
+        "trillium": "mpirun",
         # UBC ARC sockeye cluster
         "sockeye": "mpirun",
         # MOAD development machine
@@ -1129,6 +1145,7 @@ def _execute(
         "fir": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "narval": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "nibi": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "trillium": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         # UBC ARC sockeye cluster
         "sockeye": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         # MOAD development machine
@@ -1149,6 +1166,7 @@ def _execute(
             "fir": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "narval": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "nibi": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "trillium": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             # UBC ARC sockeye cluster
             "sockeye": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             # MOAD development machine
@@ -1208,7 +1226,7 @@ def _execute(
             echo "Results deflation started at $(date)"{redirect}
             """
         )
-        if SYSTEM in {"fir", "narval", "nibi"}:
+        if SYSTEM in {"fir", "narval", "nibi", "trillium"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
