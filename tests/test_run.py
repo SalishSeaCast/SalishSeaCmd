@@ -191,12 +191,8 @@ class TestRun:
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             # EOAS optimum cluster
-            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "optimum", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "optimum", "qsub -q mpi", "43.admin.default.domain"),
         ],
     )
     def test_run_submit(
@@ -269,12 +265,8 @@ class TestRun:
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             # EOAS optimum cluster
-            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "optimum", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "optimum", "qsub -q mpi", "43.admin.default.domain"),
         ],
     )
     def test_run_waitjob(
@@ -442,12 +434,8 @@ class TestRun:
             (False, 0, "orcinus", "qsub", "43.orca2.ibb"),
             (True, 4, "orcinus", "qsub", "43.orca2.ibb"),
             # EOAS optimum cluster
-            (False, 0, "delta", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "delta", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "sigma", "qsub -q mpi", "43.admin.default.domain"),
-            (False, 0, "omega", "qsub -q mpi", "43.admin.default.domain"),
-            (True, 4, "omega", "qsub -q mpi", "43.admin.default.domain"),
+            (False, 0, "optimum", "qsub -q mpi", "43.admin.default.domain"),
+            (True, 4, "optimum", "qsub -q mpi", "43.admin.default.domain"),
         ],
     )
     def test_run_separate_deflate(
@@ -610,7 +598,7 @@ class TestRun:
             (
                 False,
                 0,
-                "delta",
+                "optimum",
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
                 "43.admin.default.domain",
@@ -618,39 +606,7 @@ class TestRun:
             (
                 True,
                 4,
-                "delta",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                False,
-                0,
-                "sigma",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                True,
-                4,
-                "sigma",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                False,
-                0,
-                "omega",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                True,
-                4,
-                "omega",
+                "optimum",
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
                 "43.admin.default.domain",
@@ -867,7 +823,7 @@ class TestRun:
             (
                 False,
                 0,
-                "delta",
+                "optimum",
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
                 "43.admin.default.domain",
@@ -875,39 +831,7 @@ class TestRun:
             (
                 True,
                 4,
-                "delta",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                False,
-                0,
-                "sigma",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                True,
-                4,
-                "sigma",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                False,
-                0,
-                "omega",
-                "qsub -q mpi",
-                ("43.admin.default.domain", "44.admin.default.domain"),
-                "43.admin.default.domain",
-            ),
-            (
-                True,
-                4,
-                "omega",
+                "optimum",
                 "qsub -q mpi",
                 ("43.admin.default.domain", "44.admin.default.domain"),
                 "43.admin.default.domain",
@@ -2567,23 +2491,13 @@ class TestBuildBatchScript:
         )
         assert script == expected
 
-    @pytest.mark.parametrize(
-        "system, deflate",
-        [
-            ("delta", True),
-            ("delta", False),
-            ("omega", True),
-            ("omega", False),
-            ("sigma", True),
-            ("sigma", False),
-        ],
-    )
-    def test_optimum(self, system, deflate, monkeypatch):
+    @pytest.mark.parametrize("deflate", (True, False))
+    def test_optimum(self, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
         run_desc = yaml.safe_load(desc_file)
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "optimum")
 
         script = salishsea_cmd.run._build_batch_script(
             run_desc,
@@ -3278,19 +3192,7 @@ class TestPbsDirectives:
             ),
             # EOAS optimum cluster
             (
-                "delta",
-                20,
-                "",
-                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
-            ),
-            (
-                "omega",
-                20,
-                "",
-                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
-            ),
-            (
-                "sigma",
+                "optimum",
                 20,
                 "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
@@ -3344,19 +3246,7 @@ class TestPbsDirectives:
             ),
             # EOAS optimum cluster
             (
-                "delta",
-                20,
-                "",
-                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
-            ),
-            (
-                "omega",
-                20,
-                "",
-                "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
-            ),
-            (
-                "sigma",
+                "optimum",
                 20,
                 "",
                 "#PBS -l nodes=3:ppn=20\n# memory per processor\n#PBS -l pmem=2000mb",
@@ -3401,9 +3291,8 @@ class TestPbsDirectives:
         )
         assert pbs_directives == expected
 
-    @pytest.mark.parametrize("node_name", ("delta", "sigma", "omega"))
-    def test_pbs_directives_deflate(self, node_name, monkeypatch):
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", node_name)
+    def test_pbs_directives_deflate(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "optimum")
         run_desc = yaml.safe_load(
             StringIO(
                 textwrap.dedent(
@@ -3491,12 +3380,8 @@ class TestDefinitions:
             ("orcinus", "${PBS_O_HOME}/.local", True),
             ("orcinus", "${PBS_O_HOME}/.local", False),
             # EOAS optimum cluster
-            ("delta", "${PBS_O_HOME}", True),
-            ("delta", "${PBS_O_HOME}", False),
-            ("omega", "${PBS_O_HOME}", True),
-            ("omega", "${PBS_O_HOME}", False),
-            ("sigma", "${PBS_O_HOME}", True),
-            ("sigma", "${PBS_O_HOME}", False),
+            ("optimum", "${PBS_O_HOME}", True),
+            ("optimum", "${PBS_O_HOME}", False),
         ],
     )
     def test_definitions(self, system, home, deflate, monkeypatch):
@@ -3602,9 +3487,8 @@ class TestModules:
         )
         assert modules == expected
 
-    @pytest.mark.parametrize("system", ["delta", "sigma", "omega"])
-    def test_optimum(self, system, monkeypatch):
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+    def test_optimum(self, monkeypatch):
+        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "optimum")
 
         modules = salishsea_cmd.run._modules()
 
@@ -3648,15 +3532,7 @@ class TestExecute:
             ("orcinus", "mpirun -np 42 ./nemo.exe : -np 1 ./xios_server.exe"),
             # EOAS optimum cluster
             (
-                "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-            ),
-            (
-                "omega",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-            ),
-            (
-                "sigma",
+                "optimum",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
             ),
         ],
@@ -3687,7 +3563,7 @@ class TestExecute:
             echo "Results combining started at $(date)"
             """
         )
-        if system in {"delta", "omega", "sigma"}:
+        if system == "optimum":
             expected += textwrap.dedent(
                 """\
                 module load GCC/8.3
@@ -3837,55 +3713,19 @@ class TestExecute:
                 True,
             ),
             (
-                "delta",
+                "optimum",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
                 True,
             ),
             (
-                "delta",
+                "optimum",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 False,
                 False,
             ),
             (
-                "delta",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                True,
-                True,
-            ),
-            (
-                "omega",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                False,
-                True,
-            ),
-            (
-                "omega",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                False,
-                False,
-            ),
-            (
-                "omega",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                True,
-                True,
-            ),
-            (
-                "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                False,
-                True,
-            ),
-            (
-                "sigma",
-                "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
-                False,
-                False,
-            ),
-            (
-                "sigma",
+                "optimum",
                 "mpiexec -hostfile $(openmpi_nodefile) --bind-to core -np 42 ./nemo.exe : --bind-to core -np 1 ./xios_server.exe",
                 True,
                 True,
@@ -3920,7 +3760,7 @@ class TestExecute:
             echo "Results combining started at $(date)"
             """
         )
-        if system in {"delta", "sigma", "omega"}:
+        if system == "optimum":
             expected += textwrap.dedent(
                 """\
                 module load GCC/8.3
