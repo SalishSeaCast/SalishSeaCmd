@@ -51,6 +51,8 @@ SYSTEM = (
 )
 if SYSTEM in {"seawolf1", "seawolf2", "seawolf3"}:
     SYSTEM = "orcinus"
+if SYSTEM in {"delta", "omega", "sigma"}:
+    SYSTEM = "optimum"
 
 SEPARATE_DEFLATE_JOBS = {
     # deflate job type: file pattern
@@ -282,9 +284,7 @@ def run(
             # UBC Chemistry orcinus cluster
             "orcinus": "qsub",
             # EOAS optimum cluster
-            "delta": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-            "omega": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
-            "sigma": "qsub -q mpi",  # optimum.eoas.ubc.ca login node
+            "optimum": "qsub -q mpi",
         }[SYSTEM]
     except KeyError:
         log.error(
@@ -688,9 +688,7 @@ def _build_batch_script(
                 # UBC Chemistry orcinus cluster
                 "orcinus": 12 if not cores_per_node else int(cores_per_node),
                 # EOAS optimum cluster
-                "delta": 20 if not cores_per_node else int(cores_per_node),
-                "omega": 20 if not cores_per_node else int(cores_per_node),
-                "sigma": 20 if not cores_per_node else int(cores_per_node),
+                "optimum": 20 if not cores_per_node else int(cores_per_node),
             }[SYSTEM]
         except KeyError:
             log.error(f"unknown system: {SYSTEM}")
@@ -979,9 +977,7 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
         # UBC Chemistry orcinus cluster
         "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
         # EOAS optimum cluster
-        "delta": Path("${PBS_O_HOME}", "bin", "salishsea"),
-        "omega": Path("${PBS_O_HOME}", "bin", "salishsea"),
-        "sigma": Path("${PBS_O_HOME}", "bin", "salishsea"),
+        "optimum": Path("${PBS_O_HOME}", "bin", "salishsea"),
     }.get(SYSTEM, Path("${HOME}", ".local", "bin", "salishsea"))
     defns = (
         f'RUN_ID="{get_run_desc_value(run_desc, ("run_id",))}"\n'
@@ -1048,17 +1044,7 @@ def _modules():
             """
         ),
         # EOAS optimum cluster
-        "delta": textwrap.dedent(
-            """\
-            module load OpenMPI/2.1.6/GCC/SYSTEM
-            """
-        ),
-        "omega": textwrap.dedent(
-            """\
-            module load OpenMPI/2.1.6/GCC/SYSTEM
-            """
-        ),
-        "sigma": textwrap.dedent(
+        "optimum": textwrap.dedent(
             """\
             module load OpenMPI/2.1.6/GCC/SYSTEM
             """
@@ -1093,9 +1079,7 @@ def _execute(
         # UBC Chemistry orcinus cluster
         "orcinus": "mpirun",
         # EOAS optimum cluster
-        "delta": "mpiexec -hostfile $(openmpi_nodefile)",
-        "omega": "mpiexec -hostfile $(openmpi_nodefile)",
-        "sigma": "mpiexec -hostfile $(openmpi_nodefile)",
+        "optimum": "mpiexec -hostfile $(openmpi_nodefile)",
     }.get(SYSTEM, "mpirun")
     mpirun = {
         # Alliance Canada clusters
@@ -1110,9 +1094,7 @@ def _execute(
         # UBC Chemistry orcinus cluster
         "orcinus": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         # EOAS optimum cluster
-        "delta": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
-        "omega": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
-        "sigma": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
+        "optimum": f"{mpirun} --bind-to core -np {nemo_processors} ./nemo.exe",
     }.get(SYSTEM, f"{mpirun} -np {nemo_processors} ./nemo.exe")
     if xios_processors:
         mpirun = {
@@ -1128,9 +1110,7 @@ def _execute(
             # UBC Chemistry orcinus cluster
             "orcinus": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             # EOAS optimum cluster
-            "delta": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
-            "omega": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
-            "sigma": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
+            "optimum": f"{mpirun} : --bind-to core -np {xios_processors} ./xios_server.exe{redirect}",
         }.get(
             SYSTEM,
             f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
@@ -1150,7 +1130,7 @@ def _execute(
         echo "Results combining started at $(date)"{redirect}
         """
     )
-    if SYSTEM in {"delta", "omega", "sigma"}:
+    if SYSTEM == "optimum":
         # Load GCC-8.3 modules just before combining because rebuild_nemo on optimum
         # is built with them, in contrast to XIOS and NEMO which are built with
         # the system GCC-4.4.7
