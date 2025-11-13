@@ -22,6 +22,18 @@
 ``SalishSeaCmd`` Changes That Break Backward Compatibility
 *************************************************************
 
+.. _BreakingChangesVersion25.3:
+
+Version 25.3
+============
+
+The following change that was introduced in version 25.3 of the ``SalishSeaCmd``
+package is incompatible with earlier versions:
+
+* Dropped support for Python 3.11.
+  Minimum supported Python version is now 3.12.
+
+
 .. _BreakingChangesVersion25.2:
 
 Version 25.2

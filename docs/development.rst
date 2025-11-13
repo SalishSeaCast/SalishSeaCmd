@@ -78,9 +78,9 @@ Python Versions
     :alt: Python Version from PEP 621 TOML
 
 The :kbd:`SalishSeaCmd` package is developed using `Python`_ 3.14.
-The minimum supported Python version is 3.11.
+The minimum supported Python version is 3.12.
 The :ref:`SalishSeaCmdContinuousIntegration` workflow on GitHub ensures that the package
-is tested for all versions of Python>=3.11.
+is tested for all versions of Python>=3.12.
 An old version of the package running under Python 3.5 is deployed on the
 Westgrid :kbd:`orcinus` HPC platform.
 That version is tagged in the repository as ``orcinus-python-3.5``.
