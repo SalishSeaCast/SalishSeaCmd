@@ -28,7 +28,7 @@ dependencies:
   - f90nml
   - gitpython
   - pip
-  - python=3.13
+  - python=3.14
   - pyyaml
 
   # For coding style, repo QA, and pkg management
