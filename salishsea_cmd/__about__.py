@@ -16,4 +16,4 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-__version__ = "25.3"  # pragma: no cover
+__version__ = "25.4.dev0"  # pragma: no cover
