@@ -71,6 +71,7 @@ split-results = "salishsea_cmd.split_results:SplitResults"
 [tool.coverage.run]
 branch = true
 source = [ "salishsea_cmd", "tests"]
+omit = [ ".pixi/*" ]
 
 [tool.coverage.report]
 show_missing = true
@@ -107,3 +108,14 @@ SalishSeaCmd = { path = ".", editable = true }
 
 [tool.pixi.environments]
 default = {features = [], solve-group = "default"}
+test = { features = ["test"], solve-group = "default" }
+
+[tool.pixi.feature.test.dependencies]
+pytest = "*"
+pytest-cov = "*"
+pytest-randomly = "*"
+
+[tool.pixi.feature.test.tasks]
+pytest = "pytest"
+pytest-cov = "pytest --cov=./"
+pytest-cov-html = "pytest --cov=./ --cov-report html"

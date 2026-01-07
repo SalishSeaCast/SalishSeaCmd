@@ -415,13 +415,12 @@ The `pytest`_ tool is used for test fixtures and as the test runner for the suit
 
 .. _pytest: https://docs.pytest.org/en/latest/
 
-With your :kbd:`salishsea-cmd` development environment activated,
-use:
+Use:
 
 .. code-block:: bash
 
-    (salishsea-cmd)$ cd SalishSeaCmd/
-    (salishsea-cmd)$ pytest
+    cd SalishSeaCmd/
+    pixi run pytest
 
 to run the test suite.
 The output looks something like:
@@ -429,21 +428,21 @@ The output looks something like:
 .. code-block:: text
 
     ================================= test session starts ===================================
-    platform linux -- Python 3.14.0, pytest-9.0.1, pluggy-1.6.0
-    Using --randomly-seed=1309584472
+    platform linux -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+    Using --randomly-seed=3689377719
     rootdir: /media/doug/warehouse/MEOPAR/SalishSeaCmd
     configfile: pytest.ini
-    plugins: cov-7.0.0, anyio-4.11.0, randomly-3.15.0
+    plugins: cov-7.0.0, randomly-3.15.0
     collected 268 items
 
-    tests/test_run.py ....................................................................
-    ......................................................................................
-    ..............................................................................     [ 86%]
-    tests/test_prepare.py ..............                                               [ 91%]
-    tests/test_api.py ......                                                           [ 94%]
-    tests/test_split_results.py ................                                       [100%]
+    tests/test_api.py ......                                                          [  2%]
+    tests/test_run.py ......................................................................
+    ........................................................................................
+    ..........................................................................        [ 88%]
+    tests/test_prepare.py ..............                                              [ 94%]
+    tests/test_split_results.py ................                                      [100%]
 
-    ================================= 268 passed in 1.56s ===================================
+    ================================= 268 passed in 0.68s ===================================
 
 You can monitor what lines of code the test suite exercises using the `coverage.py`_ and `pytest-cov`_ tools with the command:
 
@@ -452,8 +451,8 @@ You can monitor what lines of code the test suite exercises using the `coverage.
 
 .. code-block:: bash
 
-    (salishsea-cmd)$ cd SalishSeaCmd/
-    (salishsea-cmd)$ cpytest --cov=./
+    cd SalishSeaCmd/
+    pixi run pytest-cov
 
 The test coverage report will be displayed below the test suite run output.
 
@@ -462,7 +461,7 @@ you can use
 
 .. code-block:: bash
 
-    (salishsea-cmd)$ pytest --cov=./ --cov-report html
+        pixi run pytest-cov-html
 
 to produce an HTML report that you can view in your browser by opening
 :file:`SalishSeaCmd/htmlcov/index.html`.
