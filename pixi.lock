@@ -41,6 +41,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/linux-64/openssl-3.6.0-h26f9b46_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pbr-7.0.3-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pip-25.3-pyh145f28c_0.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/pixi-pycharm-0.0.10-unix_hf108a03_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.17.0-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/linux-64/pthread-stubs-0.4-hb9d3cd8_1002.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/pygments-2.19.2-pyhd8ed1ab_0.conda
@@ -478,6 +479,17 @@ packages:
   - pkg:pypi/pip?source=hash-mapping
   size: 1177084
   timestamp: 1762776338614
+- conda: https://conda.anaconda.org/conda-forge/noarch/pixi-pycharm-0.0.10-unix_hf108a03_0.conda
+  sha256: c84a62f421f3ba388df06df7f414d7b568ad4bc3c33a7799b3405f213a3b1ff5
+  md5: 07b709969aa53039501c5960e45794b8
+  depends:
+  - __unix
+  - python >=3.8
+  license: BSD-3-Clause
+  license_family: BSD
+  purls: []
+  size: 7034
+  timestamp: 1763572165675
 - conda: https://conda.anaconda.org/conda-forge/noarch/prettytable-3.17.0-pyhd8ed1ab_0.conda
   sha256: a1cc667bd683f26c319ccab257cd3e17b33f34ef90ff4f548a811a342358c952
   md5: 9a12c482f559d39f3ed9550ba9e0eeb0
@@ -651,7 +663,7 @@ packages:
 - pypi: ./
   name: salishseacmd
   version: 25.4.dev0
-  sha256: 5f29bf3bee1cc6227ba2e38738df57362d08092762f996228489e30ff89fff8a
+  sha256: 1f57893d16ba95ff817f97c8f338e509f9a3b05c840fb5e7297240114b05513e
   requires_dist:
   - arrow
   - attrs

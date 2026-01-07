@@ -94,6 +94,7 @@ attrs = "*"
 cliff = "*"
 f90nml = "*"
 gitpython = "*"
+pixi-pycharm = ">=0.0.10,<0.0.11"
 python = "3.14.*"
 pyyaml = "*"
 
