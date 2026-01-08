@@ -415,12 +415,12 @@ The `pytest`_ tool is used for test fixtures and as the test runner for the suit
 
 .. _pytest: https://docs.pytest.org/en/latest/
 
-Use:
+To run the test suite in the most recent supported version of Python use:
 
 .. code-block:: bash
 
     cd SalishSeaCmd/
-    pixi run pytest
+    pixi run -e test pytest
 
 to run the test suite.
 The output looks something like:
@@ -452,7 +452,7 @@ You can monitor what lines of code the test suite exercises using the `coverage.
 .. code-block:: bash
 
     cd SalishSeaCmd/
-    pixi run pytest-cov
+    pixi run -e test pytest-cov
 
 The test coverage report will be displayed below the test suite run output.
 
@@ -461,7 +461,8 @@ you can use
 
 .. code-block:: bash
 
-        pixi run pytest-cov-html
+    cd SalishSeaCmd/
+    pixi run -e test pytest-cov-html
 
 to produce an HTML report that you can view in your browser by opening
 :file:`SalishSeaCmd/htmlcov/index.html`.

@@ -111,6 +111,7 @@ default = {features = [], solve-group = "default"}
 test = { features = ["test"], solve-group = "default" }
 test-py312 = ["py312", "test"]
 test-py313 = ["py313", "test"]
+test-py314 = ["py314", "test"]
 
 [tool.pixi.feature.test.dependencies]
 pytest = "*"
@@ -127,3 +128,6 @@ python = "3.12.*"
 
 [tool.pixi.feature.py313.dependencies]
 python = "3.13.*"
+
+[tool.pixi.feature.py314.dependencies]
+python = "3.14.*"
