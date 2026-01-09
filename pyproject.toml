@@ -112,6 +112,7 @@ test = { features = ["test"], solve-group = "default" }
 test-py312 = ["py312", "test"]
 test-py313 = ["py313", "test"]
 test-py314 = ["py314", "test"]
+docs = { features = ["docs"], solve-group = "default" }
 
 [tool.pixi.feature.test.dependencies]
 pytest = "*"
@@ -131,3 +132,17 @@ python = "3.13.*"
 
 [tool.pixi.feature.py314.dependencies]
 python = "3.14.*"
+
+[tool.pixi.feature.docs.dependencies]
+sphinx = "8.1.3.*"
+sphinx-notfound-page = "1.0.4.*"
+sphinx-rtd-theme = "3.0.0.*"
+mock = "*"
+pillow = "*"
+
+[tool.pixi.feature.docs.tasks]
+docs = { cmd = "make clean html", cwd = "docs/" }
+linkcheck = { cmd = "make clean linkcheck", cwd = "docs/" }
+
+[dependency-groups]
+docs = ["commonmark>=0.9.1,<0.10", "recommonmark>=0.7.1,<0.8", "readthedocs-sphinx-ext>=2.2.5,<3"]
