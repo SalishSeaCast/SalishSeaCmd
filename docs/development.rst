@@ -77,12 +77,12 @@ Python Versions
     :target: https://docs.python.org/3/
     :alt: Python Version from PEP 621 TOML
 
-The :kbd:`SalishSeaCmd` package is developed using `Python`_ 3.14.
+The :py:obj:`SalishSeaCmd` package is developed using `Python`_ 3.14.
 The minimum supported Python version is 3.12.
 The :ref:`SalishSeaCmdContinuousIntegration` workflow on GitHub ensures that the package
 is tested for all versions of Python>=3.12.
 An old version of the package running under Python 3.5 is deployed on the
-Westgrid :kbd:`orcinus` HPC platform.
+Westgrid ``orcinus`` HPC platform.
 That version is tagged in the repository as ``orcinus-python-3.5``.
 
 .. _Python: https://www.python.org/
@@ -103,7 +103,7 @@ Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from Git
 
 .. code-block:: bash
 
-    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
+    git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
 
 
 .. _SalishSeaCmdDevelopmentEnvironment:
@@ -116,29 +116,45 @@ so you need to clone its repo,
 :ref:`NEMO-Cmd-repo`,
 beside your clone of :ref:`SalishSeaCmd-repo`.
 
-Setting up an isolated development environment using `Conda`_ is recommended.
-Assuming that you have :ref:`AnacondaPythonDistro` or `Miniconda3`_ installed,
-you can create and activate an environment called :kbd:`salishsea-cmd` that will have all of the Python packages necessary for development,
-testing,
-and building the documentation with the commands:
+:py:obj:`SalishSeaCmd` uses Pixi_ for package and environment management.
+If you don't already have Pixi_ installed,
+please follow its `installation instructions`_ to do so.
 
-.. _Conda: https://docs.conda.io/en/latest/
-.. _Miniconda3: https://docs.conda.io/en/latest/miniconda.html
+.. _Pixi: https://pixi.prefix.dev/latest/
+.. _`installation instructions`: https://pixi.prefix.dev/latest/installation/
 
-.. code-block:: bash
+Most commands are executed using :command:`pixi run` in the :file:`SalishSeaCmd/` directory
+(or a sub-directory).
+Dependencies will be downloaded and linked in to environments when you use :command:`pixi run`
+for the first time.
 
-    $ conda env create -f SalishSeaCmd/envs/environment-dev.yaml
-    $ conda activate salishsea-cmd
-    (salishsea-cmd)$ pip install --editable NEMO-Cmd
-    (salishsea-cmd)$ pip install --editable SalishSeaCmd
+* The ``default`` environment has the packages installed that are required to run the
+  :py:obj:`SalishSeaCmd` command-line interface;
+  e.g. :command:`pixi run salishsea help`
 
-The :kbd:`--editable` option in the :command:`pip install` commands above installs the :kbd:`NEMO-Cmd` package and the :kbd:`SalishSeaCmd` packages via symlinks so that :program:`salishsea` in the :kbd:`salishsea-cmd` environment will be automatically updated as the repos evolve.
+* Other environments used by commands in the sections below have addition packages for running
+  the test suite,
+  building and link checking the documentation,
+  etc.
 
-To deactivate the environment use:
+* If you are using an integrated development environment like VSCode or PyCharm
+  where you need a Python interpreter to support coding assistance features,
+  run development tasks,
+  etc.,
+  use the interpreter in the ``dev`` environment.
+  You can get its full path with :command:`pixi run -e dev which python`
 
-.. code-block:: bash
+To get detailed information about the environments,
+the packages installed in them,
+`Pixi`_ tasks that are defined for them,
+etc.,
+:use command:`pixi info`.
 
-    (salishsea-cmd)$ conda deactivate
+:py:obj:`SalishSeaCmd` is installed in `editable install mode`_ in all of the environments that
+`Pixi`_ creates.
+That means that changes you make to the code are immediately reflected in the environments.
+
+.. _editable install mode: https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs
 
 
 .. _SalishSeaCmdCodingStyle:
@@ -153,7 +169,7 @@ Coding Style
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 
-The ``SalishSeaCmd`` package uses Git pre-commit hooks managed by `pre-commit`_ to
+The :py:obj:`SalishSeaCmd` package uses Git pre-commit hooks managed by `pre-commit`_ to
 maintain consistent code style and and other aspects of code,
 docs,
 and repo QA.
@@ -161,18 +177,16 @@ and repo QA.
 .. _pre-commit: https://pre-commit.com/
 
 To install the `pre-commit` hooks in a newly cloned repo,
-activate the conda development environment,
-and run :command:`pre-commit install`:
+run :command:`pre-commit install`:
 
 .. code-block:: bash
 
-    $ cd SalishSeaCmd
-    $ conda activate salishsea-cmd
-    (nemo-cmd)$ pre-commit install
+    cd SalishSeaCmd
+    pixi run -e dev pre-commit install
 
 .. note::
     You only need to install the hooks once immediately after you make a new clone
-    of the `SalishSeaCmd repository`_ and build your :ref:`SalishSeaCmdDevelopmentEnvironment`.
+    of the `SalishSeaCmd repository`_.
 
 .. _SalishSeaCmd repository: https://github.com/SalishSeaCast/SalishSeaCmd
 
@@ -186,7 +200,7 @@ Building the Documentation
     :target: https://salishseacmd.readthedocs.io/en/latest/
     :alt: Documentation Status
 
-The documentation for the :kbd:`SalishSeaCmd` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
+The documentation for the :py:obj:`SalishSeaCmd` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
 
 .. _reStructuredText: https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
 .. _Sphinx: https://www.sphinx-doc.org/en/master/
@@ -399,7 +413,7 @@ The output looks something like:
 
     Look for any errors in the above output or in _build/linkcheck/output.txt
 
-:command:`make linkcheck` is run monthly via a `scheduled GitHub Actions workflow`_
+:command:`linkcheck` is run monthly via a `scheduled GitHub Actions workflow`_.
 
 .. _scheduled GitHub Actions workflow: https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Asphinx-linkcheck
 
@@ -409,7 +423,7 @@ The output looks something like:
 Running the Unit Tests
 ======================
 
-The test suite for the :kbd:`SalishSeaCmd` package is in :file:`SalishSeaCmd/tests/`.
+The test suite for the :py:obj:`SalishSeaCmd` package is in :file:`SalishSeaCmd/tests/`.
 The `pytest`_ tool is used for test fixtures and as the test runner for the suite.
 
 .. _pytest: https://docs.pytest.org/en/latest/
@@ -479,7 +493,7 @@ Continuous Integration
     :target: https://app.codecov.io/gh/SalishSeaCast/SalishSeaCmd
     :alt: Codecov Testing Coverage Report
 
-The :kbd:`SalishSeaCmd` package unit test suite is run and a coverage report is generated
+The :py:obj:`SalishSeaCmd` package unit test suite is run and a coverage report is generated
 whenever changes are pushed to GitHub.
 The results are visible on the `repo actions page`_,
 from the green checkmarks beside commits on the `repo commits page`_,
@@ -507,7 +521,7 @@ Version Control Repository
     :target: https://github.com/SalishSeaCast/SalishSeaCmd
     :alt: Git on GitHub
 
-The :kbd:`SalishSeaCmd` package code and documentation source files are available in the
+The :py:obj:`SalishSeaCmd` package code and documentation source files are available in the
 :ref:`SalishSeaCmd-repo` `Git`_ repository at https://github.com/SalishSeaCast/SalishSeaCmd.
 
 .. _Git: https://git-scm.com/
