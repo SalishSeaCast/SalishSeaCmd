@@ -2571,7 +2571,7 @@ packages:
 - pypi: ./
   name: salishseacmd
   version: 25.4.dev0
-  sha256: c927cf47cc497f29512c92888759144479f8c2f9413ce146991a7d8fe5f9efb5
+  sha256: c1861e0961425766f80833aa29692449b9fea86e6dd40cca3b6600440744b0bd
   requires_dist:
   - arrow
   - attrs
