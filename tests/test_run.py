@@ -2075,8 +2075,16 @@ class TestSubmitSeparateDeflateJobs:
 class TestBuildBatchScript:
     """Unit test for _build_batch_script() function."""
 
+    @staticmethod
+    @pytest.fixture
+    def mock_path(monkeypatch):
+        def _mock_path(path):
+            return Path("$HOME/MEOPAR/SalishSeaCmd/salishsea_cmd/run.py")
+
+        monkeypatch.setattr(salishsea_cmd.run, "Path", _mock_path)
+
     @pytest.mark.parametrize("deflate", [True, False])
-    def test_fir(self, deflate, monkeypatch):
+    def test_fir(self, mock_path, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2098,7 +2106,7 @@ class TestBuildBatchScript:
         )
 
         expected = textwrap.dedent(
-            f"""\
+            """\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2118,18 +2126,18 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="${{HOME}}/.local/bin/salishsea combine"
+            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
-                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """
             )
         expected += textwrap.dedent(
             """\
-            GATHER="${HOME}/.local/bin/salishsea gather"
+            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
@@ -2180,7 +2188,7 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
-    def test_narval(self, deflate, monkeypatch):
+    def test_narval(self, mock_path, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2202,7 +2210,7 @@ class TestBuildBatchScript:
         )
 
         expected = textwrap.dedent(
-            f"""\
+            """\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2222,18 +2230,18 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="${{HOME}}/.local/bin/salishsea combine"
+            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
-                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """
             )
         expected += textwrap.dedent(
             """\
-            GATHER="${HOME}/.local/bin/salishsea gather"
+            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
@@ -2284,7 +2292,7 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
-    def test_nibi(self, deflate, monkeypatch):
+    def test_nibi(self, mock_path, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2306,7 +2314,7 @@ class TestBuildBatchScript:
         )
 
         expected = textwrap.dedent(
-            f"""\
+            """\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2326,18 +2334,18 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="${{HOME}}/.local/bin/salishsea combine"
+            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
-                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """
             )
         expected += textwrap.dedent(
             """\
-            GATHER="${HOME}/.local/bin/salishsea gather"
+            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
@@ -2388,7 +2396,7 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
-    def test_trillium(self, deflate, monkeypatch):
+    def test_trillium(self, mock_path, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2410,7 +2418,7 @@ class TestBuildBatchScript:
         )
 
         expected = textwrap.dedent(
-            f"""\
+            """\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2429,18 +2437,18 @@ class TestBuildBatchScript:
             RUN_DESC=\"tmp_run_dir/SalishSea.yaml\"
             WORK_DIR=\"tmp_run_dir\"
             RESULTS_DIR=\"results_dir\"
-            COMBINE=\"${{HOME}}/.local/bin/salishsea combine\"
+            COMBINE=\"pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine\"
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
-                DEFLATE=\"${HOME}/.local/bin/salishsea deflate\"
+                DEFLATE=\"pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate\"
                 """
             )
         expected += textwrap.dedent(
             """\
-            GATHER=\"${HOME}/.local/bin/salishsea gather\"
+            GATHER=\"pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather\"
 
             module load StdEnv/2023
             module load gcc/12.3
@@ -2492,7 +2500,7 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize("deflate", (True, False))
-    def test_optimum(self, deflate, monkeypatch):
+    def test_optimum(self, mock_path, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2535,18 +2543,18 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="${PBS_O_HOME}/bin/salishsea combine"
+            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
-                DEFLATE="${PBS_O_HOME}/bin/salishsea deflate"
+                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """
             )
         expected += textwrap.dedent(
             """\
-            GATHER="${PBS_O_HOME}/bin/salishsea gather"
+            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load OpenMPI/2.1.6/GCC/SYSTEM
 
@@ -2604,7 +2612,7 @@ class TestBuildBatchScript:
         "deflate",
         (True, False),
     )
-    def test_orcinus(self, deflate, monkeypatch):
+    def test_orcinus(self, mock_path, deflate, monkeypatch):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2648,18 +2656,18 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="${PBS_O_HOME}/.local/bin/salishsea combine"
+            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
-                DEFLATE="${PBS_O_HOME}/.local/bin/salishsea deflate"
+                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """
             )
         expected += textwrap.dedent(
             """\
-            GATHER="${PBS_O_HOME}/.local/bin/salishsea gather"
+            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load intel
             module load intel/14.0/netcdf-4.3.3.1_mpi
@@ -2714,7 +2722,7 @@ class TestBuildBatchScript:
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
-    def test_salish(self, deflate, monkeypatch):
+    def test_salish(self, mock_path, deflate, monkeypatch):
         run_desc = yaml.safe_load(
             StringIO(
                 textwrap.dedent(
@@ -2750,18 +2758,18 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="${HOME}/.local/bin/salishsea combine"
+            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
-                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """
             )
         expected += textwrap.dedent(
             """\
-            GATHER="${HOME}/.local/bin/salishsea gather"
+            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
 
             mkdir -p ${RESULTS_DIR}
@@ -2817,7 +2825,9 @@ class TestBuildBatchScript:
             ("sockeye", "40", "cascade", False),
         ],
     )
-    def test_sockeye(self, node_name, cores_per_node, cpu_arch, deflate, monkeypatch):
+    def test_sockeye(
+        self, mock_path, node_name, cores_per_node, cpu_arch, deflate, monkeypatch
+    ):
         desc_file = StringIO(
             "run_id: foo\n" "walltime: 01:02:03\n" "email: me@example.com"
         )
@@ -2870,18 +2880,18 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="${{HOME}}/.local/bin/salishsea combine"
+            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """
         )
         if deflate:
             expected += textwrap.dedent(
                 """\
-                DEFLATE="${HOME}/.local/bin/salishsea deflate"
+                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """
             )
         expected += textwrap.dedent(
             """\
-            GATHER="${HOME}/.local/bin/salishsea gather"
+            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load gcc/9.4.0
             module load openmpi/4.1.1-cuda11-3
@@ -3359,33 +3369,22 @@ class TestDefinitions:
     """Unit tests for _definitions function."""
 
     @pytest.mark.parametrize(
-        "system, home, deflate",
+        "home, deflate",
         [
-            # Alliance Canada clusters
-            ("fir", "${HOME}/.local", True),
-            ("fir", "${HOME}/.local", False),
-            ("narval", "${HOME}/.local", True),
-            ("narval", "${HOME}/.local", False),
-            ("nibi", "${HOME}/.local", True),
-            ("nibi", "${HOME}/.local", False),
-            ("trillium", "${HOME}/.local", True),
-            ("trillium", "${HOME}/.local", False),
-            # UBC ARC sockeye cluster
-            ("sockeye", "${HOME}/.local", True),
-            ("sockeye", "${HOME}/.local", False),
-            # MOAD development machine
-            ("salish", "${HOME}/.local", True),
-            ("salish", "${HOME}/.local", False),
-            # UBC Chemistry orcinus cluster
-            ("orcinus", "${PBS_O_HOME}/.local", True),
-            ("orcinus", "${PBS_O_HOME}/.local", False),
-            # EOAS optimum cluster
-            ("optimum", "${PBS_O_HOME}", True),
-            ("optimum", "${PBS_O_HOME}", False),
+            # Clusters that use SLURM scheduler
+            ("${HOME}", True),
+            ("${HOME}", False),
+            # Clusters that use PBS/TORQUE scheduler
+            ("${PBS_O_HOME}", True),
+            ("${PBS_O_HOME}", False),
         ],
     )
-    def test_definitions(self, system, home, deflate, monkeypatch):
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
+    def test_definitions(self, home, deflate, monkeypatch):
+        def mock_path(path):
+            return Path(f"{home}/MEOPAR/SalishSeaCmd/salishsea_cmd/run.py")
+
+        monkeypatch.setattr(salishsea_cmd.run, "Path", mock_path)
+
         desc_file = StringIO("run_id: foo\n")
         run_desc = yaml.safe_load(desc_file)
 
@@ -3402,11 +3401,15 @@ class TestDefinitions:
             f'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
             f'WORK_DIR="tmp_run_dir"\n'
             f'RESULTS_DIR="results_dir"\n'
-            f'COMBINE="{home}/bin/salishsea combine"\n'
+            f'COMBINE="pixi run -m {home}/MEOPAR/SalishSeaCmd salishsea combine"\n'
         )
         if deflate:
-            expected += f'DEFLATE="{home}/bin/salishsea deflate"\n'
-        expected += f'GATHER="{home}/bin/salishsea gather"\n'
+            expected += (
+                f'DEFLATE="pixi run -m {home}/MEOPAR/SalishSeaCmd salishsea deflate"\n'
+            )
+        expected += (
+            f'GATHER="pixi run -m {home}/MEOPAR/SalishSeaCmd salishsea gather"\n'
+        )
         assert defns == expected
 
 

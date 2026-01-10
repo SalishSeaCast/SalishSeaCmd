@@ -22,7 +22,7 @@
 :command:`salishsea` Sub-Commands
 *********************************
 
-The command :kbd:`salishsea help` produces a list of the available :program:`salishsea`
+The command :command:`pixi run salishsea help` produces a list of the available :program:`salishsea`
 options and sub-commands:
 
 .. code-block:: text
@@ -51,12 +51,12 @@ options and sub-commands:
                    (e.g. a hindcast run) into daily results directories.
 
 For details of the arguments and options for a sub-command use
-:command:`salishsea help <sub-command>`.
+:command:`pixi run salishsea help <sub-command>`.
 For example:
 
 .. code-block:: bash
 
-    $ salishsea help run
+    pixi run salishsea help run
 
 .. code-block:: text
 
@@ -121,7 +121,7 @@ You can check what version of :program:`salishsea` you have installed with:
 
 .. code-block:: bash
 
-    salishsea --version
+    pixi run salishsea --version
 
 
 .. _salishsea-run:
@@ -220,7 +220,7 @@ Example:
 
 .. code-block:: bash
 
-    $ salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
+    pixi run salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
 
     salishsea_cmd.run INFO: salishsea_cmd.prepare Created run directory /global/scratch/sallen/20mar17hindcast_2017-10-01T183841.082501-0700
     salishsea_cmd.run INFO: 3330782.orca2.ibb
@@ -253,7 +253,7 @@ Example:
 
 .. code-block:: bash
 
-    $ salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
+    pixi run salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
 
     salishsea_cmd.run INFO: salishsea_cmd.prepare Created run directory ../../SalishSea/38e87e0c-472d-11e3-9c8e-0025909a8461
     salishsea_cmd.run INFO: SalishSeaNEMO.sh queued as 3330782.orca2.ibb
@@ -294,9 +294,9 @@ Example:
 
 .. code-block:: bash
 
-    $ salishsea prepare SalishSea.yaml iodef.xml
+    pixi run salishsea prepare SalishSea.yaml iodef.xml
 
-    salishsea_cmd.prepare INFO: Created run directory ../../runs/SalishSea/38e87e0c-472d-11e3-9c8e-0025909a8461
+    salishsea_cmd.prepare INFO: Created run directory /scratch/dlatorne/MEOPAR/runs/01mar23-11x32_2025-12-24T145433.665751-0800
 
 The name of the run directory created is a `Universally Unique Identifier`_
 (UUID)
@@ -385,7 +385,7 @@ Please use:
 
 .. code-block:: bash
 
-    $ salishsea help combine
+    pixi run salishsea help combine
 
 to see its usage,
 and see :ref:`nemocmd:nemo-combine` for more details.
@@ -407,7 +407,7 @@ Please use:
 
 .. code-block:: bash
 
-    $ salishsea help deflate
+    pixi run salishsea help deflate
 
 to see its usage,
 and see :ref:`nemocmd:nemo-deflate` for more details.
@@ -427,7 +427,7 @@ Please use:
 
 .. code-block:: bash
 
-    $ salishsea help gather
+    pixi run salishsea help gather
 
 to see its usage,
 and see :ref:`nemocmd:nemo-gather` for more details.

@@ -36,6 +36,9 @@ SalishSeaCast NEMO Command Processor
 |                            | .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github                                                                                                                   |
 |                            |     :target: https://github.com/SalishSeaCast/SalishSeaCmd                                                                                                                                           |
 |                            |     :alt: Git on GitHub                                                                                                                                                                              |
+|                            | .. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json                                                                           |
+|                            |     :target: https://pixi.prefix.dev/latest/                                                                                                                                                         |
+|                            |     :alt: Pixi                                                                                                                                                                                       |
 |                            | .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white                                                                                              |
 |                            |     :target: https://pre-commit.com                                                                                                                                                                  |
 |                            |     :alt: pre-commit                                                                                                                                                                                 |
@@ -52,18 +55,25 @@ for doing various operations associated with the `SalishSeaCast NEMO model`_.
 
 .. _SalishSeaCast NEMO model: https://salishsea-meopar-docs.readthedocs.io/en/latest/
 
-Use ``salishsea --help`` to get a list of the sub-commands available for doing things
-with and related to SalishSeaCast NEMO.
-Use ``salishsea help <sub-command>`` to get a synopsis of what a sub-command does,
+The package uses Pixi_ to manage dependencies and operating environments.
+If you don't already have Pixi_ installed,
+please follow its `installation instructions`_ to do so.
+Please see the `package installation`_ or `package development`_
+documentation sections for more details.
+
+.. _Pixi: https://pixi.prefix.dev/latest/
+.. _`installation instructions`: https://pixi.prefix.dev/latest/installation/
+.. _package installation: https://salishseacmd.readthedocs.io/en/latest/installation.html
+.. _package development: https://salishseacmd.readthedocs.io/en/latest/development.html
+
+In the ``SalishSeaCmd/`` directory,
+use ``pixi run salishsea --help`` to get a list of the sub-commands available.
+Use ``pixi run salishsea help <sub-command>`` to get a synopsis of what a sub-command does,
 what its required arguments are,
 and what options are available to control it.
 
 Documentation for the command processor is in the ``docs/`` directory and is rendered
 at https://salishseacmd.readthedocs.io/en/latest/.
-
-.. image:: https://readthedocs.org/projects/salishseacmd/badge/?version=latest
-    :target: https://salishseacmd.readthedocs.io/en/latest/
-    :alt: Documentation Status
 
 This an extensible tool built on the OpenStack ``cliff``
 (`Command Line Interface Formulation Framework`_)
