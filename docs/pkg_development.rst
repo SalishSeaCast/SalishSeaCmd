@@ -332,83 +332,83 @@ The output looks something like:
     copying assets: done
     writing output... [100%] subcommands
 
-    (     development: line   23) ok        https://black.readthedocs.io/en/stable/
-    (     development: line   23) ok        https://app.codecov.io/gh/SalishSeaCast/SalishSeaCmd
-    (     development: line   36) ok        https://app.readthedocs.org/projects/salishseacmd/badge/?version=latest
+    ( pkg_development: line   36) ok        https://app.readthedocs.org/projects/salishseacmd/badge/?version=latest
+    ( pkg_development: line   23) ok        https://black.readthedocs.io/en/stable/
+    ( pkg_development: line   23) ok        https://app.codecov.io/gh/SalishSeaCast/SalishSeaCmd
+    ( pkg_development: line   29) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
+    ( pkg_development: line  460) ok        https://coverage.readthedocs.io/en/latest/
     (breaking_changes: line  132) ok        https://calver.org/
-    (     development: line  445) ok        https://coverage.readthedocs.io/en/latest/
-    (     development: line   29) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaCmd/branch/main/graph/badge.svg
-    (     development: line  494) ok        https://docs.github.com/en/actions
-    (     development: line  205) ok        https://app.readthedocs.org/projects/salishseacmd/builds/
-    (     development: line  119) ok        https://docs.conda.io/en/latest/
-    (     development: line  119) ok        https://docs.conda.io/en/latest/miniconda.html
-    (     development: line   23) ok        https://docs.python.org/3/
+    (    installation: line   35) ok        https://docs.conda.io/en/latest/
+    (    installation: line   35) ok        https://docs.conda.io/en/latest/miniconda.html
+    ( pkg_development: line  426) ok        https://docs.pytest.org/en/latest/
+    ( pkg_development: line  219) ok        https://app.readthedocs.org/projects/salishseacmd/builds/
+    ( pkg_development: line   23) ok        https://docs.python.org/3/
     (breaking_changes: line  183) ok        https://docs.python.org/3/library/constants.html#False
     (             api: line   23) ok        https://docs.python.org/3/library/constants.html#None
-    (run_description_file/3.6_yaml_file: line  446) ok        https://docs.python.org/3/library/constants.html#True
-    (     development: line  411) ok        https://docs.pytest.org/en/latest/
     (run_description_file/3.6_agrif_yaml_file: line   26) ok        https://agrif.imag.fr/
-    (             api: line   23) ok        https://docs.python.org/3/library/functions.html#int
     (           index: line   33) ok        https://docs.openstack.org/cliff/latest/
-    (             api: line   23) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
-    (             api: line   23) ok        https://docs.python.org/3/library/stdtypes.html#str
+    (             api: line   23) ok        https://docs.python.org/3/library/functions.html#int
+    (run_description_file/3.6_yaml_file: line  446) ok        https://docs.python.org/3/library/constants.html#True
     (             api: line   23) ok        https://docs.python.org/3/library/stdtypes.html#dict
-    (     development: line  509) ok        https://git-scm.com/
+    (             api: line   23) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
+    ( pkg_development: line  509) ok        https://docs.github.com/en/actions
+    (             api: line   23) ok        https://docs.python.org/3/library/stdtypes.html#str
     (     subcommands: line  301) ok        https://en.wikipedia.org/wiki/Universally_unique_identifier
+    ( pkg_development: line  524) ok        https://git-scm.com/
     (breaking_changes: line  123) ok        https://f90nml.readthedocs.io/en/latest/
-    -rate limited-   https://github.com/SalishSeaCast/SS-run-sets/blob/main/v201905/hindcast/file_def_dailysplit.xml | sleeping...
     (           index: line   33) ok        https://github.com/SalishSeaCast/NEMO-Cmd
     (     subcommands: line  382) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
-    (     development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd
-    (     development: line   26) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions/workflows/pytest-with-coverage.yaml/badge.svg
-    (     development: line   39) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions/workflows/sphinx-linkcheck.yaml/badge.svg
-    (     development: line  481) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions
-    (     development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow:CodeQL
-    (     development: line  401) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Asphinx-linkcheck
-    (     development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow:pytest-with-coverage
-    (     development: line  481) ok        https://github.com/SalishSeaCast/SalishSeaCmd/commits/main
-    (     development: line  474) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/pytest-with-coverage/badge.svg
-    (     development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow:sphinx-linkcheck
-    (     development: line  284) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/sphinx-linkcheck/badge.svg
-    (     development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
-    (breaking_changes: line  106) ok        https://gitpython.readthedocs.io/en/stable/
-    (     development: line   65) ok        https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg
-    (     development: line   62) ok        https://img.shields.io/badge/code%20style-black-000000.svg
-    (     development: line   53) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
-    (     development: line   59) ok        https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
-    (     development: line  536) ok        https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst
-    (     development: line   56) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
-    (     development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/releases
-    (    installation: line   35) ok        https://github.com/conda-forge/miniforge
-    (     development: line   23) ok        https://github.com/pypa/hatch
-    (     development: line   43) ok        https://img.shields.io/github/v/release/SalishSeaCast/SalishSeaCmd?logo=github
-    (     subcommands: line  390) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-combine
-    (     development: line   49) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
-    (     subcommands: line  231) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-deflate
-    (     development: line   46) ok        https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaCmd/main/pyproject.toml&logo=Python&logoColor=gold&label=Python
-    (     subcommands: line  432) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-gather
-    (     development: line  445) ok        https://pytest-cov.readthedocs.io/en/latest/
-    (run_description_file/index: line   25) ok        https://pyyaml.org/wiki/PyYAMLDocumentation
-    (     development: line   23) ok        https://pre-commit.com
-    (     development: line  156) ok        https://pre-commit.com/
-    (           index: line   25) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/index.html#salishseanemo
-    (breaking_changes: line  175) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#landprocessorelimination
-    (run_description_file/3.6_yaml_file: line  173) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#preferred-mpi-lpe-decompositions
-    (     development: line  114) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#nemo-cmd-repo
-    (run_description_file/3.6_yaml_file: line   91) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#nemo-3-6-code-repo
-    (     development: line  100) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseacmd-repo
-    (run_description_file/index: line   30) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#ss-run-sets-repo
-    (run_description_file/3.6_yaml_file: line  102) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#xios-repo
-    (     development: line   80) ok        https://www.python.org/
-    (     development: line   23) ok        https://salishseacmd.readthedocs.io/en/latest/
-    (run_description_file/3.6_yaml_file: line   76) ok        https://slurm.schedmd.com/
-    (     development: line  189) ok        https://www.sphinx-doc.org/en/master/
-    (     development: line  119) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/work_env/anaconda_python.html#anacondapythondistro
-    (     development: line  189) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
-    (     development: line   23) ok        https://www.apache.org/licenses/LICENSE-2.0
-    -rate limited-   https://github.com/SalishSeaCast/SS-run-sets/blob/main/v201905/hindcast/file_def_dailysplit.xml | sleeping...
-    (     development: line   32) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions/workflows/codeql-analysis.yaml/badge.svg
     (     subcommands: line  444) ok        https://github.com/SalishSeaCast/SS-run-sets/blob/main/v201905/hindcast/file_def_dailysplit.xml
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd
+    ( pkg_development: line   32) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions/workflows/codeql-analysis.yaml/badge.svg
+    ( pkg_development: line   26) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions/workflows/pytest-with-coverage.yaml/badge.svg
+    ( pkg_development: line   39) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions/workflows/sphinx-linkcheck.yaml/badge.svg
+    ( pkg_development: line  496) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow:CodeQL
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow:sphinx-linkcheck
+    ( pkg_development: line  496) ok        https://github.com/SalishSeaCast/SalishSeaCmd/commits/main
+    ( pkg_development: line  416) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow%3Asphinx-linkcheck
+    ( pkg_development: line  489) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/pytest-with-coverage/badge.svg
+    ( pkg_development: line  298) ok        https://github.com/SalishSeaCast/SalishSeaCmd/workflows/sphinx-linkcheck/badge.svg
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/actions?query=workflow:pytest-with-coverage
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/issues
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaCmd/releases
+    (breaking_changes: line  106) ok        https://gitpython.readthedocs.io/en/stable/
+    (           index: line   67) ok        https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst
+    ( pkg_development: line   65) ok        https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg
+    ( pkg_development: line   62) ok        https://img.shields.io/badge/code%20style-black-000000.svg
+    ( pkg_development: line   53) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    ( pkg_development: line   59) ok        https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+    ( pkg_development: line   49) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaCmd?logo=github
+    ( pkg_development: line   56) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    ( pkg_development: line   43) ok        https://img.shields.io/github/v/release/SalishSeaCast/SalishSeaCmd?logo=github
+    ( pkg_development: line   46) ok        https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaCmd/main/pyproject.toml&logo=Python&logoColor=gold&label=Python
+    (    installation: line   35) ok        https://github.com/conda-forge/miniforge
+    (     subcommands: line  390) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-combine
+    (     subcommands: line  231) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-deflate
+    ( pkg_development: line   23) ok        https://github.com/pypa/hatch
+    (     subcommands: line  432) ok        https://nemo-cmd.readthedocs.io/en/latest/subcommands.html#nemo-gather
+    ( pkg_development: line  119) ok        https://pixi.prefix.dev/latest/installation/
+    ( pkg_development: line  119) ok        https://pixi.prefix.dev/latest/
+    ( pkg_development: line  153) ok        https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs
+    ( pkg_development: line  460) ok        https://pytest-cov.readthedocs.io/en/latest/
+    (breaking_changes: line  175) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#landprocessorelimination
+    (           index: line   25) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/index.html#salishseanemo
+    ( pkg_development: line   23) ok        https://pre-commit.com
+    ( pkg_development: line  172) ok        https://pre-commit.com/
+    (run_description_file/index: line   25) ok        https://pyyaml.org/wiki/PyYAMLDocumentation
+    (    installation: line   33) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#nemo-cmd-repo
+    (run_description_file/3.6_yaml_file: line   91) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#nemo-3-6-code-repo
+    (run_description_file/3.6_yaml_file: line  173) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/code-notes/salishsea-nemo/land-processor-elimination/index.html#preferred-mpi-lpe-decompositions
+    (    installation: line   33) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseacmd-repo
+    (run_description_file/index: line   30) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#ss-run-sets-repo
+    ( pkg_development: line   80) ok        https://www.python.org/
+    (run_description_file/3.6_yaml_file: line  102) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#xios-repo
+    ( pkg_development: line   23) ok        https://salishseacmd.readthedocs.io/en/latest/
+    ( pkg_development: line  203) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html
+    (           index: line   72) ok        https://www.apache.org/licenses/LICENSE-2.0
+    (run_description_file/3.6_yaml_file: line   76) ok        https://slurm.schedmd.com/
+    ( pkg_development: line  203) ok        https://www.sphinx-doc.org/en/master/
     build succeeded.
 
     Look for any errors in the above output or in _build/linkcheck/output.txt
