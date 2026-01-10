@@ -98,7 +98,7 @@ pyyaml = "*"
 
 [tool.pixi.pypi-dependencies]
 python-hglib = "*"
-NEMO-Cmd = { git = "https://github.com/SalishSeaCast/NEMO-Cmd.git" }
+nemo-cmd = { git = "https://github.com/SalishSeaCast/NEMO-Cmd.git" }
 SalishSeaCmd = { path = ".", editable = true }
 
 [tool.pixi.tasks]
