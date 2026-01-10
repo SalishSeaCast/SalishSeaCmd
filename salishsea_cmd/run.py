@@ -964,21 +964,8 @@ def _td2hms(timedelta):
 
 
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
-    salishsea_cmd = {
-        # Alliance Canada clusters
-        "fir": Path("${HOME}", ".local", "bin", "salishsea"),
-        "narval": Path("${HOME}", ".local", "bin", "salishsea"),
-        "nibi": Path("${HOME}", ".local", "bin", "salishsea"),
-        "trillium": Path("${HOME}", ".local", "bin", "salishsea"),
-        # UBC ARC sockeye cluster
-        "sockeye": Path("${HOME}", ".local", "bin", "salishsea"),
-        # MOAD development machine
-        "salish": Path("${HOME}", ".local", "bin", "salishsea"),
-        # UBC Chemistry orcinus cluster
-        "orcinus": Path("${PBS_O_HOME}", ".local", "bin", "salishsea"),
-        # EOAS optimum cluster
-        "optimum": Path("${PBS_O_HOME}", "bin", "salishsea"),
-    }.get(SYSTEM, Path("${HOME}", ".local", "bin", "salishsea"))
+    salishsea_cmd_dir = Path(__file__).parent.parent
+    salishsea_cmd = f"pixi run -m {os.fspath(salishsea_cmd_dir)} salishsea"
     defns = (
         f'RUN_ID="{get_run_desc_value(run_desc, ("run_id",))}"\n'
         f'RUN_DESC="{run_dir}/{run_desc_file.name}"\n'
