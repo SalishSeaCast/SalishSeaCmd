@@ -123,6 +123,20 @@ You can check what version of :program:`salishsea` you have installed with:
 
     pixi run salishsea --version
 
+A common use-case is to execute the :command:`salishsea run` command in the directory containing
+your run description YAML file.
+To accomplish that,
+we have to tell Pixi where to find the :file:`SalishSeaCmd/` directory so that it can use the
+correct environment.
+We do that by using the :option:`-m` or :option:`--manifest` option of :command:`pixi run`.
+Example:
+
+.. code-block:: bash
+
+    cd SS-run-sets/SalishSea/sea/Carbon_v202111/
+    pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea run 01jan11_Lb80.yaml \
+      /scratch/allen/Carbon/MoreSens/Now/01jan11/
+
 
 .. _salishsea-run:
 
