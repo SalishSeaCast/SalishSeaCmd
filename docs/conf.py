@@ -74,8 +74,8 @@ autodoc_mock_imports = [
 templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
-source_suffix = ".rst"
+# You can specify multiple suffixes as a list of strings:
+source_suffix = {".rst": "restructuredtext"}
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

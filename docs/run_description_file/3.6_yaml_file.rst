@@ -477,7 +477,6 @@ example :kbd:`vcs revisions` section:
         - $HOME/MEOPAR/rivers
         - $HOME/MEOPAR/tides
         - $HOME/MEOPAR/tracers
-        - $HOME/MEOPAR/NEMO-Cmd
         - $HOME/MEOPAR/SalishSeaCmd
         - $HOME/MEOPAR/XIOS-ARCH
       hg:
@@ -512,7 +511,6 @@ the files created will be::
   rivers_rev.txt
   tides_rev.txt
   tracers_rev.txt
-  NEMO-Cmd_rev.txt
   SalishSeaCmd_rev.txt
   XIOS-ARCH_rev.txt
   FVCOM-VHFR-config_rev.txt

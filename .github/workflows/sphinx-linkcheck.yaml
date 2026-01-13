@@ -10,14 +10,5 @@ jobs:
   sphinx-linkcheck:
     permissions:
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        # Need to specify Python version here because we use test env which gets its
-        # Python version via matrix
-        python-version: [ '3.14' ]
-    uses: UBC-MOAD/gha-workflows/.github/workflows/sphinx-linkcheck.yaml@main
-    with:
-      python-version: ${{ matrix.python-version }}
-      conda-env-file: envs/environment-test.yaml
-      conda-env-name: salishsea-cmd-test
+
+    uses: UBC-MOAD/gha-workflows/.github/workflows/pixi-sphinx-linkcheck.yaml@main
