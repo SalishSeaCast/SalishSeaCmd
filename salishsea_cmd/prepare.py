@@ -21,6 +21,7 @@
 Sets up the necessary symbolic links for a SalishSeaCast NEMO run
 in a specified directory and changes the pwd to that directory.
 """
+
 import logging
 from pathlib import Path
 

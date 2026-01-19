@@ -26,6 +26,7 @@ single day run so that ERDDAP will accept them
 The run description files are left in the first run day's directory.
 The restart files are moved to the last run day's directory.
 """
+
 import logging
 import os
 import shutil

@@ -17,6 +17,7 @@
 
 
 """SalishSeaCmd combine sub-command plug-in unit tests"""
+
 from unittest.mock import Mock, patch
 
 import cliff.app
