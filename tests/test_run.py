@@ -17,6 +17,7 @@
 
 
 """SalishSeaCmd run sub-command plug-in unit tests"""
+
 import logging
 import os
 import shlex
@@ -635,9 +636,7 @@ class TestRun:
         m_crs.return_value = (
             [
                 (
-                    yaml.safe_load(
-                        StringIO(
-                            """
+                    yaml.safe_load(StringIO("""
                         run_id: 1_sensitivity
 
                         segmented run:
@@ -650,9 +649,7 @@ class TestRun:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    """
-                        )
-                    ),
+                    """)),
                     "SalishSea_1.yaml",
                     Path("results_dir_1"),
                     {
@@ -664,9 +661,7 @@ class TestRun:
                     },
                 ),
                 (
-                    yaml.safe_load(
-                        StringIO(
-                            """
+                    yaml.safe_load(StringIO("""
                         run_id: 2_sensitivity
 
                         segmented run:
@@ -679,9 +674,7 @@ class TestRun:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    """
-                        )
-                    ),
+                    """)),
                     "SalishSea_2.yaml",
                     Path("results_dir_2"),
                     {
@@ -860,9 +853,7 @@ class TestRun:
         m_crs.return_value = (
             [
                 (
-                    yaml.safe_load(
-                        StringIO(
-                            """
+                    yaml.safe_load(StringIO("""
                         run_id: 0_sensitivity
 
                         segmented run:
@@ -875,9 +866,7 @@ class TestRun:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    """
-                        )
-                    ),
+                    """)),
                     "SalishSea_0.yaml",
                     Path("results_dir_0"),
                     {
@@ -889,9 +878,7 @@ class TestRun:
                     },
                 ),
                 (
-                    yaml.safe_load(
-                        StringIO(
-                            """
+                    yaml.safe_load(StringIO("""
                         run_id: 1_sensitivity
 
                         segmented run:
@@ -904,9 +891,7 @@ class TestRun:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                    """
-                        )
-                    ),
+                    """)),
                     "SalishSea_1.yaml",
                     Path("results_dir_1"),
                     {
@@ -971,10 +956,7 @@ class TestCalcRunSegments:
 
     def test_no_run_id(self, mock_f90nml_read, monkeypatch):
         def mock_load_run_desc(run_desc_path):
-            return yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        """\
+            return yaml.safe_load(StringIO(textwrap.dedent("""\
                         segmented run:
                             start date: 2014-11-15
                             start time step: 152634
@@ -985,10 +967,7 @@ class TestCalcRunSegments:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                            """
-                    )
-                )
-            )
+                            """)))
 
         monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
 
@@ -999,10 +978,7 @@ class TestCalcRunSegments:
 
     def test_no_start_date(self, mock_f90nml_read, monkeypatch):
         def mock_load_run_desc(run_desc_path):
-            return yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        """\
+            return yaml.safe_load(StringIO(textwrap.dedent("""\
                         run_id: sensitivity
 
                         segmented run:
@@ -1015,10 +991,7 @@ class TestCalcRunSegments:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                        """
-                    )
-                )
-            )
+                        """)))
 
         monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
 
@@ -1029,10 +1002,7 @@ class TestCalcRunSegments:
 
     def test_no_start_time_step(self, mock_f90nml_read, monkeypatch):
         def mock_load_run_desc(run_desc_path):
-            return yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        """\
+            return yaml.safe_load(StringIO(textwrap.dedent("""\
                         run_id: sensitivity
 
                         segmented run:
@@ -1045,10 +1015,7 @@ class TestCalcRunSegments:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                        """
-                    )
-                )
-            )
+                        """)))
 
         monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
 
@@ -1059,10 +1026,7 @@ class TestCalcRunSegments:
 
     def test_no_end_date(self, mock_f90nml_read, monkeypatch):
         def mock_load_run_desc(run_desc_path):
-            return yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        """\
+            return yaml.safe_load(StringIO(textwrap.dedent("""\
                         run_id: sensitivity
 
                         segmented run:
@@ -1075,10 +1039,7 @@ class TestCalcRunSegments:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                        """
-                    )
-                )
-            )
+                        """)))
 
         monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
 
@@ -1089,10 +1050,7 @@ class TestCalcRunSegments:
 
     def test_no_days_per_segment(self, mock_f90nml_read, monkeypatch):
         def mock_load_run_desc(run_desc_path):
-            return yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        """\
+            return yaml.safe_load(StringIO(textwrap.dedent("""\
                         run_id: sensitivity
 
                         segmented run:
@@ -1105,10 +1063,7 @@ class TestCalcRunSegments:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                        """
-                    )
-                )
-            )
+                        """)))
 
         monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
 
@@ -1119,10 +1074,7 @@ class TestCalcRunSegments:
 
     def test_no_first_segment_number(self, mock_f90nml_read, monkeypatch):
         def mock_load_run_desc(run_desc_path):
-            return yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        """\
+            return yaml.safe_load(StringIO(textwrap.dedent("""\
                         run_id: sensitivity
 
                         segmented run:
@@ -1135,10 +1087,7 @@ class TestCalcRunSegments:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                        """
-                    )
-                )
-            )
+                        """)))
 
         monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
 
@@ -1149,10 +1098,7 @@ class TestCalcRunSegments:
 
     def test_no_namdom_namelist(self, mock_f90nml_read, monkeypatch):
         def mock_load_run_desc(run_desc_path):
-            return yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        """\
+            return yaml.safe_load(StringIO(textwrap.dedent("""\
                         run_id: sensitivity
 
                         segmented run:
@@ -1164,10 +1110,7 @@ class TestCalcRunSegments:
                             segment walltime: 12:00:00
                             namelists:
                                 namrun: ./namelist.time
-                        """
-                    )
-                )
-            )
+                        """)))
 
         monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
 
@@ -1179,10 +1122,7 @@ class TestCalcRunSegments:
     @pytest.mark.parametrize("first_seg_no", (0, 3))
     def test_run_segments(self, mock_f90nml_read, first_seg_no, monkeypatch):
         def mock_load_run_desc(run_desc_path):
-            return yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        f"""\
+            return yaml.safe_load(StringIO(textwrap.dedent(f"""\
                         run_id: sensitivity
 
                         segmented run:
@@ -1195,10 +1135,7 @@ class TestCalcRunSegments:
                             namelists:
                                 namrun: ./namelist.time
                                 namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                        """
-                    )
-                )
-            )
+                        """)))
 
         monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
 
@@ -1208,10 +1145,7 @@ class TestCalcRunSegments:
 
         expected = [
             (
-                yaml.safe_load(
-                    StringIO(
-                        textwrap.dedent(
-                            f"""\
+                yaml.safe_load(StringIO(textwrap.dedent(f"""\
                             run_id: {first_seg_no}_sensitivity
 
                             segmented run:
@@ -1224,10 +1158,7 @@ class TestCalcRunSegments:
                                 namelists:
                                     namrun: ./namelist.time
                                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                            """
-                        )
-                    )
-                ),
+                            """))),
                 f"SalishSea_{first_seg_no}.yaml",
                 Path(f"results_dir_{first_seg_no}"),
                 {
@@ -1239,10 +1170,7 @@ class TestCalcRunSegments:
                 },
             ),
             (
-                yaml.safe_load(
-                    StringIO(
-                        textwrap.dedent(
-                            f"""\
+                yaml.safe_load(StringIO(textwrap.dedent(f"""\
                             run_id: {first_seg_no + 1}_sensitivity
 
                             segmented run:
@@ -1255,10 +1183,7 @@ class TestCalcRunSegments:
                                 namelists:
                                     namrun: ./namelist.time
                                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-                            """
-                        )
-                    )
-                ),
+                            """))),
                 f"SalishSea_{first_seg_no + 1}.yaml",
                 Path(f"results_dir_{first_seg_no + 1}"),
                 {
@@ -1275,10 +1200,7 @@ class TestCalcRunSegments:
 
     def test_final_run_segment(self, mock_f90nml_read, monkeypatch):
         def mock_load_run_desc(run_desc_path):
-            return yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        """\
+            return yaml.safe_load(StringIO(textwrap.dedent("""\
                         run_id: SKOG_2016_BASE
 
                         segmented run:
@@ -1291,10 +1213,7 @@ class TestCalcRunSegments:
                           namelists:
                             namrun: ./namelist.time
                             namdom: $PROJECT/SalishSeaCast/hindcast-sys/SS-run-sets/v201812/namelist.domain
-                        """
-                    )
-                )
-            )
+                        """)))
 
         monkeypatch.setattr(salishsea_cmd.run, "load_run_desc", mock_load_run_desc)
 
@@ -1303,10 +1222,7 @@ class TestCalcRunSegments:
         )
 
         expected = (
-            yaml.safe_load(
-                StringIO(
-                    textwrap.dedent(
-                        """\
+            yaml.safe_load(StringIO(textwrap.dedent("""\
                     run_id: 8_SKOG_2016_BASE
 
                     segmented run:
@@ -1319,10 +1235,7 @@ class TestCalcRunSegments:
                       namelists:
                         namrun: ./namelist.time
                         namdom: $PROJECT/SalishSeaCast/hindcast-sys/SS-run-sets/v201812/namelist.domain
-                    """
-                    )
-                )
-            ),
+                    """))),
             "BR5_12SKOG2016_8.yaml",
             Path("SKOG_C_8"),
             {
@@ -1424,9 +1337,7 @@ class TestWriteSegmentNamerunNamelist:
     """Unit tests for _write_segment_namerun_namelist() function."""
 
     def test_no_namrun_namelist(self):
-        run_desc = yaml.safe_load(
-            StringIO(
-                """
+        run_desc = yaml.safe_load(StringIO("""
             run_id: sensitivity
 
             segmented run:
@@ -1438,9 +1349,7 @@ class TestWriteSegmentNamerunNamelist:
                 namelists:
 
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-            """
-            )
-        )
+            """))
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
             with pytest.raises(SystemExit):
                 salishsea_cmd.run._write_segment_namrun_namelist(
@@ -1449,18 +1358,14 @@ class TestWriteSegmentNamerunNamelist:
 
     def test_write_segment_namrun_namelist(self, tmp_path):
         namelist_time = tmp_path / "namelist.time"
-        namelist_time.write_text(
-            """
+        namelist_time.write_text("""
             &namrun
                 nn_it000 = 0
                 nn_itend = 0
                 nn_date0 = 0
             &end
-            """
-        )
-        run_desc = yaml.safe_load(
-            StringIO(
-                """
+            """)
+        run_desc = yaml.safe_load(StringIO("""
             run_id: sensitivity
 
             segmented run:
@@ -1472,9 +1377,7 @@ class TestWriteSegmentNamerunNamelist:
                 namelists:
                     namrun: ./namelist.time
                     namdom: $PROJECT/SS-run-sets/v201812/namelist.domain
-        """
-            )
-        )
+        """))
         run_desc["segmented run"]["namelists"]["namrun"] = os.fspath(namelist_time)
         namelist_namrun_patch = {
             "namrun": {
@@ -1498,9 +1401,7 @@ class TestWriteSegmentDescFile:
     """Unit test for _write_segment_desc_file() function."""
 
     def test_run_desc_file(self, tmp_path):
-        run_desc = yaml.safe_load(
-            StringIO(
-                """
+        run_desc = yaml.safe_load(StringIO("""
             run_id: sensitivity
             walltime: 24:00:00
 
@@ -1521,21 +1422,17 @@ class TestWriteSegmentDescFile:
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
-        """
-            )
-        )
+        """))
 
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
             segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
-            segment_namrun.write_text(
-                """
+            segment_namrun.write_text("""
                 &namrun
                     nn_it000 = 174234
                     nn_itend = 189353
                     nn_date0 = 20141125
                 &end
-                """
-            )
+                """)
             run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
                 run_desc,
                 "SalishSea_1.yaml",
@@ -1547,9 +1444,7 @@ class TestWriteSegmentDescFile:
             assert Path(tmp_run_desc_dir, "SalishSea_1.yaml").exists()
 
     def test_namrun_namelist_path(self, tmp_path):
-        run_desc = yaml.safe_load(
-            StringIO(
-                """
+        run_desc = yaml.safe_load(StringIO("""
             run_id: sensitivity
             walltime: 24:00:00
 
@@ -1570,21 +1465,17 @@ class TestWriteSegmentDescFile:
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
-        """
-            )
-        )
+        """))
 
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
             segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
-            segment_namrun.write_text(
-                """
+            segment_namrun.write_text("""
                 &namrun
                     nn_it000 = 174234
                     nn_itend = 189353
                     nn_date0 = 20141125
                 &end
-                """
-            )
+                """)
             run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
                 run_desc,
                 "SalishSea_1.yaml",
@@ -1596,9 +1487,7 @@ class TestWriteSegmentDescFile:
 
     @pytest.mark.parametrize("nemo_exp", ("SalishSea", "SKOG"))
     def test_segment_0_restart_files_path(self, nemo_exp, tmp_path):
-        run_desc = yaml.safe_load(
-            StringIO(
-                f"""
+        run_desc = yaml.safe_load(StringIO(f"""
             run_id: sensitivity
             walltime: 24:00:00
 
@@ -1619,20 +1508,16 @@ class TestWriteSegmentDescFile:
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc
-        """
-            )
-        )
+        """))
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
             segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
-            segment_namrun.write_text(
-                """
+            segment_namrun.write_text("""
                 &namrun
                     nn_it000 = 174234
                     nn_itend = 189353
                     nn_date0 = 20141125
                 &end
-                """
-            )
+                """)
             run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
                 run_desc,
                 "SalishSea_1.yaml",
@@ -1651,9 +1536,7 @@ class TestWriteSegmentDescFile:
 
     @pytest.mark.parametrize("nemo_exp", ("SalishSea", "SKOG"))
     def test_restart_files_path(self, nemo_exp, tmp_path):
-        run_desc = yaml.safe_load(
-            StringIO(
-                f"""
+        run_desc = yaml.safe_load(StringIO(f"""
             run_id: sensitivity
             walltime: 24:00:00
 
@@ -1674,20 +1557,16 @@ class TestWriteSegmentDescFile:
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/{nemo_exp}_00152633_restart_trc.nc
-        """
-            )
-        )
+        """))
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
             segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
-            segment_namrun.write_text(
-                """
+            segment_namrun.write_text("""
                 &namrun
                     nn_it000 = 174234
                     nn_itend = 189353
                     nn_date0 = 20141125
                 &end
-                """
-            )
+                """)
             run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
                 run_desc,
                 "SalishSea_1.yaml",
@@ -1701,9 +1580,7 @@ class TestWriteSegmentDescFile:
         assert run_desc["restart"]["restart_trc.nc"] == expected
 
     def test_no_segment_walltime(self, tmp_path):
-        run_desc = yaml.safe_load(
-            StringIO(
-                """
+        run_desc = yaml.safe_load(StringIO("""
             run_id: sensitivity
             walltime: 24:00:00
 
@@ -1724,20 +1601,16 @@ class TestWriteSegmentDescFile:
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
-        """
-            )
-        )
+        """))
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
             segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
-            segment_namrun.write_text(
-                """
+            segment_namrun.write_text("""
                 &namrun
                     nn_it000 = 174234
                     nn_itend = 189353
                     nn_date0 = 20141125
                 &end
-                """
-            )
+                """)
             with pytest.raises(SystemExit):
                 salishsea_cmd.run._write_segment_desc_file(
                     run_desc,
@@ -1748,9 +1621,7 @@ class TestWriteSegmentDescFile:
                 )
 
     def test_segment_walltime(self, tmp_path):
-        run_desc = yaml.safe_load(
-            StringIO(
-                """
+        run_desc = yaml.safe_load(StringIO("""
             run_id: sensitivity
             walltime: 24:00:00
 
@@ -1771,20 +1642,16 @@ class TestWriteSegmentDescFile:
             restart:
                 restart.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart.nc
                 restart_trc.nc: $PROJECT/$USER/MEOPAR/results/14nov14/SalishSea_00152633_restart_trc.nc
-        """
-            )
-        )
+        """))
         with tempfile.TemporaryDirectory() as tmp_run_desc_dir:
             segment_namrun = Path(tmp_run_desc_dir, "namelist.time")
-            segment_namrun.write_text(
-                """
+            segment_namrun.write_text("""
                 &namrun
                     nn_it000 = 174234
                     nn_itend = 189353
                     nn_date0 = 20141125
                 &end
-                """
-            )
+                """)
             run_desc, segment_desc_file = salishsea_cmd.run._write_segment_desc_file(
                 run_desc,
                 "SalishSea_1.yaml",
@@ -2105,8 +1972,7 @@ class TestBuildBatchScript:
             cpu_arch="",
         )
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2127,16 +1993,12 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2023
@@ -2154,11 +2016,9 @@ class TestBuildBatchScript:
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
 
                 echo "Results deflation started at $(date)"
                 module load nco/4.9.5
@@ -2166,10 +2026,8 @@ class TestBuildBatchScript:
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
                 echo "Results deflation ended at $(date)"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
 
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
@@ -2183,8 +2041,7 @@ class TestBuildBatchScript:
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
-            """
-        )
+            """)
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
@@ -2209,8 +2066,7 @@ class TestBuildBatchScript:
             cpu_arch="",
         )
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2231,16 +2087,12 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2020
@@ -2258,11 +2110,9 @@ class TestBuildBatchScript:
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
 
                 echo "Results deflation started at $(date)"
                 module load nco/4.9.5
@@ -2270,10 +2120,8 @@ class TestBuildBatchScript:
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
                 echo "Results deflation ended at $(date)"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
 
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
@@ -2287,8 +2135,7 @@ class TestBuildBatchScript:
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
-            """
-        )
+            """)
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
@@ -2313,8 +2160,7 @@ class TestBuildBatchScript:
             cpu_arch="",
         )
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2335,16 +2181,12 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2023
@@ -2362,11 +2204,9 @@ class TestBuildBatchScript:
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
 
                 echo "Results deflation started at $(date)"
                 module load nco/4.9.5
@@ -2374,10 +2214,8 @@ class TestBuildBatchScript:
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
                 echo "Results deflation ended at $(date)"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
 
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
@@ -2391,8 +2229,7 @@ class TestBuildBatchScript:
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
-            """
-        )
+            """)
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
@@ -2417,8 +2254,7 @@ class TestBuildBatchScript:
             cpu_arch="",
         )
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             #!/bin/bash
 
             #SBATCH --job-name=foo
@@ -2438,16 +2274,12 @@ class TestBuildBatchScript:
             WORK_DIR=\"tmp_run_dir\"
             RESULTS_DIR=\"results_dir\"
             COMBINE=\"pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine\"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 DEFLATE=\"pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate\"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             GATHER=\"pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather\"
 
             module load StdEnv/2023
@@ -2466,11 +2298,9 @@ class TestBuildBatchScript:
             echo \"Results combining started at $(date)\"
             ${COMBINE} ${RUN_DESC} --debug
             echo \"Results combining ended at $(date)\"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
 
                 echo \"Results deflation started at $(date)\"
                 module load nco/4.9.5
@@ -2478,10 +2308,8 @@ class TestBuildBatchScript:
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
                 echo \"Results deflation ended at $(date)\"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
 
             echo \"Results gathering started at $(date)\"
             ${GATHER} ${RESULTS_DIR} --debug
@@ -2495,8 +2323,7 @@ class TestBuildBatchScript:
             rmdir $(pwd)
             echo \"Finished at $(date)\" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
-            """
-        )
+            """)
         assert script == expected
 
     @pytest.mark.parametrize("deflate", (True, False))
@@ -2521,8 +2348,7 @@ class TestBuildBatchScript:
             cpu_arch="",
         )
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             #!/bin/bash
 
             #PBS -N foo
@@ -2544,16 +2370,12 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load OpenMPI/2.1.6/GCC/SYSTEM
@@ -2576,21 +2398,17 @@ class TestBuildBatchScript:
             module load NETCDF/4.6/1
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
 
                 echo "Results deflation started at $(date)"
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
                 echo "Results deflation ended at $(date)"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
 
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
@@ -2604,8 +2422,7 @@ class TestBuildBatchScript:
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
-            """
-        )
+            """)
         assert script == expected
 
     @pytest.mark.parametrize(
@@ -2633,8 +2450,7 @@ class TestBuildBatchScript:
             cpu_arch="",
         )
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             #!/bin/bash
 
             #PBS -N foo
@@ -2657,16 +2473,12 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load intel
@@ -2689,21 +2501,17 @@ class TestBuildBatchScript:
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
 
                 echo "Results deflation started at $(date)"
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
                 echo "Results deflation ended at $(date)"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
 
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
@@ -2717,23 +2525,16 @@ class TestBuildBatchScript:
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
-            """
-        )
+            """)
         assert script == expected
 
     @pytest.mark.parametrize("deflate", [True, False])
     def test_salish(self, mock_path, deflate, monkeypatch):
-        run_desc = yaml.safe_load(
-            StringIO(
-                textwrap.dedent(
-                    """\
+        run_desc = yaml.safe_load(StringIO(textwrap.dedent("""\
                     run_id: foo
                     walltime: 01:02:03
                     email: me@example.com
-                    """
-                )
-            )
-        )
+                    """)))
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "salish")
 
         script = salishsea_cmd.run._build_batch_script(
@@ -2750,8 +2551,7 @@ class TestBuildBatchScript:
             cpu_arch="",
         )
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             #!/bin/bash
 
             RUN_ID="foo"
@@ -2759,16 +2559,12 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
 
@@ -2784,21 +2580,17 @@ class TestBuildBatchScript:
             echo "Results combining started at $(date)" >>${RESULTS_DIR}/stdout
             ${COMBINE} ${RUN_DESC} --debug >>${RESULTS_DIR}/stdout
             echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
 
                 echo "Results deflation started at $(date)" >>${RESULTS_DIR}/stdout
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug >>${RESULTS_DIR}/stdout
                 echo "Results deflation ended at $(date)" >>${RESULTS_DIR}/stdout
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
 
             echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
             ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
@@ -2812,8 +2604,7 @@ class TestBuildBatchScript:
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
-            """
-        )
+            """)
         assert script == expected
 
     @pytest.mark.parametrize(
@@ -2849,21 +2640,16 @@ class TestBuildBatchScript:
         )
 
         procs = 40 if not cores_per_node else cores_per_node
-        expected = textwrap.dedent(
-            f"""\
+        expected = textwrap.dedent(f"""\
             #!/bin/bash
 
             #SBATCH --job-name=foo
-        """
-        )
+        """)
         if cpu_arch:
-            expected += textwrap.dedent(
-                f"""\
+            expected += textwrap.dedent(f"""\
                 #SBATCH --constraint={cpu_arch}
-                """
-            )
-        expected += textwrap.dedent(
-            f"""\
+                """)
+        expected += textwrap.dedent(f"""\
             #SBATCH --nodes=2
             #SBATCH --ntasks-per-node={procs}
             #SBATCH --mem=186gb
@@ -2881,16 +2667,12 @@ class TestBuildBatchScript:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load gcc/9.4.0
@@ -2910,21 +2692,17 @@ class TestBuildBatchScript:
             echo "Results combining started at $(date)"
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
-            """
-        )
+            """)
         if deflate:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
 
                 echo "Results deflation started at $(date)"
                 ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
                   *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
                   --jobs 4 --debug
                 echo "Results deflation ended at $(date)"
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
 
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
@@ -2938,8 +2716,7 @@ class TestBuildBatchScript:
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
-            """
-        )
+            """)
         assert script == expected
 
     def test_unknown_system(self, caplog, monkeypatch):
@@ -3213,23 +2990,16 @@ class TestPbsDirectives:
         self, system, procs_per_node, cpu_arch, procs_directives, monkeypatch
     ):
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
-        run_desc = yaml.safe_load(
-            StringIO(
-                textwrap.dedent(
-                    """\
+        run_desc = yaml.safe_load(StringIO(textwrap.dedent("""\
                     run_id: foo
                     walltime: 01:02:03
-                    """
-                )
-            )
-        )
+                    """)))
 
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc, 42, "me@example.com", Path("foo"), procs_per_node, cpu_arch
         )
 
-        expected = textwrap.dedent(
-            f"""\
+        expected = textwrap.dedent(f"""\
 #PBS -N foo
 #PBS -S /bin/bash
 #PBS -l walltime=1:02:03
@@ -3240,8 +3010,7 @@ class TestPbsDirectives:
 # stdout and stderr file paths/names
 #PBS -o foo/stdout
 #PBS -e foo/stderr
-            """
-        )
+            """)
         assert pbs_directives == expected
 
     @pytest.mark.parametrize(
@@ -3267,16 +3036,10 @@ class TestPbsDirectives:
         self, system, procs_per_node, cpu_arch, procs_directives, monkeypatch
     ):
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
-        run_desc = yaml.safe_load(
-            StringIO(
-                textwrap.dedent(
-                    """\
+        run_desc = yaml.safe_load(StringIO(textwrap.dedent("""\
                     run_id: foo
                     walltime: 01:02:03
-                    """
-                )
-            )
-        )
+                    """)))
 
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc,
@@ -3288,8 +3051,7 @@ class TestPbsDirectives:
             stderr_stdout=False,
         )
 
-        expected = textwrap.dedent(
-            f"""\
+        expected = textwrap.dedent(f"""\
 #PBS -N foo
 #PBS -S /bin/bash
 #PBS -l walltime=1:02:03
@@ -3297,22 +3059,15 @@ class TestPbsDirectives:
 #PBS -m bea
 #PBS -M me@example.com
 {procs_directives}
-            """
-        )
+            """)
         assert pbs_directives == expected
 
     def test_pbs_directives_deflate(self, monkeypatch):
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", "optimum")
-        run_desc = yaml.safe_load(
-            StringIO(
-                textwrap.dedent(
-                    """\
+        run_desc = yaml.safe_load(StringIO(textwrap.dedent("""\
                     run_id: foo
                     walltime: 01:02:03
-                    """
-                )
-            )
-        )
+                    """)))
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc,
             1,
@@ -3322,8 +3077,7 @@ class TestPbsDirectives:
             deflate=True,
             result_type="ptrc",
         )
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             #PBS -N ptrc_foo_deflate
             #PBS -S /bin/bash
             #PBS -l walltime=1:02:03
@@ -3336,8 +3090,7 @@ class TestPbsDirectives:
             # stdout and stderr file paths/names
             #PBS -o foo/stdout_deflate_ptrc
             #PBS -e foo/stderr_deflate_ptrc
-            """
-        )
+            """)
         assert pbs_directives == expected
 
     @pytest.mark.parametrize(
@@ -3348,16 +3101,10 @@ class TestPbsDirectives:
 
         re: issue#16
         """
-        run_desc = yaml.safe_load(
-            StringIO(
-                textwrap.dedent(
-                    f"""\
+        run_desc = yaml.safe_load(StringIO(textwrap.dedent(f"""\
                     run_id: foo
                     walltime: {walltime}
-                    """
-                )
-            )
-        )
+                    """)))
         pbs_directives = salishsea_cmd.run._pbs_directives(
             run_desc, 42, "me@example.com", Path("")
         )
@@ -3436,12 +3183,10 @@ class TestModules:
 
         modules = salishsea_cmd.run._modules()
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
-            """
-        )
+            """)
         assert modules == expected
 
     @pytest.mark.parametrize("system", ["fir", "nibi"])
@@ -3450,12 +3195,10 @@ class TestModules:
 
         modules = salishsea_cmd.run._modules()
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
-            """
-        )
+            """)
         assert modules == expected
 
     def test_trillium(self, monkeypatch):
@@ -3463,13 +3206,11 @@ class TestModules:
 
         modules = salishsea_cmd.run._modules()
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             module load StdEnv/2023
             module load gcc/12.3
             module load netcdf-fortran-mpi/4.6.1
-            """
-        )
+            """)
         assert modules == expected
 
     def test_orcinus(self, monkeypatch):
@@ -3477,8 +3218,7 @@ class TestModules:
 
         modules = salishsea_cmd.run._modules()
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             module load intel
             module load intel/14.0/netcdf-4.3.3.1_mpi
             module load intel/14.0/netcdf-fortran-4.4.0_mpi
@@ -3486,8 +3226,7 @@ class TestModules:
             module load intel/14.0/nco-4.5.2
             module load python/3.5.0
             module load git
-            """
-        )
+            """)
         assert modules == expected
 
     def test_optimum(self, monkeypatch):
@@ -3495,11 +3234,9 @@ class TestModules:
 
         modules = salishsea_cmd.run._modules()
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             module load OpenMPI/2.1.6/GCC/SYSTEM
-            """
-        )
+            """)
         assert modules == expected
 
     def test_sockeye(self, monkeypatch):
@@ -3507,14 +3244,12 @@ class TestModules:
 
         modules = salishsea_cmd.run._modules()
 
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             module load gcc/9.4.0
             module load openmpi/4.1.1-cuda11-3
             module load netcdf-fortran/4.5.3-hdf4-support
             module load parallel-netcdf/1.12.2-additional-bindings
-            """
-        )
+            """)
         assert modules == expected
 
 
@@ -3552,8 +3287,7 @@ class TestExecute:
             redirect_stdout_stderr=False,
         )
 
-        expected = textwrap.dedent(
-            f"""\
+        expected = textwrap.dedent(f"""\
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)"
@@ -3564,49 +3298,38 @@ class TestExecute:
             echo "Ended run at $(date)"
 
             echo "Results combining started at $(date)"
-            """
-        )
+            """)
         if system == "optimum":
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 module load GCC/8.3
                 module load OpenMPI/2.1.6/GCC/8.3
                 module load ZLIB/1.2/11
                 module load use.paustin
                 module load HDF5/1.08/20
                 module load NETCDF/4.6/1
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
 
             echo "Results deflation started at $(date)"
-            """
-        )
+            """)
         if system in {"fir", "narval", "nibi", "trillium"}:
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 module load nco/4.9.5
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             ${DEFLATE} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
               *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
               --jobs 4 --debug
             echo "Results deflation ended at $(date)"
-            """
-        )
-        expected += textwrap.dedent(
-            """\
+            """)
+        expected += textwrap.dedent("""\
 
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
-            """
-        )
+            """)
         assert script == expected
 
     def test_salish_execute_with_deflate(self, monkeypatch):
@@ -3621,8 +3344,7 @@ class TestExecute:
             redirect_stdout_stderr=True,
         )
 
-        expected = textwrap.dedent(
-            f"""\
+        expected = textwrap.dedent(f"""\
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
@@ -3645,8 +3367,7 @@ class TestExecute:
             echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
             ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
             echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
-            """
-        )
+            """)
         assert script == expected
 
     @pytest.mark.parametrize(
@@ -3749,8 +3470,7 @@ class TestExecute:
             redirect_stdout_stderr=False,
         )
 
-        expected = textwrap.dedent(
-            f"""\
+        expected = textwrap.dedent(f"""\
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)"
@@ -3761,29 +3481,24 @@ class TestExecute:
             echo "Ended run at $(date)"
 
             echo "Results combining started at $(date)"
-            """
-        )
+            """)
         if system == "optimum":
-            expected += textwrap.dedent(
-                """\
+            expected += textwrap.dedent("""\
                 module load GCC/8.3
                 module load OpenMPI/2.1.6/GCC/8.3
                 module load ZLIB/1.2/11
                 module load use.paustin
                 module load HDF5/1.08/20
                 module load NETCDF/4.6/1
-                """
-            )
-        expected += textwrap.dedent(
-            """\
+                """)
+        expected += textwrap.dedent("""\
             ${COMBINE} ${RUN_DESC} --debug
             echo "Results combining ended at $(date)"
 
             echo "Results gathering started at $(date)"
             ${GATHER} ${RESULTS_DIR} --debug
             echo "Results gathering ended at $(date)"
-            """
-        )
+            """)
         assert script == expected
 
     @pytest.mark.parametrize(
@@ -3808,8 +3523,7 @@ class TestExecute:
             redirect_stdout_stderr=True,
         )
 
-        expected = textwrap.dedent(
-            f"""\
+        expected = textwrap.dedent(f"""\
             mkdir -p ${{RESULTS_DIR}}
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
@@ -3826,8 +3540,7 @@ class TestExecute:
             echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
             ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
             echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
-            """
-        )
+            """)
         assert script == expected
 
 
@@ -3836,14 +3549,12 @@ class TestCleanup:
 
     def test_cleanup(self):
         script = salishsea_cmd.run._cleanup()
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             echo "Deleting run directory" >>${RESULTS_DIR}/stdout
             rmdir $(pwd)
             echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
             exit ${MPIRUN_EXIT_CODE}
-            """
-        )
+            """)
         assert script == expected
 
 

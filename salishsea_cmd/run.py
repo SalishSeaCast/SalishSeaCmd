@@ -20,6 +20,7 @@
 
 Prepare for, execute, and gather the results of a run of the SalishSeaCast NEMO model.
 """
+
 import copy
 import datetime
 import logging
@@ -903,44 +904,36 @@ def _pbs_directives(
         ).time()
         td = datetime.timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
     walltime = _td2hms(td)
-    pbs_directives = textwrap.dedent(
-        f"""\
+    pbs_directives = textwrap.dedent(f"""\
         #PBS -N {run_id}
         #PBS -S /bin/bash
         #PBS -l walltime={walltime}
         # email when the job [b]egins and [e]nds, or is [a]borted
         #PBS -m bea
         #PBS -M {email}
-        """
-    )
+        """)
     if SYSTEM == "orcinus":
         pbs_directives += "#PBS -l partition=QDR\n"
     if SYSTEM == "salish":
-        pbs_directives += textwrap.dedent(
-            f"""\
+        pbs_directives += textwrap.dedent(f"""\
             {procs_directive}
             # total memory for job
             #PBS -l mem=64gb
-            """
-        )
+            """)
     else:
-        pbs_directives += textwrap.dedent(
-            f"""\
+        pbs_directives += textwrap.dedent(f"""\
             {procs_directive}
             # memory per processor
             #PBS -l pmem={pmem}
-            """
-        )
+            """)
     if stderr_stdout:
         stdout = f"stdout_deflate_{result_type}" if deflate else "stdout"
         stderr = f"stderr_deflate_{result_type}" if deflate else "stderr"
-        pbs_directives += textwrap.dedent(
-            f"""\
+        pbs_directives += textwrap.dedent(f"""\
             # stdout and stderr file paths/names
             #PBS -o {results_dir}/{stdout}
             #PBS -e {results_dir}/{stderr}
-            """
-        )
+            """)
     return pbs_directives
 
 
@@ -982,45 +975,34 @@ def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
 def _modules():
     modules = {
         # Alliance Canada clusters
-        "fir": textwrap.dedent(
-            """\
+        "fir": textwrap.dedent("""\
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
-            """
-        ),
-        "narval": textwrap.dedent(
-            """\
+            """),
+        "narval": textwrap.dedent("""\
             module load StdEnv/2020
             module load netcdf-fortran-mpi/4.6.0
-            """
-        ),
-        "nibi": textwrap.dedent(
-            """\
+            """),
+        "nibi": textwrap.dedent("""\
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
-            """
-        ),
-        "trillium": textwrap.dedent(
-            """\
+            """),
+        "trillium": textwrap.dedent("""\
             module load StdEnv/2023
             module load gcc/12.3
             module load netcdf-fortran-mpi/4.6.1
-            """
-        ),
+            """),
         # UBC ARC sockeye cluster
-        "sockeye": textwrap.dedent(
-            """\
+        "sockeye": textwrap.dedent("""\
             module load gcc/9.4.0
             module load openmpi/4.1.1-cuda11-3
             module load netcdf-fortran/4.5.3-hdf4-support
             module load parallel-netcdf/1.12.2-additional-bindings
-            """
-        ),
+            """),
         # MOAD development machine
         "salish": "",
         # UBC Chemistry orcinus cluster
-        "orcinus": textwrap.dedent(
-            """\
+        "orcinus": textwrap.dedent("""\
             module load intel
             module load intel/14.0/netcdf-4.3.3.1_mpi
             module load intel/14.0/netcdf-fortran-4.4.0_mpi
@@ -1028,14 +1010,11 @@ def _modules():
             module load intel/14.0/nco-4.5.2
             module load python/3.5.0
             module load git
-            """
-        ),
+            """),
         # EOAS optimum cluster
-        "optimum": textwrap.dedent(
-            """\
+        "optimum": textwrap.dedent("""\
             module load OpenMPI/2.1.6/GCC/SYSTEM
-            """
-        ),
+            """),
     }.get(SYSTEM, "")
     return modules
 
@@ -1103,8 +1082,7 @@ def _execute(
             f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
         )
     redirect = "" if not redirect_stdout_stderr else " >>${RESULTS_DIR}/stdout"
-    script = textwrap.dedent(
-        f"""\
+    script = textwrap.dedent(f"""\
         mkdir -p ${{RESULTS_DIR}}
         cd ${{WORK_DIR}}
         echo "working dir: $(pwd)"{redirect}
@@ -1115,83 +1093,66 @@ def _execute(
         echo "Ended run at $(date)"{redirect}
 
         echo "Results combining started at $(date)"{redirect}
-        """
-    )
+        """)
     if SYSTEM == "optimum":
         # Load GCC-8.3 modules just before combining because rebuild_nemo on optimum
         # is built with them, in contrast to XIOS and NEMO which are built with
         # the system GCC-4.4.7
-        script += textwrap.dedent(
-            """\
+        script += textwrap.dedent("""\
             module load GCC/8.3
             module load OpenMPI/2.1.6/GCC/8.3
             module load ZLIB/1.2/11
             module load use.paustin
             module load HDF5/1.08/20
             module load NETCDF/4.6/1
-            """
-        )
-    script += textwrap.dedent(
-        f"""\
+            """)
+    script += textwrap.dedent(f"""\
         ${{COMBINE}} ${{RUN_DESC}} --debug{redirect}
         echo "Results combining ended at $(date)"{redirect}
-        """
-    )
+        """)
     if deflate and not separate_deflate:
-        script += textwrap.dedent(
-            f"""\
+        script += textwrap.dedent(f"""\
 
             echo "Results deflation started at $(date)"{redirect}
-            """
-        )
+            """)
         if SYSTEM in {"fir", "narval", "nibi", "trillium"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
-            script += textwrap.dedent(
-                """\
+            script += textwrap.dedent("""\
                 module load nco/4.9.5
-                """
-            )
-        script += textwrap.dedent(
-            f"""\
+                """)
+        script += textwrap.dedent(f"""\
             ${{DEFLATE}} *_ptrc_T*.nc *_prod_T*.nc *_carp_T*.nc *_grid_[TUVW]*.nc \\
               *_turb_T*.nc *_dia[12n]_T*.nc FVCOM*.nc Slab_[UV]*.nc *_mtrc_T*.nc \\
               --jobs {max_deflate_jobs} --debug{redirect}
             echo "Results deflation ended at $(date)"{redirect}
-            """
-        )
-    script += textwrap.dedent(
-        f"""\
+            """)
+    script += textwrap.dedent(f"""\
 
         echo "Results gathering started at $(date)"{redirect}
         ${{GATHER}} ${{RESULTS_DIR}} --debug{redirect}
         echo "Results gathering ended at $(date)"{redirect}
-        """
-    )
+        """)
     return script
 
 
 def _fix_permissions():
-    script = textwrap.dedent(
-        """\
+    script = textwrap.dedent("""\
         chmod go+rx ${RESULTS_DIR}
         chmod g+rw ${RESULTS_DIR}/*
         chmod o+r ${RESULTS_DIR}/*
-        """
-    )
+        """)
     return script
 
 
 def _cleanup():
-    script = textwrap.dedent(
-        """\
+    script = textwrap.dedent("""\
         echo "Deleting run directory" >>${RESULTS_DIR}/stdout
         rmdir $(pwd)
         echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
         exit ${MPIRUN_EXIT_CODE}
-        """
-    )
+        """)
     return script
 
 
