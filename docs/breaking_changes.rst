@@ -22,6 +22,19 @@
 ``SalishSeaCmd`` Changes That Break Backward Compatibility
 *************************************************************
 
+.. _BreakingChangesVersion26.1:
+
+Version 26.1
+============
+
+The following change that was introduced in version 26.1 of the ``SalishSeaCmd``
+package is incompatible with earlier versions:
+
+* Changed to Pixi_ for package and environment management.
+
+  .. _Pixi: https://pixi.prefix.dev/latest/
+
+
 .. _BreakingChangesVersion25.3:
 
 Version 25.3
