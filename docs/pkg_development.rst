@@ -114,6 +114,10 @@ Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from Git
 Development Environment
 =======================
 
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json
+    :target: https://pixi.prefix.dev/latest/
+    :alt: Pixi
+
 :py:obj:`SalishSeaCmd` uses Pixi_ for package and environment management.
 If you don't already have Pixi_ installed,
 please follow its `installation instructions`_ to do so.
