@@ -114,10 +114,9 @@ Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from Git
 Development Environment
 =======================
 
-The :kbd:`SalishSeaCmd` package depends on the :kbd:`NEMO-Cmd` package,
-so you need to clone its repo,
-:ref:`NEMO-Cmd-repo`,
-beside your clone of :ref:`SalishSeaCmd-repo`.
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json
+    :target: https://pixi.prefix.dev/latest/
+    :alt: Pixi
 
 :py:obj:`SalishSeaCmd` uses Pixi_ for package and environment management.
 If you don't already have Pixi_ installed,
@@ -576,7 +575,7 @@ completed.
 
 The release process steps are:
 
-#. Use :command:`hatch version release` to bump the version from ``.devn`` to the next release
+#. Use :command:`pixi run -e dev hatch version release` to bump the version from ``.devn`` to the next release
    version identifier
 
 #. Confirm that :file:`docs/breaking_changes.rst` includes any relevant notes for the
@@ -621,8 +620,8 @@ The release process steps are:
 
 #. Close the milestone for the just released version.
 
-#. Use :command:`hatch version minor,dev` to bump the version for the next development cycle,
-   or use :command:`hatch version major,minor,dev` for a year rollover version bump
+#. Use :command:`pixi run -e dev hatch version minor,dev` to bump the version for the next development cycle,
+   or use :command:`pixi run -e dev hatch version major,minor,dev` for a year rollover version bump
 
 #. Commit the version bump
 
