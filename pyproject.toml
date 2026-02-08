@@ -152,7 +152,7 @@ black = "*"
 hatch = "*"
 pre-commit = "*"
 # For reuirements.txt file maintenance (until dependabot supports pixi.lock files)
-pip = ">=25.3,<26"
+pip = ">=26.0.1,<27"
 # For unit tests
 pytest = "*"
 pytest-cov = "*"
