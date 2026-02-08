@@ -114,11 +114,6 @@ Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from Git
 Development Environment
 =======================
 
-The :kbd:`SalishSeaCmd` package depends on the :kbd:`NEMO-Cmd` package,
-so you need to clone its repo,
-:ref:`NEMO-Cmd-repo`,
-beside your clone of :ref:`SalishSeaCmd-repo`.
-
 :py:obj:`SalishSeaCmd` uses Pixi_ for package and environment management.
 If you don't already have Pixi_ installed,
 please follow its `installation instructions`_ to do so.
