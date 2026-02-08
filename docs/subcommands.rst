@@ -128,7 +128,7 @@ your run description YAML file.
 To accomplish that,
 we have to tell Pixi where to find the :file:`SalishSeaCmd/` directory so that it can use the
 correct environment.
-We do that by using the :option:`-m` or :option:`--manifest` option of :command:`pixi run`.
+We do that by using the ``-m`` or ``--manifest`` option of :command:`pixi run`.
 Example:
 
 .. code-block:: bash
