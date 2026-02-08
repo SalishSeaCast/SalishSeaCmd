@@ -151,7 +151,7 @@ To get detailed information about the environments,
 the packages installed in them,
 `Pixi`_ tasks that are defined for them,
 etc.,
-:use command:`pixi info`.
+use :command:`pixi info`.
 
 :py:obj:`SalishSeaCmd` is installed in `editable install mode`_ in all of the environments that
 `Pixi`_ creates.

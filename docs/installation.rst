@@ -25,7 +25,7 @@
 :py:obj:`SalishSeaCmd` is a Python package that provides the :program:`salishsea`
 command-line tool for doing various operations associated with the
 :ref:`SalishSeaNEMO` model.
-It is an extension of the :py:obj`NEMO-Cmd` package customized for working with
+It is an extension of the :py:obj:`NEMO-Cmd` package customized for working with
 the SalishSeaCast NEMO model.
 
 These instructions assume that:
@@ -53,7 +53,7 @@ your run description YAML file.
 To accomplish that,
 we have to tell Pixi where to find the :file:`SalishSeaCmd/` directory so that it can use the
 correct environment.
-We do that by using the :option:`-m` or :option:`--manifest` option of :command:`pixi run`.
+We do that by using the ``-m`` or ``--manifest`` option of :command:`pixi run`.
 Example:
 
 .. code-block:: bash
