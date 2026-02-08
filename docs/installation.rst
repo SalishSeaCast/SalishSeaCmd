@@ -25,7 +25,7 @@
 :py:obj:`SalishSeaCmd` is a Python package that provides the :program:`salishsea`
 command-line tool for doing various operations associated with the
 :ref:`SalishSeaNEMO` model.
-It is an extension of the :py:obj`NEMO-Cmd` package customized for working with
+It is an extension of the :py:obj:`NEMO-Cmd` package customized for working with
 the SalishSeaCast NEMO model.
 
 These instructions assume that:
