@@ -25,7 +25,7 @@ cliff==4.13.1
 cmd2==3.2.0
 colorama==0.4.6
 coverage==7.13.3
-cryptography==46.0.4
+cryptography==46.0.5
 distlib==0.4.0
 docutils==0.21.2
 editables==0.5
