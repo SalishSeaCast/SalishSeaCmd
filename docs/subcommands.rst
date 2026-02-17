@@ -26,39 +26,38 @@ The command :command:`pixi run salishsea help` produces a list of the available 
 options and sub-commands:
 
 .. code-block:: text
+   :class: no-copybutton
 
-  usage: salishsea [--version] [-v | -q] [--log-file LOG_FILE] [-h] [--debug]
+    usage: salishsea [--version] [-v | -q] [--log-file LOG_FILE] [-h] [--debug]
 
-  SalishSeaCast NEMO Command Processor
+    SalishSeaCast NEMO Command Processor
 
-  optional arguments:
-    --version            show program's version number and exit
-    -v, --verbose        Increase verbosity of output. Can be repeated.
-    -q, --quiet          Suppress output except warnings and errors.
-    --log-file LOG_FILE  Specify a file to log output. Disabled by default.
-    -h, --help           Show help message and exit.
-    --debug              Show tracebacks on errors.
+    optional arguments:
+      --version            show program's version number and exit
+      -v, --verbose        Increase verbosity of output. Can be repeated.
+      -q, --quiet          Suppress output except warnings and errors.
+      --log-file LOG_FILE  Specify a file to log output. Disabled by default.
+      -h, --help           Show help message and exit.
+      --debug              Show tracebacks on errors.
 
-  Commands:
-    combine        Combine per-processor files from an MPI NEMO run into single files (NEMO-Cmd)
-    complete       print bash completion command (cliff)
-    deflate        Deflate variables in netCDF files using Lempel-Ziv compression. (NEMO-Cmd)
-    gather         Gather results from a NEMO run. (NEMO-Cmd)
-    help           print detailed help for another command (cliff)
-    prepare        Prepare a SalishSeaCast NEMO run.
-    run            Prepare, execute, and gather results from a SalishSeaCast NEMO model run.
-    split-results  Split the results of a multi-day SalishSeaCast NEMO model run
-                   (e.g. a hindcast run) into daily results directories.
+    Commands:
+      combine        Combine per-processor files from an MPI NEMO run into single files (NEMO-Cmd)
+      complete       print bash completion command (cliff)
+      deflate        Deflate variables in netCDF files using Lempel-Ziv compression. (NEMO-Cmd)
+      gather         Gather results from a NEMO run. (NEMO-Cmd)
+      help           print detailed help for another command (cliff)
+      prepare        Prepare a SalishSeaCast NEMO run.
+      run            Prepare, execute, and gather results from a SalishSeaCast NEMO model run.
+      split-results  Split the results of a multi-day SalishSeaCast NEMO model run
+                     (e.g. a hindcast run) into daily results directories.
 
 For details of the arguments and options for a sub-command use
 :command:`pixi run salishsea help <sub-command>`.
 For example:
 
-.. code-block:: bash
+.. code-block:: console
 
-    pixi run salishsea help run
-
-.. code-block:: text
+    $ pixi run salishsea help run
 
     usage: salishsea run [-h] [--cores-per-node CORES_PER_NODE] [--cpu-arch CPU_ARCH]
                          [--deflate] [--max-deflate-jobs MAX_DEFLATE_JOBS]
@@ -119,9 +118,9 @@ For example:
 
 You can check what version of :program:`salishsea` you have installed with:
 
-.. code-block:: bash
+.. code-block:: console
 
-    pixi run salishsea --version
+    $ pixi run salishsea --version
 
 A common use-case is to execute the :command:`salishsea run` command in the directory containing
 your run description YAML file.
@@ -131,11 +130,11 @@ correct environment.
 We do that by using the ``-m`` or ``--manifest`` option of :command:`pixi run`.
 Example:
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd SS-run-sets/SalishSea/sea/Carbon_v202111/
-    pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea run 01jan11_Lb80.yaml \
-      /scratch/allen/Carbon/MoreSens/Now/01jan11/
+    $ cd SS-run-sets/SalishSea/sea/Carbon_v202111/
+    $ pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea run 01jan11_Lb80.yaml \
+        /scratch/allen/Carbon/MoreSens/Now/01jan11/
 
 
 .. _salishsea-run:
@@ -150,6 +149,7 @@ description file.
 The results are gathered in the specified results directory.
 
 .. code-block:: text
+   :class: no-copybutton
 
     usage: salishsea run [-h] [--cores-per-node CORES_PER_NODE] [--cpu-arch CPU_ARCH]
                          [--deflate] [--max-deflate-jobs MAX_DEFLATE_JOBS]
@@ -232,9 +232,9 @@ See the :ref:`RunDescriptionFileStructure` section for details of the run descri
 The :command:`run` sub-command concludes by printing the path to the run directory and the response from the job queue manager.
 Example:
 
-.. code-block:: bash
+.. code-block:: console
 
-    pixi run salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
+    $ pixi run salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
 
     salishsea_cmd.run INFO: salishsea_cmd.prepare Created run directory /global/scratch/sallen/20mar17hindcast_2017-10-01T183841.082501-0700
     salishsea_cmd.run INFO: 3330782.orca2.ibb
@@ -265,9 +265,9 @@ and :kbd:`dia[12]_T`.
 The output of a :command:`run --separate-deflate` sub-command includes information from the job queue manager about the NEMO job and the 3 deflate jobs.
 Example:
 
-.. code-block:: bash
+.. code-block:: console
 
-    pixi run salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
+    $ pixi run salishsea run SalishSea.yaml $HOME/MEOPAR/SalishSea/myrun
 
     salishsea_cmd.run INFO: salishsea_cmd.prepare Created run directory ../../SalishSea/20mar17hindcast_2017-10-01T183841.082501-0700
     salishsea_cmd.run INFO: SalishSeaNEMO.sh queued as 3330782.orca2.ibb
@@ -286,6 +286,7 @@ SalishSeaCast NEMO run described in the specified run description,
 and IOM server definitions files:
 
 .. code-block:: text
+   :class: no-copybutton
 
     usage: salishsea prepare [-h] [--nemo3.4] [-q] DESC_FILE
 
@@ -306,9 +307,9 @@ See the :ref:`RunDescriptionFileStructure` section for details of the run descri
 The :command:`prepare` sub-command concludes by printing the path to the run directory it created.
 Example:
 
-.. code-block:: bash
+.. code-block:: console
 
-    pixi run salishsea prepare SalishSea.yaml iodef.xml
+    $ pixi run salishsea prepare SalishSea.yaml iodef.xml
 
     salishsea_cmd.prepare INFO: Created run directory /scratch/dlatorne/MEOPAR/runs/01mar23-11x32_2025-12-24T145433.665751-0800
 
@@ -396,9 +397,9 @@ The :command:`combine` sub-command combines the per-processor results and/or res
 It is provided by the `NEMO-Cmd`_ package.
 Please use:
 
-.. code-block:: bash
+.. code-block:: console
 
-    pixi run salishsea help combine
+    $ pixi run salishsea help combine
 
 to see its usage,
 and see :ref:`nemocmd:nemo-combine` for more details.
@@ -418,9 +419,9 @@ The :command:`deflate` sub-command deflates the variables in netCDF files using 
 It is provided by the `NEMO-Cmd`_ package.
 Please use:
 
-.. code-block:: bash
+.. code-block:: console
 
-    pixi run salishsea help deflate
+    $ pixi run salishsea help deflate
 
 to see its usage,
 and see :ref:`nemocmd:nemo-deflate` for more details.
@@ -438,9 +439,9 @@ The :command:`gather` sub-command moves results from a NEMO run into a results d
 It is provided by the `NEMO-Cmd`_ package.
 Please use:
 
-.. code-block:: bash
+.. code-block:: console
 
-    pixi run salishsea help gather
+    $ pixi run salishsea help gather
 
 to see its usage,
 and see :ref:`nemocmd:nemo-gather` for more details.
@@ -468,6 +469,7 @@ The restart files are moved to the last run day's directory.
 .. _file_def_dailysplit.xml: https://github.com/SalishSeaCast/SS-run-sets/blob/main/v201905/hindcast/file_def_dailysplit.xml
 
 .. code-block:: text
+   :class: no-copybutton
 
     usage: salishsea split-results [-h] [-q] SOURCE_DIR
 

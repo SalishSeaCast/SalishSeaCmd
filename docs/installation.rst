@@ -43,10 +43,10 @@ a working environment the first time that you use a `Pixi`_ command in the :file
 (or a sub-directory).
 Example:
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd SalishSeaCmd
-    pixi run salishsea help
+    $ cd SalishSeaCmd
+    $ pixi run salishsea help
 
 A common use-case is to execute the :command:`salishsea run` command in the directory containing
 your run description YAML file.
@@ -56,11 +56,11 @@ correct environment.
 We do that by using the ``-m`` or ``--manifest`` option of :command:`pixi run`.
 Example:
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd SS-run-sets/SalishSea/sea/Carbon_v202111/
-    pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea run 01jan11_Lb80.yaml \
-      /scratch/allen/Carbon/MoreSens/Now/01jan11/
+    $ cd SS-run-sets/SalishSea/sea/Carbon_v202111/
+    $ pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea run 01jan11_Lb80.yaml \
+        /scratch/allen/Carbon/MoreSens/Now/01jan11/
 
 For doing so it development,
 testing,

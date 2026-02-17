@@ -104,9 +104,9 @@ Clone the :ref:`SalishSeaCmd-repo` code and documentation `repository`_ from Git
 
 .. _repository: https://github.com/SalishSeaCast/SalishSeaCmd
 
-.. code-block:: bash
+.. code-block:: console
 
-    git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
+    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
 
 
 .. _SalishSeaCmdDevelopmentEnvironment:
@@ -181,10 +181,10 @@ and repo QA.
 To install the `pre-commit` hooks in a newly cloned repo,
 run :command:`pre-commit install`:
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd SalishSeaCmd
-    pixi run -e dev pre-commit install
+    $ cd SalishSeaCmd
+    $ pixi run -e dev pre-commit install
 
 .. note::
     You only need to install the hooks once immediately after you make a new clone
