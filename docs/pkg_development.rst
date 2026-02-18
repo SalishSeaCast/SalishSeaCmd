@@ -248,6 +248,7 @@ To do a clean build of the documentation use:
 The output looks something like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     ✨ Pixi task (docs in docs): make clean html
     Removing everything under '_build'...
@@ -312,6 +313,7 @@ Run the link checker with:
 The output looks something like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     ✨ Pixi task (linkcheck in docs): make clean linkcheck
     Removing everything under '_build'...
@@ -441,6 +443,7 @@ to run the test suite.
 The output looks something like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     ================================= test session starts ===================================
     platform linux -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
