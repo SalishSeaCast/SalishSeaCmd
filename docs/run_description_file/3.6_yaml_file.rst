@@ -518,11 +518,11 @@ the files created will be::
 For Git repositories,
 each :file:`_rev.txt` file will contain the output of the commands:
 
-.. code-block:: bash
+.. code-block:: console
 
-    git branch --show-current
-    git log -1
-    git show --pretty="" --name-only
+    $ git branch --show-current
+    $ git log -1
+    $ git show --pretty="" --name-only
 
 for the repository.
 That is a record of the last committed revision of the repository that will be in effect for the run.
