@@ -240,10 +240,10 @@ Building and Previewing the Documentation
 Building the documentation is driven by :file:`docs/Makefile`.
 To do a clean build of the documentation use:
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd SalishSeaCmd/
-    pixi run docs
+    $ cd SalishSeaCmd/
+    $ pixi run docs
 
 The output looks something like:
 
@@ -304,10 +304,10 @@ Link Checking the Documentation
 Sphinx also provides a link checker utility which can be run to find broken or redirected links in the docs.
 Run the link checker with:
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd SalishSeaCmd/
-    pixi run linkcheck
+    $ cd SalishSeaCmd/
+    $ pixi run linkcheck
 
 The output looks something like:
 
@@ -432,10 +432,10 @@ The `pytest`_ tool is used for test fixtures and as the test runner for the suit
 
 To run the test suite in the most recent supported version of Python use:
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd SalishSeaCmd/
-    pixi run -e test pytest
+    $ cd SalishSeaCmd/
+    $ pixi run -e test pytest
 
 to run the test suite.
 The output looks something like:
@@ -464,20 +464,20 @@ You can monitor what lines of code the test suite exercises using the `coverage.
 .. _coverage.py: https://coverage.readthedocs.io/en/latest/
 .. _pytest-cov: https://pytest-cov.readthedocs.io/en/latest/
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd SalishSeaCmd/
-    pixi run -e test pytest-cov
+    $ cd SalishSeaCmd/
+    $ pixi run -e test pytest-cov
 
 The test coverage report will be displayed below the test suite run output.
 
 Alternatively,
 you can use
 
-.. code-block:: bash
+.. code-block:: console
 
-    cd SalishSeaCmd/
-    pixi run -e test pytest-cov-html
+    $ cd SalishSeaCmd/
+    $ pixi run -e test pytest-cov-html
 
 to produce an HTML report that you can view in your browser by opening
 :file:`SalishSeaCmd/htmlcov/index.html`.
