@@ -38,14 +38,23 @@ These instructions assume that:
   .. _Pixi: https://pixi.prefix.dev/latest/
   .. _`installation instructions`: https://pixi.prefix.dev/latest/installation/
 
-The packages that are required by :py:obj:`SalishSeaCmd` will be downloaded and linked into
-a working environment the first time that you use a `Pixi`_ command in the :file:`SalishSeaCmd/` directory
-(or a sub-directory).
-Example:
+Use Pixi to create an isolated environment for :py:obj:`SalishSeaCmd` to avoid conflicts with
+other Python packages installed on your system.
+That environment will have all of the Python packages necessary to use the :program:`salishsea`
+command that is provided by the :py:obj:`SalishSeaCmd` package.
 
 .. code-block:: console
 
     $ cd SalishSeaCmd
+    $ pixi install
+
+When you are in the :file:`SalishSeaCmd/` directory
+(or a sub-directory)
+you can run the :program:`salishsea` command with with the :command:`pixi run` command.
+Example:
+
+.. code-block:: console
+
     $ pixi run salishsea help
 
 A common use-case is to execute the :command:`salishsea run` command in the directory containing
@@ -62,7 +71,7 @@ Example:
     $ pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea run 01jan11_Lb80.yaml \
         /scratch/allen/Carbon/MoreSens/Now/01jan11/
 
-For doing so it development,
+For doing development,
 testing,
 and documentation of the :py:obj:`SalishSeaCmd` package,
 please see the :ref:`SalishSeaCmdPackageDevelopment` section.
