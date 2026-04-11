@@ -38,7 +38,7 @@ These instructions assume that:
   .. _Pixi: https://pixi.prefix.dev/latest/
   .. _`installation instructions`: https://pixi.prefix.dev/latest/installation/
 
-Use Pixi to create an isolated environment for :py:obj:`AtlantisCmd` to avoid conflicts with
+Use Pixi to create an isolated environment for :py:obj:`SalishSeaCmd` to avoid conflicts with
 other Python packages installed on your system.
 That environment will have all of the Python packages necessary to use the :program:`salishsea`
 command that is provided by the :py:obj:`SalishSeaCmd` package.
