@@ -60,9 +60,9 @@ Example:
 A common use-case is to execute the :command:`salishsea run` command in the directory containing
 your run description YAML file.
 To accomplish that,
-we have to tell Pixi where to find the :file:`SalishSeaCmd/` directory so that it can use the
+you have to tell Pixi where to find the :file:`SalishSeaCmd/` directory so that it can use the
 correct environment.
-We do that by using the ``-m`` or ``--manifest`` option of :command:`pixi run`.
+You do that by using the ``-m`` or ``--manifest`` option of :command:`pixi run`.
 Example:
 
 .. code-block:: console
