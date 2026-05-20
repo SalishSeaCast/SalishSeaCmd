@@ -980,8 +980,8 @@ def _modules():
             module load netcdf-fortran-mpi/4.6.1
             """),
         "narval": textwrap.dedent("""\
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
             """),
         "nibi": textwrap.dedent("""\
             module load StdEnv/2023
