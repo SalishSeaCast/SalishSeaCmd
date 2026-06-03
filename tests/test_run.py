@@ -2095,8 +2095,8 @@ class TestBuildBatchScript:
         expected += textwrap.dedent("""\
             GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
 
             mkdir -p ${RESULTS_DIR}
             cd ${WORK_DIR}
@@ -3177,19 +3177,7 @@ class TestModules:
 
         assert modules == ""
 
-    @pytest.mark.parametrize("system", ["narval"])
-    def test_narval(self, system, monkeypatch):
-        monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
-
-        modules = salishsea_cmd.run._modules()
-
-        expected = textwrap.dedent("""\
-            module load StdEnv/2020
-            module load netcdf-fortran-mpi/4.6.0
-            """)
-        assert modules == expected
-
-    @pytest.mark.parametrize("system", ["fir", "nibi"])
+    @pytest.mark.parametrize("system", ["fir", "narval", "nibi"])
     def test_2025_alliance_clusters(self, system, monkeypatch):
         monkeypatch.setattr(salishsea_cmd.run, "SYSTEM", system)
 
