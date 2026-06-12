@@ -277,6 +277,7 @@ def run(
             "fir": "sbatch",
             "narval": "sbatch",
             "nibi": "sbatch",
+            "rorqual": "sbatch",
             "trillium": "sbatch",
             # UBC ARC sockeye cluster
             "sockeye": "sbatch",
@@ -664,6 +665,7 @@ def _build_batch_script(
         "fir",
         "narval",
         "nibi",
+        "rorqual",
         "trillium",
         # UBC ARC sockeye cluster
         "sockeye",
@@ -673,6 +675,7 @@ def _build_batch_script(
             "fir": 192 if not cores_per_node else int(cores_per_node),
             "narval": 64 if not cores_per_node else int(cores_per_node),
             "nibi": 192 if not cores_per_node else int(cores_per_node),
+            "rorqual": 192 if not cores_per_node else int(cores_per_node),
             "trillium": 192 if not cores_per_node else int(cores_per_node),
             # UBC ARC sockeye cluster
             "sockeye": 40 if not cores_per_node else int(cores_per_node),
@@ -773,6 +776,7 @@ def _sbatch_directives(
         "fir": "0",
         "narval": "0",
         "nibi": "0",
+        "rorqual": "0",
         # Not used on trillium
         # UBC ARC sockeye cluster
         "sockeye": "186gb",
@@ -987,6 +991,10 @@ def _modules():
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
             """),
+        "rorqual": textwrap.dedent("""\
+            module load StdEnv/2023
+            module load netcdf-fortran-mpi/4.6.1
+            """),
         "trillium": textwrap.dedent("""\
             module load StdEnv/2023
             module load gcc/12.3
@@ -1037,6 +1045,7 @@ def _execute(
         "fir": "mpirun",
         "narval": "mpirun",
         "nibi": "mpirun",
+        "rorqual": "mpirun",
         "trillium": "mpirun",
         # UBC ARC sockeye cluster
         "sockeye": "mpirun",
@@ -1052,6 +1061,7 @@ def _execute(
         "fir": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "narval": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "nibi": f"{mpirun} -np {nemo_processors} ./nemo.exe",
+        "rorqual": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         "trillium": f"{mpirun} -np {nemo_processors} ./nemo.exe",
         # UBC ARC sockeye cluster
         "sockeye": f"{mpirun} -np {nemo_processors} ./nemo.exe",
@@ -1068,6 +1078,7 @@ def _execute(
             "fir": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "narval": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "nibi": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
+            "rorqual": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             "trillium": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
             # UBC ARC sockeye cluster
             "sockeye": f"{mpirun} : -np {xios_processors} ./xios_server.exe{redirect}",
@@ -1115,7 +1126,7 @@ def _execute(
 
             echo "Results deflation started at $(date)"{redirect}
             """)
-        if SYSTEM in {"fir", "narval", "nibi", "trillium"}:
+        if SYSTEM in {"fir", "narval", "nibi", "rorqual", "trillium"}:
             # Load the nco module just before deflation because it replaces
             # the netcdf-mpi and netcdf-fortran-mpi modules with their non-mpi
             # variants
