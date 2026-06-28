@@ -1,4 +1,6 @@
-name: "CodeQL"
+name: CodeQL
+
+permissions: {}
 
 on:
   push:
