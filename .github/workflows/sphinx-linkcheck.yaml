@@ -11,6 +11,6 @@ on:
 jobs:
   sphinx-linkcheck:
     permissions:
-      contents: read
+      contents: read  # Required to access the repository's source code
 
     uses: UBC-MOAD/gha-workflows/.github/workflows/pixi-sphinx-linkcheck.yaml@main  # zizmor: ignore[unpinned-uses]
