@@ -91,7 +91,7 @@ rich==14.3.4
 rich-argparse==1.8.0
 SalishSeaCmd==26.2.dev0
 SecretStorage==3.4.1
-setuptools==82.0.1
+setuptools==83.0.0
 shellingham==1.5.4
 six==1.17.0
 smmap==5.0.3
