@@ -962,7 +962,7 @@ def _td2hms(timedelta):
 
 def _definitions(run_desc, run_desc_file, run_dir, results_dir, deflate):
     salishsea_cmd_dir = Path(__file__).parent.parent
-    salishsea_cmd = f"pixi run -m {os.fspath(salishsea_cmd_dir)} salishsea"
+    salishsea_cmd = f"pixi run --as-is -m {os.fspath(salishsea_cmd_dir)} salishsea"
     defns = (
         f'RUN_ID="{get_run_desc_value(run_desc, ("run_id",))}"\n'
         f'RUN_DESC="{run_dir}/{run_desc_file.name}"\n'
