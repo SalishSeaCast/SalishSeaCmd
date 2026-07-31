@@ -2030,14 +2030,14 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
+            COMBINE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """)
         if deflate:
             expected += textwrap.dedent("""\
-                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
+                DEFLATE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """)
         expected += textwrap.dedent("""\
-            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
+            GATHER="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
@@ -2124,14 +2124,14 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
+            COMBINE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """)
         if deflate:
             expected += textwrap.dedent("""\
-                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
+                DEFLATE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """)
         expected += textwrap.dedent("""\
-            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
+            GATHER="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
@@ -2218,14 +2218,14 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
+            COMBINE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """)
         if deflate:
             expected += textwrap.dedent("""\
-                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
+                DEFLATE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """)
         expected += textwrap.dedent("""\
-            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
+            GATHER="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
@@ -2312,14 +2312,14 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
+            COMBINE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """)
         if deflate:
             expected += textwrap.dedent("""\
-                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
+                DEFLATE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """)
         expected += textwrap.dedent("""\
-            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
+            GATHER="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load StdEnv/2023
             module load netcdf-fortran-mpi/4.6.1
@@ -2405,14 +2405,14 @@ class TestBuildBatchScript:
             RUN_DESC=\"tmp_run_dir/SalishSea.yaml\"
             WORK_DIR=\"tmp_run_dir\"
             RESULTS_DIR=\"results_dir\"
-            COMBINE=\"pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine\"
+            COMBINE=\"pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea combine\"
             """)
         if deflate:
             expected += textwrap.dedent("""\
-                DEFLATE=\"pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate\"
+                DEFLATE=\"pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate\"
                 """)
         expected += textwrap.dedent("""\
-            GATHER=\"pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather\"
+            GATHER=\"pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea gather\"
 
             module load StdEnv/2023
             module load gcc/12.3
@@ -2501,14 +2501,14 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
+            COMBINE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """)
         if deflate:
             expected += textwrap.dedent("""\
-                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
+                DEFLATE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """)
         expected += textwrap.dedent("""\
-            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
+            GATHER="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load OpenMPI/2.1.6/GCC/SYSTEM
 
@@ -2604,14 +2604,14 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
+            COMBINE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """)
         if deflate:
             expected += textwrap.dedent("""\
-                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
+                DEFLATE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """)
         expected += textwrap.dedent("""\
-            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
+            GATHER="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load intel
             module load intel/14.0/netcdf-4.3.3.1_mpi
@@ -2690,14 +2690,14 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
+            COMBINE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """)
         if deflate:
             expected += textwrap.dedent("""\
-                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
+                DEFLATE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """)
         expected += textwrap.dedent("""\
-            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
+            GATHER="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
 
             mkdir -p ${RESULTS_DIR}
@@ -2798,14 +2798,14 @@ class TestBuildBatchScript:
             RUN_DESC="tmp_run_dir/SalishSea.yaml"
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
-            COMBINE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
+            COMBINE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea combine"
             """)
         if deflate:
             expected += textwrap.dedent("""\
-                DEFLATE="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
+                DEFLATE="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea deflate"
                 """)
         expected += textwrap.dedent("""\
-            GATHER="pixi run -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
+            GATHER="pixi run --as-is -m $HOME/MEOPAR/SalishSeaCmd salishsea gather"
 
             module load gcc/9.4.0
             module load openmpi/4.1.1-cuda11-3
@@ -3317,15 +3317,11 @@ class TestDefinitions:
             f'RUN_DESC="tmp_run_dir/SalishSea.yaml"\n'
             f'WORK_DIR="tmp_run_dir"\n'
             f'RESULTS_DIR="results_dir"\n'
-            f'COMBINE="pixi run -m {home}/MEOPAR/SalishSeaCmd salishsea combine"\n'
+            f'COMBINE="pixi run --as-is -m {home}/MEOPAR/SalishSeaCmd salishsea combine"\n'
         )
         if deflate:
-            expected += (
-                f'DEFLATE="pixi run -m {home}/MEOPAR/SalishSeaCmd salishsea deflate"\n'
-            )
-        expected += (
-            f'GATHER="pixi run -m {home}/MEOPAR/SalishSeaCmd salishsea gather"\n'
-        )
+            expected += f'DEFLATE="pixi run --as-is -m {home}/MEOPAR/SalishSeaCmd salishsea deflate"\n'
+        expected += f'GATHER="pixi run --as-is -m {home}/MEOPAR/SalishSeaCmd salishsea gather"\n'
         assert defns == expected
 
 
